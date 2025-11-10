@@ -117,7 +117,7 @@ export class FlickElement {
    * This is a convenience method that calls .appendTo() on each child,
    * passing 'this' (the current element) as the parent.
    */
-  children(...elements: FlickElement[]): this {
+  append(...elements: FlickElement[]): this {
     for (const element of elements) {
       element.appendTo(this);
     }
