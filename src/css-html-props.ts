@@ -118,6 +118,7 @@ export const gridTemplateAreas = s("gridTemplateAreas");
 export const gridAutoColumns = s("gridAutoColumns");
 export const gridAutoRows = s("gridAutoRows");
 export const gridAutoFlow = s("gridAutoFlow");
+export const gap = px("gap");
 export const gridGap = px("gridGap");
 export const gridColumnGap = px("gridColumnGap");
 export const gridRowGap = px("gridRowGap");
