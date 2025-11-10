@@ -113,6 +113,18 @@ export class FlickElement {
   }
 
   /**
+   * Appends multiple FlickElement children to this element.
+   * This is a convenience method that calls .appendTo() on each child,
+   * passing 'this' (the current element) as the parent.
+   */
+  children(...elements: FlickElement[]): this {
+    for (const element of elements) {
+      element.appendTo(this);
+    }
+    return this; // For chaining
+  }
+
+  /**
    * Attaches an event listener that runs in the worker.
    * @param event The event name (e.g., 'click')
    * @param handler The handler function
@@ -149,10 +161,10 @@ export class FlickElement {
       if (typeof value === "function") {
         effect(() => {
           const unwrappedValue = (value as Getter<any>)();
-          this.queueAttribute(name, unwrappedValue);
+          this.queueAttribute(name, String(unwrappedValue));
         });
       } else {
-        this.queueAttribute(name, value);
+        this.queueAttribute(name, String(value));
       }
     } else {
       // --- Signature: attr(...rules) ---
@@ -162,10 +174,10 @@ export class FlickElement {
         if (typeof value === "function") {
           effect(() => {
             const unwrappedValue = (value as Getter<any>)();
-            this.queueAttribute(name, unwrappedValue);
+            this.queueAttribute(name, String(unwrappedValue));
           });
         } else {
-          this.queueAttribute(name, value);
+          this.queueAttribute(name, String(value));
         }
       }
     }
