@@ -112,6 +112,15 @@ worker.addEventListener("message", (e: MessageEvent<WorkerToMainCommand[]>) => {
           mainThreadListenerRegistry.get(cmd.id)!.set(cmd.event, proxyHandler);
           break;
         }
+
+        case "attribute": {
+          const node = flickRegistry.get(cmd.id);
+          // setAttribute works on all Elements (HTML or SVG)
+          if (node && "setAttribute" in node) {
+            (node as Element).setAttribute(cmd.name, String(cmd.value));
+          }
+          break;
+        }
       }
     }
   });

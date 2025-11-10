@@ -19,6 +19,13 @@ type CreateElementCommand = {
   ns?: "svg";
 };
 
+type CreateSVGElementCommand = {
+  type: "attribute";
+  id: FlickId;
+  name: string;
+  value: string | number;
+};
+
 type SetTextCommand = {
   type: "text";
   id: FlickId;
@@ -61,14 +68,13 @@ type DestroyElementCommand = {
  */
 export type WorkerToMainCommand =
   | CreateElementCommand
+  | CreateSVGElementCommand
   | SetTextCommand
   | SetStyleCommand
   | AppendChildCommand
   | AddListenerCommand
   | RemoveListenerCommand
   | DestroyElementCommand;
-
-// --- Main Thread to Worker Payloads (Events) ---
 
 type InitPayload = {
   type: "init";

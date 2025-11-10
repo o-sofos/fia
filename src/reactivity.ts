@@ -5,7 +5,7 @@ export interface Signal<T> {
   (): T;
   set(value: T): void;
 }
-
+export type Reactive<T> = T | Getter<T>;
 export type Getter<T> = () => T;
 
 export interface Signal<T> extends Getter<T> {
