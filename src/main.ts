@@ -5,6 +5,8 @@ import type {
 } from "./types";
 import { FLICK_ROOT_ID } from "./types";
 
+const SVG_NS = "http://www.w3.org/2000/svg";
+
 console.log("Main Thread: Renderer loaded.");
 
 const flickRegistry = new Map<FlickId, Node>();
@@ -52,7 +54,13 @@ worker.addEventListener("message", (e: MessageEvent<WorkerToMainCommand[]>) => {
     for (const cmd of commands) {
       switch (cmd.type) {
         case "create":
-          flickRegistry.set(cmd.id, document.createElement(cmd.tag));
+          let el: Element;
+          if (cmd.ns === "svg") {
+            el = document.createElementNS(SVG_NS, cmd.tag);
+          } else {
+            el = document.createElement(cmd.tag);
+          }
+          flickRegistry.set(cmd.id, el);
           break;
         case "text": {
           const node = flickRegistry.get(cmd.id);

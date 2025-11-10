@@ -1,4 +1,4 @@
-import { div, h1, p, button } from "./core";
+import { div, h1, p, button } from "./element-html";
 import { signal } from "./reactivity";
 
 const count = signal(0);

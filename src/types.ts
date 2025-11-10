@@ -16,6 +16,7 @@ type CreateElementCommand = {
   type: "create";
   id: FlickId;
   tag: string; // e.g., 'div', 'h1', 'svg'
+  ns?: "svg";
 };
 
 type SetTextCommand = {
@@ -85,4 +86,4 @@ type EventPayload = {
 /**
  * A message sent from the Main Thread to the Worker.
  */
-export type MainToWorkerMessage = InitPayload | EventPayload 
+export type MainToWorkerMessage = InitPayload | EventPayload;

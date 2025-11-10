@@ -11,8 +11,8 @@ type Reactive<T> = T | Signal<T>;
 export class FlickElement {
   public readonly id: FlickId = createFlickId();
 
-  constructor(tag: string) {
-    queueCommand({ type: "create", id: this.id, tag });
+  constructor(tag: string, ns?: "svg") {
+    queueCommand({ type: "create", id: this.id, tag, ns });
   }
 
   text(value: Reactive<string | number>): this {
@@ -75,7 +75,13 @@ export class FlickElement {
   }
 }
 
-export const div = () => new FlickElement("div");
-export const h1 = () => new FlickElement("h1");
-export const p = () => new FlickElement("p");
-export const button = () => new FlickElement("button");
+/**
+ * A specialized FlickElement that creates elements
+ * in the SVG namespace.
+ */
+export class FlickSvgElement extends FlickElement {
+  constructor(tag: string) {
+    // Always call the parent constructor with 'svg'
+    super(tag, "svg");
+  }
+}
