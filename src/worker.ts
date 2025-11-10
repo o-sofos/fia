@@ -1,12 +1,17 @@
 import type { MainToWorkerMessage } from "./types";
 import { workerEventListenerRegistry } from "./worker-api";
 
-self.onmessageerror = (event) => {
-  console.error("[Worker]: A 'messageerror' occurred:", event);
-};
-self.onerror = (event) => {
+self.addEventListener("error", (event) => {
+  console.error("[Worker]: An 'error' occurred:", event);
+});
+
+self.addEventListener("unhandledrejection", (event) => {
+  console.error("[Worker]: An 'unhandledrejection' occurred:", event);
+});
+
+self.addEventListener("messageerror", (event) => {
   console.error("[Worker]: An unhandled error occurred:", event);
-};
+});
 
 // --- This is now the ONLY 'message' listener ---
 self.addEventListener("message", (e: MessageEvent<MainToWorkerMessage>) => {
