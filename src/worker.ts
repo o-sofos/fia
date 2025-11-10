@@ -1,31 +1,39 @@
-// === src/worker.ts (Runs on Web Worker) ===
-import type { MainToWorkerMessage, WorkerToMainCommand } from "./types";
+import type { MainToWorkerMessage } from "./types";
+import { workerEventListenerRegistry } from "./worker-api";
 
-let commandQueue: WorkerToMainCommand[] = [];
-let isBatchQueued = false;
-
-function sendBatch() {
-  if (commandQueue.length === 0) {
-    isBatchQueued = false;
-    return;
-  }
-  self.postMessage(commandQueue);
-  commandQueue = [];
-  isBatchQueued = false;
-}
-
-export function queueCommand(command: WorkerToMainCommand) {
-  commandQueue.push(command);
-  if (!isBatchQueued) {
-    isBatchQueued = true;
-    queueMicrotask(sendBatch);
-  }
-}
-
-self.onmessage = (e: MessageEvent<MainToWorkerMessage>) => {
-  if (e.data.type === "init") {
-    console.log("Worker: Received init. Loading App.ts...");
-    // Dynamically import the user's app
-    import("./App");
-  }
+self.onmessageerror = (event) => {
+  console.error("[Worker]: A 'messageerror' occurred:", event);
 };
+self.onerror = (event) => {
+  console.error("[Worker]: An unhandled error occurred:", event);
+};
+
+// --- This is now the ONLY 'message' listener ---
+self.addEventListener("message", (e: MessageEvent<MainToWorkerMessage>) => {
+  const msg = e.data;
+
+  switch (msg.type) {
+    case "init":
+      console.log("Worker: Received init. Loading App.ts...");
+      // This import starts the app
+      import("./App");
+      break;
+
+    case "event": {
+      const handler = workerEventListenerRegistry.get(msg.id)?.get(msg.event);
+      if (handler) {
+        console.log(`[Worker]: Found handler for ID ${msg.id}. Running...`);
+        handler(msg.payload);
+      } else {
+        console.warn(
+          `[Worker]: No handler found for event "${msg.event}" on ID ${msg.id}`
+        );
+        console.warn(
+          `[Worker]: Current handlers:`,
+          workerEventListenerRegistry
+        );
+      }
+      break;
+    }
+  }
+});

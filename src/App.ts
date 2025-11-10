@@ -1,8 +1,32 @@
-import { div } from "./core";
+import { div, h1, p, button } from "./core";
+import { signal } from "./reactivity";
 
-console.log("App.ts: Running application logic...");
+const count = signal(0);
 
-// This code now runs correctly inside the worker
-div().text("some text").appendTo("root");
+const container = div()
+  .style("fontFamily", "sans-serif")
+  .style("textAlign", "center")
+  .style("marginTop", "50px")
+  .appendTo("root");
 
-console.log('App.ts: "some text" UI has been queued.');
+h1().text("Hello from Flick!").appendTo(container);
+
+p().text("This entire UI is running in a Web Worker.").appendTo(container);
+
+div()
+  .style("fontSize", "2rem")
+  .style("margin", "20px")
+  .text(count) // <-- Pass the signal directly!
+  .appendTo(container);
+
+button()
+  .text("Click Me")
+  .style("fontSize", "1rem")
+  .style("padding", "10px 20px")
+  .style("cursor", "pointer")
+  .on("click", () => {
+    // This handler runs in the WORKER!
+    console.log("Worker: Click event received!");
+    count.set(count() + 1);
+  })
+  .appendTo(container);

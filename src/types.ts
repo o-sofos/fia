@@ -85,4 +85,4 @@ type EventPayload = {
 /**
  * A message sent from the Main Thread to the Worker.
  */
-export type MainToWorkerMessage = InitPayload | EventPayload;
+export type MainToWorkerMessage = InitPayload | EventPayload 

@@ -1,7 +1,7 @@
 import { effect } from "./reactivity";
-import  type { Signal } from "./reactivity";
+import type { Signal } from "./reactivity";
 import { type FlickId, FLICK_ROOT_ID } from "./types";
-import  { queueCommand } from "./worker";
+import { queueCommand, registerWorkerListener } from "./worker-api";
 
 let nextId = 0;
 const createFlickId = () => (nextId++).toString(36);
@@ -52,6 +52,25 @@ export class FlickElement {
       parentId: parent === "root" ? FLICK_ROOT_ID : parent.id,
       childId: this.id,
     });
+    return this;
+  }
+
+  /**
+   * Attaches an event listener that runs in the worker.
+   * @param event The event name (e.g., 'click')
+   * @param handler The handler function
+   */
+  on(event: string, handler: (payload: any) => void): this {
+    console.log(
+      `[Worker]: Registering listener for "${event}" on ID ${this.id}`
+    );
+
+    // Store the real handler in the worker's registry
+    registerWorkerListener(this.id, event, handler);
+
+    // Tell the main thread to attach a proxy listener
+    queueCommand({ type: "listen", id: this.id, event });
+
     return this;
   }
 }

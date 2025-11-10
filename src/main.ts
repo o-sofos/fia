@@ -1,5 +1,8 @@
-// === src/index.ts (Runs on Main Thread) ===
-import type { FlickId, WorkerToMainCommand } from "./types";
+import type {
+  FlickId,
+  MainToWorkerMessage,
+  WorkerToMainCommand,
+} from "./types";
 import { FLICK_ROOT_ID } from "./types";
 
 console.log("Main Thread: Renderer loaded.");
@@ -7,11 +10,41 @@ console.log("Main Thread: Renderer loaded.");
 const flickRegistry = new Map<FlickId, Node>();
 flickRegistry.set(FLICK_ROOT_ID, document.body);
 
+// Store listeners so we can remove them later (e.g., .off())
+const mainThreadListenerRegistry = new Map<
+  FlickId,
+  Map<string, EventListener>
+>();
+
+/**
+ * Serializes an Event into a simple object.
+ * We only send the data we need, not the whole Event object.
+ */
+function serializeEvent(event: Event): any {
+  if (event instanceof MouseEvent) {
+    return {
+      clientX: event.clientX,
+      clientY: event.clientY,
+      button: event.button,
+    };
+  }
+  if (event instanceof InputEvent) {
+    return { value: (event.target as HTMLInputElement).value };
+  }
+  if (event instanceof KeyboardEvent) {
+    return { key: event.key, code: event.code, ctrlKey: event.ctrlKey };
+  }
+  return {};
+}
+
 const worker = new Worker(new URL("./worker.ts", import.meta.url), {
   type: "module",
 });
+worker.onerror = (event) => {
+  console.error("[Main Thread]: A worker error occurred:", event);
+};
 
-worker.onmessage = (e: MessageEvent<WorkerToMainCommand[]>) => {
+worker.addEventListener("message", (e: MessageEvent<WorkerToMainCommand[]>) => {
   const commands = e.data;
 
   // Use rAF to batch DOM writes
@@ -38,10 +71,43 @@ worker.onmessage = (e: MessageEvent<WorkerToMainCommand[]>) => {
           if (p && c) p.appendChild(c);
           break;
         }
+        case "listen": {
+          const node = flickRegistry.get(cmd.id);
+          if (!node) break;
+
+          // Create a generic proxy listener
+          const proxyHandler = (event: Event) => {
+            // Send the serializable payload to the worker
+            try {
+              worker.postMessage({
+                type: "event",
+                id: cmd.id,
+                event: cmd.event,
+                payload: serializeEvent(event), // <-- Back to normal
+              } as MainToWorkerMessage);
+            } catch (error) {
+              // ❗️ If this logs, we've found the problem!
+              console.error(
+                "[Main Thread]: CRITICAL! postMessage FAILED!",
+                error
+              );
+            }
+          };
+
+          // Add the real listener
+          node.addEventListener(cmd.event, proxyHandler);
+
+          // Store it so we can remove it later
+          if (!mainThreadListenerRegistry.has(cmd.id)) {
+            mainThreadListenerRegistry.set(cmd.id, new Map());
+          }
+          mainThreadListenerRegistry.get(cmd.id)!.set(cmd.event, proxyHandler);
+          break;
+        }
       }
     }
   });
-};
+});
 
 // Tell the worker it's time to start
 console.log("Main Thread: Initializing worker...");
