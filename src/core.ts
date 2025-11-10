@@ -1,12 +1,11 @@
-import { effect } from "./reactivity";
-import type { Signal } from "./reactivity";
+import { effect, type Signal, type Getter } from "./reactivity";
 import { type FlickId, FLICK_ROOT_ID } from "./types";
 import { queueCommand, registerWorkerListener } from "./worker-api";
 
 let nextId = 0;
 const createFlickId = () => (nextId++).toString(36);
 
-type Reactive<T> = T | Signal<T>;
+type Reactive<T> = T | Getter<T>;
 
 export class FlickElement {
   public readonly id: FlickId = createFlickId();
@@ -16,14 +15,16 @@ export class FlickElement {
   }
 
   text(value: Reactive<string | number>): this {
+    // This 'if' block now correctly handles both Signals and simple getters
     if (typeof value === "function") {
-      effect(() =>
+      effect(() => {
+        const unwrappedValue = (value as Getter<any>)();
         queueCommand({
           type: "text",
           id: this.id,
-          value: String((value as Signal<any>)()),
-        })
-      );
+          value: String(unwrappedValue),
+        });
+      });
     } else {
       queueCommand({ type: "text", id: this.id, value: String(value) });
     }
@@ -31,15 +32,17 @@ export class FlickElement {
   }
 
   style(prop: string, value: Reactive<string | number>): this {
+    // This 'if' block also correctly handles both
     if (typeof value === "function") {
-      effect(() =>
+      effect(() => {
+        const unwrappedValue = (value as Getter<any>)();
         queueCommand({
           type: "style",
           id: this.id,
           prop,
-          value: (value as Signal<any>)(),
-        })
-      );
+          value: unwrappedValue,
+        });
+      });
     } else {
       queueCommand({ type: "style", id: this.id, prop, value });
     }

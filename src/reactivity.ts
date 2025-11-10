@@ -6,13 +6,29 @@ export interface Signal<T> {
   set(value: T): void;
 }
 
+export type Getter<T> = () => T;
+
+export interface Signal<T> extends Getter<T> {
+  set(value: T): void;
+}
+
+/**
+ * Gets the currently running effect, if any.
+ */
+function getActiveEffect(): Effect | undefined {
+  return trackingStack[trackingStack.length - 1];
+}
+
 export function signal<T>(initialValue: T): Signal<T> {
   let value = initialValue;
   const subscribers = new Set<Effect>();
 
-  const getter = (): T => {
-    if (trackingStack.length > 0)
-      subscribers.add(trackingStack[trackingStack.length - 1]);
+  const getter: Getter<T> = (): T => {
+    // ... (same implementation)
+    const activeEffect = getActiveEffect();
+    if (activeEffect) {
+      subscribers.add(activeEffect);
+    }
     return value;
   };
 
