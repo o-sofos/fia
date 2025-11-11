@@ -24,7 +24,7 @@ const helloWorldCode = `
 import { h1, p, div } from './elements';
 import { color } from './css-properties';
 
-const root = div().appendTo('root');
+const root = div();
 
 root.append(
   h1()
@@ -42,7 +42,7 @@ import { button, div } from './elements';
 import { signal } from './reactivity';
 
 const count = signal(0);
-const root = div().appendTo('root');
+const root = div();
 
 // The text node reactively updates
 root.append(
@@ -68,21 +68,19 @@ setTimeout(() => {
 }, 100); // Small delay to ensure styles are applied
 
 // --- App Container ---
-const app = main()
-  .style(
-    css.fontFamily(
-      '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
-    ),
-    css.backgroundColor("#ffffff"),
-    css.color("#222"),
-    css.margin(0),
-    css.padding(0),
-    css.transition("opacity 0.6s ease-out, transform 0.6s ease-out"),
-    // Bind styles directly to our signals for animation
-    css.opacity(pageOpacity),
-    css.transform(pageTransform)
-  )
-  .appendTo("root");
+main().style(
+  css.fontFamily(
+    '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif'
+  ),
+  css.backgroundColor("#ffffff"),
+  css.color("#222"),
+  css.margin(0),
+  css.padding(0),
+  css.transition("opacity 0.6s ease-out, transform 0.6s ease-out"),
+  // Bind styles directly to our signals for animation
+  css.opacity(pageOpacity),
+  css.transform(pageTransform)
+);
 
 // --- 1. Header & Navigation ---
 header()
@@ -114,8 +112,7 @@ header()
             css.textDecoration("none")
           )
       )
-  )
-  .appendTo(app);
+  );
 
 // --- 2. Hero Section ---
 section()
@@ -152,8 +149,7 @@ section()
         css.cursor("pointer"),
         css.marginTop("30px")
       )
-  )
-  .appendTo(app);
+  );
 
 // --- 3. Features Section ---
 section()
@@ -188,8 +184,7 @@ section()
       "Typed & Tree-Shakable",
       "500+ typed CSS functions (color(), padding()) and a zero-config, 19.8 KB design built for full TypeScript inference."
     )
-  )
-  .appendTo(app);
+  );
 
 // --- 4. "How it Works" Diagram Section ---
 section()
@@ -250,8 +245,7 @@ section()
             )
           )
       )
-  )
-  .appendTo(app);
+  );
 
 // --- 5. Code Example Section ---
 section()
@@ -280,8 +274,7 @@ section()
         h3().style(css.fontSize("24px")).text("Instantly Reactive"),
         pre().append(code().text(counterCode))
       )
-  )
-  .appendTo(app);
+  );
 
 // --- 6. Final Mantra Section ---
 section()
@@ -313,8 +306,7 @@ section()
         css.fontWeight("bold")
       )
       .text("19.8 KB min+gzip")
-  )
-  .appendTo(app);
+  );
 
 // --- 7. Footer ---
 footer()
@@ -324,8 +316,7 @@ footer()
     css.color("#888"),
     css.fontSize("14px")
   )
-  .text("© 2025 Flick Framework")
-  .appendTo(app);
+  .text("© 2025 Flick Framework");
 
 // --- Reusable Component (as a simple function) ---
 function createFeatureCard(icon: string, title: string, description: string) {
