@@ -1,24 +1,22 @@
 import type { MainToWorkerMessage } from "./types";
 import { workerEventListenerRegistry } from "./worker-api";
 
-self.addEventListener("error", (event) => {
-  console.error("[Worker]: An 'error' occurred:", event);
-});
+// --- Error Handlers ---
+self.onmessageerror = (event) => {
+  console.error("[Flick Worker]: A 'messageerror' occurred:", event);
+};
+self.onerror = (event) => {
+  console.error("[Flick Worker]: An unhandled error occurred:", event);
+};
 
-self.addEventListener("unhandledrejection", (event) => {
-  console.error("[Worker]: An 'unhandledrejection' occurred:", event);
-});
-
-self.addEventListener("messageerror", (event) => {
-  console.error("[Worker]: An unhandled error occurred:", event);
-});
-
-// --- This is now the ONLY 'message' listener ---
+// --- This is the Flick Worker Runtime ---
 self.addEventListener("message", (e: MessageEvent<MainToWorkerMessage>) => {
   const msg = e.data;
-
   switch (msg.type) {
     case "init":
+      // The worker is ready. The user's code will
+      // now execute in their file.
+      console.log("Flick Worker: Runtime initialized.");
       break;
 
     case "event": {
@@ -27,11 +25,7 @@ self.addEventListener("message", (e: MessageEvent<MainToWorkerMessage>) => {
         handler(msg.payload);
       } else {
         console.warn(
-          `[Worker]: No handler found for event "${msg.event}" on ID ${msg.id}`
-        );
-        console.warn(
-          `[Worker]: Current handlers:`,
-          workerEventListenerRegistry
+          `[Flick Worker]: No handler found for event "${msg.event}" on ID ${msg.id}`
         );
       }
       break;
