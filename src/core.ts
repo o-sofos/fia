@@ -51,6 +51,8 @@ export class FlickElement {
   public key: string | number | null = null;
   private _children: FlickElement[] = [];
 
+  private _isAppended: boolean = false;
+
   /**
    * Assigns a unique key to this element, used for
    * O(1) keyed list reconciliation.
@@ -70,6 +72,16 @@ export class FlickElement {
 
   constructor(tag: string, ns?: "svg") {
     queueCommand({ type: "create", id: this.id, tag, ns });
+
+    // Schedule an "auto-root" check
+    // This will run after the current JS "tick"
+    // giving .append() or .appendTo() a chance to run first.
+    queueMicrotask(() => {
+      if (!this._isAppended) {
+        // If no parent was set, append to root by default
+        this.appendTo("root");
+      }
+    });
   }
 
   text(value: Reactive<string | number>): this {
@@ -115,11 +127,10 @@ export class FlickElement {
   }
 
   appendTo(parent: FlickElement | "root"): this {
-    queueCommand({
-      type: "append",
-      parentId: parent === "root" ? FLICK_ROOT_ID : parent.id,
-      childId: this.id,
-    });
+    this._isAppended = true;
+
+    const parentId = parent === "root" ? FLICK_ROOT_ID : parent.id;
+    queueCommand({ type: "append", parentId: parentId, childId: this.id });
     return this;
   }
 
@@ -162,6 +173,10 @@ export class FlickElement {
     let lastPlacedNode: FlickElement | null = null;
 
     newChildren.forEach((newChild) => {
+      // This prevents the child's auto-root microtask
+      // from firing incorrectly.
+      newChild._isAppended = true;
+
       const key = newChild.key;
 
       if (key !== null && oldKeyMap.has(key)) {
