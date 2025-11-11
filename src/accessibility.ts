@@ -1,5 +1,5 @@
 // We can re-use the AttributeRule type since it's structurally identical
-import type { AttributeRule } from "./css-svg-props";
+import type { AttributeRule } from "./svg.props";
 import type { Reactive } from "./reactivity";
 
 // Helper function (same as in svg-attributes.ts)

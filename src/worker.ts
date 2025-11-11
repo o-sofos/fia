@@ -19,17 +19,11 @@ self.addEventListener("message", (e: MessageEvent<MainToWorkerMessage>) => {
 
   switch (msg.type) {
     case "init":
-      console.log("Worker: Received init. Loading App.ts...");
-      // This import starts the app
-      import("./LadingPage");
-      // import("./App");
-      // import("./App.svg");
       break;
 
     case "event": {
       const handler = workerEventListenerRegistry.get(msg.id)?.get(msg.event);
       if (handler) {
-        console.log(`[Worker]: Found handler for ID ${msg.id}. Running...`);
         handler(msg.payload);
       } else {
         console.warn(
