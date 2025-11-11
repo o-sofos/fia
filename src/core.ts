@@ -1,7 +1,11 @@
 import type { StyleRule } from "./html.props";
 import { effect, type Getter, type Reactive } from "./reactivity";
 import { type FlickId, FLICK_ROOT_ID } from "./types";
-import { queueCommand, registerWorkerListener } from "./worker-api";
+import {
+  queueCommand,
+  registerWorkerListener,
+  workerEventListenerRegistry,
+} from "./worker-api";
 
 let nextId = 0;
 const createFlickId = () => (nextId++).toString(36);
@@ -229,9 +233,7 @@ export class FlickElement {
     // 1. Remove old children that are no longer present
     oldChildren.forEach((oldChild) => {
       if (oldChild._key === null || !newKeyMap.has(oldChild._key)) {
-        // We need a .destroy() method to clean up
-        // For now, let's just queue a command
-        queueCommand({ type: "destroy", id: oldChild.id }); // (We'd need to implement this)
+        oldChild.destroy();
       }
     });
 
@@ -353,6 +355,27 @@ export class FlickElement {
       }
     }
     return this;
+  }
+
+  /**
+   * Recursively destroys this element and all its children.
+   *
+   * This queues 'destroy' commands for the main thread, which
+   * will remove the DOM nodes and clean up all associated
+   * event listeners to prevent memory leaks.
+   */
+  public destroy(): void {
+    // 1. Destroy all children first (depth-first)
+    for (const child of this._children) {
+      child.destroy();
+    }
+
+    // 2. Queue the destroy command for this element
+    queueCommand({ type: "destroy", id: this.id });
+
+    // 3. We also need to clean up the worker-side listener map
+    // (This assumes workerEventListenerRegistry is in worker-api.ts)
+    workerEventListenerRegistry.delete(this.id);
   }
 }
 

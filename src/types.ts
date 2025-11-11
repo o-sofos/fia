@@ -69,6 +69,10 @@ type MoveCommand = {
   beforeId: FlickId | null;
 };
 
+type DestroyCommand = {
+  type: "destroy";
+  id: FlickId;
+};
 /**
  * A single command sent from the Worker to the Main Thread.
  * These are always batched into an array for performance.
@@ -82,7 +86,8 @@ export type WorkerToMainCommand =
   | AddListenerCommand
   | RemoveListenerCommand
   | DestroyElementCommand
-  | MoveCommand;
+  | MoveCommand
+  | DestroyCommand;
 
 type InitPayload = {
   type: "init";

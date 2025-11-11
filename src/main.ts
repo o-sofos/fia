@@ -20,7 +20,7 @@ import { FLICK_ROOT_ID } from "./types";
  * ```
  */
 export function renderer(worker: Worker) {
-  const flickRegistry = new Map<FlickId, Node>();
+  const flickRegistry = new Map<FlickId, Element>();
   flickRegistry.set(FLICK_ROOT_ID, document.body);
 
   const mainThreadListenerRegistry = new Map<
@@ -105,6 +105,26 @@ export function renderer(worker: Worker) {
                 el = document.createElement(cmd.tag);
               }
               flickRegistry.set(cmd.id, el);
+              break;
+            }
+            case "destroy": {
+              const node = flickRegistry.get(cmd.id);
+              if (!node) break;
+
+              // 1. Remove from the DOM
+              node.remove();
+
+              // 2. Remove all registered event listeners
+              const listeners = mainThreadListenerRegistry.get(cmd.id);
+              if (listeners) {
+                listeners.forEach((handler, event) => {
+                  node.removeEventListener(event, handler);
+                });
+                mainThreadListenerRegistry.delete(cmd.id);
+              }
+
+              // 3. Remove from the main registry
+              flickRegistry.delete(cmd.id);
               break;
             }
             case "text": {
