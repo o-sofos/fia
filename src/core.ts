@@ -57,7 +57,7 @@ function unitHelper(prop: string, value: string | number): string | number {
  */
 export class FlickElement {
   public readonly id: FlickId = createFlickId();
-  public key: string | number | null = null;
+  public _key: string | number | null = null;
   private _children: FlickElement[] = [];
 
   private _isAppended: boolean = false;
@@ -99,8 +99,8 @@ export class FlickElement {
    * );
    * ```
    */
-  public setKey(value: string | number): this {
-    this.key = value;
+  public key(value: string | number): this {
+    this._key = value;
     return this;
   }
 
@@ -214,21 +214,21 @@ export class FlickElement {
 
     const oldKeyMap = new Map<string | number, FlickElement>();
     oldChildren.forEach((child) => {
-      if (child.key !== null) {
-        oldKeyMap.set(child.key, child);
+      if (child._key !== null) {
+        oldKeyMap.set(child._key, child);
       }
     });
 
     const newKeyMap = new Map<string | number, FlickElement>();
     newChildren.forEach((child) => {
-      if (child.key !== null) {
-        newKeyMap.set(child.key, child);
+      if (child._key !== null) {
+        newKeyMap.set(child._key, child);
       }
     });
 
     // 1. Remove old children that are no longer present
     oldChildren.forEach((oldChild) => {
-      if (oldChild.key === null || !newKeyMap.has(oldChild.key)) {
+      if (oldChild._key === null || !newKeyMap.has(oldChild._key)) {
         // We need a .destroy() method to clean up
         // For now, let's just queue a command
         queueCommand({ type: "destroy", id: oldChild.id }); // (We'd need to implement this)
@@ -243,7 +243,7 @@ export class FlickElement {
       // from firing incorrectly.
       newChild._isAppended = true;
 
-      const key = newChild.key;
+      const key = newChild._key;
 
       if (key !== null && oldKeyMap.has(key)) {
         // --- IT'S AN EXISTING NODE (MOVE) ---
