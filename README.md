@@ -41,5 +41,130 @@ This is a standard HTML file. It just needs to load your `main.ts` file as a mod
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Flick
+    <title>Flick App</title>
+  </head>
+  <body>
+    <script type="module" src="/main.ts"></script>
+  </body>
+</html>
+```
+
+### 2. `main.ts` (Main Thread)
+
+This file is your "dumb" renderer. Its only job is to load the Flick renderer and tell it where your worker file is.
+
+```typescript
+// Imports and runs the Flick main-thread renderer
+import { renderer } from "jsr:@flick/core/renderer";
+
+// This file only needs to do one thing:
+// Create the worker that will run your *actual* app.
+const worker = new Worker(new URL("./app.worker.ts", import.meta.url), {
+  type: "module",
+});
+
+// Connect the renderer to the worker
+renderer(worker);
+```
+
+(Flick's renderer automatically finds this worker and establishes communication).
+
+### 3. `app.worker.ts` (Worker Thread & App Logic)
+
+This is where your entire application lives. Import the Flick API and start building.
+
+```typescript
+// Imports and runs the Flick worker core
+import "jsr:@flick/core/worker";
+
+// Import the building blocks from Flick
+import { signal } from "jsr:@flick/core";
+import { div, h1, button } from "jsr:@flick/core/elements";
+import { color, padding, cursor } from "jsr:@flick/core/css";
+
+// 1. Create reactive state
+const count = signal(0);
+
+// 2. Build your UI
+// Elements without a parent automatically append to the root
+h1().style(color("blue")).text("Hello from Flick!");
+
+div().text(count); // This text node is now bound to the signal
+
+button()
+  .text("Click Me")
+  .style(padding(10, 20), cursor("pointer"))
+  .on("click", () => {
+    // 3. Update state. The UI updates automatically.
+    count.set(count() + 1);
+  });
+```
+
+## API Examples
+
+Here are more advanced usage examples.
+
+### Reactivity
+
+Flick's reactivity is "implicitly memoized." You never need to use a memo() or useMemo(). Just pass a getter function, and Flick optimizes it automatically.
+
+```typescript
+import { signal } from "jsr:@flick/core";
+import { div, input } from "jsr:@flick/core/elements";
+
+const name = signal("World");
+const greeting = () => `Hello, ${name()}!`; // A simple getter
+
+// This text node will ONLY update when 'name' changes.
+div().text(greeting);
+
+input()
+  .attr("value", name)
+  .on("input", (e) => name.set(e.payload.value));
+```
+
+### Typed Styling & Attributes
+
+```typescript
+import { div } from "jsr:@flick/core/elements";
+import {
+  backgroundColor,
+  borderRadius,
+  boxShadow,
+  padding,
+} from "jsr:@flick/core/css";
+import { ariaLabel } from "jsr:@flick/core/aria";
+
+div()
+  .style(
+    backgroundColor("#f9f9f9"),
+    borderRadius(8),
+    padding("20px"),
+    boxShadow("0 4px 12px rgba(0,0,0,0.1)")
+  )
+  .attr(ariaLabel("A styled, accessible container"))
+  .text("I am a styled box.");
+```
+
+### Secure by Default
+
+Flick's architecture neutralizes XSS threats at the source.
+
+Attack Vector:
+
+```typescript
+const userInput = `<img src="x" onerror="alert('XSS!')">`;
+
+// In other frameworks, this might be a vulnerability:
+div().html(userInput); // 😱 Flick does not have an .html() method
+```
+
+Flick's Defense:
+
+```typescript
+// .text() uses 'textContent', which escapes all HTML.
+// The attacker's script will NOT execute.
+div().text(userInput);
+
+// Output: <div>&lt;img src...&gt;</div>
 ```
