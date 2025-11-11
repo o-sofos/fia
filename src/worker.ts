@@ -1,3 +1,20 @@
+/**
+ * @module jsr:@flick/core/worker
+ *
+ * This is the Flick worker-thread runtime.
+ * Import this file once (for its side effects) in your app.worker.ts
+ * to initialize the event listeners.
+ *
+ * @example
+ * ```typescript
+ * // In app.worker.ts
+ * import 'jsr:@flick/core/worker';
+ * import { signal } from 'jsr:@flick/core';
+ * import { div } from 'jsr:@flick/core/elements';
+ *
+ * div().text(signal('Hello from the worker!'));
+ * ```
+ */
 import type { MainToWorkerMessage } from "./types";
 import { workerEventListenerRegistry } from "./worker-api";
 

@@ -36,8 +36,11 @@ const px =
   });
 
 // --- Typography & Text ---
+/** Sets the CSS `color` property. */
 export const color = s("color");
+/** Sets the CSS `direction` property. */
 export const direction = s("direction");
+/** Sets the CSS `fontFamily` property. */
 export const fontFamily = s("fontFamily");
 export const fontSize = px("fontSize");
 export const fontWeight = s("fontWeight");

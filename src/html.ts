@@ -1,8 +1,11 @@
 import { FlickElement } from "./core";
 
 // --- Main Root ---
+/** Creates a `<div>` element. */
 export const html = () => new FlickElement("html");
+/** Creates a `<head>` element. */
 export const head = () => new FlickElement("head");
+/** Creates a `<body>` element. */
 export const body = () => new FlickElement("body");
 
 // --- Document Metadata (Mainly for <head>) ---

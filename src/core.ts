@@ -50,6 +50,11 @@ function unitHelper(prop: string, value: string | number): string | number {
   return value;
 }
 
+/**
+ * The core Flick element class.
+ * All element factories (div, h1, etc.) return an instance of this.
+ * Its methods are chainable.
+ */
 export class FlickElement {
   public readonly id: FlickId = createFlickId();
   public key: string | number | null = null;
@@ -58,22 +63,13 @@ export class FlickElement {
   private _isAppended: boolean = false;
 
   /**
-   * Assigns a unique key to this element, used for
-   * O(1) keyed list reconciliation.
+   * Creates a new element in the worker and queues a 'create'
+   * command for the main thread.
+   *
+   * This is used internally by element factories.
+   * @param tag The HTML tag name (e.g., 'div').
+   * @param ns The XML namespace (e.g., 'svg').
    */
-  public setKey(value: string | number): this {
-    this.key = value;
-    return this;
-  }
-
-  private queueAttribute(name: string, value: string | number) {
-    queueCommand({ type: "attribute", id: this.id, name, value });
-  }
-
-  private queueStyle(prop: string, value: string | number) {
-    queueCommand({ type: "style", id: this.id, prop, value });
-  }
-
   constructor(tag: string, ns?: "svg") {
     queueCommand({ type: "create", id: this.id, tag, ns });
 
@@ -88,6 +84,45 @@ export class FlickElement {
     });
   }
 
+  /**
+   * Assigns a unique key to this element.
+   * This is used by the `append()` method to perform efficient
+   * O(1) list reconciliation.
+   *
+   * @param value A unique string or number for this element.
+   * @returns `this` (for chaining).
+   *
+   * @example
+   * ```typescript
+   * data.map(item =>
+   * div().key(item.id).text(item.name)
+   * );
+   * ```
+   */
+  public setKey(value: string | number): this {
+    this.key = value;
+    return this;
+  }
+
+  private queueAttribute(name: string, value: string | number) {
+    queueCommand({ type: "attribute", id: this.id, name, value });
+  }
+
+  private queueStyle(prop: string, value: string | number) {
+    queueCommand({ type: "style", id: this.id, prop, value });
+  }
+
+  /**
+   * Sets the text content of the element.
+   * This method is **XSS-safe** as it uses `textContent`.
+   *
+   * If a `Reactive` value (a signal or getter) is passed,
+   * Flick will create an effect to automatically update
+   * the text when the value changes.
+   *
+   * @param value The static or reactive text to set.
+   * @returns `this` (for chaining).
+   */
   text(value: Reactive<string | number>): this {
     // This 'if' block now correctly handles both Signals and simple getters
     if (typeof value === "function") {
@@ -105,6 +140,25 @@ export class FlickElement {
     return this;
   }
 
+  /**
+   * Applies CSS styles to the element.
+   *
+   * Pass one or more `StyleRule` objects created by the
+   * CSS helper functions (e.g., `color('red')`).
+   *
+   * @param rules The `StyleRule` objects to apply.
+   * @returns `this` (for chaining).
+   *
+   * @example
+   * ```typescript
+   * import { color, padding } from 'jsr:@flick/core/css';
+   *
+   * div().style(
+   * color('blue'),
+   * padding(10, 20)
+   * );
+   * ```
+   */
   style(...rules: StyleRule[]): this {
     for (const rule of rules) {
       const { prop, value, unit } = rule;
@@ -130,6 +184,11 @@ export class FlickElement {
     return this;
   }
 
+  /**
+   * Appends this element to a specific parent.
+   * @param parent The `FlickElement` to append to, or 'root' for the body.
+   * @returns `this` (for chaining).
+   */
   appendTo(parent: FlickElement | "root"): this {
     this._isAppended = true;
 
@@ -139,10 +198,13 @@ export class FlickElement {
   }
 
   /**
-   * Replaces all children of this element with a new set,
-   * performing an efficient, keyed reconciliation.
+   * Appends one or more child elements.
    *
-   * @param children The new child elements to append.
+   * This method performs an efficient, keyed reconciliation to
+   * add, move, or remove children, minimizing DOM operations.
+   *
+   * @param children The child `FlickElement`s to append.
+   * @returns `this` (for chaining).
    */
   append(...children: FlickElement[]): this {
     // This is a simple but fast reconciliation algorithm
@@ -219,8 +281,13 @@ export class FlickElement {
 
   /**
    * Attaches an event listener that runs in the worker.
-   * @param event The event name (e.g., 'click')
-   * @param handler The handler function
+   *
+   * The event payload is automatically serialized and sent
+   * from the main thread to the worker.
+   *
+   * @param event The DOM event name (e.g., 'click', 'input').
+   * @param handler The callback function to run in the worker.
+   * @returns `this` (for chaining).
    */
   on(event: string, handler: (payload: any) => void): this {
     // Store the real handler in the worker's registry
@@ -233,11 +300,26 @@ export class FlickElement {
   }
 
   /**
-   * Sets an attribute on the element.
-   * This is used for all SVG properties (e.g., cx, cy, d)
-   * and standard HTML attributes (e.g., href, src, alt).
+   * Applies attributes to the element.
+   *
+   * Pass one or more `AttributeRule` objects from the
+   * SVG or ARIA helper modules. This method is **XSS-safe**
+   * and sanitizes dangerous attributes like `href` and `on*` handlers.
+   *
+   * @param rules The `AttributeRule` objects to apply.
+   * @returns `this` (for chaining).
+   *
+   * @example
+   * ```typescript
+   * import { href } from 'jsr:@flick/core/svg';
+   *
+   * mySvgCircle.attr(href('#foo'));
+   * ```
    */
   attr(...rules: AttributeRule[]): this;
+  /**
+   * Applies a single attribute. (Legacy)
+   */
   attr(name: string, value: Reactive<string | number>): this;
 
   // Implementation

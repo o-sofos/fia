@@ -4,7 +4,20 @@ import { FLICK_ROOT_ID } from "./types";
 /**
  * Connects the Flick renderer to your application worker.
  * Call this function once in your main thread file.
+ *
  * @param worker An instance of your application's Worker.
+ *
+ * @example
+ * ```typescript
+ * // In main.ts
+ * import { renderer } from 'jsr:@flick/core/renderer';
+ *
+ * const worker = new Worker(new URL('./app.worker.ts', import.meta.url), {
+ * type: 'module'
+ * });
+ *
+ * renderer(worker);
+ * ```
  */
 export function renderer(worker: Worker) {
   const flickRegistry = new Map<FlickId, Node>();
