@@ -8,7 +8,7 @@ export * from "./html";
 
 // --- 3. Style & Attribute Helpers ---
 // Export all functions from the helper modules
-export * from "./html.props";
+export * from "./css";
 export * from "./accessibility";
 
 // --- 4. Core Classes (for advanced use & type-checking) ---

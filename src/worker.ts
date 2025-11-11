@@ -15,6 +15,8 @@
  * div().text(signal('Hello from the worker!'));
  * ```
  */
+import { div } from "./html";
+import { display } from "./css";
 import type { MainToWorkerMessage } from "./types";
 import { workerEventListenerRegistry } from "./worker-api";
 
@@ -33,7 +35,7 @@ self.addEventListener("message", (e: MessageEvent<MainToWorkerMessage>) => {
     case "init":
       // The worker is ready. The user's code will
       // now execute in their file.
-      console.log("Flick Worker: Runtime initialized.");
+      div().text("Hello from the worker!").style(display("initial"));
       break;
 
     case "event": {
