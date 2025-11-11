@@ -62,6 +62,19 @@ worker.addEventListener("message", (e: MessageEvent<WorkerToMainCommand[]>) => {
           }
           flickRegistry.set(cmd.id, el);
           break;
+        case "move": {
+          const parent = flickRegistry.get(cmd.parentId);
+          const node = flickRegistry.get(cmd.id);
+          // If beforeId is null, insertBefore appends to the end
+          const beforeNode = cmd.beforeId
+            ? flickRegistry.get(cmd.beforeId)
+            : null;
+
+          if (parent && node) {
+            parent.insertBefore(node, beforeNode || null);
+          }
+          break;
+        }
         case "text": {
           const node = flickRegistry.get(cmd.id);
           if (node) node.textContent = cmd.value;

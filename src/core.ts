@@ -48,6 +48,17 @@ function unitHelper(prop: string, value: string | number): string | number {
 
 export class FlickElement {
   public readonly id: FlickId = createFlickId();
+  public key: string | number | null = null;
+  private _children: FlickElement[] = [];
+
+  /**
+   * Assigns a unique key to this element, used for
+   * O(1) keyed list reconciliation.
+   */
+  public setKey(value: string | number): this {
+    this.key = value;
+    return this;
+  }
 
   private queueAttribute(name: string, value: string | number) {
     queueCommand({ type: "attribute", id: this.id, name, value });
@@ -113,15 +124,78 @@ export class FlickElement {
   }
 
   /**
-   * Appends multiple FlickElement children to this element.
-   * This is a convenience method that calls .appendTo() on each child,
-   * passing 'this' (the current element) as the parent.
+   * Replaces all children of this element with a new set,
+   * performing an efficient, keyed reconciliation.
+   *
+   * @param children The new child elements to append.
    */
-  append(...elements: FlickElement[]): this {
-    for (const element of elements) {
-      element.appendTo(this);
-    }
-    return this; // For chaining
+  append(...children: FlickElement[]): this {
+    // This is a simple but fast reconciliation algorithm
+
+    const oldChildren = this._children;
+    const newChildren = children;
+
+    const oldKeyMap = new Map<string | number, FlickElement>();
+    oldChildren.forEach((child) => {
+      if (child.key !== null) {
+        oldKeyMap.set(child.key, child);
+      }
+    });
+
+    const newKeyMap = new Map<string | number, FlickElement>();
+    newChildren.forEach((child) => {
+      if (child.key !== null) {
+        newKeyMap.set(child.key, child);
+      }
+    });
+
+    // 1. Remove old children that are no longer present
+    oldChildren.forEach((oldChild) => {
+      if (oldChild.key === null || !newKeyMap.has(oldChild.key)) {
+        // We need a .destroy() method to clean up
+        // For now, let's just queue a command
+        queueCommand({ type: "destroy", id: oldChild.id }); // (We'd need to implement this)
+      }
+    });
+
+    // 2. Add and Move new children
+    let lastPlacedNode: FlickElement | null = null;
+
+    newChildren.forEach((newChild) => {
+      const key = newChild.key;
+
+      if (key !== null && oldKeyMap.has(key)) {
+        // --- IT'S AN EXISTING NODE (MOVE) ---
+        const oldChild = oldKeyMap.get(key)!;
+
+        // Find the node that should be "before" this one
+        const beforeId = lastPlacedNode ? lastPlacedNode.id : null;
+
+        // Send the MOVE command
+        queueCommand({
+          type: "move",
+          id: oldChild.id,
+          parentId: this.id,
+          beforeId: beforeId,
+        });
+
+        lastPlacedNode = oldChild; // This node is now placed
+      } else {
+        // --- IT'S A NEW NODE (APPEND) ---
+        // We'll just call the original 'append' logic
+        queueCommand({
+          type: "append",
+          parentId: this.id,
+          childId: newChild.id,
+        });
+        lastPlacedNode = newChild;
+      }
+    });
+
+    // 3. Update internal state
+    this._children = newChildren;
+
+    return this;
   }
 
   /**
