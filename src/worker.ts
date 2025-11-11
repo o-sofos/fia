@@ -21,7 +21,8 @@ self.addEventListener("message", (e: MessageEvent<MainToWorkerMessage>) => {
     case "init":
       console.log("Worker: Received init. Loading App.ts...");
       // This import starts the app
-      import("./App");
+      import("./LadingPage");
+      // import("./App");
       // import("./App.svg");
       break;
 

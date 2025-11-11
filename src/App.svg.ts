@@ -1,7 +1,7 @@
 // === src/SvgApp.ts (FIXED) ===
 import { signal } from "./reactivity";
 
-// ❗️ Import CSS functions for actual CSS
+// Import CSS functions for actual CSS
 import {
   fontFamily,
   textAlign,
@@ -28,10 +28,10 @@ const appContainer = div()
 
 // --- SVG Container ---
 const svgCanvas = svg()
-  // ❗️ Use .attr() for SVG attributes
+  // Use .attr() for SVG attributes
   .attr("width", "80%")
   .attr("height", "400px")
-  // ❗️ Use .style() for CSS properties
+  // Use .style() for CSS properties
   .style(border("2px solid #ccc"), backgroundColor("#f9f9f9"))
   .on("mousemove", (e: MouseEvent) => {
     // We need to get the mouse position *relative* to the SVG
