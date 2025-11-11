@@ -1,5 +1,4 @@
-import type { StyleRule } from "./css-html-props";
-import type { AttributeRule } from "./css-svg-props";
+import type { StyleRule } from "./html.props";
 import { effect, type Getter, type Reactive } from "./reactivity";
 import { type FlickId, FLICK_ROOT_ID } from "./types";
 import { queueCommand, registerWorkerListener } from "./worker-api";
@@ -38,6 +37,11 @@ const unitlessProps = new Set([
   "zIndex",
   "zoom",
 ]);
+
+export type AttributeRule = {
+  name: string;
+  value: Reactive<string | number>;
+};
 
 function unitHelper(prop: string, value: string | number): string | number {
   if (typeof value === "number" && value !== 0 && !unitlessProps.has(prop)) {
@@ -219,10 +223,6 @@ export class FlickElement {
    * @param handler The handler function
    */
   on(event: string, handler: (payload: any) => void): this {
-    console.log(
-      `[Worker]: Registering listener for "${event}" on ID ${this.id}`
-    );
-
     // Store the real handler in the worker's registry
     registerWorkerListener(this.id, event, handler);
 

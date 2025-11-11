@@ -44,8 +44,6 @@ function sanitizeAttribute(id: FlickId, name: string, value: string): boolean {
   return true;
 }
 
-console.log("Main Thread: Renderer loaded.");
-
 const flickRegistry = new Map<FlickId, Node>();
 flickRegistry.set(FLICK_ROOT_ID, document.body);
 
@@ -182,5 +180,4 @@ worker.addEventListener("message", (e: MessageEvent<WorkerToMainCommand[]>) => {
 });
 
 // Tell the worker it's time to start
-console.log("Main Thread: Initializing worker...");
 worker.postMessage({ type: "init" });
