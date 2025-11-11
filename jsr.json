@@ -4,6 +4,10 @@
   "license": "MIT",
   "exports": {
     ".": "./src/mod.ts",
-    "./renderer": "./src/main.ts"
+    "./renderer": "./src/index.ts",
+    "./worker": "./src/worker.ts",
+    "./css": "./src/css-html-props.ts",
+    "./svg": "./src/svg.ts",
+    "./aria": "./src/accessibility.ts"
   }
 }
