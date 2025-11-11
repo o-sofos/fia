@@ -9,6 +9,15 @@ export type StyleRule = {
   unit?: "px";
 };
 
+// This helper joins multiple static arguments with a space.
+const multiStatic =
+  (prop: string) =>
+  (...args: (string | number)[]): StyleRule => ({
+    prop,
+    value: args.join(" "), // Joins args, e.g., (1, 'solid', 'red') -> "1 solid red"
+    unit: undefined, // Assumes units are in the args
+  });
+
 // Helper for properties that take a simple string/number (color, zIndex)
 const s =
   (prop: string) =>
@@ -44,12 +53,12 @@ export const whiteSpace = s("whiteSpace");
 export const wordSpacing = px("wordSpacing");
 
 // --- Box Model ---
-export const margin = px("margin");
+export const margin = multiStatic("margin");
 export const marginTop = px("marginTop");
 export const marginRight = px("marginRight");
 export const marginBottom = px("marginBottom");
 export const marginLeft = px("marginLeft");
-export const padding = px("padding");
+export const padding = multiStatic("padding");
 export const paddingTop = px("paddingTop");
 export const paddingRight = px("paddingRight");
 export const paddingBottom = px("paddingBottom");
@@ -83,14 +92,14 @@ export const backgroundImage = s("backgroundImage");
 export const backgroundPosition = s("backgroundPosition");
 export const backgroundRepeat = s("backgroundRepeat");
 export const backgroundSize = s("backgroundSize");
-export const border = s("border");
+export const border = multiStatic("border");
 export const borderWidth = px("borderWidth");
 export const borderColor = s("borderColor");
 export const borderStyle = s("borderStyle");
 export const borderRadius = px("borderRadius");
-export const borderTop = s("borderTop");
-export const borderRight = s("borderRight");
-export const borderBottom = s("borderBottom");
+export const borderTop = multiStatic("borderTop");
+export const borderRight = multiStatic("borderRight");
+export const borderBottom = multiStatic("borderBottom");
 export const borderLeft = s("borderLeft");
 export const outline = s("outline");
 export const boxShadow = s("boxShadow");
