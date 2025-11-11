@@ -7,6 +7,43 @@ import { FLICK_ROOT_ID } from "./types";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 
+//  Add a safelist for URL protocols
+const URL_SAFELIST = ["http:", "https:", "mailto:", "tel:", "data:", "#"];
+
+function sanitizeAttribute(id: FlickId, name: string, value: string): boolean {
+  const lowerName = name.toLowerCase();
+
+  // Rule 1: Block all inline event handlers (e.g., 'onclick')
+  if (lowerName.startsWith("on")) {
+    console.warn(`[Flick Security]: Blocked 'on*' event attribute on ${id}.`);
+    return false;
+  }
+
+  // Rule 2: Check URL-based attributes
+  if (
+    lowerName === "href" ||
+    lowerName === "src" ||
+    lowerName === "formaction"
+  ) {
+    try {
+      const url = new URL(value, document.baseURI);
+      if (URL_SAFELIST.includes(url.protocol)) {
+        return true; // Safe
+      }
+      console.warn(
+        `[Flick Security]: Blocked unsafe protocol in ${name} on ${id}.`
+      );
+      return false; // Unsafe protocol (e.g., 'javascript:')
+    } catch (e) {
+      // It's a relative path (e.g., '/img/foo.png'), which is safe.
+      return true;
+    }
+  }
+
+  // Default: All other attributes are safe
+  return true;
+}
+
 console.log("Main Thread: Renderer loaded.");
 
 const flickRegistry = new Map<FlickId, Node>();
@@ -23,20 +60,21 @@ const mainThreadListenerRegistry = new Map<
  * We only send the data we need, not the whole Event object.
  */
 function serializeEvent(event: Event): any {
-  if (event instanceof MouseEvent) {
-    return {
-      clientX: event.clientX,
-      clientY: event.clientY,
-      button: event.button,
-    };
+  // ... (MouseEvent, InputEvent, KeyboardEvent cases) ...
+
+  // Handle 'blur' or 'focus' events
+  // We'll check the event type, as FocusEvent is generic.
+  if (event.type === "blur" || event.type === "focusout") {
+    const target = event.target as HTMLElement;
+    if (target.isContentEditable) {
+      return {
+        innerHTML: target.innerHTML, // The raw, "dirty" HTML
+        textContent: target.textContent, // The plain text
+      };
+    }
   }
-  if (event instanceof InputEvent) {
-    return { value: (event.target as HTMLInputElement).value };
-  }
-  if (event instanceof KeyboardEvent) {
-    return { key: event.key, code: event.code, ctrlKey: event.ctrlKey };
-  }
-  return {};
+
+  return {}; // Default for simple clicks
 }
 
 const worker = new Worker(new URL("./worker.ts", import.meta.url), {
@@ -128,9 +166,13 @@ worker.addEventListener("message", (e: MessageEvent<WorkerToMainCommand[]>) => {
 
         case "attribute": {
           const node = flickRegistry.get(cmd.id);
-          // setAttribute works on all Elements (HTML or SVG)
+          const valueStr = String(cmd.value);
+
           if (node && "setAttribute" in node) {
-            (node as Element).setAttribute(cmd.name, String(cmd.value));
+            // RUN THE SANITIZER
+            if (sanitizeAttribute(cmd.id, cmd.name, valueStr)) {
+              (node as Element).setAttribute(cmd.name, valueStr);
+            }
           }
           break;
         }
