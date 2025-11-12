@@ -17,6 +17,7 @@ import { FlickElement } from "./core";
 import { button, div, h1 } from "./html";
 import { color } from "./css";
 import { ariaLabel } from "./accessibility";
+import { signal } from "./reactivity";
 
 describe("FlickElement (Worker-Side API)", () => {
   //  Reset the mock's call history before each test
@@ -241,6 +242,86 @@ describe("FlickElement (Worker-Side API)", () => {
           type: "move",
           id: childA.id,
           beforeId: null,
+        })
+      );
+    });
+  });
+
+  // --- Test for .attr() ---
+  describe("FlickElement.attr()", () => {
+    it("should queue a single attribute command", async () => {
+      const el = div().attr("href", "#");
+      await vi.runAllTimersAsync(); // for auto-root
+
+      // We expect 3 calls: create, append(auto-root), attribute
+      expect(queueCommand).toHaveBeenCalledTimes(3);
+      expect(queueCommand).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "attribute",
+          name: "href",
+          value: "#",
+          id: el.id,
+        })
+      );
+    });
+
+    it("should queue multiple attribute commands", async () => {
+      const el = div().attr(ariaLabel("test")).attr("id", "my-id");
+      await vi.runAllTimersAsync();
+
+      // We expect 4 calls: create, append(auto-root), attr1, attr2
+      expect(queueCommand).toHaveBeenCalledTimes(4);
+
+      // 1. Assert Attribute 1 (aria-label)
+      expect(queueCommand).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "attribute",
+          name: "aria-label",
+          value: "test",
+          id: el.id,
+        })
+      );
+
+      // 2. Assert Attribute 2 (id="my-id")
+      expect(queueCommand).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "attribute",
+          name: "id",
+          value: "my-id",
+          id: el.id,
+        })
+      );
+    });
+
+    it("should create an effect for a reactive attribute", async () => {
+      const mySignal = signal("test");
+      const el = div().attr("aria-label", mySignal);
+
+      // 1. Assert initial command sequence (CREATE, ATTRIBUTE, APPEND)
+      await vi.runAllTimersAsync();
+      expect(queueCommand).toHaveBeenCalledTimes(3);
+
+      // 2. Assert that the reactive attribute command was sent (before the append)
+      // We check the call at index 1, which should be the attribute command
+      expect(vi.mocked(queueCommand).mock.calls[1][0]).toEqual(
+        expect.objectContaining({
+          type: "attribute",
+          name: "aria-label",
+          value: "test",
+        })
+      );
+
+      // 3. Clear mocks and update signal (the reactive test)
+      vi.clearAllMocks();
+      mySignal.set("new value");
+
+      // 4. Assert: Only the attribute command was queued (Times = 1)
+      expect(queueCommand).toHaveBeenCalledTimes(1);
+      expect(queueCommand).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "attribute",
+          name: "aria-label",
+          value: "new value",
         })
       );
     });

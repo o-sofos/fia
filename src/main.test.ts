@@ -246,5 +246,38 @@ describe("Renderer (Main Thread)", () => {
 
       consoleWarnSpy.mockRestore(); // Clean up the spy
     });
+
+    it("should proxy an input event with value", async () => {
+      // 1. Arrange: Spy on the worker's postMessage
+      const postMessageSpy = vi.spyOn(mockWorker, "postMessage");
+
+      // 2. Act: Create an input and add a listener
+      const commands = [
+        { type: "create", id: "in-1", tag: "input" },
+        { type: "listen", id: "in-1", event: "input" },
+        { type: "append", parentId: FLICK_ROOT_ID, childId: "in-1" },
+      ];
+      mockWorker.postMessageToRenderer(commands);
+      await vi.runAllTimersAsync();
+
+      // 3. Act: Simulate the user typing
+      const inputEl = document.body.querySelector("input");
+      expect(inputEl).not.toBeNull();
+
+      // Set the value and dispatch the event
+      inputEl!.value = "test value";
+      inputEl!.dispatchEvent(
+        new Event("input", { bubbles: true, composed: true })
+      );
+
+      // 4. Assert: The renderer sent the correct payload
+      expect(postMessageSpy).toHaveBeenCalledTimes(1);
+      expect(postMessageSpy).toHaveBeenCalledWith({
+        type: "event",
+        id: "in-1",
+        event: "input",
+        payload: { value: "test value" }, // Check the payload
+      });
+    });
   });
 });

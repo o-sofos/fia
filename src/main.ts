@@ -68,7 +68,7 @@ export function renderer(worker: Worker) {
         button: event.button,
       };
     }
-    if (event instanceof InputEvent) {
+    if (event.type === "input" && event.target) {
       return { value: (event.target as HTMLInputElement).value };
     }
     if (event instanceof KeyboardEvent) {
