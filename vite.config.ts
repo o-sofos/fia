@@ -18,5 +18,10 @@ export default defineConfig({
      * available in all test files without importing them.
      */
     globals: true,
+
+    coverage: {
+      provider: "v8",
+      enabled: true,
+    },
   },
 });
