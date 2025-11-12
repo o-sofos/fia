@@ -35,7 +35,6 @@ self.addEventListener("message", (e: MessageEvent<MainToWorkerMessage>) => {
     case "init":
       // The worker is ready. The user's code will
       // now execute in their file.
-      div().text("Hello from the worker!").style(display("initial"));
       break;
 
     case "event": {
