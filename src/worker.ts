@@ -15,8 +15,6 @@
  * div().text(signal('Hello from the worker!'));
  * ```
  */
-import { div } from "./html";
-import { display } from "./css";
 import type { MainToWorkerMessage } from "./types";
 import { workerEventListenerRegistry } from "./worker-api";
 

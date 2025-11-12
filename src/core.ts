@@ -1,4 +1,3 @@
-import type { StyleRule } from "./css";
 import { effect, type Getter, type Reactive } from "./reactivity";
 import { type FlickId, FLICK_ROOT_ID } from "./types";
 import {
@@ -140,50 +139,6 @@ export class FlickElement {
       });
     } else {
       queueCommand({ type: "text", id: this.id, value: String(value) });
-    }
-    return this;
-  }
-
-  /**
-   * Applies CSS styles to the element.
-   *
-   * Pass one or more `StyleRule` objects created by the
-   * CSS helper functions (e.g., `color('red')`).
-   *
-   * @param rules The `StyleRule` objects to apply.
-   * @returns `this` (for chaining).
-   *
-   * @example
-   * ```typescript
-   * import { color, padding } from 'jsr:@flick/core/css';
-   *
-   * div().style(
-   * color('blue'),
-   * padding(10, 20)
-   * );
-   * ```
-   */
-  style(...rules: StyleRule[]): this {
-    for (const rule of rules) {
-      const { prop, value, unit } = rule;
-
-      if (typeof value === "function") {
-        // It's reactive (a Getter or Signal)
-        effect(() => {
-          let unwrappedValue = (value as Getter<any>)();
-          if (unit === "px") {
-            unwrappedValue = unitHelper(prop, unwrappedValue);
-          }
-          this.queueStyle(prop, unwrappedValue);
-        });
-      } else {
-        // It's a static value
-        let staticValue = value;
-        if (unit === "px") {
-          staticValue = unitHelper(prop, staticValue);
-        }
-        this.queueStyle(prop, staticValue);
-      }
     }
     return this;
   }
