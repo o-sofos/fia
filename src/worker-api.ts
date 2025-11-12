@@ -1,4 +1,4 @@
-import type { WorkerToMainCommand, FlickId } from "./types";
+import type { WorkerToMainCommand, FlickId } from "../../flick-comms/src/types";
 
 // --- State and Command Queue ---
 let commandQueue: WorkerToMainCommand[] = [];

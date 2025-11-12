@@ -8,7 +8,7 @@ import {
   beforeAll,
   afterAll,
 } from "vitest";
-import { FLICK_ROOT_ID, type FlickId } from "./types";
+import { FLICK_ROOT_ID, type FlickId } from "../../flick-comms/src/types";
 import { signal } from "./reactivity";
 import { FlickElement } from "./core";
 import { button, div, h1 } from "./html";

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderer } from "./main";
 
-import { FLICK_ROOT_ID } from "./types";
+import { FLICK_ROOT_ID } from "../../flick-comms/src/types";
 
 // We need a mock worker to test the renderer
 class MockWorker {

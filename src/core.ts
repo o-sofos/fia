@@ -1,5 +1,5 @@
 import { effect, type Getter, type Reactive } from "./reactivity";
-import { type FlickId, FLICK_ROOT_ID } from "./types";
+import { type FlickId, FLICK_ROOT_ID } from "../../flick-comms/src/types";
 import {
   queueCommand,
   registerWorkerListener,

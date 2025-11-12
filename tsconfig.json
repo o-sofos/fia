@@ -23,5 +23,9 @@
     "noUncheckedSideEffectImports": true,
     "noEmitOnError": true
   },
-  "include": ["src", "../flick-elements/src/a11y/accessibility.ts"]
+  "include": [
+    "src",
+    "../flick-elements/src/a11y/accessibility.ts",
+    "../flick-comms/src/types.ts"
+  ]
 }

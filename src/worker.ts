@@ -15,7 +15,7 @@
  * div().text(signal('Hello from the worker!'));
  * ```
  */
-import type { MainToWorkerMessage } from "./types";
+import type { MainToWorkerMessage } from "../../flick-comms/src/types";
 import { workerEventListenerRegistry } from "./worker-api";
 
 // --- Error Handlers ---

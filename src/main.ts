@@ -1,5 +1,5 @@
-import type { FlickId, WorkerToMainCommand } from "./types";
-import { FLICK_ROOT_ID } from "./types";
+import type { FlickId, WorkerToMainCommand } from "../../flick-comms/src/types";
+import { FLICK_ROOT_ID } from "../../flick-comms/src/types";
 
 /**
  * Connects the Flick renderer to your application worker.
