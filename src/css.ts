@@ -93,10 +93,10 @@ const px =
 /** Helper for complex, multi-value string properties (e.g., '1px solid red') */
 const multi =
   (prop: string) =>
-  (value: Reactive<string>): StyleRule => ({
+  (...args: (string | number)[]): StyleRule => ({
     prop,
-    value,
-    unit: undefined,
+    value: args.join(" "), // Joins args, e.g., (1, 'solid', 'red') -> "1 solid red"
+    unit: undefined, // Assumes units are in the args
   });
 
 // --- 3. Strongly-Typed Properties ---
@@ -139,7 +139,7 @@ export const wordSpacing = px("wordSpacing");
 
 // --- Box Model ---
 /** Sets the CSS `margin` property. Pass a number (for px) or a full string (e.g., '10px 20px'). */
-export const margin = px("margin"); // ❗️ FIX: Use 'px'
+export const margin = px("margin"); //  FIX: Use 'px'
 /** Sets the CSS `marginTop` property. Auto-applies 'px' to numbers. */
 export const marginTop = px("marginTop");
 /** Sets the CSS `marginRight` property. Auto-applies 'px' to numbers. */
@@ -149,7 +149,7 @@ export const marginBottom = px("marginBottom");
 /** Sets the CSS `marginLeft` property. Auto-applies 'px' to numbers. */
 export const marginLeft = px("marginLeft");
 /** Sets the CSS `padding` property. Pass a number (for px) or a full string (e.g., '10px 20px'). */
-export const padding = px("padding"); // ❗️ FIX: Use 'px'
+export const padding = px("padding"); //  FIX: Use 'px'
 /** Sets the CSS `paddingTop` property. Auto-applies 'px' to numbers. */
 export const paddingTop = px("paddingTop");
 /** Sets the CSS `paddingRight` property. Auto-applies 'px' to numbers. */
@@ -274,7 +274,7 @@ export const gridTemplate = s("gridTemplate");
 /** Sets the CSS `gridTemplateColumns` property. */
 export const gridTemplateColumns = s("gridTemplateColumns");
 /** Sets the CSS `gridTemplateRows` property. */
-export const gridTemplateRows = s("gridTemplateRows"); // ❗️ FIX: Typo 'sB'
+export const gridTemplateRows = s("gridTemplateRows"); //  FIX: Typo 'sB'
 /** Sets the CSS `gridTemplateAreas` property. */
 export const gridTemplateAreas = s("gridTemplateAreas");
 /** Sets the CSS `gridAutoColumns` property. */

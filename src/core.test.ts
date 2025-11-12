@@ -147,4 +147,102 @@ describe("FlickElement (Worker-Side API)", () => {
       handler
     );
   });
+
+  describe("FlickElement.append() (Keyed Reconciliation)", () => {
+    let parent: FlickElement;
+
+    beforeEach(() => {
+      // Set up a clean parent for each test
+      parent = div().appendTo("root");
+      vi.runAllTimersAsync(); // Clear its auto-root
+      vi.clearAllMocks();
+    });
+
+    it("should add new items to the end", async () => {
+      const childA = div().key("A");
+      parent.append(childA);
+      await vi.runAllTimersAsync();
+      vi.clearAllMocks();
+
+      const childB = div().key("B");
+      parent.append(childA, childB);
+      await vi.runAllTimersAsync();
+
+      expect(queueCommand).toHaveBeenCalledTimes(3);
+      expect(queueCommand).toHaveBeenCalledWith(
+        expect.objectContaining({ type: "create", id: childB.id })
+      );
+      expect(queueCommand).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "move",
+          id: childA.id,
+          beforeId: childB.id,
+        })
+      );
+      //  THE FIX: Check for 'childId', not 'id'
+      expect(queueCommand).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "append",
+          childId: childB.id,
+          beforeId: null,
+        })
+      );
+    });
+
+    it("should remove items from the end", async () => {
+      const childA = div().key("A");
+      const childB = div().key("B");
+      parent.append(childA, childB);
+      await vi.runAllTimersAsync();
+      vi.clearAllMocks();
+
+      parent.append(childA);
+      await vi.runAllTimersAsync();
+
+      expect(queueCommand).toHaveBeenCalledTimes(2);
+      expect(queueCommand).toHaveBeenCalledWith(
+        expect.objectContaining({ type: "destroy", id: childB.id })
+      );
+      expect(queueCommand).toHaveBeenCalledWith(
+        expect.objectContaining({ type: "move", id: childA.id, beforeId: null })
+      );
+    });
+
+    it("should correctly reverse a list (pure move)", async () => {
+      const childA = div().key("A");
+      const childB = div().key("B");
+      const childC = div().key("C");
+      parent.append(childA, childB, childC);
+      await vi.runAllTimersAsync();
+      vi.clearAllMocks();
+
+      // Act: Reverse the list
+      parent.append(childC, childB, childA);
+      await vi.runAllTimersAsync();
+
+      expect(queueCommand).toHaveBeenCalledTimes(3);
+      //  THE FIX: Check against the variable IDs, not hardcoded strings
+      expect(queueCommand).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "move",
+          id: childC.id,
+          beforeId: childB.id,
+        })
+      );
+      expect(queueCommand).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "move",
+          id: childB.id,
+          beforeId: childA.id,
+        })
+      );
+      expect(queueCommand).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "move",
+          id: childA.id,
+          beforeId: null,
+        })
+      );
+    });
+  });
 });

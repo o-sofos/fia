@@ -7,7 +7,7 @@ const a =
   (name: string) =>
   (value: Reactive<string | number | boolean>): AttributeRule => ({
     name,
-    // ❗️ FIX: Pass the reactive value (or plain value) through directly.
+    //  FIX: Pass the reactive value (or plain value) through directly.
     // The .attr() method will handle unwrapping and casting.
     value: value as Reactive<string | number>,
   });

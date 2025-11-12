@@ -42,7 +42,8 @@ type SetStyleCommand = {
 type AppendChildCommand = {
   type: "append";
   parentId: FlickId;
-  childId: FlickId; // This is correct
+  childId: FlickId;
+  beforeId: FlickId | null;
 };
 
 type AddListenerCommand = {

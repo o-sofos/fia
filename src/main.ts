@@ -151,9 +151,19 @@ export function renderer(worker: Worker) {
               break;
             }
             case "append": {
-              const p = flickRegistry.get(cmd.parentId);
-              const c = flickRegistry.get(cmd.childId);
-              if (p && c) p.appendChild(c);
+              const parent = flickRegistry.get(cmd.parentId);
+              const child = flickRegistry.get(cmd.childId);
+              // Get the node to insert before
+              const beforeNode = cmd.beforeId
+                ? flickRegistry.get(cmd.beforeId)
+                : null;
+
+              if (parent && child) {
+                // insertBefore handles all cases:
+                // - If beforeNode is null, it appends to the end.
+                // - If beforeNode is an element, it inserts before it.
+                parent.insertBefore(child, beforeNode || null);
+              }
               break;
             }
             case "move": {

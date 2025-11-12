@@ -193,4 +193,58 @@ describe("Renderer (Main Thread)", () => {
       payload: expect.any(Object), // We know our serializer works
     });
   });
+
+  describe("Renderer (Main Thread)", () => {
+    // ... (Keep all your existing tests) ...
+
+    it("should create SVG elements with the correct namespace", async () => {
+      const commands = [
+        { type: "create", id: "svg-1", tag: "svg", ns: "svg" },
+        { type: "create", id: "path-1", tag: "path", ns: "svg" },
+        { type: "append", parentId: "svg-1", childId: "path-1" },
+        { type: "append", parentId: FLICK_ROOT_ID, childId: "svg-1" },
+      ];
+
+      mockWorker.postMessageToRenderer(commands);
+      await vi.runAllTimersAsync();
+
+      const svg = document.body.querySelector("svg");
+      const path = document.body.querySelector("path");
+
+      expect(svg).not.toBeNull();
+      expect(path).not.toBeNull();
+
+      // This is the real test
+      expect(svg?.namespaceURI).toBe("http://www.w3.org/2000/svg");
+      expect(path?.namespaceURI).toBe("http://www.w3.org/2000/svg");
+    });
+
+    it('should block "on*" event attributes', async () => {
+      // 1. Arrange: Spy on the console
+      const consoleWarnSpy = vi
+        .spyOn(console, "warn")
+        .mockImplementation(() => {});
+
+      const commands = [
+        { type: "create", id: "el-1", tag: "img" },
+        { type: "attribute", id: "el-1", name: "src", value: "x" },
+        { type: "attribute", id: "el-1", name: "onerror", value: "alert(1)" },
+        { type: "append", parentId: FLICK_ROOT_ID, childId: "el-1" },
+      ];
+
+      mockWorker.postMessageToRenderer(commands);
+      await vi.runAllTimersAsync();
+
+      const img = document.body.querySelector("img");
+      expect(img).not.toBeNull();
+      // The sanitizer should have blocked the attribute
+      expect(img?.getAttribute("onerror")).toBeNull();
+      // And it should have warned the developer
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        expect.stringContaining("Blocked 'on*' event attribute")
+      );
+
+      consoleWarnSpy.mockRestore(); // Clean up the spy
+    });
+  });
 });

@@ -197,7 +197,12 @@ export class FlickElement {
     this._isAppended = true;
 
     const parentId = parent === "root" ? FLICK_ROOT_ID : parent.id;
-    queueCommand({ type: "append", parentId: parentId, childId: this.id });
+    queueCommand({
+      type: "append",
+      parentId: parentId,
+      childId: this.id,
+      beforeId: null,
+    });
     return this;
   }
 
@@ -211,8 +216,6 @@ export class FlickElement {
    * @returns `this` (for chaining).
    */
   append(...children: FlickElement[]): this {
-    // This is a simple but fast reconciliation algorithm
-
     const oldChildren = this._children;
     const newChildren = children;
 
@@ -223,55 +226,51 @@ export class FlickElement {
       }
     });
 
-    const newKeyMap = new Map<string | number, FlickElement>();
+    const newKeySet = new Set<string | number>();
     newChildren.forEach((child) => {
       if (child._key !== null) {
-        newKeyMap.set(child._key, child);
+        newKeySet.add(child._key);
       }
     });
 
     // 1. Remove old children that are no longer present
     oldChildren.forEach((oldChild) => {
-      if (oldChild._key === null || !newKeyMap.has(oldChild._key)) {
+      if (oldChild._key === null || !newKeySet.has(oldChild._key)) {
         oldChild.destroy();
       }
     });
 
     // 2. Add and Move new children
-    let lastPlacedNode: FlickElement | null = null;
-
-    newChildren.forEach((newChild) => {
-      // This prevents the child's auto-root microtask
-      // from firing incorrectly.
-      newChild._isAppended = true;
-
+    newChildren.forEach((newChild, i) => {
+      newChild._isAppended = true; // Mark as appended
       const key = newChild._key;
 
-      if (key !== null && oldKeyMap.has(key)) {
+      const oldChild = key !== null ? oldKeyMap.get(key) : undefined;
+
+      // Find the ID of the *next* sibling in the *new* list.
+      // This is the node we need to insert *before*.
+      const nextSibling = newChildren[i + 1];
+      const beforeId = nextSibling ? nextSibling.id : null;
+
+      if (oldChild) {
         // --- IT'S AN EXISTING NODE (MOVE) ---
-        const oldChild = oldKeyMap.get(key)!;
-
-        // Find the node that should be "before" this one
-        const beforeId = lastPlacedNode ? lastPlacedNode.id : null;
-
-        // Send the MOVE command
+        // It's already in the DOM, just move it to the correct spot.
         queueCommand({
           type: "move",
           id: oldChild.id,
           parentId: this.id,
           beforeId: beforeId,
         });
-
-        lastPlacedNode = oldChild; // This node is now placed
       } else {
-        // --- IT'S A NEW NODE (APPEND) ---
-        // We'll just call the original 'append' logic
+        // --- IT'S A NEW NODE (CREATE & APPEND) ---
+        // The 'create' command was already queued by the factory (div(), etc.)
+        // We just need to append it in the correct DOM position.
         queueCommand({
           type: "append",
           parentId: this.id,
           childId: newChild.id,
+          beforeId: beforeId, // Pass the correct 'before' ID
         });
-        lastPlacedNode = newChild;
       }
     });
 
