@@ -222,6 +222,7 @@ export class FlickElement {
     const oldKeyMap = new Map<string | number, FlickElement>();
     oldChildren.forEach((child) => {
       if (child._key !== null) {
+        // Map the existing DOM element ID to its key
         oldKeyMap.set(child._key, child);
       }
     });
@@ -242,19 +243,34 @@ export class FlickElement {
 
     // 2. Add and Move new children
     newChildren.forEach((newChild, i) => {
-      newChild._isAppended = true; // Mark as appended
+      newChild._isAppended = true;
       const key = newChild._key;
+
+      // --- Determine the Before Node (The Fix) ---
+      let beforeId: FlickId | null = null;
+
+      // Iterate over the rest of the new children to find the first sibling
+      // that corresponds to an element ALREADY IN THE DOM.
+      for (let j = i + 1; j < newChildren.length; j++) {
+        const potentialSibling = newChildren[j];
+
+        // If this sibling is a MOVED node, it is already in the DOM.
+        if (
+          potentialSibling._key !== null &&
+          oldKeyMap.has(potentialSibling._key)
+        ) {
+          // Get the *existing* DOM node's ID to use as the reference
+          beforeId = oldKeyMap.get(potentialSibling._key!)!.id;
+          break;
+        }
+        // If the sibling is brand new, we ignore it and check the next one.
+      }
 
       const oldChild = key !== null ? oldKeyMap.get(key) : undefined;
 
-      // Find the ID of the *next* sibling in the *new* list.
-      // This is the node we need to insert *before*.
-      const nextSibling = newChildren[i + 1];
-      const beforeId = nextSibling ? nextSibling.id : null;
-
       if (oldChild) {
         // --- IT'S AN EXISTING NODE (MOVE) ---
-        // It's already in the DOM, just move it to the correct spot.
+        // If the old element is in the wrong place, move it.
         queueCommand({
           type: "move",
           id: oldChild.id,
@@ -263,13 +279,12 @@ export class FlickElement {
         });
       } else {
         // --- IT'S A NEW NODE (CREATE & APPEND) ---
-        // The 'create' command was already queued by the factory (div(), etc.)
-        // We just need to append it in the correct DOM position.
+        // Insert the brand new node before the first existing element found above.
         queueCommand({
           type: "append",
           parentId: this.id,
           childId: newChild.id,
-          beforeId: beforeId, // Pass the correct 'before' ID
+          beforeId: beforeId,
         });
       }
     });
