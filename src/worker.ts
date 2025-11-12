@@ -41,7 +41,16 @@ self.addEventListener("message", (e: MessageEvent<MainToWorkerMessage>) => {
     case "event": {
       const handler = workerEventListenerRegistry.get(msg.id)?.get(msg.event);
       if (handler) {
-        handler(msg.payload);
+        try {
+          handler(msg.payload);
+        } catch (error) {
+          // This bug won't crash the worker OR the task.
+          // It will just fail gracefully.
+          console.error(
+            `[Flick Worker]: Error in event handler for ${msg.event} on ${msg.id}:`,
+            error
+          );
+        }
       } else {
         console.warn(
           `[Flick Worker]: No handler found for event "${msg.event}" on ID ${msg.id}`
