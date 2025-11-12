@@ -119,10 +119,10 @@
   dependencies:
     tslib "^2.4.0"
 
-"@flick/comms@npm:@jsr/flick__comms":
-  version "0.1.5"
-  resolved "https://npm.jsr.io/~/11/@jsr/flick__comms/0.1.5.tgz#3FE724D15458C6CF91D95054C617774DAD21D73F"
-  integrity sha512-KpNBE8bOzc5rmlEncH9MqAt2atQ9LxMglMbL8ZmBJUML0VHrlSd6VF5hVf4eU3oQMRmrS4CrwxmW4D+Ql3QV5A==
+"@flick/comms@npm:@jsr/flick__comms@latest":
+  version "0.1.6"
+  resolved "https://npm.jsr.io/~/11/@jsr/flick__comms/0.1.6.tgz#29423DD9157EFBEB3327E2542D9385F53E41F4A0"
+  integrity sha512-RBGEhrTVLwQ35pUNqooia1rnNQNFB8O6Inm5qG+tu5n4p1IjYR5MGNBejEy6KcZLAe8DCp76hf+vKRHcQ+UCGw==
 
 "@jridgewell/resolve-uri@^3.1.0":
   version "3.1.2"
