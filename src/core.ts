@@ -219,75 +219,63 @@ export class FlickElement {
     const oldChildren = this._children;
     const newChildren = children;
 
+    // 1. Build old key map and new key set (Unchanged)
     const oldKeyMap = new Map<string | number, FlickElement>();
     oldChildren.forEach((child) => {
-      if (child._key !== null) {
-        // Map the existing DOM element ID to its key
-        oldKeyMap.set(child._key, child);
-      }
+      if (child._key !== null) oldKeyMap.set(child._key, child);
     });
-
     const newKeySet = new Set<string | number>();
     newChildren.forEach((child) => {
-      if (child._key !== null) {
-        newKeySet.add(child._key);
-      }
+      if (child._key !== null) newKeySet.add(child._key);
     });
 
-    // 1. Remove old children that are no longer present
+    // 1. Remove old children
     oldChildren.forEach((oldChild) => {
       if (oldChild._key === null || !newKeySet.has(oldChild._key)) {
         oldChild.destroy();
       }
     });
 
-    // 2. Add and Move new children
-    newChildren.forEach((newChild, i) => {
+    // 2. Add and Move
+
+    // We need to know which node comes next.
+    let nextNodeId: FlickId | null = null;
+
+    // Iterate the NEW list in reverse order (from end to start)
+    for (let i = newChildren.length - 1; i >= 0; i--) {
+      const newChild = newChildren[i];
       newChild._isAppended = true;
+
       const key = newChild._key;
-
-      // --- Determine the Before Node (The Fix) ---
-      let beforeId: FlickId | null = null;
-
-      // Iterate over the rest of the new children to find the first sibling
-      // that corresponds to an element ALREADY IN THE DOM.
-      for (let j = i + 1; j < newChildren.length; j++) {
-        const potentialSibling = newChildren[j];
-
-        // If this sibling is a MOVED node, it is already in the DOM.
-        if (
-          potentialSibling._key !== null &&
-          oldKeyMap.has(potentialSibling._key)
-        ) {
-          // Get the *existing* DOM node's ID to use as the reference
-          beforeId = oldKeyMap.get(potentialSibling._key!)!.id;
-          break;
-        }
-        // If the sibling is brand new, we ignore it and check the next one.
-      }
-
       const oldChild = key !== null ? oldKeyMap.get(key) : undefined;
+
+      const nodeToManipulate = oldChild || newChild; // Either the old DOM node, or the new element
+
+      // Determine the reference node ID (The element currently at the front of the queue)
+      const beforeId = nextNodeId;
 
       if (oldChild) {
         // --- IT'S AN EXISTING NODE (MOVE) ---
-        // If the old element is in the wrong place, move it.
+        // Move the old node to the front of the list being built.
         queueCommand({
           type: "move",
           id: oldChild.id,
           parentId: this.id,
-          beforeId: beforeId,
+          beforeId: beforeId, // Insert before the node we just placed
         });
+        nextNodeId = oldChild.id; // This node is now the one to insert before
       } else {
         // --- IT'S A NEW NODE (CREATE & APPEND) ---
-        // Insert the brand new node before the first existing element found above.
+        // Insert the brand new node before the current reference node.
         queueCommand({
           type: "append",
           parentId: this.id,
           childId: newChild.id,
           beforeId: beforeId,
         });
+        nextNodeId = newChild.id; // This new node is now the one to insert before
       }
-    });
+    }
 
     // 3. Update internal state
     this._children = newChildren;
