@@ -1,10 +1,14 @@
 {
   "name": "@flick/core",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "license": "MIT",
   "exports": {
     ".": "./src/mod.ts",
-    "./renderer": "./src/main.ts",
-    "./worker": "./src/worker.ts"
+    "./renderer": "./src/renderer.ts",
+    "./worker": "./src/worker.ts",
+    "./elements": "./src/element-html.ts",
+    "./svg": "./src/svg.ts",
+    "./css": "./src/css-html-props.ts",
+    "./aria": "./src/accessibility.ts"
   }
 }
