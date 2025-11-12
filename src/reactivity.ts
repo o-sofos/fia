@@ -1,15 +1,9 @@
-type Effect = () => void;
+import type { Effect, Getter, Signal } from "@flick/comms/types";
+
 const trackingStack: Effect[] = [];
 
 function getActiveEffect(): Effect | undefined {
   return trackingStack[trackingStack.length - 1];
-}
-
-export type Getter<T> = () => T;
-export type Reactive<T> = T | Getter<T>;
-
-export interface Signal<T> extends Getter<T> {
-  set(value: T): void;
 }
 
 /** Creates a reactive signal that holds a value. */

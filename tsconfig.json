@@ -26,6 +26,7 @@
   "include": [
     "src",
     "../flick-elements/src/a11y/accessibility.ts",
-    "../flick-comms/src/types.ts"
+    "../flick-comms/src/types.ts",
+    "../flick-elements/src/styles/css.test.ts"
   ]
 }

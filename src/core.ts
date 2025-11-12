@@ -1,13 +1,18 @@
-import { effect, type Getter, type Reactive } from "./reactivity";
-import { type FlickId, FLICK_ROOT_ID } from "../../flick-comms/src/types";
 import {
+  FLICK_ROOT_ID,
+  type FlickId,
+  type Getter,
+  type Reactive,
+  type StyleRule,
+} from "@flick/comms/types";
+
+import {
+  createFlickId,
   queueCommand,
   registerWorkerListener,
   workerEventListenerRegistry,
-} from "./worker-api";
-
-let nextId = 0;
-const createFlickId = () => (nextId++).toString(36);
+} from "@flick/comms";
+import { effect } from "./reactivity";
 
 const unitlessProps = new Set([
   "animationIterationCount",
@@ -143,7 +148,7 @@ export class FlickElement {
     return this;
   }
 
-  /**
+  /**ZOZ
    * Appends this element to a specific parent.
    * @param parent The `FlickElement` to append to, or 'root' for the body.
    * @returns `this` (for chaining).
@@ -333,6 +338,50 @@ export class FlickElement {
     // 3. We also need to clean up the worker-side listener map
     // (This assumes workerEventListenerRegistry is in worker-api.ts)
     workerEventListenerRegistry.delete(this.id);
+  }
+
+  /**
+   * Applies CSS styles to the element.
+   *
+   * Pass one or more `StyleRule` objects created by the
+   * CSS helper functions (e.g., `color('red')`).
+   *
+   * @param rules The `StyleRule` objects to apply.
+   * @returns `this` (for chaining).
+   *
+   * @example
+   * ```typescript
+   * import { color, padding } from 'jsr:@flick/core/css';
+   *
+   * div().style(
+   * color('blue'),
+   * padding(10, 20)
+   * );
+   * ```
+   */
+  style(...rules: StyleRule[]): this {
+    for (const rule of rules) {
+      const { prop, value, unit } = rule;
+
+      if (typeof value === "function") {
+        // It's reactive (a Getter or Signal)
+        effect(() => {
+          let unwrappedValue = (value as Getter<any>)();
+          if (unit === "px") {
+            unwrappedValue = unitHelper(prop, unwrappedValue);
+          }
+          this.queueStyle(prop, unwrappedValue);
+        });
+      } else {
+        // It's a static value
+        let staticValue = value;
+        if (unit === "px") {
+          staticValue = unitHelper(prop, staticValue);
+        }
+        this.queueStyle(prop, staticValue);
+      }
+    }
+    return this;
   }
 }
 
