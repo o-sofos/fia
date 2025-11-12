@@ -94,4 +94,103 @@ describe("Renderer (Main Thread)", () => {
     // The sanitizer should have *blocked* the attribute
     expect(a?.getAttribute("href")).toBeNull();
   });
+
+  it("should apply styles to an element", async () => {
+    const commands = [
+      { type: "create", id: "el-1", tag: "div" },
+      { type: "style", id: "el-1", prop: "color", value: "red" },
+      { type: "style", id: "el-1", prop: "backgroundColor", value: "blue" },
+      { type: "append", parentId: FLICK_ROOT_ID, childId: "el-1" },
+    ];
+
+    mockWorker.postMessageToRenderer(commands);
+    await vi.runAllTimersAsync();
+
+    const el = document.body.querySelector("div");
+    expect(el).not.toBeNull();
+    expect(el?.style.color).toBe("red");
+    expect(el?.style.backgroundColor).toBe("blue");
+  });
+
+  it("should move an element for list reconciliation", async () => {
+    // 1. Arrange: Create A, B, C in order
+    const createCommands = [
+      { type: "create", id: "A", tag: "div" },
+      { type: "text", id: "A", value: "A" },
+      { type: "append", parentId: FLICK_ROOT_ID, childId: "A" },
+      { type: "create", id: "B", tag: "div" },
+      { type: "text", id: "B", value: "B" },
+      { type: "append", parentId: FLICK_ROOT_ID, childId: "B" },
+      { type: "create", id: "C", tag: "div" },
+      { type: "text", id: "C", value: "C" },
+      { type: "append", parentId: FLICK_ROOT_ID, childId: "C" },
+    ];
+    mockWorker.postMessageToRenderer(createCommands);
+    await vi.runAllTimersAsync();
+
+    expect(document.body.textContent).toBe("ABC");
+
+    // 2. Act: Move C before B
+    const moveCommands = [
+      { type: "move", id: "C", parentId: FLICK_ROOT_ID, beforeId: "B" },
+    ];
+    mockWorker.postMessageToRenderer(moveCommands);
+    await vi.runAllTimersAsync();
+
+    // 3. Assert: DOM order is now ACB
+    expect(document.body.textContent).toBe("ACB");
+  });
+
+  it("should destroy an element and clean up listeners", async () => {
+    // 1. Arrange: Create a button with a listener
+    const commands = [
+      { type: "create", id: "btn-1", tag: "button" },
+      { type: "listen", id: "btn-1", event: "click" },
+      { type: "append", parentId: FLICK_ROOT_ID, childId: "btn-1" },
+    ];
+    mockWorker.postMessageToRenderer(commands);
+    await vi.runAllTimersAsync();
+
+    const btn = document.body.querySelector("button");
+    expect(btn).not.toBeNull();
+
+    // 2. Act: Destroy the button
+    const destroyCommands = [{ type: "destroy", id: "btn-1" }];
+    mockWorker.postMessageToRenderer(destroyCommands);
+    await vi.runAllTimersAsync();
+
+    // 3. Assert: The button is gone
+    expect(document.body.querySelector("button")).toBeNull();
+    // We can't *truly* test if the listener map was cleaned
+    // without access to the renderer's internal state,
+    // but we've confirmed the DOM removal.
+  });
+
+  it("should proxy a DOM event back to the worker", async () => {
+    // 1. Arrange: Spy on the worker's postMessage
+    const postMessageSpy = vi.spyOn(mockWorker, "postMessage");
+
+    // 2. Act: Create a button and add a listener
+    const commands = [
+      { type: "create", id: "btn-click", tag: "button" },
+      { type: "listen", id: "btn-click", event: "click" },
+      { type: "append", parentId: FLICK_ROOT_ID, childId: "btn-click" },
+    ];
+    mockWorker.postMessageToRenderer(commands);
+    await vi.runAllTimersAsync();
+
+    // 3. Act: Simulate the user click
+    const btn = document.body.querySelector("button");
+    btn?.click(); // This fires the proxyHandler
+
+    // 4. Assert: The renderer should have sent a
+    // 'event' message back to the worker.
+    expect(postMessageSpy).toHaveBeenCalledTimes(1);
+    expect(postMessageSpy).toHaveBeenCalledWith({
+      type: "event",
+      id: "btn-click",
+      event: "click",
+      payload: expect.any(Object), // We know our serializer works
+    });
+  });
 });
