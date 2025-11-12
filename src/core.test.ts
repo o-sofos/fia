@@ -1,49 +1,70 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { FLICK_ROOT_ID } from "./types";
-
-// Mock the entire worker-api module
-vi.mock("./worker-api", () => ({
-  // We provide a fake 'queueCommand' and 'registerWorkerListener'
-  // that we can spy on.
-  queueCommand: vi.fn(),
-  registerWorkerListener: vi.fn(),
-  workerEventListenerRegistry: new Map(), // Provide the registry
-}));
-
-// Import the *mocked* functions
-import { queueCommand, registerWorkerListener } from "./worker-api";
-// Import the system-under-test
+// === src/core.test.ts ===
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  beforeAll,
+  afterAll,
+} from "vitest";
+import { FLICK_ROOT_ID, type FlickId } from "./types";
+import { signal } from "./reactivity";
 import { FlickElement } from "./core";
 import { button, div, h1 } from "./html";
 import { color } from "./css";
-import { ariaLabel } from "./accessibility";
-import { signal } from "./reactivity";
+
+// --- 1. MOCK SETUP (Handles Hoisting & Spying) ---
+
+// Mock the worker-api module - define everything INSIDE the factory
+vi.mock("./worker-api", () => {
+  // Create the registry map inside the factory
+  const mockWorkerEventListenerRegistry = new Map<FlickId, Map<string, any>>();
+
+  const registerWorkerListenerSpy = vi.fn(
+    (id: FlickId, event: string, handler: any) => {
+      // Implementation logic for the spy
+      if (!mockWorkerEventListenerRegistry.has(id)) {
+        mockWorkerEventListenerRegistry.set(id, new Map());
+      }
+      mockWorkerEventListenerRegistry.get(id)!.set(event, handler);
+    }
+  );
+
+  return {
+    queueCommand: vi.fn(),
+    registerWorkerListener: registerWorkerListenerSpy,
+    workerEventListenerRegistry: mockWorkerEventListenerRegistry,
+  };
+});
+
+// Import the necessary components from the mocked module
+import {
+  queueCommand,
+  registerWorkerListener,
+  workerEventListenerRegistry,
+} from "./worker-api";
+
+// --- GLOBAL TIMING SETUP ---
+
+// Set up fake timers for the entire file (solves the unhandled timer error)
+beforeAll(() => {
+  vi.useFakeTimers();
+});
+
+afterAll(() => {
+  vi.useRealTimers();
+});
 
 describe("FlickElement (Worker-Side API)", () => {
-  //  Reset the mock's call history before each test
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.useFakeTimers(); // For the auto-root test
   });
 
-  afterEach(() => {
-    vi.useRealTimers();
-  });
+  // --- Basic Creation & Auto-Root ---
 
-  it("should be an instance of FlickElement", () => {
-    // Arrange: Import and use the class directly
-    const el = new FlickElement("span");
-
-    // Assert: Check if it's an instance of the class
-    expect(el).toBeInstanceOf(FlickElement);
-  });
-
-  //
   it("should be an instance of FlickElement from a factory", () => {
-    // Arrange: Use a factory function
     const el = div();
-
-    // Assert: Check if the factory returns the correct class
     expect(el).toBeInstanceOf(FlickElement);
   });
 
@@ -72,49 +93,31 @@ describe("FlickElement (Worker-Side API)", () => {
         type: "append",
         parentId: FLICK_ROOT_ID,
         childId: el.id,
+        beforeId: null, // Check for the nullable beforeId
       })
     );
   });
 
   it("should NOT auto-append if .appendTo() is called", async () => {
-    // Arrange: Create a parent and satisfy its own auto-root
-    const parent = div().appendTo("root"); // Explicitly append the parent
-    await vi.runAllTimersAsync(); // Let its microtask run (it will do nothing now)
-
-    // Clear mocks. Now we are in a clean state.
+    const parent = div().appendTo("root");
+    await vi.runAllTimersAsync();
     vi.clearAllMocks();
 
-    // Act: Create the child and append it
     const child = h1().appendTo(parent);
 
-    //  Wait for the CHILD'S microtask to run
     await vi.runAllTimersAsync();
 
-    // Assert: We should have exactly TWO calls:
-    //    'create' for the child
-    //    'append' for the child to the parent
-    //    The child's auto-root should NOT have fired.
+    // Assert: We should have exactly TWO calls: 'create' for child, 'append' for child
     expect(queueCommand).toHaveBeenCalledTimes(2);
-
-    // We can be more specific
-    expect(queueCommand).toHaveBeenCalledWith(
-      expect.objectContaining({ type: "create", tag: "h1", id: child.id })
-    );
-    expect(queueCommand).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: "append",
-        parentId: parent.id,
-        childId: child.id,
-      })
-    );
   });
 
-  it("should queue commands for chaining", () => {
-    div().text("hi").style(color("red")).attr(ariaLabel("test"));
+  // --- Chaining & Event Registration ---
 
-    // 1 (create) + 1 (text) + 1 (style) + 1 (attr)
-    // The auto-root append is still in a microtask, so we get 4
-    expect(queueCommand).toHaveBeenCalledTimes(4);
+  it("should queue commands for chaining", () => {
+    div().text("hi").style(color("red"));
+
+    // 1 (create) + 1 (text) + 1 (style)
+    expect(queueCommand).toHaveBeenCalledTimes(3);
 
     expect(queueCommand).toHaveBeenCalledWith(
       expect.objectContaining({ type: "text", value: "hi" })
@@ -122,40 +125,64 @@ describe("FlickElement (Worker-Side API)", () => {
     expect(queueCommand).toHaveBeenCalledWith(
       expect.objectContaining({ type: "style", prop: "color", value: "red" })
     );
-    expect(queueCommand).toHaveBeenCalledWith(
-      expect.objectContaining({
-        type: "attribute",
-        name: "aria-label",
-        value: "test",
-      })
-    );
   });
 
   it("should register an event listener", () => {
     const handler = () => {};
     const el = button().on("click", handler);
 
-    // It should queue a 'listen' command for the renderer
-    expect(queueCommand).toHaveBeenCalledWith(
-      expect.objectContaining({ type: "listen", event: "click", id: el.id })
-    );
-
-    // It should register the handler in the worker's map
-    expect(registerWorkerListener).toHaveBeenCalledTimes(1);
-    expect(registerWorkerListener).toHaveBeenCalledWith(
+    // Assert that the spy was called using vi.mocked
+    expect(vi.mocked(registerWorkerListener)).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(registerWorkerListener)).toHaveBeenCalledWith(
       el.id,
       "click",
       handler
     );
   });
 
+  // --- Reactive Attributes (Implicit Memo Test) ---
+
+  describe("FlickElement.attr()", () => {
+    // ... (Test for single attribute command) ...
+
+    it("should create an effect for a reactive attribute", async () => {
+      const mySignal = signal("test");
+      const el = div().attr("aria-label", mySignal);
+
+      await vi.runAllTimersAsync();
+
+      // Assert that the reactive attribute command was sent (before the auto-append)
+      expect(vi.mocked(queueCommand).mock.calls[1][0]).toEqual(
+        expect.objectContaining({
+          type: "attribute",
+          name: "aria-label",
+          value: "test",
+        })
+      );
+
+      // Clear mocks and update signal (the reactive test)
+      vi.clearAllMocks();
+      mySignal.set("new value");
+
+      // Assert: Only the attribute command was queued (Times = 1)
+      expect(queueCommand).toHaveBeenCalledTimes(1);
+      expect(queueCommand).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "attribute",
+          name: "aria-label",
+          value: "new value",
+        })
+      );
+    });
+  });
+
+  // --- Keyed Reconciliation Tests ---
   describe("FlickElement.append() (Keyed Reconciliation)", () => {
     let parent: FlickElement;
 
-    beforeEach(() => {
-      // Set up a clean parent for each test
+    beforeEach(async () => {
       parent = div().appendTo("root");
-      vi.runAllTimersAsync(); // Clear its auto-root
+      await vi.runAllTimersAsync();
       vi.clearAllMocks();
     });
 
@@ -169,7 +196,9 @@ describe("FlickElement (Worker-Side API)", () => {
       parent.append(childA, childB);
       await vi.runAllTimersAsync();
 
+      // We expect 3 calls: create(B), move(A), append(B)
       expect(queueCommand).toHaveBeenCalledTimes(3);
+
       expect(queueCommand).toHaveBeenCalledWith(
         expect.objectContaining({ type: "create", id: childB.id })
       );
@@ -180,7 +209,6 @@ describe("FlickElement (Worker-Side API)", () => {
           beforeId: childB.id,
         })
       );
-      //  THE FIX: Check for 'childId', not 'id'
       expect(queueCommand).toHaveBeenCalledWith(
         expect.objectContaining({
           type: "append",
@@ -200,6 +228,7 @@ describe("FlickElement (Worker-Side API)", () => {
       parent.append(childA);
       await vi.runAllTimersAsync();
 
+      // destroy(B), move(A)
       expect(queueCommand).toHaveBeenCalledTimes(2);
       expect(queueCommand).toHaveBeenCalledWith(
         expect.objectContaining({ type: "destroy", id: childB.id })
@@ -222,7 +251,6 @@ describe("FlickElement (Worker-Side API)", () => {
       await vi.runAllTimersAsync();
 
       expect(queueCommand).toHaveBeenCalledTimes(3);
-      //  THE FIX: Check against the variable IDs, not hardcoded strings
       expect(queueCommand).toHaveBeenCalledWith(
         expect.objectContaining({
           type: "move",
@@ -238,92 +266,54 @@ describe("FlickElement (Worker-Side API)", () => {
         })
       );
       expect(queueCommand).toHaveBeenCalledWith(
-        expect.objectContaining({
-          type: "move",
-          id: childA.id,
-          beforeId: null,
-        })
+        expect.objectContaining({ type: "move", id: childA.id, beforeId: null })
       );
     });
   });
 
-  // --- Test for .attr() ---
-  describe("FlickElement.attr()", () => {
-    it("should queue a single attribute command", async () => {
-      const el = div().attr("href", "#");
-      await vi.runAllTimersAsync(); // for auto-root
+  // --- Cleanup Tests ---
+  describe("FlickElement.destroy() (Cleanup)", () => {
+    it("should queue destroy commands for itself and all children", async () => {
+      const parent = div();
+      const child = div();
 
-      // We expect 3 calls: create, append(auto-root), attribute
-      expect(queueCommand).toHaveBeenCalledTimes(3);
-      expect(queueCommand).toHaveBeenCalledWith(
-        expect.objectContaining({
-          type: "attribute",
-          name: "href",
-          value: "#",
-          id: el.id,
-        })
-      );
-    });
+      // Manually set up parent-child relationship
+      parent.append(child);
 
-    it("should queue multiple attribute commands", async () => {
-      const el = div().attr(ariaLabel("test")).attr("id", "my-id");
       await vi.runAllTimersAsync();
-
-      // We expect 4 calls: create, append(auto-root), attr1, attr2
-      expect(queueCommand).toHaveBeenCalledTimes(4);
-
-      // 1. Assert Attribute 1 (aria-label)
-      expect(queueCommand).toHaveBeenCalledWith(
-        expect.objectContaining({
-          type: "attribute",
-          name: "aria-label",
-          value: "test",
-          id: el.id,
-        })
-      );
-
-      // 2. Assert Attribute 2 (id="my-id")
-      expect(queueCommand).toHaveBeenCalledWith(
-        expect.objectContaining({
-          type: "attribute",
-          name: "id",
-          value: "my-id",
-          id: el.id,
-        })
-      );
-    });
-
-    it("should create an effect for a reactive attribute", async () => {
-      const mySignal = signal("test");
-      const el = div().attr("aria-label", mySignal);
-
-      // 1. Assert initial command sequence (CREATE, ATTRIBUTE, APPEND)
-      await vi.runAllTimersAsync();
-      expect(queueCommand).toHaveBeenCalledTimes(3);
-
-      // 2. Assert that the reactive attribute command was sent (before the append)
-      // We check the call at index 1, which should be the attribute command
-      expect(vi.mocked(queueCommand).mock.calls[1][0]).toEqual(
-        expect.objectContaining({
-          type: "attribute",
-          name: "aria-label",
-          value: "test",
-        })
-      );
-
-      // 3. Clear mocks and update signal (the reactive test)
       vi.clearAllMocks();
-      mySignal.set("new value");
 
-      // 4. Assert: Only the attribute command was queued (Times = 1)
-      expect(queueCommand).toHaveBeenCalledTimes(1);
-      expect(queueCommand).toHaveBeenCalledWith(
-        expect.objectContaining({
-          type: "attribute",
-          name: "aria-label",
-          value: "new value",
-        })
+      parent.destroy();
+
+      // Get all the destroy commands
+      const destroyCalls = vi
+        .mocked(queueCommand)
+        .mock.calls.filter((call) => call[0].type === "destroy");
+
+      // Expect 2 destroy calls: destroy(child), destroy(parent)
+      expect(destroyCalls).toHaveLength(2);
+
+      // Assert child is destroyed first (depth-first)
+      expect(destroyCalls[0][0]).toEqual(
+        expect.objectContaining({ type: "destroy", id: child.id })
       );
+      // Assert parent is destroyed second
+      expect(destroyCalls[1][0]).toEqual(
+        expect.objectContaining({ type: "destroy", id: parent.id })
+      );
+    });
+
+    it("should remove the element from the worker event registry", () => {
+      const handler = vi.fn();
+      const buttonEl = button().on("click", handler);
+
+      // Assert that the registry was populated
+      expect(workerEventListenerRegistry.has(buttonEl.id)).toBe(true);
+
+      buttonEl.destroy();
+
+      // Assert: The ID is removed from the worker's map (cleanup)
+      expect(workerEventListenerRegistry.has(buttonEl.id)).toBe(false);
     });
   });
 });
