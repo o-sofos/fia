@@ -520,6 +520,40 @@ button({
 }, "Keep Even");
 ```
 
+
+## 🛠️ Development
+
+Flick uses [Bun](https://bun.sh) for development, testing, and bundling.
+
+### Prerequisites
+
+- [Bun](https://bun.sh) v1.0+
+
+### Setup
+
+```bash
+# Install dependencies
+bun install
+```
+
+### Dev Server
+
+Starts a development server with hot-reloading for TypeScript files.
+
+```bash
+bun run dev
+```
+
+The server runs at `http://localhost:4000`. It serves `index.html` by default and compiles `.ts` files on the fly.
+
+### Testing
+
+Run the test suite:
+
+```bash
+bun test
+```
+
 ## Contributing
 Flick is intentionally minimal. Before opening a PR, ask yourself:
 
