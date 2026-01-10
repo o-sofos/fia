@@ -1,199 +1,278 @@
 /**
- * Flick Reactivity System
- *
- * Creates reactive values with automatic dependency tracking.
- * Use $() for both signals and computed values.
+ * Flick Reactivity System - Performance Optimized
+ * 
+ * Key optimizations:
+ * - Minimal allocations
+ * - Inline hot paths
+ * - Avoid Set/Map overhead where possible
+ * - Use arrays for small subscriber lists
+ * - Lazy property definitions
  */
 
 /** Effect function type */
 type Effect = () => void;
 
-/** Tracking stack for dependency collection */
-const trackingStack: Effect[] = [];
+/** Tracking context */
+let currentEffect: Effect | undefined = undefined;
 
-/** Currently running effects that need re-execution */
-let pendingEffects: Set<Effect> | null = null;
-let isBatching = false;
+/** Batch update state */
+let batchDepth = 0;
+let batchedEffects: Effect[] | undefined = undefined;
 
 /**
- * Get the currently tracking effect (if any)
+ * Batch multiple signal updates
  */
-function getActiveEffect(): Effect | undefined {
-  return trackingStack[trackingStack.length - 1];
+export function batch(fn: () => void): void {
+  batchDepth++;
+  try {
+    fn();
+  } finally {
+    batchDepth--;
+    if (batchDepth === 0 && batchedEffects) {
+      const effects = batchedEffects;
+      batchedEffects = undefined;
+      
+      // Run effects, avoiding duplicates
+      const seen = new Set<Effect>();
+      for (let i = 0; i < effects.length; i++) {
+        const effect = effects[i];
+        if (!seen.has(effect)) {
+          seen.add(effect);
+          effect();
+        }
+      }
+    }
+  }
 }
 
 /**
- * Run effects, batching them to avoid duplicate runs
+ * Schedule effect execution
  */
-function scheduleEffects(effects: Set<Effect>): void {
-  if (isBatching) {
-    // Add to pending batch
-    for (const effect of effects) {
-      pendingEffects!.add(effect);
-    }
-    return;
-  }
-
-  // Execute immediately
-  for (const effect of effects) {
+function scheduleEffect(effect: Effect): void {
+  if (batchDepth > 0) {
+    // Batch mode: collect effects
+    if (!batchedEffects) batchedEffects = [];
+    batchedEffects.push(effect);
+  } else {
+    // Immediate execution
     effect();
   }
 }
 
 /**
- * Batch multiple signal updates to run effects only once
- */
-export function batch(fn: () => void): void {
-  if (isBatching) {
-    fn();
-    return;
-  }
-
-  isBatching = true;
-  pendingEffects = new Set();
-
-  try {
-    fn();
-  } finally {
-    isBatching = false;
-    const effects = pendingEffects;
-    pendingEffects = null;
-
-    for (const effect of effects) {
-      effect();
-    }
-  }
-}
-
-/**
- * Create a reactive effect that re-runs when dependencies change
+ * Create a reactive effect
  */
 export function effect(fn: Effect): () => void {
-  const effectFn = () => {
-    trackingStack.push(effectFn);
+  const run = () => {
+    const prevEffect = currentEffect;
+    currentEffect = run;
     try {
       fn();
     } finally {
-      trackingStack.pop();
+      currentEffect = prevEffect;
     }
   };
-
-  effectFn();
-
-  // Return cleanup function
+  
+  run();
   return () => {
-    // Effects clean themselves up when their signals are garbage collected
+    // Cleanup handled by GC
   };
 }
 
 /**
- * Signal interface - reactive value with .value getter/setter
+ * Signal type - optimized for both function calls and property access
  */
 export interface Signal<T> {
-  /** Get the current value */
-  readonly value: T;
+  (): T;
+  value: T;
+  valueOf(): T;
 }
 
 export interface WritableSignal<T> extends Signal<T> {
-  /** Set a new value */
+  (newValue?: T): T | void;
   value: T;
 }
 
 /**
- * Create a reactive signal or computed value
- *
- * @example
- * ```typescript
- * // Writable signal
- * const count = $(0);
- * count.value = 5;
- *
- * // Computed (read-only)
- * const doubled = $(() => count.value * 2);
- * console.log(doubled.value); // 10
- * ```
+ * Internal signal node - pure data structure for performance
  */
-export function $<T>(initialOrCompute: T | (() => T)): typeof initialOrCompute extends () => T ? Signal<T> : WritableSignal<T>;
-export function $<T>(initialOrCompute: T | (() => T)): Signal<T> | WritableSignal<T> {
-  // Check if it's a computed (function that returns a value)
-  if (typeof initialOrCompute === "function") {
-    return createComputed(initialOrCompute as () => T);
-  }
-
-  return createSignal(initialOrCompute);
+interface SignalNode<T> {
+  value: T;
+  subs: Effect[] | null; // Use array for better cache locality
 }
 
 /**
- * Create a writable signal
+ * Create signal - optimized version
  */
-function createSignal<T>(initialValue: T): WritableSignal<T> {
-  let value = initialValue;
-  const subscribers = new Set<Effect>();
-
-  return {
-    get value(): T {
-      const activeEffect = getActiveEffect();
-      if (activeEffect) {
-        subscribers.add(activeEffect);
-      }
-      return value;
-    },
-
-    set value(newValue: T) {
-      if (Object.is(value, newValue)) {
-        return;
-      }
-      value = newValue;
-      scheduleEffects(new Set(subscribers));
-    },
+function createSignal<T>(initial: T): WritableSignal<T> {
+  // Use plain object for data - better for V8 optimization
+  const node: SignalNode<T> = {
+    value: initial,
+    subs: null
   };
-}
-
-/**
- * Create a read-only computed signal
- */
-function createComputed<T>(compute: () => T): Signal<T> {
-  let cachedValue: T;
-  let isDirty = true;
-  const subscribers = new Set<Effect>();
-
-  // Effect to track dependencies and mark dirty
-  const updateEffect = () => {
-    trackingStack.push(updateEffect);
-    try {
-      cachedValue = compute();
-      isDirty = false;
-    } finally {
-      trackingStack.pop();
-    }
-    // Notify our subscribers
-    scheduleEffects(new Set(subscribers));
-  };
-
-  // Run once to establish initial value and dependencies
-  updateEffect();
-
-  return {
-    get value(): T {
-      const activeEffect = getActiveEffect();
-      if (activeEffect) {
-        subscribers.add(activeEffect);
-      }
-
-      if (isDirty) {
-        trackingStack.push(updateEffect);
-        try {
-          cachedValue = compute();
-          isDirty = false;
-        } finally {
-          trackingStack.pop();
+  
+  // Main function - hot path must be fast
+  const read = function(newValue?: T): T | void {
+    // WRITE PATH (less common)
+    if (arguments.length > 0) {
+      // Early exit if value hasn't changed
+      if (Object.is(node.value, newValue)) return;
+      
+      node.value = newValue!;
+      
+      // Notify subscribers if any exist
+      const subs = node.subs;
+      if (subs) {
+        // Inline notification for small arrays (common case)
+        if (subs.length === 1) {
+          scheduleEffect(subs[0]);
+        } else if (subs.length === 2) {
+          scheduleEffect(subs[0]);
+          scheduleEffect(subs[1]);
+        } else {
+          // General case
+          for (let i = 0; i < subs.length; i++) {
+            scheduleEffect(subs[i]);
+          }
         }
       }
-
-      return cachedValue;
+      return;
+    }
+    
+    // READ PATH (hot path - most common)
+    // Track dependency if we're in an effect
+    if (currentEffect) {
+      if (!node.subs) {
+        // First subscriber - allocate array
+        node.subs = [currentEffect];
+      } else if (node.subs.indexOf(currentEffect) === -1) {
+        // Add new subscriber
+        node.subs.push(currentEffect);
+      }
+    }
+    
+    return node.value;
+  } as WritableSignal<T>;
+  
+  // Define .value property - lazy getter/setter
+  Object.defineProperty(read, 'value', {
+    get() {
+      // Same as read() - track dependency
+      if (currentEffect && node.subs) {
+        if (node.subs.indexOf(currentEffect) === -1) {
+          node.subs.push(currentEffect);
+        }
+      } else if (currentEffect) {
+        node.subs = [currentEffect];
+      }
+      return node.value;
     },
+    set(newValue: T) {
+      // Same as read(newValue)
+      if (Object.is(node.value, newValue)) return;
+      node.value = newValue;
+      
+      const subs = node.subs;
+      if (subs) {
+        for (let i = 0; i < subs.length; i++) {
+          scheduleEffect(subs[i]);
+        }
+      }
+    }
+  });
+  
+  // valueOf for auto-unwrapping - inline for performance
+  read.valueOf = function() {
+    if (currentEffect && node.subs) {
+      if (node.subs.indexOf(currentEffect) === -1) {
+        node.subs.push(currentEffect);
+      }
+    } else if (currentEffect) {
+      node.subs = [currentEffect];
+    }
+    return node.value;
   };
+  
+  return read;
 }
 
-// Alias for API compatibility with README examples
+/**
+ * Create computed signal - optimized version
+ */
+function createComputed<T>(compute: () => T): Signal<T> {
+  const node: SignalNode<T> = {
+    value: undefined as T,
+    subs: null
+  };
+  
+  let dirty = true;
+  
+  const update = () => {
+    const prevEffect = currentEffect;
+    currentEffect = update;
+    try {
+      const newValue = compute();
+      if (!Object.is(node.value, newValue)) {
+        node.value = newValue;
+        
+        // Notify subscribers
+        const subs = node.subs;
+        if (subs) {
+          for (let i = 0; i < subs.length; i++) {
+            scheduleEffect(subs[i]);
+          }
+        }
+      }
+      dirty = false;
+    } finally {
+      currentEffect = prevEffect;
+    }
+  };
+  
+  // Initial computation
+  update();
+  
+  const read = function(): T {
+    // Re-compute if dirty
+    if (dirty) {
+      update();
+    }
+    
+    // Track dependency
+    if (currentEffect) {
+      if (!node.subs) {
+        node.subs = [currentEffect];
+      } else if (node.subs.indexOf(currentEffect) === -1) {
+        node.subs.push(currentEffect);
+      }
+    }
+    
+    return node.value;
+  } as Signal<T>;
+  
+  Object.defineProperty(read, 'value', {
+    get() {
+      return read();
+    }
+  });
+  
+  read.valueOf = function() {
+    return read();
+  };
+  
+  return read;
+}
+
+/**
+ * Main $ function - optimized dispatch
+ */
+export function $<T>(
+  initialOrCompute: T | (() => T)
+): typeof initialOrCompute extends () => T ? Signal<T> : WritableSignal<T> {
+  return typeof initialOrCompute === "function"
+    ? createComputed(initialOrCompute as () => T)
+    : createSignal(initialOrCompute);
+}
+
+// Alias for API compatibility
 export { $ as signal };
