@@ -259,77 +259,139 @@ function createElement<K extends keyof HTMLElementTagNameMap>(
 }
 
 // Text elements
+/** HTML <div> element */
 export const div: ElementFactory<"div"> = createElement("div");
+/** HTML <span> element */
 export const span: ElementFactory<"span"> = createElement("span");
+/** HTML <p> element */
 export const p: ElementFactory<"p"> = createElement("p");
+/** HTML <h1> element */
 export const h1: ElementFactory<"h1"> = createElement("h1");
+/** HTML <h2> element */
 export const h2: ElementFactory<"h2"> = createElement("h2");
+/** HTML <h3> element */
 export const h3: ElementFactory<"h3"> = createElement("h3");
+/** HTML <h4> element */
 export const h4: ElementFactory<"h4"> = createElement("h4");
+/** HTML <h5> element */
 export const h5: ElementFactory<"h5"> = createElement("h5");
+/** HTML <h6> element */
 export const h6: ElementFactory<"h6"> = createElement("h6");
+/** HTML <a> element */
 export const a: ElementFactory<"a"> = createElement("a");
+/** HTML <strong> element */
 export const strong: ElementFactory<"strong"> = createElement("strong");
+/** HTML <em> element */
 export const em: ElementFactory<"em"> = createElement("em");
+/** HTML <code> element */
 export const code: ElementFactory<"code"> = createElement("code");
+/** HTML <pre> element */
 export const pre: ElementFactory<"pre"> = createElement("pre");
 
 // Form elements
+/** HTML <form> element */
 export const form: ElementFactory<"form"> = createElement("form");
+/** HTML <input> element */
 export const input: ElementFactory<"input"> = createElement("input");
+/** HTML <textarea> element */
 export const textarea: ElementFactory<"textarea"> = createElement("textarea");
+/** HTML <select> element */
 export const select: ElementFactory<"select"> = createElement("select");
+/** HTML <option> element */
 export const option: ElementFactory<"option"> = createElement("option");
+/** HTML <button> element */
 export const button: ElementFactory<"button"> = createElement("button");
+/** HTML <label> element */
 export const label: ElementFactory<"label"> = createElement("label");
+/** HTML <fieldset> element */
 export const fieldset: ElementFactory<"fieldset"> = createElement("fieldset");
+/** HTML <legend> element */
 export const legend: ElementFactory<"legend"> = createElement("legend");
 
 // List elements
+/** HTML <ul> element */
 export const ul: ElementFactory<"ul"> = createElement("ul");
+/** HTML <ol> element */
 export const ol: ElementFactory<"ol"> = createElement("ol");
+/** HTML <li> element */
 export const li: ElementFactory<"li"> = createElement("li");
 
 // Table elements
+/** HTML <table> element */
 export const table: ElementFactory<"table"> = createElement("table");
+/** HTML <thead> element */
 export const thead: ElementFactory<"thead"> = createElement("thead");
+/** HTML <tbody> element */
 export const tbody: ElementFactory<"tbody"> = createElement("tbody");
+/** HTML <tfoot> element */
 export const tfoot: ElementFactory<"tfoot"> = createElement("tfoot");
+/** HTML <tr> element */
 export const tr: ElementFactory<"tr"> = createElement("tr");
+/** HTML <td> element */
 export const td: ElementFactory<"td"> = createElement("td");
+/** HTML <th> element */
 export const th: ElementFactory<"th"> = createElement("th");
 
 // Semantic elements
+/** HTML <header> element */
 export const header: ElementFactory<"header"> = createElement("header");
+/** HTML <footer> element */
 export const footer: ElementFactory<"footer"> = createElement("footer");
+/** HTML <nav> element */
 export const nav: ElementFactory<"nav"> = createElement("nav");
+/** HTML <main> element */
 export const main: ElementFactory<"main"> = createElement("main");
+/** HTML <section> element */
 export const section: ElementFactory<"section"> = createElement("section");
+/** HTML <article> element */
 export const article: ElementFactory<"article"> = createElement("article");
+/** HTML <aside> element */
 export const aside: ElementFactory<"aside"> = createElement("aside");
 
 // Media elements
+/** HTML <img> element */
 export const img: ElementFactory<"img"> = createElement("img");
+/** HTML <video> element */
 export const video: ElementFactory<"video"> = createElement("video");
+/** HTML <audio> element */
 export const audio: ElementFactory<"audio"> = createElement("audio");
+/** HTML <canvas> element */
 export const canvas: ElementFactory<"canvas"> = createElement("canvas");
 
 // Other common elements
+/** HTML <br> element */
 export const br: ElementFactory<"br"> = createElement("br");
+/** HTML <hr> element */
 export const hr: ElementFactory<"hr"> = createElement("hr");
+/** HTML <blockquote> element */
 export const blockquote: ElementFactory<"blockquote"> = createElement("blockquote");
+/** HTML <details> element */
 export const details: ElementFactory<"details"> = createElement("details");
+/** HTML <summary> element */
 export const summary: ElementFactory<"summary"> = createElement("summary");
+/** HTML <dialog> element */
 export const dialog: ElementFactory<"dialog"> = createElement("dialog");
+/** HTML <progress> element */
 export const progress: ElementFactory<"progress"> = createElement("progress");
+/** HTML <abbr> element */
 export const abbr: ElementFactory<"abbr"> = createElement("abbr");
+/** HTML <address> element */
 export const address: ElementFactory<"address"> = createElement("address");
+/** HTML <time> element */
 export const time: ElementFactory<"time"> = createElement("time");
+/** HTML <small> element */
 export const small: ElementFactory<"small"> = createElement("small");
+/** HTML <sub> element */
 export const sub: ElementFactory<"sub"> = createElement("sub");
+/** HTML <sup> element */
 export const sup: ElementFactory<"sup"> = createElement("sup");
+/** HTML <mark> element */
 export const mark: ElementFactory<"mark"> = createElement("mark");
+/** HTML <del> element */
 export const del: ElementFactory<"del"> = createElement("del");
+/** HTML <ins> element */
 export const ins: ElementFactory<"ins"> = createElement("ins");
+/** HTML <kbd> element */
 export const kbd: ElementFactory<"kbd"> = createElement("kbd");
+/** HTML <samp> element */
 export const samp: ElementFactory<"samp"> = createElement("samp");
