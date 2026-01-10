@@ -4,14 +4,14 @@
  * Demonstrates the basic usage of Flick's reactive UI system.
  */
 
-import { $, div, h1, button, p } from "./mod";
+import { $, div, h1, button, p, span } from "./mod";
 
 // Create reactive state
-const count = $(0);
+export const count = $(0);
 
 // Create computed values
-const doubled = $(() => count.value * 2);
-const isEven = $(() => count.value % 2 === 0);
+export const doubled = $(() => count.value * 2);
+export const isEven = $(() => count.value % 2 === 0);
 
 // Build the UI
 div({ style: { padding: "20px", fontFamily: "system-ui" } }, () => {
@@ -21,9 +21,9 @@ div({ style: { padding: "20px", fontFamily: "system-ui" } }, () => {
   p("Doubled: ", doubled);
   p(() => {
     if (isEven.value) {
-      p({ style: { color: "green" } }, "✓ Even number");
+      span({ style: { color: "green" } }, "✓ Even number");
     } else {
-      p({ style: { color: "orange" } }, "○ Odd number");
+      span({ style: { color: "orange" } }, "○ Odd number");
     }
   });
 
