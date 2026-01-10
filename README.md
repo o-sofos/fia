@@ -9,7 +9,7 @@
 
 ---
 
-## Overview
+## 🔭 Overview
 
 ### Native Speed. Declarative Fluency.
 
@@ -27,7 +27,7 @@ Most frameworks add layers of abstraction between you and the DOM. Flick gives y
 
 🚀 No build required - Import from JSR and start building
 
-## Philosophy
+## 🧠 Philosophy
 
 Flick is built on three principles:
 
@@ -87,7 +87,7 @@ div(() => {
 ```
 That's it. No build step, no configuration, no boilerplate.
 
-## Core Concepts
+## 💡 Core Concepts
 
 ### Reactive Values
 Use $() to create values that automatically update the UI when they change.
@@ -189,7 +189,7 @@ div({
 }, "Reactive div");
 ```
 
-## Examples
+## 📦 Examples
 
 ### Todo App
 
@@ -374,7 +374,7 @@ div(() => {
 });
 ```
 
-## API Reference
+## 📚 API Reference
 
 ### $(initialValue)
 
@@ -463,7 +463,7 @@ const name = $("World");
 p("Hello, ", name.value);
 ```
 
-## Patterns
+## 🎨 Patterns
 
 ### Two-Way Binding
 
@@ -557,7 +557,7 @@ Run the test suite:
 bun test
 ```
 
-## Contributing
+## 🤝 Contributing
 Flick is intentionally minimal. Before opening a PR, ask yourself:
 
 - Does this belong in the core, or should it be a separate package?
@@ -566,7 +566,7 @@ Flick is intentionally minimal. Before opening a PR, ask yourself:
 
 If you answered "yes" to any of these, it probably shouldn't be in core.
 
-## License
+## 📄 License
 MIT
 
 
