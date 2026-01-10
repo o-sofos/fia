@@ -1,9 +1,25 @@
-// === @flick/core/src/mod.ts ===
+/**
+ * @module @flick/core
+ *
+ * Flick - A 2KB framework for building reactive UIs with signals and plain functions.
+ *
+ * @example
+ * ```typescript
+ * import { $, div, h1, button, p } from "@flick/core";
+ *
+ * const count = $(0);
+ *
+ * div(() => {
+ *   h1("Counter App");
+ *   p("Count: ", count);
+ *   button({ onclick: () => count.value++ }, "Increment");
+ * });
+ * ```
+ */
 
-// --- 1. Reactivity Primitives (The State Model) ---
-// Exports the core functions for state and side effects.
-export { signal, effect } from "./reactivity";
+// Reactivity primitives
+export { $, signal, effect, batch } from "./reactivity";
+export type { Signal, WritableSignal } from "./reactivity";
 
-// --- 2. Core Element Classes (The Base Objects) ---
-// Exports the classes that all other element factories extend.
-export { FlickElement, FlickSvgElement } from "./core";
+// Element factories
+export * from "./elements";
