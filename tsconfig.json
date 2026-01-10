@@ -4,7 +4,6 @@
     "useDefineForClassFields": true,
     "module": "ESNext",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "types": ["vite/client"],
     "skipLibCheck": true,
 
     /* Bundler mode */
@@ -23,10 +22,5 @@
     "noUncheckedSideEffectImports": true,
     "noEmitOnError": true
   },
-  "include": [
-    "src",
-    "../flick-elements/src/a11y/accessibility.ts",
-    "../flick-comms/src/types.ts",
-    "../flick-elements/src/styles/css.test.ts"
-  ]
+  "include": ["src"]
 }
