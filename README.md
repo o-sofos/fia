@@ -1,7 +1,7 @@
 # Flick
 
 [![jsr:@flick/core](https://jsr.io/badges/@flick/core)](https://jsr.io/@flick/core)
-[![jsr:@flick/core_v](https://jsr.io/badges/@flick/core/v)](https://jsr.io/@flick/core)
+[![jsr:@flick/core_score](https://jsr.io/badges/@flick/core/score)](https://jsr.io/@flick/core)
 
 > **No JSX. No VDOM. No Jank.**
 >
