@@ -5,19 +5,27 @@
  * Elements created inside a parent's callback are automatically appended.
  */
 
-/** Stack of parent elements for context-based mounting */
-const contextStack: HTMLElement[] = [];
+/**
+ * Interface for any object that can act as a parent context.
+ * Usually an HTMLElement, but can be a proxy for reactive blocks.
+ */
+export interface Context {
+  appendChild(node: Node): Node;
+}
+
+/** Stack of parent elements/contexts */
+const contextStack: Context[] = [];
 
 /**
- * Push an element onto the context stack
+ * Push a context onto the stack
  * @internal
  */
-export function pushContext(element: HTMLElement): void {
-  contextStack.push(element);
+export function pushContext(context: Context): void {
+  contextStack.push(context);
 }
 
 /**
- * Pop an element from the context stack
+ * Pop the top context
  * @internal
  */
 export function popContext(): void {
@@ -29,7 +37,7 @@ export function popContext(): void {
  * Returns document.body if no context is set
  * @internal
  */
-export function getCurrentContext(): HTMLElement {
+export function getCurrentContext(): Context {
   return contextStack[contextStack.length - 1] ?? document.body;
 }
 

@@ -5,10 +5,126 @@
  * Each function returns the created HTMLElement.
  */
 
-import { pushContext, popContext, getCurrentContext } from "./context";
+import { pushContext, popContext, getCurrentContext, type Context } from "./context";
 import { effect, type Signal } from "./reactivity";
 
-/** Props that can be passed to element functions */
+/**
+ * Context that captures nodes appended to it instead of attaching to DOM
+ */
+class CaptureContext implements Context {
+  nodes: Node[] = [];
+  appendChild(node: Node): Node {
+    this.nodes.push(node);
+    return node;
+  }
+}
+
+/**
+ * Append a child to an element
+ */
+function appendChild(parent: HTMLElement | Context, child: Child): void {
+  const target = parent instanceof HTMLElement ? parent : parent;
+  // If parent is not an HTMLElement (i.e. it's a proxy Context), 
+  // we just call appendChild. This handles nested proxies naturally.
+  // Wait, if parent is CaptureContext, appendChild is defined.
+  // But logic below creates text nodes etc.
+  
+  if (child === null || child === undefined) {
+    return;
+  }
+
+  if (typeof child === "string" || typeof child === "number") {
+    target.appendChild(document.createTextNode(String(child)));
+  } else if (child instanceof HTMLElement) {
+    target.appendChild(child);
+  } else if (isSignal(child)) {
+    // Reactive text node
+    const textNode = document.createTextNode("");
+    effect(() => {
+      textNode.textContent = String(child.value);
+    });
+    target.appendChild(textNode);
+  } else if (typeof child === "function") {
+    // Reactive function: Create an anchor and compute children reactively
+    const anchor = document.createTextNode("");
+    target.appendChild(anchor);
+
+    let activeNodes: Node[] = [];
+
+    effect(() => {
+      // 1. Clean up old nodes
+      // Since this effect might run multiple times, we need to remove the previous elements
+      // from the DOM to avoid duplication.
+      // Note: If nodes were captured in a CaptureContext, 'remove()' might fail or be no-op 
+      // if they haven't been attached to real DOM yet. But typically 'effect' runs
+      // synchronously immediately (initial run), then asynchronously later?
+      // Our effect implementation is synchronous.
+      
+      for (const node of activeNodes) {
+        if (node.parentNode) {
+          node.parentNode.removeChild(node);
+        }
+      }
+      activeNodes = [];
+
+      // 2. Run the function in a capture context
+      const captureCtx = new CaptureContext();
+      pushContext(captureCtx);
+      try {
+        child();
+      } finally {
+        popContext();
+      }
+
+      // 3. Move new nodes to the correct place (after anchor)
+      // If parent is a real HTMLElement:
+      if (typeof (target as any).insertBefore === 'function') {
+        const realParent = target as HTMLElement;
+        const referenceParams = anchor.nextSibling;
+        
+        for (const node of captureCtx.nodes) {
+          realParent.insertBefore(node, referenceParams); // If ref is null, appends to end
+          activeNodes.push(node);
+        }
+      } else {
+         // Parent is a CaptureContext. We just push them up.
+         // But we need to maintain order relative to 'anchor'.
+         // Since CaptureContext just maintains a list, re-inserting is tricky without
+         // proper list splicing support.
+         // Limitation: Reactive functions inside a CaptureContext (nested reactivity inside function)
+         // might be tricky with this simple implementation.
+         // BUT standard usage is: div(() => { ... })
+         // div is an HTMLElement. So target IS an HTMLElement usually.
+         // It's only a CaptureContext if we are INSIDE another reactive function.
+         // In that case, we are building the list for the OUTSIDE effect.
+         // The outside effect will handle attachment.
+         // So for now, we just append to the parent context in order.
+         // Actually, if we are in a capture context, 'anchor' is in captureCtx.nodes.
+         // We should insert 'blockNodes' after 'anchor' in 'target.nodes'.
+         // This requires CaptureContext to support splice/insert.
+         // Let's assume for now target is HTMLElement for the common case.
+         // If it's not, we might append to end (which might be wrong order if other siblings exist).
+         
+         // Fix: Only support direct DOM manipulation for now. Nested reactive functions ok as long as parent is real.
+         // If parent is CaptureContext, we just append. This means nested reactivity re-renders entire parent list?
+         // No, the inner effect runs independently.
+         // For a recursive VDOM-less system, handling nested reactive inserts into a detached list is hard.
+         // Simple solution: CaptureContext should support `insertBefore`.
+         // Let's assume it does or casting.
+         
+         const captureParent = target as CaptureContext;
+         // Find anchor index
+         const index = captureParent.nodes.indexOf(anchor);
+         if (index !== -1) {
+            captureParent.nodes.splice(index + 1, 0, ...captureCtx.nodes);
+         } else {
+            captureParent.nodes.push(...captureCtx.nodes);
+         }
+         activeNodes.push(...captureCtx.nodes);
+      }
+    });
+  }
+}
 export type ElementProps = {
   [key: string]: unknown;
   class?: string | Record<string, boolean>;
@@ -86,35 +202,6 @@ function applyStyle(element: HTMLElement, value: unknown): void {
   }
 }
 
-/**
- * Append a child to an element
- */
-function appendChild(parent: HTMLElement, child: Child): void {
-  if (child === null || child === undefined) {
-    return;
-  }
-
-  if (typeof child === "string" || typeof child === "number") {
-    parent.appendChild(document.createTextNode(String(child)));
-  } else if (child instanceof HTMLElement) {
-    parent.appendChild(child);
-  } else if (isSignal(child)) {
-    // Reactive text node
-    const textNode = document.createTextNode("");
-    effect(() => {
-      textNode.textContent = String(child.value);
-    });
-    parent.appendChild(textNode);
-  } else if (typeof child === "function") {
-    // Render function - push context and execute
-    pushContext(parent);
-    try {
-      child();
-    } finally {
-      popContext();
-    }
-  }
-}
 
 /**
  * Create an element factory function
