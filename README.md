@@ -9,6 +9,8 @@
 
 ---
 
+## Overview
+
 ### Native Speed. Declarative Fluency.
 
 Most frameworks add layers of abstraction between you and the DOM. Flick gives you just enough to be productive:
@@ -25,7 +27,8 @@ Most frameworks add layers of abstraction between you and the DOM. Flick gives y
 
 🚀 No build required - Import from JSR and start building
 
-### Philosophy
+## Philosophy
+
 Flick is built on three principles:
 
 * Minimal abstraction - We give you $() for reactivity and functions for elements. That's it.
@@ -46,21 +49,21 @@ Use Flick when:
 
 🚀 You want fast iteration without build steps
 
-
-
 ## 🚀 Getting Started
 
-Installation
-
-### 1. `index.html` (Your Host File)
+### Installation
 
 ```typescript
 // Import from JSR (Deno, Bun, Node with JSR support)
 import { $ } from "jsr:@flick/core";
 ```
 
+### Quick Start
+
+Create a simple counter app:
+
 ```typescript
-import { signal ,div, h1, button, p} from "jsr:@flick/core";
+import { signal, div, h1, button, p } from "jsr:@flick/core";
 
 // 1. Create reactive state
 const count = signal(0);
@@ -84,9 +87,9 @@ div(() => {
 ```
 That's it. No build step, no configuration, no boilerplate.
 
-### Core Concepts
+## Core Concepts
 
-#### Reactive Values
+### Reactive Values
 Use $() to create values that automatically update the UI when they change.
 
 ```typescript
@@ -106,7 +109,7 @@ count.value++;
 isActive.value = !isActive.value;
 ```
 
-#### Computed Values
+### Computed Values
 Reactive values can derive from other reactive values:
 
 ```typescript
@@ -122,7 +125,7 @@ count.value = 5;
 console.log(doubled.value); 
 ```
 
-#### Elements
+### Elements
 Every HTML element is a function that creates and mounts a DOM node.
 
 ```typescript
@@ -148,7 +151,7 @@ button(
 );
 ```
 
-#### Context-Based Mounting
+### Context-Based Mounting
 Elements automatically append to their parent context. No need for explicit mounting.
 
 ```typescript
@@ -167,7 +170,7 @@ div(() => {
 });
 ```
 
-#### Reactive Attributes
+### Reactive Attributes
 Any prop can use .value from a reactive variable:
 
 ```typescript
@@ -186,9 +189,9 @@ div({
 }, "Reactive div");
 ```
 
-### Examples
+## Examples
 
-#### Todo App
+### Todo App
 
 ```typescript
 import { $, div, h1, input, button, ul, li } from "jsr:@flick/core";
@@ -232,7 +235,7 @@ div(() => {
 });
 ```
 
-#### Form with Validation
+### Form with Validation
 
 ```typescript
 import { $, div, form, input, p, button } from "jsr:@flick/core";
@@ -297,7 +300,7 @@ div(() => {
 });
 ```
 
-#### Conditional Rendering
+### Conditional Rendering
 
 ```typescript
 import { $, div, button, p } from "jsr:@flick/core";
@@ -319,7 +322,7 @@ div(() => {
 });
 ```
 
-#### Dynamic Lists
+### Dynamic Lists
 
 ```typescript
 import { $, div, button, ul, li } from "jsr:@flick/core";
@@ -371,9 +374,9 @@ div(() => {
 });
 ```
 
-### API Reference
+## API Reference
 
-```$(initialValue)```
+### $(initialValue)
 
 Creates a reactive value. Read and write using .value.
 
@@ -397,7 +400,7 @@ user.value = { name: "Charlie", age: 25 };
 todos.value = [...todos.value, "Task 3"];
 ```
 
-```$(computeFn)```
+### $(computeFn)
 ```typescript
 const firstName = $("John");
 const lastName = $("Doe");
@@ -460,9 +463,9 @@ const name = $("World");
 p("Hello, ", name.value);
 ```
 
-### Patterns
+## Patterns
 
-#### Two-Way Binding
+### Two-Way Binding
 
 ```typescript
 const text = $("");
@@ -473,7 +476,7 @@ input({
 });
 ```
 
-#### Toggle State
+### Toggle State
 
 ```typescript
 const isOpen = $(false);
@@ -481,10 +484,10 @@ const isOpen = $(false);
 button(
   { onclick: () => isOpen.value = !isOpen.value },
   isOpen.value ? "Close" : "Open"
-);
+});
 ```
 
-#### Derived State
+### Derived State
 
 ```typescript
 const todos = $([...]);
@@ -492,7 +495,7 @@ const completed = $(() => todos.value.filter(t => t.done));
 const remaining = $(() => todos.value.filter(t => !t.done));
 ```
 
-#### Conditional Classes
+### Conditional Classes
 
 ```typescript
 const isActive = $(false);
@@ -500,10 +503,10 @@ const isActive = $(false);
 button(
   { class: { active: isActive.value } },
   "Click me"
-);
+});
 ```
 
-#### Array Operations
+### Array Operations
 
 ```typescript
 const items = $([1, 2, 3]);
