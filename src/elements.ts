@@ -204,6 +204,14 @@ function applyStyle(element: HTMLElement, value: unknown): void {
 
 
 /**
+ * Type for element factory functions
+ */
+export type ElementFactory<K extends keyof HTMLElementTagNameMap> = (
+  propsOrChild?: ElementProps | Child,
+  ...children: Child[]
+) => HTMLElementTagNameMap[K];
+
+/**
  * Create an element factory function
  */
 function createElement<K extends keyof HTMLElementTagNameMap>(
@@ -251,77 +259,77 @@ function createElement<K extends keyof HTMLElementTagNameMap>(
 }
 
 // Text elements
-export const div = createElement("div");
-export const span = createElement("span");
-export const p = createElement("p");
-export const h1 = createElement("h1");
-export const h2 = createElement("h2");
-export const h3 = createElement("h3");
-export const h4 = createElement("h4");
-export const h5 = createElement("h5");
-export const h6 = createElement("h6");
-export const a = createElement("a");
-export const strong = createElement("strong");
-export const em = createElement("em");
-export const code = createElement("code");
-export const pre = createElement("pre");
+export const div: ElementFactory<"div"> = createElement("div");
+export const span: ElementFactory<"span"> = createElement("span");
+export const p: ElementFactory<"p"> = createElement("p");
+export const h1: ElementFactory<"h1"> = createElement("h1");
+export const h2: ElementFactory<"h2"> = createElement("h2");
+export const h3: ElementFactory<"h3"> = createElement("h3");
+export const h4: ElementFactory<"h4"> = createElement("h4");
+export const h5: ElementFactory<"h5"> = createElement("h5");
+export const h6: ElementFactory<"h6"> = createElement("h6");
+export const a: ElementFactory<"a"> = createElement("a");
+export const strong: ElementFactory<"strong"> = createElement("strong");
+export const em: ElementFactory<"em"> = createElement("em");
+export const code: ElementFactory<"code"> = createElement("code");
+export const pre: ElementFactory<"pre"> = createElement("pre");
 
 // Form elements
-export const form = createElement("form");
-export const input = createElement("input");
-export const textarea = createElement("textarea");
-export const select = createElement("select");
-export const option = createElement("option");
-export const button = createElement("button");
-export const label = createElement("label");
-export const fieldset = createElement("fieldset");
-export const legend = createElement("legend");
+export const form: ElementFactory<"form"> = createElement("form");
+export const input: ElementFactory<"input"> = createElement("input");
+export const textarea: ElementFactory<"textarea"> = createElement("textarea");
+export const select: ElementFactory<"select"> = createElement("select");
+export const option: ElementFactory<"option"> = createElement("option");
+export const button: ElementFactory<"button"> = createElement("button");
+export const label: ElementFactory<"label"> = createElement("label");
+export const fieldset: ElementFactory<"fieldset"> = createElement("fieldset");
+export const legend: ElementFactory<"legend"> = createElement("legend");
 
 // List elements
-export const ul = createElement("ul");
-export const ol = createElement("ol");
-export const li = createElement("li");
+export const ul: ElementFactory<"ul"> = createElement("ul");
+export const ol: ElementFactory<"ol"> = createElement("ol");
+export const li: ElementFactory<"li"> = createElement("li");
 
 // Table elements
-export const table = createElement("table");
-export const thead = createElement("thead");
-export const tbody = createElement("tbody");
-export const tfoot = createElement("tfoot");
-export const tr = createElement("tr");
-export const td = createElement("td");
-export const th = createElement("th");
+export const table: ElementFactory<"table"> = createElement("table");
+export const thead: ElementFactory<"thead"> = createElement("thead");
+export const tbody: ElementFactory<"tbody"> = createElement("tbody");
+export const tfoot: ElementFactory<"tfoot"> = createElement("tfoot");
+export const tr: ElementFactory<"tr"> = createElement("tr");
+export const td: ElementFactory<"td"> = createElement("td");
+export const th: ElementFactory<"th"> = createElement("th");
 
 // Semantic elements
-export const header = createElement("header");
-export const footer = createElement("footer");
-export const nav = createElement("nav");
-export const main = createElement("main");
-export const section = createElement("section");
-export const article = createElement("article");
-export const aside = createElement("aside");
+export const header: ElementFactory<"header"> = createElement("header");
+export const footer: ElementFactory<"footer"> = createElement("footer");
+export const nav: ElementFactory<"nav"> = createElement("nav");
+export const main: ElementFactory<"main"> = createElement("main");
+export const section: ElementFactory<"section"> = createElement("section");
+export const article: ElementFactory<"article"> = createElement("article");
+export const aside: ElementFactory<"aside"> = createElement("aside");
 
 // Media elements
-export const img = createElement("img");
-export const video = createElement("video");
-export const audio = createElement("audio");
-export const canvas = createElement("canvas");
+export const img: ElementFactory<"img"> = createElement("img");
+export const video: ElementFactory<"video"> = createElement("video");
+export const audio: ElementFactory<"audio"> = createElement("audio");
+export const canvas: ElementFactory<"canvas"> = createElement("canvas");
 
 // Other common elements
-export const br = createElement("br");
-export const hr = createElement("hr");
-export const blockquote = createElement("blockquote");
-export const details = createElement("details");
-export const summary = createElement("summary");
-export const dialog = createElement("dialog");
-export const progress = createElement("progress");
-export const abbr = createElement("abbr");
-export const address = createElement("address");
-export const time = createElement("time");
-export const small = createElement("small");
-export const sub = createElement("sub");
-export const sup = createElement("sup");
-export const mark = createElement("mark");
-export const del = createElement("del");
-export const ins = createElement("ins");
-export const kbd = createElement("kbd");
-export const samp = createElement("samp");
+export const br: ElementFactory<"br"> = createElement("br");
+export const hr: ElementFactory<"hr"> = createElement("hr");
+export const blockquote: ElementFactory<"blockquote"> = createElement("blockquote");
+export const details: ElementFactory<"details"> = createElement("details");
+export const summary: ElementFactory<"summary"> = createElement("summary");
+export const dialog: ElementFactory<"dialog"> = createElement("dialog");
+export const progress: ElementFactory<"progress"> = createElement("progress");
+export const abbr: ElementFactory<"abbr"> = createElement("abbr");
+export const address: ElementFactory<"address"> = createElement("address");
+export const time: ElementFactory<"time"> = createElement("time");
+export const small: ElementFactory<"small"> = createElement("small");
+export const sub: ElementFactory<"sub"> = createElement("sub");
+export const sup: ElementFactory<"sup"> = createElement("sup");
+export const mark: ElementFactory<"mark"> = createElement("mark");
+export const del: ElementFactory<"del"> = createElement("del");
+export const ins: ElementFactory<"ins"> = createElement("ins");
+export const kbd: ElementFactory<"kbd"> = createElement("kbd");
+export const samp: ElementFactory<"samp"> = createElement("samp");
