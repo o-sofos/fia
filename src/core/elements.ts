@@ -39,11 +39,14 @@ export function isSignal(value: unknown): value is Signal<unknown> {
 
 export type MaybeSignal<T> = T | Signal<T>;
 
+export type Renderable = string | number | boolean | null | undefined;
+
 export type Child =
   | string
   | number
   | boolean
-  | Signal<unknown>
+  | boolean
+  | Signal<Renderable>
   | (() => void)
   | HTMLElement
   | Child[]
@@ -839,8 +842,8 @@ export interface ElementFactory<K extends keyof HTMLElementTagNameMap> {
   // Overload: Text content + Props (convenience)
   (content: MaybeSignal<string | number>, props: ElementProps<K>): HTMLElementTagNameMap[K];
   // Standard signatures
-  (props: ElementProps<K>, ...children: Child[]): HTMLElementTagNameMap[K];
-  (...children: Child[]): HTMLElementTagNameMap[K];
+  (props: ElementProps<K>, ...children: (Child | ((ref: HTMLElementTagNameMap[K]) => void))[]): HTMLElementTagNameMap[K];
+  (...children: (Child | ((ref: HTMLElementTagNameMap[K]) => void))[]): HTMLElementTagNameMap[K];
 }
 
 /**
@@ -855,7 +858,7 @@ export interface VoidElementFactory<K extends keyof HTMLElementTagNameMap> {
 // CHILD HANDLING
 // =============================================================================
 
-function appendChild(parent: HTMLElement | Context, child: Child): void {
+function appendChild(parent: HTMLElement | Context, child: Child | ((el: any) => void)): void {
   if (child === null || child === undefined || child === false || child === true) {
     return;
   }
@@ -880,6 +883,10 @@ function appendChild(parent: HTMLElement | Context, child: Child): void {
     });
     target.appendChild(textNode);
   } else if (typeof child === "function") {
+    if (child.length > 0) {
+      (child as (el: any) => void)(target);
+      return;
+    }
     const anchor = document.createTextNode("");
     target.appendChild(anchor);
 
@@ -896,7 +903,7 @@ function appendChild(parent: HTMLElement | Context, child: Child): void {
       const captureCtx = new CaptureContext();
       pushContext(captureCtx);
       try {
-        child();
+        (child as () => void)();
       } finally {
         popContext();
       }
@@ -1021,7 +1028,7 @@ function createElement<K extends keyof HTMLElementTagNameMap>(
     const element = document.createElement(tag);
 
     let props: ElementProps<K> | null = null;
-    let allChildren: Child[] = [];
+    let allChildren: (Child | ((el: any) => void))[] = [];
 
     const isSimpleContent = typeof arg1 === "string" || typeof arg1 === "number" || isSignal(arg1);
 
