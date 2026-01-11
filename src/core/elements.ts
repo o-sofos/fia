@@ -322,7 +322,7 @@ interface StrictCSSProperties {
   order?: CSSOrder;
   gap?: CSSGap;
   rowGap?: CSSGap;
-  // columnGap?: CSSGap;
+  columnGap?: CSSGap;
 
   // Grid
   gridTemplateColumns?: CSSGridTemplate;
@@ -478,7 +478,7 @@ interface StrictCSSProperties {
   columns?: string;
   columnCount?: "auto" | number | CSSGlobalValues;
   columnWidth?: CSSLength;
-  columnGap?: CSSGap;
+  // columnGap?: CSSGap; Duplicate definition(also under Flexbox)
   columnRule?: string;
   columnRuleWidth?: CSSLength;
   columnRuleStyle?: CSSBorderStyle;
@@ -531,6 +531,11 @@ interface GlobalAttributes {
   title?: MaybeSignal<string>;
   lang?: MaybeSignal<string>;
   dir?: MaybeSignal<Dir>;
+
+  // Content
+  textContent?: MaybeSignal<string>;
+  innerText?: MaybeSignal<string>;
+  innerHTML?: MaybeSignal<string>;
 
   // Accessibility
   role?: MaybeSignal<string>;
@@ -819,12 +824,23 @@ export type ElementProps<K extends keyof HTMLElementTagNameMap> =
   & AriaAttributes;
 
 // =============================================================================
-// ELEMENT FACTORY TYPE
+// ELEMENT FACTORY TYPES
 // =============================================================================
 
+/**
+ * Factory for normal elements (can have children)
+ */
 export interface ElementFactory<K extends keyof HTMLElementTagNameMap> {
   (props: ElementProps<K>, ...children: Child[]): HTMLElementTagNameMap[K];
   (...children: Child[]): HTMLElementTagNameMap[K];
+}
+
+/**
+ * Factory for void elements (cannot have children)
+ * Examples: input, img, br, hr, meta, link, etc.
+ */
+export interface VoidElementFactory<K extends keyof HTMLElementTagNameMap> {
+  (props?: ElementProps<K>): HTMLElementTagNameMap[K];
 }
 
 // =============================================================================
@@ -917,7 +933,11 @@ function assignProp(element: HTMLElement, key: string, value: unknown): void {
     key === "volume" ||
     key === "indeterminate" ||
     key === "defaultValue" ||
-    key === "defaultChecked"
+    key === "defaultValue" ||
+    key === "defaultChecked" ||
+    key === "textContent" ||
+    key === "innerText" ||
+    key === "innerHTML"
   ) {
     (element as any)[key] = value;
   } else if (typeof value === "boolean") {
@@ -1024,6 +1044,25 @@ function createElement<K extends keyof HTMLElementTagNameMap>(
   };
 }
 
+/**
+ * Create a void element factory (no children allowed)
+ */
+function createVoidElement<K extends keyof HTMLElementTagNameMap>(
+  tag: K
+): VoidElementFactory<K> {
+  return (props?: ElementProps<K>): HTMLElementTagNameMap[K] => {
+    const element = document.createElement(tag);
+
+    if (props) {
+      applyProps(element, props);
+    }
+
+    getCurrentContext().appendChild(element);
+
+    return element;
+  };
+}
+
 // =============================================================================
 // ELEMENT EXPORTS
 // =============================================================================
@@ -1046,7 +1085,7 @@ export const pre = createElement("pre");
 
 // Form elements
 export const form = createElement("form");
-export const input = createElement("input");
+export const input: VoidElementFactory<"input"> = createVoidElement("input");
 export const textarea = createElement("textarea");
 export const select = createElement("select");
 export const option = createElement("option");
@@ -1076,7 +1115,7 @@ export const td = createElement("td");
 export const th = createElement("th");
 export const caption = createElement("caption");
 export const colgroup = createElement("colgroup");
-export const col = createElement("col");
+export const col: VoidElementFactory<"col"> = createVoidElement("col");
 
 // Semantic elements
 export const header = createElement("header");
@@ -1092,15 +1131,15 @@ export const hgroup = createElement("hgroup");
 export const search = createElement("search");
 
 // Media elements
-export const img = createElement("img");
+export const img: VoidElementFactory<"img"> = createVoidElement("img");
 export const video = createElement("video");
 export const audio = createElement("audio");
 export const canvas = createElement("canvas");
 export const picture = createElement("picture");
-export const source = createElement("source");
-export const track = createElement("track");
+export const source: VoidElementFactory<"source"> = createVoidElement("source");
+export const track: VoidElementFactory<"track"> = createVoidElement("track");
 export const iframe = createElement("iframe");
-export const embed = createElement("embed");
+export const embed: VoidElementFactory<"embed"> = createVoidElement("embed");
 export const object = createElement("object");
 
 // Interactive elements
@@ -1110,9 +1149,9 @@ export const dialog = createElement("dialog");
 export const menu = createElement("menu");
 
 // Text-level elements
-export const br = createElement("br");
-export const hr = createElement("hr");
-export const wbr = createElement("wbr");
+export const br: VoidElementFactory<"br"> = createVoidElement("br");
+export const hr: VoidElementFactory<"hr"> = createVoidElement("hr");
+export const wbr: VoidElementFactory<"wbr"> = createVoidElement("wbr");
 export const blockquote = createElement("blockquote");
 export const q = createElement("q");
 export const cite = createElement("cite");
@@ -1143,6 +1182,12 @@ export const meter = createElement("meter");
 // Template/Slot
 export const template = createElement("template");
 export const slot = createElement("slot");
+
+// Area/Base/Link/Meta (void elements)
+export const area: VoidElementFactory<"area"> = createVoidElement("area");
+export const base: VoidElementFactory<"base"> = createVoidElement("base");
+export const link: VoidElementFactory<"link"> = createVoidElement("link");
+export const meta: VoidElementFactory<"meta"> = createVoidElement("meta");
 
 // Deprecated but sometimes needed
 export const b = createElement("b");
