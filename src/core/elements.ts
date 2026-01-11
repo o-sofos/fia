@@ -25,12 +25,16 @@ class CaptureContext implements Context {
 // =============================================================================
 
 export function isSignal(value: unknown): value is Signal<unknown> {
-  return (
-    value !== null &&
-    typeof value === "object" &&
-    "value" in value &&
-    Object.getOwnPropertyDescriptor(value, "value")?.get !== undefined
-  );
+  if (value === null || value === undefined) {
+    return false;
+  }
+  // Signal is a function with a .value getter
+  // Must be a function (our signals are callable) with a value getter
+  if (typeof value !== "function") {
+    return false;
+  }
+  const descriptor = Object.getOwnPropertyDescriptor(value, "value");
+  return descriptor !== undefined && descriptor.get !== undefined;
 }
 
 export type MaybeSignal<T> = T | Signal<T>;
@@ -478,7 +482,7 @@ interface StrictCSSProperties {
   columns?: string;
   columnCount?: "auto" | number | CSSGlobalValues;
   columnWidth?: CSSLength;
-  // columnGap?: CSSGap; Duplicate definition(also under Flexbox)
+  // columnGap?: CSSGap;
   columnRule?: string;
   columnRuleWidth?: CSSLength;
   columnRuleStyle?: CSSBorderStyle;
@@ -533,9 +537,8 @@ interface GlobalAttributes {
   dir?: MaybeSignal<Dir>;
 
   // Content
-  textContent?: MaybeSignal<string>;
-  innerText?: MaybeSignal<string>;
-  innerHTML?: MaybeSignal<string>;
+  textContent?: MaybeSignal<string | number>;
+  innerText?: MaybeSignal<string | number>;
 
   // Accessibility
   role?: MaybeSignal<string>;
@@ -832,9 +835,9 @@ export type ElementProps<K extends keyof HTMLElementTagNameMap> =
  */
 export interface ElementFactory<K extends keyof HTMLElementTagNameMap> {
   // Overload: Text content + Click handler (for convenient buttons)
-  (text: string, onclick: (event: MouseEvent) => void): HTMLElementTagNameMap[K];
+  (content: MaybeSignal<string | number>, onclick: (event: MouseEvent) => void): HTMLElementTagNameMap[K];
   // Overload: Text content + Props (convenience)
-  (text: string, props: ElementProps<K>): HTMLElementTagNameMap[K];
+  (content: MaybeSignal<string | number>, props: ElementProps<K>): HTMLElementTagNameMap[K];
   // Standard signatures
   (props: ElementProps<K>, ...children: Child[]): HTMLElementTagNameMap[K];
   (...children: Child[]): HTMLElementTagNameMap[K];
@@ -940,8 +943,7 @@ function assignProp(element: HTMLElement, key: string, value: unknown): void {
     key === "defaultValue" ||
     key === "defaultChecked" ||
     key === "textContent" ||
-    key === "innerText" ||
-    key === "innerHTML"
+    key === "innerText"
   ) {
     (element as any)[key] = value;
   } else if (typeof value === "boolean") {
@@ -968,6 +970,7 @@ function applyProps<K extends keyof HTMLElementTagNameMap>(
       const eventName = key.slice(2).toLowerCase();
       element.addEventListener(eventName, value as EventListener);
     } else if (isSignal(value)) {
+      // Reactive prop - re-apply when signal changes
       effect(() => {
         assignProp(element, key, value.value);
       });
@@ -1011,7 +1014,7 @@ function createElement<K extends keyof HTMLElementTagNameMap>(
 ): ElementFactory<K> {
   // @ts-ignore - Dynamic definition
   return (
-    arg1?: ElementProps<K> | Child | string,
+    arg1?: ElementProps<K> | Child | MaybeSignal<string | number>,
     arg2?: Child | ElementProps<K> | ((e: MouseEvent) => void),
     ...rest: Child[]
   ): HTMLElementTagNameMap[K] => {
@@ -1020,24 +1023,20 @@ function createElement<K extends keyof HTMLElementTagNameMap>(
     let props: ElementProps<K> | null = null;
     let allChildren: Child[] = [];
 
-    // Overload Detection Logic
-    if (typeof arg1 === "string") {
-      // Case: (text, ...)
-      const textContent = arg1;
+    const isSimpleContent = typeof arg1 === "string" || typeof arg1 === "number" || isSignal(arg1);
+
+    if (isSimpleContent) {
+      const content = arg1 as Child;
 
       if (typeof arg2 === "object" && arg2 !== null && !(arg2 instanceof HTMLElement) && !isSignal(arg2) && !Array.isArray(arg2)) {
-        // Case: (text, props)
         props = arg2 as ElementProps<K>;
-        allChildren = [textContent, ...rest];
-      } else if (typeof arg2 === "function" && (tag === "button" || tag === "a")) {
-        // Case: (text, onclick) - ONLY for button/a to distinguish from (child, childFn)
-        // Assuming arg2 is event handler if it's an interactive element
+        allChildren = [content, ...rest];
+      } else if (typeof arg2 === "function" && !isSignal(arg2) && (tag === "button" || tag === "a")) {
+        // Assume onclick for interactive elements if not a signal
         props = { onclick: arg2 } as unknown as ElementProps<K>;
-        allChildren = [textContent, ...rest];
+        allChildren = [content, ...rest];
       } else {
-        // Case: (text, child, ...)
-        // arg2 is child or undefined
-        allChildren = [textContent, arg2 as Child, ...rest];
+        allChildren = [content, arg2 as Child, ...rest];
       }
     } else if (
       typeof arg1 === "object" &&
@@ -1047,12 +1046,9 @@ function createElement<K extends keyof HTMLElementTagNameMap>(
       typeof arg1 !== "function" &&
       !Array.isArray(arg1)
     ) {
-      // Case: (props, ...)
       props = arg1 as ElementProps<K>;
-      // arg2 is child
       allChildren = [arg2 as Child, ...rest];
     } else {
-      // Case: (child, ...)
       allChildren = [arg1 as Child, arg2 as Child, ...rest];
     }
 

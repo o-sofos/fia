@@ -31,7 +31,7 @@ export function batch(fn: () => void): void {
     if (batchDepth === 0 && batchedEffects) {
       const effects = batchedEffects;
       batchedEffects = undefined;
-      
+
       // Run effects, avoiding duplicates
       const seen = new Set<Effect>();
       for (let i = 0; i < effects.length; i++) {
@@ -72,7 +72,7 @@ export function effect(fn: Effect): () => void {
       currentEffect = prevEffect;
     }
   };
-  
+
   run();
   return () => {
     // Cleanup handled by GC
@@ -110,16 +110,16 @@ function createSignal<T>(initial: T): WritableSignal<T> {
     value: initial,
     subs: null
   };
-  
+
   // Main function - hot path must be fast
-  const read = function(newValue?: T): T | void {
+  const read = function (newValue?: T): T | void {
     // WRITE PATH (less common)
     if (arguments.length > 0) {
       // Early exit if value hasn't changed
       if (Object.is(node.value, newValue)) return;
-      
+
       node.value = newValue!;
-      
+
       // Notify subscribers if any exist
       const subs = node.subs;
       if (subs) {
@@ -138,7 +138,7 @@ function createSignal<T>(initial: T): WritableSignal<T> {
       }
       return;
     }
-    
+
     // READ PATH (hot path - most common)
     // Track dependency if we're in an effect
     if (currentEffect) {
@@ -150,10 +150,10 @@ function createSignal<T>(initial: T): WritableSignal<T> {
         node.subs.push(currentEffect);
       }
     }
-    
+
     return node.value;
   } as WritableSignal<T>;
-  
+
   // Define .value property - lazy getter/setter
   Object.defineProperty(read, 'value', {
     get() {
@@ -171,7 +171,7 @@ function createSignal<T>(initial: T): WritableSignal<T> {
       // Same as read(newValue)
       if (Object.is(node.value, newValue)) return;
       node.value = newValue;
-      
+
       const subs = node.subs;
       if (subs) {
         for (let i = 0; i < subs.length; i++) {
@@ -180,9 +180,9 @@ function createSignal<T>(initial: T): WritableSignal<T> {
       }
     }
   });
-  
+
   // valueOf for auto-unwrapping - inline for performance
-  read.valueOf = function() {
+  read.valueOf = function () {
     if (currentEffect && node.subs) {
       if (node.subs.indexOf(currentEffect) === -1) {
         node.subs.push(currentEffect);
@@ -192,7 +192,7 @@ function createSignal<T>(initial: T): WritableSignal<T> {
     }
     return node.value;
   };
-  
+
   return read;
 }
 
@@ -204,9 +204,9 @@ function createComputed<T>(compute: () => T): Signal<T> {
     value: undefined as T,
     subs: null
   };
-  
+
   let dirty = true;
-  
+
   const update = () => {
     const prevEffect = currentEffect;
     currentEffect = update;
@@ -214,7 +214,7 @@ function createComputed<T>(compute: () => T): Signal<T> {
       const newValue = compute();
       if (!Object.is(node.value, newValue)) {
         node.value = newValue;
-        
+
         // Notify subscribers
         const subs = node.subs;
         if (subs) {
@@ -228,16 +228,16 @@ function createComputed<T>(compute: () => T): Signal<T> {
       currentEffect = prevEffect;
     }
   };
-  
+
   // Initial computation
   update();
-  
-  const read = function(): T {
+
+  const read = function (): T {
     // Re-compute if dirty
     if (dirty) {
       update();
     }
-    
+
     // Track dependency
     if (currentEffect) {
       if (!node.subs) {
@@ -246,20 +246,20 @@ function createComputed<T>(compute: () => T): Signal<T> {
         node.subs.push(currentEffect);
       }
     }
-    
+
     return node.value;
   } as Signal<T>;
-  
+
   Object.defineProperty(read, 'value', {
     get() {
       return read();
     }
   });
-  
-  read.valueOf = function() {
+
+  read.valueOf = function () {
     return read();
   };
-  
+
   return read;
 }
 
