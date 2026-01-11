@@ -100,8 +100,7 @@ interface SVGPresentationAttributes {
     // Filters & Effects
     filter?: MaybeSignal<string>;
 
-    // Color
-    color?: MaybeSignal<SVGColor>;
+    // Color interpolation (for filters/gradients)
     colorInterpolation?: MaybeSignal<ColorInterpolation>;
     colorInterpolationFilters?: MaybeSignal<ColorInterpolation>;
 
