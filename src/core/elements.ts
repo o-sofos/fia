@@ -1131,7 +1131,8 @@ function appendChild(parent: HTMLElement | ExecutionContext, child: Child | ((el
   } else if (isSignal(child)) {
     const textNode = document.createTextNode("");
     effect(() => {
-      textNode.textContent = String(child.value);
+      const v = child.value;
+      textNode.textContent = (v === null || v === undefined) ? "" : String(v);
     });
     target.appendChild(textNode);
   } else if (typeof child === "function") {
@@ -1304,14 +1305,31 @@ function applyClass(element: HTMLElement, value: unknown): void {
   if (typeof value === "string") {
     element.className = value;
   } else if (typeof value === "object" && value !== null) {
-    const classes: string[] = [];
-    for (const [className, condition] of Object.entries(value as Record<string, unknown>)) {
-      const isActive = isSignal(condition) ? condition.value : condition;
-      if (isActive) {
-        classes.push(className);
+    // If any value in the object is a signal, we need to re-run the whole class string generation
+    // OR we can make individual classes toggle reactively.
+    // The previous implementation was static. We make it reactive.
+
+    // Check if any property value is a signal
+    const entries = Object.entries(value as Record<string, unknown>);
+    const hasSignal = entries.some(([_, v]) => isSignal(v));
+
+    const updateClasses = () => {
+      const classes: string[] = [];
+      for (const [className, condition] of entries) {
+        const isActive = isSignal(condition) ? condition.value : condition;
+        if (isActive) {
+          classes.push(className);
+        }
       }
+      element.className = classes.join(" "); // This overwrites existing classes? 
+      // Note: `element.className = ...` overwrites. The `class` prop usually controls the whole attribute.
+    };
+
+    if (hasSignal) {
+      effect(updateClasses);
+    } else {
+      updateClasses();
     }
-    element.className = classes.join(" ");
   }
 }
 
@@ -1319,8 +1337,16 @@ function applyStyle(element: HTMLElement, value: unknown): void {
   if (typeof value === "string") {
     element.setAttribute("style", value);
   } else if (typeof value === "object" && value !== null) {
-    for (const [prop, val] of Object.entries(value as Record<string, string>)) {
-      (element.style as any)[prop] = val;
+    for (const [prop, val] of Object.entries(value as Record<string, unknown>)) {
+      if (isSignal(val)) {
+        effect(() => {
+          // @ts-ignore
+          element.style[prop] = val.value;
+        });
+      } else {
+        // @ts-ignore
+        element.style[prop] = val;
+      }
     }
   }
 }
