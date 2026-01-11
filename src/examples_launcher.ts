@@ -11,20 +11,20 @@ export function ExamplesLauncher() {
 
   div({ style: { display: "flex", minHeight: "100vh", fontFamily: "system-ui" } }, () => {
     // Sidebar
-    nav({ 
-      style: { 
-        width: "250px", 
-        background: "#f4f4f4", 
-        padding: "1.5rem", 
+    nav({
+      style: {
+        width: "250px",
+        background: "#f4f4f4",
+        padding: "1.5rem",
         borderRight: "1px solid #ddd",
         position: "sticky",
         top: "0",
         height: "100vh",
         overflowY: "auto"
-      } 
+      }
     }, () => {
       h1({ style: { fontSize: "1.2rem", marginBottom: "1.5rem", marginTop: "0" } }, "Flick Examples");
-      
+
       const examples = [
         { id: "01", name: "01. Hero", component: Hero },
         { id: "02", name: "02. Navbar", component: Navbar },
@@ -38,7 +38,7 @@ export function ExamplesLauncher() {
         examples.forEach(ex => {
           li({ style: { marginBottom: "0.5rem" } }, () => {
             const isActive = $(() => currentExample.value === ex.id);
-            
+
             button({
               style: {
                 width: "100%",
@@ -61,7 +61,7 @@ export function ExamplesLauncher() {
     });
 
     // Main Content Area
-    div({ style: { flex: "1", background: "#fff" } }, () => {
+    div({ id: "content-area", style: { flex: "1", background: "#fff" } }, () => {
       // Reactive switching
       if (currentExample.value === "01") Hero();
       else if (currentExample.value === "02") Navbar();
