@@ -523,6 +523,13 @@ interface StrictCSSProperties {
   scrollSnapAlign?: string;
 }
 
+/**
+ * Reactive CSS properties allowing signals for any value
+ */
+type ReactiveCSSProperties = {
+  [K in keyof StrictCSSProperties]: MaybeSignal<StrictCSSProperties[K]>;
+};
+
 // =============================================================================
 // EVENT HANDLER TYPES
 // =============================================================================
@@ -542,7 +549,7 @@ interface GlobalAttributes {
   // Core
   id?: MaybeSignal<string>;
   class?: MaybeSignal<string> | Record<string, MaybeSignal<boolean>>;
-  style?: MaybeSignal<string> | MaybeSignal<StrictCSSProperties>;
+  style?: MaybeSignal<string> | MaybeSignal<ReactiveCSSProperties>;
   title?: MaybeSignal<string>;
   lang?: MaybeSignal<string>;
   dir?: MaybeSignal<Dir>;

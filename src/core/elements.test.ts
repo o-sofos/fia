@@ -276,7 +276,6 @@ describe("Element System", () => {
 
         it("should update reactive style properties", () => {
             const color = $("red");
-            // @ts-expect-error - Signal in style object is valid at runtime but complex to type perfectly 
             const el = div({ style: { color, backgroundColor: "white" } });
 
             expect(el.style.color).toBe("red");
@@ -289,7 +288,6 @@ describe("Element System", () => {
 
         it("should handle reactive style values", () => {
             const width = $("100px");
-            // @ts-expect-error - Signal in style object
             const el = div({ style: { width } });
 
             expect(el.style.width).toBe("100px");
