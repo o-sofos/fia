@@ -1,4 +1,4 @@
-import { $, div, button, h1, nav, ul, li } from "./mod";
+import { $, div, button, h1, nav, ul, li } from "./core/mod";
 import { Hero } from "./examples/01_hero";
 import { Navbar } from "./examples/02_navbar";
 import { Features } from "./examples/03_features";

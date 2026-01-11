@@ -11,7 +11,7 @@
  * 4. Events: Handling `onsubmit`
  */
 
-import { $, div, form, input, button, p, h2, textarea } from "../mod";
+import { $, div, form, input, button, p, h2, textarea } from "../core/mod";
 
 export function Contact() {
   const email = $("");

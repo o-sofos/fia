@@ -10,7 +10,7 @@
  * 3. Composition: Using small components (Card)
  */
 
-import { div, h2, p, section } from "../mod";
+import { div, h2, p, section } from "../core/elements";
 
 const features = [
   { title: "Zero Dependencies", desc: "No bloat. Just the code you need." },
