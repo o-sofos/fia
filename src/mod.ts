@@ -18,7 +18,8 @@
  */
 
 // Reactivity primitives
-export { $, signal, effect, batch } from "./reactivity";
+export { $, effect, batch } from "./reactivity";
+export { $ as signal } from "./reactivity";
 export type { Signal, WritableSignal } from "./reactivity";
 
 // Element factories
