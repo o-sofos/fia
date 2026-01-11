@@ -7,7 +7,7 @@ import { LandingPage } from "./examples/05_full_page";
 import { Playground } from "./playground/index";
 
 export function ExamplesLauncher() {
-  const currentExample = $("01");
+  const currentExample = $("playground");
 
   div({ style: { display: "flex", minHeight: "100vh", fontFamily: "system-ui" } }, () => {
     // Sidebar
