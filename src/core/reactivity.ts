@@ -10,17 +10,74 @@
  */
 
 /** Effect function type */
-type Effect = () => void;
+type EffectFn = () => void;
 
-/** Tracking context */
-let currentEffect: Effect | undefined = undefined;
+/** Reactive node that can be subscribed to */
+interface ReactiveNode {
+  version: number;
+  subs: Set<Subscriber>;
+}
+
+/** Subscriber that tracks its dependencies */
+interface Subscriber {
+  execute: () => void;
+  deps: Set<ReactiveNode>;
+  cleanup: () => void;
+}
+
+/** Current tracking context */
+let activeSubscriber: Subscriber | undefined = undefined;
+
+/** Global version counter for dirty checking */
+let globalVersion = 0;
 
 /** Batch update state */
 let batchDepth = 0;
-let batchedEffects: Effect[] | undefined = undefined;
+let pendingEffects: Set<Subscriber> | undefined = undefined;
+
+/**
+ * Track a dependency - called when reading a reactive value
+ */
+function track(node: ReactiveNode): void {
+  if (activeSubscriber) {
+    node.subs.add(activeSubscriber);
+    activeSubscriber.deps.add(node);
+  }
+}
+
+/**
+ * Trigger updates - called when a reactive value changes
+ */
+function trigger(node: ReactiveNode): void {
+  node.version = ++globalVersion;
+
+  // Copy subscribers to avoid mutation during iteration
+  const subs = [...node.subs];
+
+  for (const sub of subs) {
+    if (batchDepth > 0) {
+      if (!pendingEffects) pendingEffects = new Set();
+      pendingEffects.add(sub);
+    } else {
+      sub.execute();
+    }
+  }
+}
+
+/**
+ * Clean up a subscriber's dependencies
+ * This is crucial for avoiding stale subscriptions (inspired by SolidJS)
+ */
+function cleanupSubscriber(sub: Subscriber): void {
+  for (const dep of sub.deps) {
+    dep.subs.delete(sub);
+  }
+  sub.deps.clear();
+}
 
 /**
  * Batch multiple signal updates
+ * Effects run once after all updates complete
  */
 export function batch(fn: () => void): void {
   batchDepth++;
@@ -28,251 +85,207 @@ export function batch(fn: () => void): void {
     fn();
   } finally {
     batchDepth--;
-    if (batchDepth === 0 && batchedEffects) {
-      const effects = batchedEffects;
-      batchedEffects = undefined;
+    if (batchDepth === 0 && pendingEffects) {
+      const effects = pendingEffects;
+      pendingEffects = undefined;
 
-      // Run effects, avoiding duplicates
-      const seen = new Set<Effect>();
-      for (let i = 0; i < effects.length; i++) {
-        const effect = effects[i];
-        if (!seen.has(effect)) {
-          seen.add(effect);
-          effect();
-        }
+      for (const sub of effects) {
+        sub.execute();
       }
     }
-  }
-}
-
-/**
- * Schedule effect execution
- */
-function scheduleEffect(effect: Effect): void {
-  if (batchDepth > 0) {
-    // Batch mode: collect effects
-    if (!batchedEffects) batchedEffects = [];
-    batchedEffects.push(effect);
-  } else {
-    // Immediate execution
-    effect();
   }
 }
 
 /**
  * Create a reactive effect
+ * Returns a dispose function to stop the effect
  */
-export function effect(fn: Effect): () => void {
-  const run = () => {
-    const prevEffect = currentEffect;
-    currentEffect = run;
-    try {
-      fn();
-    } finally {
-      currentEffect = prevEffect;
-    }
+export function effect(fn: EffectFn): () => void {
+  let active = true;
+
+  const subscriber: Subscriber = {
+    execute() {
+      if (!active) return;
+
+      // Clean up old dependencies before re-running
+      // This ensures conditional branches don't leave stale subscriptions
+      cleanupSubscriber(subscriber);
+
+      const prevSubscriber = activeSubscriber;
+      activeSubscriber = subscriber;
+      try {
+        fn();
+      } finally {
+        activeSubscriber = prevSubscriber;
+      }
+    },
+    deps: new Set(),
+    cleanup() {
+      active = false;
+      cleanupSubscriber(subscriber);
+    },
   };
 
-  run();
-  return () => {
-    // Cleanup handled by GC
-  };
+  // Run immediately to establish initial dependencies
+  subscriber.execute();
+
+  // Return dispose function
+  return () => subscriber.cleanup();
 }
 
 /**
- * Signal type - optimized for both function calls and property access
+ * Signal types
  */
 export interface Signal<T> {
   (): T;
-  value: T;
-  valueOf(): T;
+  readonly value: T;
+  peek(): T;
 }
 
 export interface WritableSignal<T> extends Signal<T> {
-  (newValue?: T): T | void;
+  (newValue: T): void;
   value: T;
 }
 
 /**
- * Internal signal node - pure data structure for performance
- */
-interface SignalNode<T> {
-  value: T;
-  subs: Effect[] | null; // Use array for better cache locality
-}
-
-/**
- * Create signal - optimized version
+ * Create a writable signal
  */
 function createSignal<T>(initial: T): WritableSignal<T> {
-  // Use plain object for data - better for V8 optimization
-  const node: SignalNode<T> = {
-    value: initial,
-    subs: null
+  const node: ReactiveNode = {
+    version: globalVersion,
+    subs: new Set(),
   };
 
-  // Main function - hot path must be fast
-  const read = function (newValue?: T): T | void {
-    // WRITE PATH (less common)
+  let currentValue = initial;
+
+  const signal = function (newValue?: T): T | void {
+    // Write path
     if (arguments.length > 0) {
-      // Early exit if value hasn't changed
-      if (Object.is(node.value, newValue)) return;
-
-      node.value = newValue!;
-
-      // Notify subscribers if any exist
-      const subs = node.subs;
-      if (subs) {
-        // Inline notification for small arrays (common case)
-        if (subs.length === 1) {
-          scheduleEffect(subs[0]);
-        } else if (subs.length === 2) {
-          scheduleEffect(subs[0]);
-          scheduleEffect(subs[1]);
-        } else {
-          // General case
-          for (let i = 0; i < subs.length; i++) {
-            scheduleEffect(subs[i]);
-          }
-        }
+      if (!Object.is(currentValue, newValue)) {
+        currentValue = newValue!;
+        trigger(node);
       }
       return;
     }
 
-    // READ PATH (hot path - most common)
-    // Track dependency if we're in an effect
-    if (currentEffect) {
-      if (!node.subs) {
-        // First subscriber - allocate array
-        node.subs = [currentEffect];
-      } else if (node.subs.indexOf(currentEffect) === -1) {
-        // Add new subscriber
-        node.subs.push(currentEffect);
-      }
-    }
-
-    return node.value;
+    // Read path
+    track(node);
+    return currentValue;
   } as WritableSignal<T>;
 
-  // Define .value property - lazy getter/setter
-  Object.defineProperty(read, 'value', {
+  Object.defineProperty(signal, "value", {
     get() {
-      // Same as read() - track dependency
-      if (currentEffect && node.subs) {
-        if (node.subs.indexOf(currentEffect) === -1) {
-          node.subs.push(currentEffect);
-        }
-      } else if (currentEffect) {
-        node.subs = [currentEffect];
-      }
-      return node.value;
+      track(node);
+      return currentValue;
     },
     set(newValue: T) {
-      // Same as read(newValue)
-      if (Object.is(node.value, newValue)) return;
-      node.value = newValue;
-
-      const subs = node.subs;
-      if (subs) {
-        for (let i = 0; i < subs.length; i++) {
-          scheduleEffect(subs[i]);
-        }
+      if (!Object.is(currentValue, newValue)) {
+        currentValue = newValue;
+        trigger(node);
       }
-    }
+    },
   });
 
-  // valueOf for auto-unwrapping - inline for performance
-  read.valueOf = function () {
-    if (currentEffect && node.subs) {
-      if (node.subs.indexOf(currentEffect) === -1) {
-        node.subs.push(currentEffect);
-      }
-    } else if (currentEffect) {
-      node.subs = [currentEffect];
-    }
-    return node.value;
-  };
+  // Peek: read without tracking (inspired by SolidJS)
+  signal.peek = () => currentValue;
 
-  return read;
+  return signal;
 }
 
 /**
- * Create computed signal - optimized version
+ * Create a computed signal
+ * Uses version-based dirty checking (inspired by Preact Signals)
  */
 function createComputed<T>(compute: () => T): Signal<T> {
-  const node: SignalNode<T> = {
-    value: undefined as T,
-    subs: null
+  const node: ReactiveNode = {
+    version: globalVersion,
+    subs: new Set(),
   };
 
-  let dirty = true;
+  let currentValue: T;
+  let lastComputedVersion = -1;
 
-  const update = () => {
-    const prevEffect = currentEffect;
-    currentEffect = update;
-    try {
-      const newValue = compute();
-      if (!Object.is(node.value, newValue)) {
-        node.value = newValue;
+  // Internal subscriber for tracking compute dependencies
+  const subscriber: Subscriber = {
+    execute() {
+      // Mark as dirty - will recompute on next read
+      // This is called when any dependency changes
+      node.version = ++globalVersion;
 
-        // Notify subscribers
-        const subs = node.subs;
-        if (subs) {
-          for (let i = 0; i < subs.length; i++) {
-            scheduleEffect(subs[i]);
-          }
+      // Propagate to our subscribers
+      const subs = [...node.subs];
+      for (const sub of subs) {
+        if (batchDepth > 0) {
+          if (!pendingEffects) pendingEffects = new Set();
+          pendingEffects.add(sub);
+        } else {
+          sub.execute();
         }
       }
-      dirty = false;
+    },
+    deps: new Set(),
+    cleanup() {
+      cleanupSubscriber(subscriber);
+    },
+  };
+
+  const recompute = () => {
+    // Clean up old dependencies
+    cleanupSubscriber(subscriber);
+
+    const prevSubscriber = activeSubscriber;
+    activeSubscriber = subscriber;
+    try {
+      const newValue = compute();
+      if (!Object.is(currentValue, newValue)) {
+        currentValue = newValue;
+      }
+      lastComputedVersion = node.version;
     } finally {
-      currentEffect = prevEffect;
+      activeSubscriber = prevSubscriber;
     }
   };
 
   // Initial computation
-  update();
+  recompute();
 
-  const read = function (): T {
-    // Re-compute if dirty
-    if (dirty) {
-      update();
+  const signal = function (): T {
+    // Recompute if dirty (version changed since last compute)
+    if (lastComputedVersion !== node.version) {
+      recompute();
     }
 
-    // Track dependency
-    if (currentEffect) {
-      if (!node.subs) {
-        node.subs = [currentEffect];
-      } else if (node.subs.indexOf(currentEffect) === -1) {
-        node.subs.push(currentEffect);
-      }
-    }
-
-    return node.value;
+    // Track this computed as a dependency
+    track(node);
+    return currentValue;
   } as Signal<T>;
 
-  Object.defineProperty(read, 'value', {
+  Object.defineProperty(signal, "value", {
     get() {
-      return read();
-    }
+      return signal();
+    },
   });
 
-  read.valueOf = function () {
-    return read();
+  // Peek without tracking
+  signal.peek = () => {
+    if (lastComputedVersion !== node.version) {
+      recompute();
+    }
+    return currentValue;
   };
 
-  return read;
+  return signal;
 }
 
 /**
- * Main $ function - optimized dispatch
+ * Main $ function - creates signals or computed values
  */
-export function $<T>(
-  initialOrCompute: T | (() => T)
-): typeof initialOrCompute extends () => T ? Signal<T> : WritableSignal<T> {
-  return typeof initialOrCompute === "function"
-    ? createComputed(initialOrCompute as () => T)
-    : createSignal(initialOrCompute);
+export function $<T>(initial: T): [T] extends [() => infer R] ? Signal<R> : WritableSignal<T>;
+export function $<T>(initial: T): Signal<T> | WritableSignal<T> {
+  return typeof initial === "function"
+    ? createComputed(initial as () => T)
+    : createSignal(initial);
 }
 
-// Alias for API compatibility
+// Named export for API compatibility
 export { $ as signal };

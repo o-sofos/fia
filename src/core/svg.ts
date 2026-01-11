@@ -54,7 +54,7 @@ type Visibility = "visible" | "hidden" | "collapse" | "inherit";
 
 type Display = "inline" | "block" | "none" | "inherit";
 
-type Overflow = "visible" | "hidden" | "scroll" | "auto" | "inherit";
+
 
 type PointerEvents =
     | "visiblePainted" | "visibleFill" | "visibleStroke" | "visible"
@@ -865,15 +865,7 @@ interface SVGElementPropsMap {
 // SVG CHILD TYPE
 // =============================================================================
 
-type SVGChild =
-    | string
-    | number
-    | Signal<unknown>
-    | (() => void)
-    | SVGElement
-    | SVGChild[]
-    | null
-    | undefined;
+
 
 // =============================================================================
 // SVG FACTORY TYPES
