@@ -831,6 +831,11 @@ export type ElementProps<K extends keyof HTMLElementTagNameMap> =
  * Factory for normal elements (can have children)
  */
 export interface ElementFactory<K extends keyof HTMLElementTagNameMap> {
+  // Overload: Text content + Click handler (for convenient buttons)
+  (text: string, onclick: (event: MouseEvent) => void): HTMLElementTagNameMap[K];
+  // Overload: Text content + Props (convenience)
+  (text: string, props: ElementProps<K>): HTMLElementTagNameMap[K];
+  // Standard signatures
   (props: ElementProps<K>, ...children: Child[]): HTMLElementTagNameMap[K];
   (...children: Child[]): HTMLElementTagNameMap[K];
 }
@@ -933,7 +938,6 @@ function assignProp(element: HTMLElement, key: string, value: unknown): void {
     key === "volume" ||
     key === "indeterminate" ||
     key === "defaultValue" ||
-    key === "defaultValue" ||
     key === "defaultChecked" ||
     key === "textContent" ||
     key === "innerText" ||
@@ -1005,29 +1009,51 @@ function applyStyle(element: HTMLElement, value: unknown): void {
 function createElement<K extends keyof HTMLElementTagNameMap>(
   tag: K
 ): ElementFactory<K> {
+  // @ts-ignore - Dynamic definition
   return (
-    propsOrChild?: ElementProps<K> | Child,
-    ...children: Child[]
+    arg1?: ElementProps<K> | Child | string,
+    arg2?: Child | ElementProps<K> | ((e: MouseEvent) => void),
+    ...rest: Child[]
   ): HTMLElementTagNameMap[K] => {
     const element = document.createElement(tag);
 
     let props: ElementProps<K> | null = null;
     let allChildren: Child[] = [];
 
-    if (propsOrChild !== undefined) {
-      if (
-        typeof propsOrChild === "object" &&
-        propsOrChild !== null &&
-        !(propsOrChild instanceof HTMLElement) &&
-        !isSignal(propsOrChild) &&
-        typeof propsOrChild !== "function" &&
-        !Array.isArray(propsOrChild)
-      ) {
-        props = propsOrChild as ElementProps<K>;
-        allChildren = children;
+    // Overload Detection Logic
+    if (typeof arg1 === "string") {
+      // Case: (text, ...)
+      const textContent = arg1;
+
+      if (typeof arg2 === "object" && arg2 !== null && !(arg2 instanceof HTMLElement) && !isSignal(arg2) && !Array.isArray(arg2)) {
+        // Case: (text, props)
+        props = arg2 as ElementProps<K>;
+        allChildren = [textContent, ...rest];
+      } else if (typeof arg2 === "function" && (tag === "button" || tag === "a")) {
+        // Case: (text, onclick) - ONLY for button/a to distinguish from (child, childFn)
+        // Assuming arg2 is event handler if it's an interactive element
+        props = { onclick: arg2 } as unknown as ElementProps<K>;
+        allChildren = [textContent, ...rest];
       } else {
-        allChildren = [propsOrChild as Child, ...children];
+        // Case: (text, child, ...)
+        // arg2 is child or undefined
+        allChildren = [textContent, arg2 as Child, ...rest];
       }
+    } else if (
+      typeof arg1 === "object" &&
+      arg1 !== null &&
+      !(arg1 instanceof HTMLElement) &&
+      !isSignal(arg1) &&
+      typeof arg1 !== "function" &&
+      !Array.isArray(arg1)
+    ) {
+      // Case: (props, ...)
+      props = arg1 as ElementProps<K>;
+      // arg2 is child
+      allChildren = [arg2 as Child, ...rest];
+    } else {
+      // Case: (child, ...)
+      allChildren = [arg1 as Child, arg2 as Child, ...rest];
     }
 
     if (props) {
