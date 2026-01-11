@@ -4,6 +4,7 @@ import { Navbar } from "./examples/02_navbar";
 import { Features } from "./examples/03_features";
 import { Contact } from "./examples/04_contact";
 import { LandingPage } from "./examples/05_full_page";
+import { Playground } from "./playground/index";
 
 export function ExamplesLauncher() {
   const currentExample = $("01");
@@ -30,6 +31,7 @@ export function ExamplesLauncher() {
         { id: "03", name: "03. Features", component: Features },
         { id: "04", name: "04. Contact", component: Contact },
         { id: "05", name: "05. Full Page", component: LandingPage },
+        { id: "playground", name: "🛝 Playground", component: Playground },
       ];
 
       ul({ style: { listStyle: "none", padding: "0", margin: "0" } }, () => {
@@ -66,6 +68,7 @@ export function ExamplesLauncher() {
       else if (currentExample.value === "03") Features();
       else if (currentExample.value === "04") Contact();
       else if (currentExample.value === "05") LandingPage();
+      else if (currentExample.value === "playground") Playground();
     });
   });
 }
