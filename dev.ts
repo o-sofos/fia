@@ -3,16 +3,56 @@
  * Serves HTML and compiles TypeScript on the fly
  */
 
+import { watch } from "node:fs";
+
+// Track connected clients
 const server = Bun.serve({
   port: 4000,
+  
+  // Enable websockets
+  websocket: {
+    open(ws) {
+      ws.subscribe("hmr");
+    },
+    message() {}, // No-op
+  },
 
-  async fetch(req) {
+  async fetch(req, server) {
     const url = new URL(req.url);
+    
+    // Handle HMR websocket upgrade
+    if (url.pathname === "/_hmr") {
+      const success = server.upgrade(req);
+      return success ? undefined : new Response("WebSocket upgrade error", { status: 400 });
+    }
+
     let path = url.pathname;
 
     // Serve index.html for root
     if (path === "/") {
       path = "/index.html";
+    }
+
+    // INTERCEPT index.html to inject HMR script
+    if (path === "/index.html") {
+       let html = await Bun.file("index.html").text();
+       const hmrScript = `
+       <script>
+         (function() {
+           let ws = new WebSocket("ws://" + location.host + "/_hmr");
+           ws.onmessage = (msg) => { 
+             if(msg.data === "reload") {
+               console.log("🔥 Reloading...");
+               location.reload(); 
+             }
+           };
+           ws.onclose = () => console.log("Disconnected from HMR");
+           console.log("🔥 HMR Connected");
+         })();
+       </script>
+       `;
+       html = html.replace("</body>", `${hmrScript}</body>`);
+       return new Response(html, { headers: { "Content-Type": "text/html" } });
     }
 
     let filePath = `.${path}`;
@@ -51,6 +91,12 @@ const server = Bun.serve({
     // Serve other files as-is
     return new Response(file);
   },
+});
+
+// Watch src directory for changes
+watch("./src", { recursive: true }, (event, filename) => {
+  console.log(`[HMR] Change detected in ${filename}`);
+  server.publish("hmr", "reload");
 });
 
 console.log(`🚀 Dev server running at http://localhost:${server.port}`);
