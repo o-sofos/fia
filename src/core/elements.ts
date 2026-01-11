@@ -96,6 +96,419 @@ type Autocomplete =
   | "postal-code" | "cc-name" | "cc-number" | "cc-exp" | "cc-csc" | "tel" | "url";
 
 // =============================================================================
+// STRICT CSS TYPES
+// =============================================================================
+
+type CSSGlobalValues = "inherit" | "initial" | "revert" | "revert-layer" | "unset";
+
+type CSSDisplay =
+  | "block" | "inline" | "inline-block" | "flex" | "inline-flex"
+  | "grid" | "inline-grid" | "flow-root" | "none" | "contents"
+  | "table" | "table-row" | "table-cell" | "table-column" | "table-column-group"
+  | "table-footer-group" | "table-header-group" | "table-row-group" | "table-caption"
+  | "list-item" | "run-in"
+  | CSSGlobalValues;
+
+type CSSPosition = "static" | "relative" | "absolute" | "fixed" | "sticky" | CSSGlobalValues;
+
+type CSSFlexDirection = "row" | "row-reverse" | "column" | "column-reverse" | CSSGlobalValues;
+
+type CSSFlexWrap = "nowrap" | "wrap" | "wrap-reverse" | CSSGlobalValues;
+
+type CSSJustifyContent =
+  | "flex-start" | "flex-end" | "center" | "space-between" | "space-around" | "space-evenly"
+  | "start" | "end" | "left" | "right" | "normal" | "stretch"
+  | CSSGlobalValues;
+
+type CSSAlignItems =
+  | "flex-start" | "flex-end" | "center" | "baseline" | "stretch"
+  | "start" | "end" | "self-start" | "self-end" | "normal"
+  | CSSGlobalValues;
+
+type CSSAlignContent =
+  | "flex-start" | "flex-end" | "center" | "space-between" | "space-around" | "space-evenly" | "stretch"
+  | "start" | "end" | "normal" | "baseline"
+  | CSSGlobalValues;
+
+type CSSAlignSelf =
+  | "auto" | "flex-start" | "flex-end" | "center" | "baseline" | "stretch"
+  | "start" | "end" | "self-start" | "self-end" | "normal"
+  | CSSGlobalValues;
+
+type CSSOverflow = "visible" | "hidden" | "clip" | "scroll" | "auto" | CSSGlobalValues;
+
+type CSSVisibility = "visible" | "hidden" | "collapse" | CSSGlobalValues;
+
+type CSSBoxSizing = "content-box" | "border-box" | CSSGlobalValues;
+
+type CSSTextAlign = "left" | "right" | "center" | "justify" | "start" | "end" | "match-parent" | CSSGlobalValues;
+
+type CSSTextDecoration = "none" | "underline" | "overline" | "line-through" | "blink" | CSSGlobalValues | (string & {});
+
+type CSSTextTransform = "none" | "capitalize" | "uppercase" | "lowercase" | "full-width" | "full-size-kana" | CSSGlobalValues;
+
+type CSSWhiteSpace = "normal" | "nowrap" | "pre" | "pre-wrap" | "pre-line" | "break-spaces" | CSSGlobalValues;
+
+type CSSWordBreak = "normal" | "break-all" | "keep-all" | "break-word" | CSSGlobalValues;
+
+type CSSWordWrap = "normal" | "break-word" | "anywhere" | CSSGlobalValues;
+
+type CSSFontWeight =
+  | "normal" | "bold" | "bolder" | "lighter"
+  | "100" | "200" | "300" | "400" | "500" | "600" | "700" | "800" | "900"
+  | 100 | 200 | 300 | 400 | 500 | 600 | 700 | 800 | 900
+  | CSSGlobalValues;
+
+type CSSFontStyle = "normal" | "italic" | "oblique" | CSSGlobalValues | (string & {});
+
+type CSSCursor =
+  | "auto" | "default" | "none" | "context-menu" | "help" | "pointer" | "progress" | "wait"
+  | "cell" | "crosshair" | "text" | "vertical-text" | "alias" | "copy" | "move" | "no-drop"
+  | "not-allowed" | "grab" | "grabbing" | "all-scroll" | "col-resize" | "row-resize"
+  | "n-resize" | "e-resize" | "s-resize" | "w-resize" | "ne-resize" | "nw-resize" | "se-resize" | "sw-resize"
+  | "ew-resize" | "ns-resize" | "nesw-resize" | "nwse-resize" | "zoom-in" | "zoom-out"
+  | CSSGlobalValues | (string & {});
+
+type CSSPointerEvents =
+  | "auto" | "none" | "visiblePainted" | "visibleFill" | "visibleStroke" | "visible"
+  | "painted" | "fill" | "stroke" | "all"
+  | CSSGlobalValues;
+
+type CSSUserSelect = "auto" | "none" | "text" | "all" | "contain" | CSSGlobalValues;
+
+type CSSFloat = "left" | "right" | "none" | "inline-start" | "inline-end" | CSSGlobalValues;
+
+type CSSClear = "none" | "left" | "right" | "both" | "inline-start" | "inline-end" | CSSGlobalValues;
+
+type CSSObjectFit = "contain" | "cover" | "fill" | "none" | "scale-down" | CSSGlobalValues;
+
+type CSSObjectPosition = "top" | "bottom" | "left" | "right" | "center" | CSSGlobalValues | (string & {});
+
+type CSSBackgroundSize = "auto" | "cover" | "contain" | CSSGlobalValues | (string & {});
+
+type CSSBackgroundRepeat = "repeat" | "repeat-x" | "repeat-y" | "no-repeat" | "space" | "round" | CSSGlobalValues | (string & {});
+
+type CSSBackgroundPosition = "top" | "bottom" | "left" | "right" | "center" | CSSGlobalValues | (string & {});
+
+type CSSBackgroundAttachment = "scroll" | "fixed" | "local" | CSSGlobalValues;
+
+type CSSBackgroundClip = "border-box" | "padding-box" | "content-box" | "text" | CSSGlobalValues;
+
+type CSSBorderStyle = "none" | "hidden" | "dotted" | "dashed" | "solid" | "double" | "groove" | "ridge" | "inset" | "outset" | CSSGlobalValues;
+
+type CSSListStyleType =
+  | "none" | "disc" | "circle" | "square" | "decimal" | "decimal-leading-zero"
+  | "lower-roman" | "upper-roman" | "lower-greek" | "lower-latin" | "upper-latin"
+  | "armenian" | "georgian" | "lower-alpha" | "upper-alpha"
+  | CSSGlobalValues | (string & {});
+
+type CSSListStylePosition = "inside" | "outside" | CSSGlobalValues;
+
+type CSSTransformOrigin = "center" | "top" | "bottom" | "left" | "right" | CSSGlobalValues | (string & {});
+
+type CSSTransitionTimingFunction =
+  | "ease" | "ease-in" | "ease-out" | "ease-in-out" | "linear" | "step-start" | "step-end"
+  | CSSGlobalValues | (string & {});
+
+type CSSAnimationDirection = "normal" | "reverse" | "alternate" | "alternate-reverse" | CSSGlobalValues;
+
+type CSSAnimationFillMode = "none" | "forwards" | "backwards" | "both" | CSSGlobalValues;
+
+type CSSAnimationPlayState = "running" | "paused" | CSSGlobalValues;
+
+type CSSResize = "none" | "both" | "horizontal" | "vertical" | "block" | "inline" | CSSGlobalValues;
+
+type CSSTextOverflow = "clip" | "ellipsis" | CSSGlobalValues | (string & {});
+
+type CSSVerticalAlign =
+  | "baseline" | "sub" | "super" | "text-top" | "text-bottom" | "middle" | "top" | "bottom"
+  | CSSGlobalValues | (string & {});
+
+type CSSLineHeight = "normal" | CSSGlobalValues | (string & {}) | number;
+
+type CSSLetterSpacing = "normal" | CSSGlobalValues | (string & {});
+
+type CSSZIndex = "auto" | CSSGlobalValues | number | (string & {});
+
+type CSSOpacity = CSSGlobalValues | number | (string & {});
+
+type CSSFlexBasis = "auto" | "content" | "fit-content" | "max-content" | "min-content" | CSSGlobalValues | (string & {});
+
+type CSSFlexGrowShrink = CSSGlobalValues | number | (string & {});
+
+type CSSOrder = CSSGlobalValues | number;
+
+type CSSGap = "normal" | CSSGlobalValues | (string & {});
+
+type CSSGridAutoFlow = "row" | "column" | "dense" | "row dense" | "column dense" | CSSGlobalValues;
+
+type CSSGridTemplate = "none" | "auto" | "max-content" | "min-content" | CSSGlobalValues | (string & {});
+
+type CSSPlaceItems = "normal" | "stretch" | "center" | "start" | "end" | "flex-start" | "flex-end" | "baseline" | CSSGlobalValues | (string & {});
+
+type CSSPlaceContent = "normal" | "stretch" | "center" | "start" | "end" | "flex-start" | "flex-end" | "space-between" | "space-around" | "space-evenly" | CSSGlobalValues | (string & {});
+
+type CSSPlaceSelf = "auto" | "normal" | "stretch" | "center" | "start" | "end" | "flex-start" | "flex-end" | "baseline" | CSSGlobalValues | (string & {});
+
+type CSSLength = string | number | CSSGlobalValues;
+
+type CSSColor = string | CSSGlobalValues;
+
+/**
+ * Strict CSS properties interface with autocomplete
+ */
+interface StrictCSSProperties {
+  // Display & Visibility
+  display?: CSSDisplay;
+  visibility?: CSSVisibility;
+  opacity?: CSSOpacity;
+
+  // Positioning
+  position?: CSSPosition;
+  top?: CSSLength;
+  right?: CSSLength;
+  bottom?: CSSLength;
+  left?: CSSLength;
+  zIndex?: CSSZIndex;
+  float?: CSSFloat;
+  clear?: CSSClear;
+
+  // Box Model
+  width?: CSSLength;
+  height?: CSSLength;
+  minWidth?: CSSLength;
+  maxWidth?: CSSLength;
+  minHeight?: CSSLength;
+  maxHeight?: CSSLength;
+  margin?: CSSLength;
+  marginTop?: CSSLength;
+  marginRight?: CSSLength;
+  marginBottom?: CSSLength;
+  marginLeft?: CSSLength;
+  marginBlock?: CSSLength;
+  marginBlockStart?: CSSLength;
+  marginBlockEnd?: CSSLength;
+  marginInline?: CSSLength;
+  marginInlineStart?: CSSLength;
+  marginInlineEnd?: CSSLength;
+  padding?: CSSLength;
+  paddingTop?: CSSLength;
+  paddingRight?: CSSLength;
+  paddingBottom?: CSSLength;
+  paddingLeft?: CSSLength;
+  paddingBlock?: CSSLength;
+  paddingBlockStart?: CSSLength;
+  paddingBlockEnd?: CSSLength;
+  paddingInline?: CSSLength;
+  paddingInlineStart?: CSSLength;
+  paddingInlineEnd?: CSSLength;
+  boxSizing?: CSSBoxSizing;
+  overflow?: CSSOverflow;
+  overflowX?: CSSOverflow;
+  overflowY?: CSSOverflow;
+
+  // Flexbox
+  flexDirection?: CSSFlexDirection;
+  flexWrap?: CSSFlexWrap;
+  flexFlow?: string;
+  justifyContent?: CSSJustifyContent;
+  alignItems?: CSSAlignItems;
+  alignContent?: CSSAlignContent;
+  alignSelf?: CSSAlignSelf;
+  flex?: string | number;
+  flexGrow?: CSSFlexGrowShrink;
+  flexShrink?: CSSFlexGrowShrink;
+  flexBasis?: CSSFlexBasis;
+  order?: CSSOrder;
+  gap?: CSSGap;
+  rowGap?: CSSGap;
+  // columnGap?: CSSGap;
+
+  // Grid
+  gridTemplateColumns?: CSSGridTemplate;
+  gridTemplateRows?: CSSGridTemplate;
+  gridTemplateAreas?: string;
+  gridTemplate?: string;
+  gridAutoColumns?: CSSGridTemplate;
+  gridAutoRows?: CSSGridTemplate;
+  gridAutoFlow?: CSSGridAutoFlow;
+  grid?: string;
+  gridColumn?: string;
+  gridColumnStart?: string | number;
+  gridColumnEnd?: string | number;
+  gridRow?: string;
+  gridRowStart?: string | number;
+  gridRowEnd?: string | number;
+  gridArea?: string;
+  placeItems?: CSSPlaceItems;
+  placeContent?: CSSPlaceContent;
+  placeSelf?: CSSPlaceSelf;
+  justifyItems?: CSSAlignItems;
+  justifySelf?: CSSAlignSelf;
+
+  // Typography
+  color?: CSSColor;
+  fontFamily?: string;
+  fontSize?: CSSLength;
+  fontWeight?: CSSFontWeight;
+  fontStyle?: CSSFontStyle;
+  fontVariant?: string;
+  lineHeight?: CSSLineHeight;
+  letterSpacing?: CSSLetterSpacing;
+  textAlign?: CSSTextAlign;
+  textDecoration?: CSSTextDecoration;
+  textDecorationLine?: string;
+  textDecorationColor?: CSSColor;
+  textDecorationStyle?: CSSBorderStyle;
+  textDecorationThickness?: CSSLength;
+  textTransform?: CSSTextTransform;
+  textIndent?: CSSLength;
+  textShadow?: string;
+  textOverflow?: CSSTextOverflow;
+  whiteSpace?: CSSWhiteSpace;
+  wordBreak?: CSSWordBreak;
+  wordWrap?: CSSWordWrap;
+  overflowWrap?: CSSWordWrap;
+  wordSpacing?: CSSLength;
+  verticalAlign?: CSSVerticalAlign;
+
+  // Background
+  background?: string;
+  backgroundColor?: CSSColor;
+  backgroundImage?: string;
+  backgroundSize?: CSSBackgroundSize;
+  backgroundRepeat?: CSSBackgroundRepeat;
+  backgroundPosition?: CSSBackgroundPosition;
+  backgroundAttachment?: CSSBackgroundAttachment;
+  backgroundClip?: CSSBackgroundClip;
+  backgroundOrigin?: CSSBackgroundClip;
+
+  // Border
+  border?: string;
+  borderWidth?: CSSLength;
+  borderStyle?: CSSBorderStyle;
+  borderColor?: CSSColor;
+  borderTop?: string;
+  borderTopWidth?: CSSLength;
+  borderTopStyle?: CSSBorderStyle;
+  borderTopColor?: CSSColor;
+  borderRight?: string;
+  borderRightWidth?: CSSLength;
+  borderRightStyle?: CSSBorderStyle;
+  borderRightColor?: CSSColor;
+  borderBottom?: string;
+  borderBottomWidth?: CSSLength;
+  borderBottomStyle?: CSSBorderStyle;
+  borderBottomColor?: CSSColor;
+  borderLeft?: string;
+  borderLeftWidth?: CSSLength;
+  borderLeftStyle?: CSSBorderStyle;
+  borderLeftColor?: CSSColor;
+  borderRadius?: CSSLength;
+  borderTopLeftRadius?: CSSLength;
+  borderTopRightRadius?: CSSLength;
+  borderBottomLeftRadius?: CSSLength;
+  borderBottomRightRadius?: CSSLength;
+  borderCollapse?: "collapse" | "separate" | CSSGlobalValues;
+  borderSpacing?: CSSLength;
+
+  // Outline
+  outline?: string;
+  outlineWidth?: CSSLength;
+  outlineStyle?: CSSBorderStyle;
+  outlineColor?: CSSColor;
+  outlineOffset?: CSSLength;
+
+  // List
+  listStyle?: string;
+  listStyleType?: CSSListStyleType;
+  listStylePosition?: CSSListStylePosition;
+  listStyleImage?: string;
+
+  // Table
+  tableLayout?: "auto" | "fixed" | CSSGlobalValues;
+  captionSide?: "top" | "bottom" | CSSGlobalValues;
+  emptyCells?: "show" | "hide" | CSSGlobalValues;
+
+  // Transform
+  transform?: string;
+  transformOrigin?: CSSTransformOrigin;
+  transformStyle?: "flat" | "preserve-3d" | CSSGlobalValues;
+  perspective?: CSSLength;
+  perspectiveOrigin?: CSSTransformOrigin;
+  backfaceVisibility?: "visible" | "hidden" | CSSGlobalValues;
+
+  // Transition
+  transition?: string;
+  transitionProperty?: string;
+  transitionDuration?: string;
+  transitionTimingFunction?: CSSTransitionTimingFunction;
+  transitionDelay?: string;
+
+  // Animation
+  animation?: string;
+  animationName?: string;
+  animationDuration?: string;
+  animationTimingFunction?: CSSTransitionTimingFunction;
+  animationDelay?: string;
+  animationIterationCount?: "infinite" | number | CSSGlobalValues;
+  animationDirection?: CSSAnimationDirection;
+  animationFillMode?: CSSAnimationFillMode;
+  animationPlayState?: CSSAnimationPlayState;
+
+  // Interaction
+  cursor?: CSSCursor;
+  pointerEvents?: CSSPointerEvents;
+  userSelect?: CSSUserSelect;
+  resize?: CSSResize;
+  touchAction?: "auto" | "none" | "pan-x" | "pan-y" | "manipulation" | "pinch-zoom" | CSSGlobalValues | (string & {});
+  scrollBehavior?: "auto" | "smooth" | CSSGlobalValues;
+
+  // Object (for images, videos)
+  objectFit?: CSSObjectFit;
+  objectPosition?: CSSObjectPosition;
+
+  // Filters & Effects
+  filter?: string;
+  backdropFilter?: string;
+  mixBlendMode?: string;
+  boxShadow?: string;
+
+  // Columns
+  columns?: string;
+  columnCount?: "auto" | number | CSSGlobalValues;
+  columnWidth?: CSSLength;
+  columnGap?: CSSGap;
+  columnRule?: string;
+  columnRuleWidth?: CSSLength;
+  columnRuleStyle?: CSSBorderStyle;
+  columnRuleColor?: CSSColor;
+  columnSpan?: "none" | "all" | CSSGlobalValues;
+  columnFill?: "auto" | "balance" | CSSGlobalValues;
+
+  // Misc
+  content?: string;
+  quotes?: string;
+  counterIncrement?: string;
+  counterReset?: string;
+  willChange?: string;
+  contain?: string;
+  isolation?: "auto" | "isolate" | CSSGlobalValues;
+  aspectRatio?: "auto" | string | number | CSSGlobalValues;
+  accentColor?: CSSColor;
+  caretColor?: CSSColor;
+  scrollMargin?: CSSLength;
+  scrollPadding?: CSSLength;
+  scrollSnapType?: string;
+  scrollSnapAlign?: string;
+
+  // SVG-related
+  fill?: CSSColor;
+  stroke?: CSSColor;
+  strokeWidth?: CSSLength;
+}
+
+// =============================================================================
 // EVENT HANDLER TYPES
 // =============================================================================
 
@@ -114,29 +527,29 @@ interface GlobalAttributes {
   // Core
   id?: MaybeSignal<string>;
   class?: MaybeSignal<string> | Record<string, MaybeSignal<boolean>>;
-  style?: MaybeSignal<string> | MaybeSignal<Partial<CSSStyleDeclaration>>;
+  style?: MaybeSignal<string> | MaybeSignal<StrictCSSProperties>;
   title?: MaybeSignal<string>;
   lang?: MaybeSignal<string>;
   dir?: MaybeSignal<Dir>;
-  
+
   // Accessibility
   role?: MaybeSignal<string>;
   tabIndex?: MaybeSignal<number>;
-  
+
   // Editing
   contentEditable?: MaybeSignal<"true" | "false" | "plaintext-only">;
   spellcheck?: MaybeSignal<boolean>;
   draggable?: MaybeSignal<boolean>;
-  
+
   // Input hints
   inputMode?: MaybeSignal<InputMode>;
   enterKeyHint?: MaybeSignal<EnterKeyHint>;
   autoCapitalize?: MaybeSignal<AutoCapitalize>;
-  
+
   // Boolean
   hidden?: MaybeSignal<boolean>;
   inert?: MaybeSignal<boolean>;
-  
+
   // Popover
   popover?: MaybeSignal<"auto" | "manual">;
 }
