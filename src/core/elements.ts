@@ -72,11 +72,15 @@ export type Child =
 
 /**
  * Event handler types - properly typed for each event kind
+ * 
+ * - `this` is bound to the element
+ * - `currentTarget` is typed to the element the handler is attached to
+ * - `target` remains EventTarget | null (can be any descendant in bubble path)
  */
 type EventHandlers<E extends Element> = {
   [K in keyof HTMLElementEventMap as `on${K}`]?: (
     this: E,
-    event: HTMLElementEventMap[K]
+    event: Omit<HTMLElementEventMap[K], "currentTarget"> & { currentTarget: E }
   ) => void;
 };
 
