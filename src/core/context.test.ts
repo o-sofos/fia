@@ -1,82 +1,78 @@
 import { GlobalRegistrator } from "@happy-dom/global-registrator";
 import { describe, it, expect, beforeEach } from "bun:test";
-import { pushContext, popContext, getCurrentContext, hasContext, type Context } from "./context";
+import { pushExecutionContext, popExecutionContext, getCurrentExecutionContext, hasExecutionContext } from "./context";
 
-GlobalRegistrator.register();
-
-// Simple mock context implementation
-class MockContext implements Context {
-    public id: string;
-    public children: Node[] = [];
-
-    constructor(id: string) {
-        this.id = id;
-    }
-
-    appendChild(node: Node): Node {
-        this.children.push(node);
-        return node;
-    }
+try {
+    GlobalRegistrator.register();
+} catch (e) {
+    // Already registered
 }
 
 describe("Context System", () => {
     // Clear the stack before each test to ensure isolation
     beforeEach(() => {
-        while (hasContext()) {
-            popContext();
+        while (hasExecutionContext()) {
+            popExecutionContext();
         }
     });
 
     it("should return document.body when stack is empty", () => {
-        expect(hasContext()).toBe(false);
-        expect(getCurrentContext()).toBe(document.body);
+        expect(hasExecutionContext()).toBe(false);
+        expect(getCurrentExecutionContext()).toBe(document.body);
     });
 
     it("should push and return new context", () => {
-        const ctx = new MockContext("ctx1");
-        pushContext(ctx);
+        const div = document.createElement("div");
+        pushExecutionContext(div);
 
-        expect(hasContext()).toBe(true);
-        expect(getCurrentContext()).toBe(ctx);
+        expect(hasExecutionContext()).toBe(true);
+        expect(getCurrentExecutionContext()).toBe(div);
     });
 
     it("should pop context and return to previous", () => {
-        const ctx = new MockContext("ctx1");
-        pushContext(ctx);
-        expect(getCurrentContext()).toBe(ctx);
+        const div = document.createElement("div");
+        pushExecutionContext(div);
+        expect(getCurrentExecutionContext()).toBe(div);
 
-        popContext();
-        expect(hasContext()).toBe(false);
-        expect(getCurrentContext()).toBe(document.body);
+        popExecutionContext();
+        expect(hasExecutionContext()).toBe(false);
+        expect(getCurrentExecutionContext()).toBe(document.body);
+    });
+
+    it("should handle popExecutionContext on empty stack gracefully", () => {
+        expect(hasExecutionContext()).toBe(false);
+        popExecutionContext(); // Should not throw
+        expect(hasExecutionContext()).toBe(false);
+        expect(getCurrentExecutionContext()).toBe(document.body);
     });
 
     it("should handle nested contexts correctly", () => {
-        const ctx1 = new MockContext("ctx1");
-        const ctx2 = new MockContext("ctx2");
-        const ctx3 = new MockContext("ctx3");
+        const div1 = document.createElement("div");
+        const div2 = document.createElement("div");
+        const div3 = document.createElement("div");
 
         // Push 1
-        pushContext(ctx1);
-        expect(getCurrentContext()).toBe(ctx1);
+        pushExecutionContext(div1);
+        expect(getCurrentExecutionContext()).toBe(div1);
 
         // Push 2
-        pushContext(ctx2);
-        expect(getCurrentContext()).toBe(ctx2);
+        pushExecutionContext(div2);
+        expect(getCurrentExecutionContext()).toBe(div2);
 
         // Push 3
-        pushContext(ctx3);
-        expect(getCurrentContext()).toBe(ctx3);
+        pushExecutionContext(div3);
+        expect(getCurrentExecutionContext()).toBe(div3);
 
         // Pop 3 -> 2
-        popContext();
-        expect(getCurrentContext()).toBe(ctx2);
+        popExecutionContext();
+        expect(getCurrentExecutionContext()).toBe(div2);
 
         // Pop 2 -> 1
-        popContext();
-        expect(getCurrentContext()).toBe(ctx1);
+        popExecutionContext();
+        expect(getCurrentExecutionContext()).toBe(div1);
 
         // Pop 1 -> Root
-        popContext();
-        expect(getCurrentContext()).toBe(document.body);
+        popExecutionContext();
+        expect(getCurrentExecutionContext()).toBe(document.body);
     });
 });
