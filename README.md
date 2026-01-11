@@ -15,39 +15,20 @@
 
 Most frameworks add layers of abstraction between you and the DOM. Flick gives you just enough to be productive:
 
-✨ Reactive values - $() creates values that automatically update the UI
-
-🎯 Direct DOM - No virtual DOM, no diffing, just native browser APIs
-
-📦 2KB total - Smaller than the frameworks claiming to be minimal
-
-🔒 Zero dependencies - No supply chain risks, no version conflicts
-
-📘 Fully typed - Complete TypeScript support with autocomplete
-
-🚀 No build required - Import from JSR and start building
+- ✨ **Reactive values** - `$()` creates values that automatically update the UI
+- 🎯 **Direct DOM** - No virtual DOM, no diffing, just native browser APIs
+- 📦 **2KB total** - Smaller than the frameworks claiming to be minimal
+- 🔒 **Zero dependencies** - No supply chain risks, no version conflicts
+- 📘 **Fully typed** - Complete TypeScript support with autocomplete
+- 🚀 **No build required** - Import from JSR and start building
 
 ## 🧠 Philosophy
 
 Flick is built on three principles:
 
-* Minimal abstraction - We give you $() for reactivity and functions for elements. That's it.
-* Zero dependencies - No supply chain risk, no version conflicts, no surprises.
-* Vanilla JavaScript - Use if, forEach, map, filter. No custom control flow helpers.
-
-## ⚡ Features
-
-Use Flick when:
-
-📱 You're building a small to medium app
-
-⚡ Performance is critical
-
-🎯 You want zero dependencies
-
-📦 Bundle size matters
-
-🚀 You want fast iteration without build steps
+* **Minimal abstraction** - We give you `$()` for reactivity and functions for elements. That's it.
+* **Zero dependencies** - No supply chain risk, no version conflicts, no surprises.
+* **Vanilla JavaScript** - Use `if`, `forEach`, `map`, `filter`. No custom control flow helpers.
 
 ## 🚀 Getting Started
 
@@ -60,37 +41,210 @@ import { $ } from "jsr:@flick/core";
 
 ### Quick Start
 
-Create a simple counter app:
-
 ```typescript
-import { signal, div, h1, button, p } from "jsr:@flick/core";
+import { $, div, h1, button, p } from "jsr:@flick/core";
 
-// 1. Create reactive state
-const count = signal(0);
+const count = $(0);
 
-// 2. Build your UI - elements auto-mount to body
-div(() => {
+div({ class: "app" }, () => {
   h1("Counter App");
-  
   p("Count: ", count);
-  
-  button(
-    { onclick: () => count.set(count() + 1) },
-    "Increment"
-  );
-  
-  button(
-    { onclick: () => count.set(count() - 1) },
-    "Decrement"
-  );
+  button("Increment", () => count.value++);
+  button("Decrement", () => count.value--);
 });
 ```
+
 That's it. No build step, no configuration, no boilerplate.
+
+---
+
+## 📐 Element Signatures
+
+Flick elements are functions that create and mount DOM nodes. Understanding their signatures is key to using Flick effectively.
+
+### Normal Elements
+
+Elements like `div`, `button`, `span`, `p`, etc. support multiple call signatures:
+
+```typescript
+// Signature 1: Props + function child (MOST COMMON)
+div(props: ElementProps, children: () => void): HTMLDivElement
+
+// Signature 2: Function child only
+div(children: () => void): HTMLDivElement
+
+// Signature 3: Props only
+div(props: ElementProps): HTMLDivElement
+
+// Signature 4: Simple content (string, number, or signal)
+div(content: string | number | Signal): HTMLDivElement
+
+// Signature 5: Content + onclick (button/a only)
+button(content: string | number | Signal, onclick: (e: MouseEvent) => void): HTMLButtonElement
+
+// Signature 6: Content + props
+button(content: string | number | Signal, props: ElementProps): HTMLButtonElement
+
+// Signature 7: No arguments
+div(): HTMLDivElement
+```
+
+### Void Elements
+
+Elements like `input`, `img`, `br`, `hr` cannot have children:
+
+```typescript
+// Only signature: Optional props
+input(props?: InputProps): HTMLInputElement
+img(props?: ImgProps): HTMLImageElement
+br(): HTMLBRElement
+hr(): HTMLHRElement
+```
+
+### The Golden Rule: Function Children for Nesting
+
+**Always use `() => { ... }` to nest elements inside a parent.**
+
+```typescript
+// ✅ CORRECT - Function establishes parent context
+div({ class: "parent" }, () => {
+  h1("Title");
+  p("Paragraph");
+  span("Nested content");
+});
+
+// ❌ WRONG - Elements mount BEFORE div processes them
+div({ class: "parent" }, h1("Title"), p("Paragraph"));
+```
+
+Why? When you write `div(h1(), p())`, JavaScript evaluates `h1()` and `p()` first. These elements immediately mount to the current context (likely `document.body`), then their return values are passed to `div()`.
+
+With `() => { h1(); p(); }`, the function is passed to `div()` first. The div pushes itself as the context, then executes the function, so children mount inside the div.
+
+### Signature Examples
+
+#### 1. Props + Function Child
+The most common pattern for complex UIs:
+
+```typescript
+div({ class: "card", id: "user-card" }, () => {
+  h1("User Profile");
+  p("Welcome back!");
+  button("Edit", () => console.log("edit clicked"));
+});
+```
+
+#### 2. Function Child Only
+When you don't need props:
+
+```typescript
+div(() => {
+  h1("Hello World");
+  p("No props needed here");
+});
+```
+
+#### 3. Props Only
+For leaf elements or containers styled via CSS:
+
+```typescript
+div({ class: "spacer", style: { height: "20px" } });
+div({ id: "mount-point" });
+```
+
+#### 4. Simple Content
+For text-only elements:
+
+```typescript
+h1("Page Title");
+p("A simple paragraph");
+span(123);
+p(signal); // Reactive - updates when signal changes
+```
+
+#### 5. Content + Click Handler (button/a only)
+Convenient shorthand for interactive elements:
+
+```typescript
+button("Click me", () => console.log("clicked"));
+button("Submit", () => form.submit());
+a("Navigate", () => router.push("/home"));
+
+// With signals
+const count = $(0);
+button(count, () => count.value++); // Shows "0", "1", "2"...
+```
+
+#### 6. Content + Props
+When you need both content and additional props:
+
+```typescript
+button("Submit", { 
+  class: "btn-primary", 
+  disabled: isLoading,
+  type: "submit" 
+});
+
+button(count, { 
+  id: "counter-btn",
+  onclick: () => count.value++
+});
+```
+
+#### 7. Void Elements
+No children allowed:
+
+```typescript
+input({ type: "text", placeholder: "Enter name" });
+input({ type: "checkbox", checked: isChecked });
+img({ src: "/logo.png", alt: "Logo" });
+br();
+hr();
+```
+
+### Complete Pattern Reference
+
+| Pattern | Example | Use Case |
+|---------|---------|----------|
+| `div(() => {...})` | `div(() => { h1(); p(); })` | Nesting elements |
+| `div({ props })` | `div({ class: "box" })` | Props only |
+| `div({ props }, () => {...})` | `div({ id: "app" }, () => {...})` | Props + nested children |
+| `div("text")` | `p("Hello")` | Simple text content |
+| `div(signal)` | `span(count)` | Reactive text |
+| `button("text", fn)` | `button("Go", () => {...})` | Quick click handler |
+| `button("text", { props })` | `button("Go", { class: "btn" })` | Content + props |
+| `input({ props })` | `input({ type: "email" })` | Void elements |
+
+### What NOT to Do
+
+```typescript
+// ❌ Passing element results as children - they mount immediately!
+div(h1("Title"), p("Text"));
+
+// ❌ Children for void elements
+input({ type: "text" }, "some text");
+img({ src: "..." }, () => { span("caption"); });
+
+// ❌ Forgetting the function wrapper for nesting
+ul(
+  li("Item 1"),  // These mount to body, not ul!
+  li("Item 2")
+);
+
+// ✅ Correct way
+ul(() => {
+  li("Item 1");
+  li("Item 2");
+});
+```
+
+---
 
 ## 💡 Core Concepts
 
 ### Reactive Values
-Use $() to create values that automatically update the UI when they change.
+
+Use `$()` to create values that automatically update the UI when they change.
 
 ```typescript
 import { $ } from "jsr:@flick/core";
@@ -110,84 +264,49 @@ isActive.value = !isActive.value;
 ```
 
 ### Computed Values
+
 Reactive values can derive from other reactive values:
 
 ```typescript
-import { $ } from "jsr:@flick/core";
-
 const count = $(0);
-
-// Create a computed value
 const doubled = $(() => count.value * 2);
 
-console.log(doubled.value);
+console.log(doubled.value); // 0
 count.value = 5;
-console.log(doubled.value); 
-```
-
-### Elements
-Every HTML element is a function that creates and mounts a DOM node.
-
-```typescript
-import { div, h1, p, input, button } from "jsr:@flick/core";
-
-// Elements can take props and children
-div(
-  { class: "container", id: "app" },
-  "Hello World"
-);
-
-// Props are optional - just pass children
-p("Simple paragraph");
-
-// Reactive values work automatically
-const name = $("Alice");
-p("Hello, ", name.value); // Updates when name changes
-
-// Event handlers
-button(
-  { onclick: (e) => console.log("Clicked!") },
-  "Click Me"
-);
+console.log(doubled.value); // 10
 ```
 
 ### Context-Based Mounting
-Elements automatically append to their parent context. No need for explicit mounting.
+
+Elements automatically append to their parent context:
 
 ```typescript
-// Outer div becomes the parent context
 div(() => {
-  h1("Title");
+  h1("Title");           // Appends to div
+  p("Paragraph 1");      // Appends to div
   
-  // These all append to the div above
-  p("Paragraph 1");
-  p("Paragraph 2");
-  
-  // Nested contexts work naturally
-  div(() => {
-    p("I'm inside a nested div");
+  section(() => {
+    p("Nested");         // Appends to section
   });
 });
 ```
 
-### Reactive Attributes
-Any prop can use .value from a reactive variable:
+### Reactive Props
+
+Any prop can accept a signal for automatic updates:
 
 ```typescript
-import { $ } from "jsr:@flick/core";
-
-const isActive = $(false);
+const isDisabled = $(false);
 const theme = $("light");
 
-div({
-  class: isActive.value ? "active" : "inactive",
-  "data-theme": theme.value,
-  style: {
-    color: theme.value === "dark" ? "white" : "black",
-    padding: "20px"
-  }
-}, "Reactive div");
+button({
+  disabled: isDisabled,  // Updates when signal changes
+  class: theme,          // Updates when signal changes
+  onclick: () => isDisabled.value = true
+}, "Submit");
 ```
+
+---
 
 ## 📦 Examples
 
@@ -199,120 +318,68 @@ import { $, div, h1, input, button, ul, li } from "jsr:@flick/core";
 const todos = $(["Buy milk", "Walk dog"]);
 const newTodo = $("");
 
-div(() => {
+div({ class: "todo-app" }, () => {
   h1("Todo List");
   
-  div(() => {
+  div({ class: "input-row" }, () => {
     input({
       type: "text",
-      value: newTodo.value,
-      oninput: (e) => newTodo.value = e.target.value,
+      value: newTodo,
       placeholder: "What needs to be done?"
     });
     
-    button({
-      onclick: () => {
-        if (newTodo.value.trim()) {
-          todos.value = [...todos.value, newTodo.value];
-          newTodo.value = "";
-        }
+    button("Add", () => {
+      if (newTodo.value.trim()) {
+        todos.value = [...todos.value, newTodo.value];
+        newTodo.value = "";
       }
-    }, "Add");
+    });
   });
   
   ul(() => {
-    todos.value.forEach((todo, index) => {
-      li(
-        { 
-          onclick: () => {
-            todos.value = todos.value.filter((_, i) => i !== index);
-          }
-        },
-        todo
-      );
+    todos.value.forEach((todo, i) => {
+      li(todo, {
+        onclick: () => {
+          todos.value = todos.value.filter((_, j) => j !== i);
+        }
+      });
     });
   });
 });
 ```
 
-### Form with Validation
+### Counter with Computed Values
 
 ```typescript
-import { $, div, form, input, p, button } from "jsr:@flick/core";
+import { $, div, p, button } from "jsr:@flick/core";
 
-const email = $("");
-const password = $("");
-
-// Computed validation
-const isValidEmail = $(() => 
-  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)
-);
-
-const canSubmit = $(() => 
-  isValidEmail.value && password.value.length >= 8
-);
+const count = $(0);
+const doubled = $(() => count.value * 2);
+const isEven = $(() => count.value % 2 === 0);
 
 div(() => {
-  form({
-    onsubmit: (e) => {
-      e.preventDefault();
-      console.log({ 
-        email: email.value, 
-        password: password.value 
-      });
-    }
-  }, () => {
-    div(() => {
-      input({
-        type: "email",
-        value: email.value,
-        oninput: (e) => email.value = e.target.value,
-        placeholder: "Email"
-      });
-      
-      p({
-        style: { 
-          color: isValidEmail.value ? "green" : "red"
-        }
-      }, isValidEmail.value ? "✓ Valid" : "✗ Invalid email");
-    });
-    
-    div(() => {
-      input({
-        type: "password",
-        value: password.value,
-        oninput: (e) => password.value = e.target.value,
-        placeholder: "Password"
-      });
-      
-      p(
-        password.value.length >= 8 
-          ? "✓ Strong password" 
-          : "✗ At least 8 characters"
-      );
-    });
-    
-    button({
-      type: "submit",
-      disabled: !canSubmit.value
-    }, "Submit");
-  });
+  p("Count: ", count);
+  p("Doubled: ", doubled);
+  p("Even: ", $(() => isEven.value ? "Yes" : "No"));
+  
+  button("++", () => count.value++);
+  button("--", () => count.value--);
+  button("Reset", () => count.value = 0);
 });
 ```
 
 ### Conditional Rendering
 
 ```typescript
-import { $, div, button, p } from "jsr:@flick/core";
-
 const showDetails = $(false);
 
 div(() => {
   button(
-    { onclick: () => showDetails.value = !showDetails.value },
-    showDetails.value ? "Hide Details" : "Show Details"
+    $(() => showDetails.value ? "Hide" : "Show"),
+    () => showDetails.value = !showDetails.value
   );
   
+  // Conditional content inside function child
   if (showDetails.value) {
     div(() => {
       p("Here are the details!");
@@ -325,145 +392,85 @@ div(() => {
 ### Dynamic Lists
 
 ```typescript
-import { $, div, button, ul, li } from "jsr:@flick/core";
-
 const items = $(["Apple", "Banana", "Cherry"]);
 
 div(() => {
-  button({
-    onclick: () => {
-      items.value = [...items.value, `Item ${items.value.length + 1}`];
-    }
-  }, "Add Item");
-  
-  button({
-    onclick: () => {
-      items.value = items.value.slice(0, -1);
-    }
-  }, "Remove Last");
+  button("Add", () => {
+    items.value = [...items.value, `Item ${items.value.length + 1}`];
+  });
   
   ul(() => {
-    items.value.forEach((item, index) => {
-      li(`${index + 1}. ${item}`);
+    items.value.forEach((item, i) => {
+      li(`${i + 1}. ${item}`);
     });
   });
 });
 ```
 
-### Counter with Multiple Computations
-
-```typescript
-import { $, div, p, button } from "jsr:@flick/core";
-
-const count = $(0);
-
-// Computed values automatically update
-const doubled = $(() => count.value * 2);
-const squared = $(() => count.value ** 2);
-const isEven = $(() => count.value % 2 === 0);
-
-div(() => {
-  p("Count: ", count.value);
-  p("Doubled: ", doubled.value);
-  p("Squared: ", squared.value);
-  p("Is Even: ", isEven.value ? "Yes" : "No");
-  
-  button({ onclick: () => count.value++ }, "++");
-  button({ onclick: () => count.value-- }, "--");
-  button({ onclick: () => count.value = 0 }, "Reset");
-});
-```
+---
 
 ## 📚 API Reference
 
-### $(initialValue)
+### `$(initialValue)`
 
-Creates a reactive value. Read and write using .value.
+Creates a writable reactive signal.
 
-```typescript 
-// Primitive values
-const count = $(0);
-const name = $("Alice");
-const isActive = $(false);
-
-// Objects and arrays
-const user = $({ name: "Alice", age: 30 });
-const todos = $(["Task 1", "Task 2"]);
-
-// Read
-console.log(count.value); // 0
-
-// Write
-count.value = 5;
-name.value = "Bob";
-user.value = { name: "Charlie", age: 25 };
-todos.value = [...todos.value, "Task 3"];
-```
-
-### $(computeFn)
 ```typescript
-const firstName = $("John");
-const lastName = $("Doe");
-
-// Computed value
-const fullName = $(() => `${firstName.value} ${lastName.value}`);
-
-console.log(fullName.value); // "John Doe"
-
-firstName.value = "Jane";
-console.log(fullName.value); // "Jane Doe"
+const count = $(0);
+count.value;      // Read: 0
+count.value = 5;  // Write
+count.value++;    // Modify
 ```
 
+### `$(() => computation)`
+
+Creates a computed (read-only) signal.
+
+```typescript
+const doubled = $(() => count.value * 2);
+doubled.value;  // Read only
+```
+
+### `effect(fn)`
+
+Runs a function whenever its dependencies change.
+
+```typescript
+effect(() => {
+  console.log("Count is:", count.value);
+});
+```
+
+### `batch(fn)`
+
+Batches multiple signal updates into one.
+
+```typescript
+batch(() => {
+  count.value++;
+  name.value = "New";
+  // Effects run once after batch completes
+});
+```
 
 ### Elements
-All standard HTML elements are available as functions:
+
+All standard HTML elements are available:
 
 ```typescript
-// Text elements
-div, span, p, h1, h2, h3, h4, h5, h6, a, strong, em, code, pre
-
-// Form elements
-form, input, textarea, select, option, button, label, fieldset, legend
-
-// List elements
-ul, ol, li
-
-// Table elements
-table, thead, tbody, tfoot, tr, td, th
-
-// Semantic elements
-header, footer, nav, main, section, article, aside
-
-// Media elements
-img, video, audio, canvas, svg
-
-// And more...
+// Text: div, span, p, h1-h6, a, strong, em, code, pre
+// Form: form, input, textarea, select, option, button, label
+// List: ul, ol, li, dl, dt, dd
+// Table: table, thead, tbody, tr, td, th
+// Semantic: header, footer, nav, main, section, article, aside
+// Media: img, video, audio, canvas, picture
+// Interactive: details, summary, dialog
+// Void: br, hr, input, img, meta, link, source, track
 ```
 
-Each element function accepts:
+---
 
-Props object (optional) - attributes, event handlers, styles
-Children - strings, numbers, reactive values, or a function for nested elements
-
-```typescript
-// With props and children
-div({ class: "container", id: "app" }, "Content");
-
-// Just children
-p("Simple text");
-
-// Nested elements with function
-div(() => {
-  h1("Title");
-  p("Description");
-});
-
-// Reactive values
-const name = $("World");
-p("Hello, ", name.value);
-```
-
-## 🎨 Patterns
+## 🎨 Common Patterns
 
 ### Two-Way Binding
 
@@ -471,28 +478,9 @@ p("Hello, ", name.value);
 const text = $("");
 
 input({
-  value: text.value,
-  oninput: (e) => text.value = e.target.value
+  value: text,
+  oninput: (e) => text.value = e.currentTarget.value
 });
-```
-
-### Toggle State
-
-```typescript
-const isOpen = $(false);
-
-button(
-  { onclick: () => isOpen.value = !isOpen.value },
-  isOpen.value ? "Close" : "Open"
-});
-```
-
-### Derived State
-
-```typescript
-const todos = $([...]);
-const completed = $(() => todos.value.filter(t => t.done));
-const remaining = $(() => todos.value.filter(t => !t.done));
 ```
 
 ### Conditional Classes
@@ -500,10 +488,9 @@ const remaining = $(() => todos.value.filter(t => !t.done));
 ```typescript
 const isActive = $(false);
 
-button(
-  { class: { active: isActive.value } },
-  "Click me"
-});
+div({
+  class: { active: isActive, hidden: !isActive }
+}, "Content");
 ```
 
 ### Array Operations
@@ -512,63 +499,38 @@ button(
 const items = $([1, 2, 3]);
 
 // Add
-button({ onclick: () => items.value = [...items.value, 4] }, "Add");
+items.value = [...items.value, 4];
 
-// Remove last
-button({ onclick: () => items.value = items.value.slice(0, -1) }, "Remove");
+// Remove
+items.value = items.value.filter(x => x !== 2);
 
-// Filter
-button({ 
-  onclick: () => items.value = items.value.filter(x => x % 2 === 0) 
-}, "Keep Even");
+// Update
+items.value = items.value.map(x => x * 2);
 ```
 
+### Ref Access
+
+```typescript
+div({ class: "box" }, (el) => {
+  // el is the HTMLDivElement
+  console.log(el.getBoundingClientRect());
+});
+```
+
+---
 
 ## 🛠️ Development
 
-Flick uses [Bun](https://bun.sh) for development, testing, and bundling.
-
-### Prerequisites
-
-- [Bun](https://bun.sh) v1.0+
-
-### Setup
-
 ```bash
-# Install dependencies
-bun install
+bun install      # Install dependencies
+bun run dev      # Start dev server at localhost:4000
+bun test         # Run tests
 ```
-
-### Dev Server
-
-Starts a development server with hot-reloading for TypeScript files.
-
-```bash
-bun run dev
-```
-
-The server runs at `http://localhost:4000`. It serves `index.html` by default and compiles `.ts` files on the fly.
-
-### Testing
-
-Run the test suite:
-
-```bash
-bun test
-```
-
-## 🤝 Contributing
-Flick is intentionally minimal. Before opening a PR, ask yourself:
-
-- Does this belong in the core, or should it be a separate package?
-- Does this add unnecessary abstraction?
-- Will this increase the bundle size?
-
-If you answered "yes" to any of these, it probably shouldn't be in core.
 
 ## 📄 License
+
 MIT
 
-
+---
 
 Built with ❤️ by developers who believe less is more.
