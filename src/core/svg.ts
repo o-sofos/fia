@@ -76,15 +76,24 @@ type VectorEffect = "none" | "non-scaling-stroke" | "non-scaling-size" | "non-ro
 interface SVGPresentationAttributes {
     // Fill & Stroke
     fill?: MaybeSignal<SVGPaint>;
+    "fill-opacity"?: MaybeSignal<number | string>;
     fillOpacity?: MaybeSignal<number | string>;
+    "fill-rule"?: MaybeSignal<FillRule>;
     fillRule?: MaybeSignal<FillRule>;
     stroke?: MaybeSignal<SVGPaint>;
+    "stroke-opacity"?: MaybeSignal<number | string>;
     strokeOpacity?: MaybeSignal<number | string>;
+    "stroke-width"?: MaybeSignal<number | string>;
     strokeWidth?: MaybeSignal<number | string>;
+    "stroke-linecap"?: MaybeSignal<StrokeLinecap>;
     strokeLinecap?: MaybeSignal<StrokeLinecap>;
+    "stroke-linejoin"?: MaybeSignal<StrokeLinejoin>;
     strokeLinejoin?: MaybeSignal<StrokeLinejoin>;
+    "stroke-dasharray"?: MaybeSignal<string>;
     strokeDasharray?: MaybeSignal<string>;
+    "stroke-dashoffset"?: MaybeSignal<number | string>;
     strokeDashoffset?: MaybeSignal<number | string>;
+    "stroke-miterlimit"?: MaybeSignal<number | string>;
     strokeMiterlimit?: MaybeSignal<number | string>;
 
     // Opacity & Visibility
@@ -93,7 +102,9 @@ interface SVGPresentationAttributes {
     display?: MaybeSignal<Display>;
 
     // Clipping & Masking
+    "clip-path"?: MaybeSignal<string>;
     clipPath?: MaybeSignal<string>;
+    "clip-rule"?: MaybeSignal<ClipRule>;
     clipRule?: MaybeSignal<ClipRule>;
     mask?: MaybeSignal<string>;
 
@@ -101,41 +112,63 @@ interface SVGPresentationAttributes {
     filter?: MaybeSignal<string>;
 
     // Color interpolation (for filters/gradients)
+    "color-interpolation"?: MaybeSignal<ColorInterpolation>;
     colorInterpolation?: MaybeSignal<ColorInterpolation>;
+    "color-interpolation-filters"?: MaybeSignal<ColorInterpolation>;
     colorInterpolationFilters?: MaybeSignal<ColorInterpolation>;
 
     // Text
+    "font-family"?: MaybeSignal<string>;
     fontFamily?: MaybeSignal<string>;
+    "font-size"?: MaybeSignal<number | string>;
     fontSize?: MaybeSignal<number | string>;
+    "font-style"?: MaybeSignal<FontStyle>;
     fontStyle?: MaybeSignal<FontStyle>;
+    "font-weight"?: MaybeSignal<FontWeight>;
     fontWeight?: MaybeSignal<FontWeight>;
+    "font-variant"?: MaybeSignal<string>;
     fontVariant?: MaybeSignal<string>;
+    "font-stretch"?: MaybeSignal<string>;
     fontStretch?: MaybeSignal<string>;
+    "text-anchor"?: MaybeSignal<TextAnchor>;
     textAnchor?: MaybeSignal<TextAnchor>;
+    "dominant-baseline"?: MaybeSignal<DominantBaseline>;
     dominantBaseline?: MaybeSignal<DominantBaseline>;
+    "letter-spacing"?: MaybeSignal<number | string>;
     letterSpacing?: MaybeSignal<number | string>;
+    "word-spacing"?: MaybeSignal<number | string>;
     wordSpacing?: MaybeSignal<number | string>;
+    "text-decoration"?: MaybeSignal<string>;
     textDecoration?: MaybeSignal<string>;
 
     // Rendering
+    "shape-rendering"?: MaybeSignal<ShapeRendering>;
     shapeRendering?: MaybeSignal<ShapeRendering>;
+    "text-rendering"?: MaybeSignal<TextRendering>;
     textRendering?: MaybeSignal<TextRendering>;
+    "image-rendering"?: MaybeSignal<ImageRendering>;
     imageRendering?: MaybeSignal<ImageRendering>;
 
     // Interaction
+    "pointer-events"?: MaybeSignal<PointerEvents>;
     pointerEvents?: MaybeSignal<PointerEvents>;
     cursor?: MaybeSignal<string>;
 
     // Transform
     transform?: MaybeSignal<string>;
+    "transform-origin"?: MaybeSignal<string>;
     transformOrigin?: MaybeSignal<string>;
 
     // Vector Effect
+    "vector-effect"?: MaybeSignal<VectorEffect>;
     vectorEffect?: MaybeSignal<VectorEffect>;
 
     // Markers
+    "marker-start"?: MaybeSignal<string>;
     markerStart?: MaybeSignal<string>;
+    "marker-mid"?: MaybeSignal<string>;
     markerMid?: MaybeSignal<string>;
+    "marker-end"?: MaybeSignal<string>;
     markerEnd?: MaybeSignal<string>;
 }
 
@@ -151,6 +184,16 @@ interface SVGCoreAttributes {
     lang?: MaybeSignal<string>;
     "xml:lang"?: MaybeSignal<string>;
     "xml:space"?: MaybeSignal<"default" | "preserve">;
+}
+
+// =============================================================================
+// SVG CONDITIONAL PROCESSING ATTRIBUTES
+// =============================================================================
+
+interface SVGConditionalProcessingAttributes {
+    requiredFeatures?: MaybeSignal<string>;
+    requiredExtensions?: MaybeSignal<string>;
+    systemLanguage?: MaybeSignal<string>;
 }
 
 // =============================================================================
@@ -211,6 +254,11 @@ type SVGEventHandlers = {
     // Load events
     onload?: (event: Event) => void;
     onerror?: (event: Event) => void;
+
+    // SVG-specific animation events
+    onbegin?: (event: Event) => void;
+    onend?: (event: Event) => void;
+    onrepeat?: (event: Event) => void;
 };
 
 // =============================================================================
@@ -235,6 +283,10 @@ type SpreadMethod = "pad" | "reflect" | "repeat";
 
 type LengthAdjust = "spacing" | "spacingAndGlyphs";
 
+type CrossOrigin = "anonymous" | "use-credentials" | "";
+
+type Decoding = "sync" | "async" | "auto";
+
 // SVG Root Element
 interface SVGSvgAttributes extends SVGCoreAttributes, SVGPresentationAttributes, SVGEventHandlers {
     width?: MaybeSignal<number | string>;
@@ -246,10 +298,34 @@ interface SVGSvgAttributes extends SVGCoreAttributes, SVGPresentationAttributes,
     xmlns?: string;
     "xmlns:xlink"?: string;
     version?: string;
+    baseProfile?: MaybeSignal<string>;
+    contentScriptType?: MaybeSignal<string>;
+    contentStyleType?: MaybeSignal<string>;
+    zoomAndPan?: MaybeSignal<"disable" | "magnify">;
+}
+
+// Anchor Element (NEW)
+interface SVGAAttributes extends SVGCoreAttributes, SVGPresentationAttributes, SVGConditionalProcessingAttributes, SVGEventHandlers {
+    href?: MaybeSignal<string>;
+    "xlink:href"?: MaybeSignal<string>;
+    target?: MaybeSignal<"_self" | "_parent" | "_top" | "_blank" | string>;
+    download?: MaybeSignal<string>;
+    rel?: MaybeSignal<string>;
+    hreflang?: MaybeSignal<string>;
+    type?: MaybeSignal<string>;
+    ping?: MaybeSignal<string>;
+    referrerpolicy?: MaybeSignal<"no-referrer" | "no-referrer-when-downgrade" | "same-origin" | "origin" | "strict-origin" | "origin-when-cross-origin" | "strict-origin-when-cross-origin" | "unsafe-url">;
+}
+
+// View Element (NEW)
+interface SVGViewAttributes extends SVGCoreAttributes {
+    viewBox?: MaybeSignal<string>;
+    preserveAspectRatio?: MaybeSignal<PreserveAspectRatio>;
+    zoomAndPan?: MaybeSignal<"disable" | "magnify">;
 }
 
 // Basic Shapes
-interface SVGRectAttributes extends SVGCoreAttributes, SVGPresentationAttributes, SVGEventHandlers {
+interface SVGRectAttributes extends SVGCoreAttributes, SVGPresentationAttributes, SVGConditionalProcessingAttributes, SVGEventHandlers {
     x?: MaybeSignal<number | string>;
     y?: MaybeSignal<number | string>;
     width?: MaybeSignal<number | string>;
@@ -259,14 +335,14 @@ interface SVGRectAttributes extends SVGCoreAttributes, SVGPresentationAttributes
     pathLength?: MaybeSignal<number>;
 }
 
-interface SVGCircleAttributes extends SVGCoreAttributes, SVGPresentationAttributes, SVGEventHandlers {
+interface SVGCircleAttributes extends SVGCoreAttributes, SVGPresentationAttributes, SVGConditionalProcessingAttributes, SVGEventHandlers {
     cx?: MaybeSignal<number | string>;
     cy?: MaybeSignal<number | string>;
     r?: MaybeSignal<number | string>;
     pathLength?: MaybeSignal<number>;
 }
 
-interface SVGEllipseAttributes extends SVGCoreAttributes, SVGPresentationAttributes, SVGEventHandlers {
+interface SVGEllipseAttributes extends SVGCoreAttributes, SVGPresentationAttributes, SVGConditionalProcessingAttributes, SVGEventHandlers {
     cx?: MaybeSignal<number | string>;
     cy?: MaybeSignal<number | string>;
     rx?: MaybeSignal<number | string>;
@@ -274,7 +350,7 @@ interface SVGEllipseAttributes extends SVGCoreAttributes, SVGPresentationAttribu
     pathLength?: MaybeSignal<number>;
 }
 
-interface SVGLineAttributes extends SVGCoreAttributes, SVGPresentationAttributes, SVGEventHandlers {
+interface SVGLineAttributes extends SVGCoreAttributes, SVGPresentationAttributes, SVGConditionalProcessingAttributes, SVGEventHandlers {
     x1?: MaybeSignal<number | string>;
     y1?: MaybeSignal<number | string>;
     x2?: MaybeSignal<number | string>;
@@ -282,23 +358,23 @@ interface SVGLineAttributes extends SVGCoreAttributes, SVGPresentationAttributes
     pathLength?: MaybeSignal<number>;
 }
 
-interface SVGPolylineAttributes extends SVGCoreAttributes, SVGPresentationAttributes, SVGEventHandlers {
+interface SVGPolylineAttributes extends SVGCoreAttributes, SVGPresentationAttributes, SVGConditionalProcessingAttributes, SVGEventHandlers {
     points?: MaybeSignal<string>;
     pathLength?: MaybeSignal<number>;
 }
 
-interface SVGPolygonAttributes extends SVGCoreAttributes, SVGPresentationAttributes, SVGEventHandlers {
+interface SVGPolygonAttributes extends SVGCoreAttributes, SVGPresentationAttributes, SVGConditionalProcessingAttributes, SVGEventHandlers {
     points?: MaybeSignal<string>;
     pathLength?: MaybeSignal<number>;
 }
 
-interface SVGPathAttributes extends SVGCoreAttributes, SVGPresentationAttributes, SVGEventHandlers {
+interface SVGPathAttributes extends SVGCoreAttributes, SVGPresentationAttributes, SVGConditionalProcessingAttributes, SVGEventHandlers {
     d?: MaybeSignal<string>;
     pathLength?: MaybeSignal<number>;
 }
 
 // Text Elements
-interface SVGTextAttributes extends SVGCoreAttributes, SVGPresentationAttributes, SVGEventHandlers {
+interface SVGTextAttributes extends SVGCoreAttributes, SVGPresentationAttributes, SVGConditionalProcessingAttributes, SVGEventHandlers {
     x?: MaybeSignal<number | string>;
     y?: MaybeSignal<number | string>;
     dx?: MaybeSignal<number | string>;
@@ -308,7 +384,7 @@ interface SVGTextAttributes extends SVGCoreAttributes, SVGPresentationAttributes
     textLength?: MaybeSignal<number | string>;
 }
 
-interface SVGTspanAttributes extends SVGCoreAttributes, SVGPresentationAttributes, SVGEventHandlers {
+interface SVGTspanAttributes extends SVGCoreAttributes, SVGPresentationAttributes, SVGConditionalProcessingAttributes, SVGEventHandlers {
     x?: MaybeSignal<number | string>;
     y?: MaybeSignal<number | string>;
     dx?: MaybeSignal<number | string>;
@@ -318,7 +394,7 @@ interface SVGTspanAttributes extends SVGCoreAttributes, SVGPresentationAttribute
     textLength?: MaybeSignal<number | string>;
 }
 
-interface SVGTextPathAttributes extends SVGCoreAttributes, SVGPresentationAttributes, SVGEventHandlers {
+interface SVGTextPathAttributes extends SVGCoreAttributes, SVGPresentationAttributes, SVGConditionalProcessingAttributes, SVGEventHandlers {
     href?: MaybeSignal<string>;
     "xlink:href"?: MaybeSignal<string>;
     startOffset?: MaybeSignal<number | string>;
@@ -327,10 +403,11 @@ interface SVGTextPathAttributes extends SVGCoreAttributes, SVGPresentationAttrib
     side?: MaybeSignal<"left" | "right">;
     lengthAdjust?: MaybeSignal<LengthAdjust>;
     textLength?: MaybeSignal<number | string>;
+    path?: MaybeSignal<string>;
 }
 
 // Container Elements
-interface SVGGAttributes extends SVGCoreAttributes, SVGPresentationAttributes, SVGEventHandlers { }
+interface SVGGAttributes extends SVGCoreAttributes, SVGPresentationAttributes, SVGConditionalProcessingAttributes, SVGEventHandlers { }
 
 interface SVGDefsAttributes extends SVGCoreAttributes, SVGPresentationAttributes { }
 
@@ -345,7 +422,7 @@ interface SVGSymbolAttributes extends SVGCoreAttributes, SVGPresentationAttribut
     refY?: MaybeSignal<number | string>;
 }
 
-interface SVGUseAttributes extends SVGCoreAttributes, SVGPresentationAttributes, SVGEventHandlers {
+interface SVGUseAttributes extends SVGCoreAttributes, SVGPresentationAttributes, SVGConditionalProcessingAttributes, SVGEventHandlers {
     href?: MaybeSignal<string>;
     "xlink:href"?: MaybeSignal<string>;
     x?: MaybeSignal<number | string>;
@@ -354,7 +431,7 @@ interface SVGUseAttributes extends SVGCoreAttributes, SVGPresentationAttributes,
     height?: MaybeSignal<number | string>;
 }
 
-interface SVGImageAttributes extends SVGCoreAttributes, SVGPresentationAttributes, SVGEventHandlers {
+interface SVGImageAttributes extends SVGCoreAttributes, SVGPresentationAttributes, SVGConditionalProcessingAttributes, SVGEventHandlers {
     href?: MaybeSignal<string>;
     "xlink:href"?: MaybeSignal<string>;
     x?: MaybeSignal<number | string>;
@@ -362,12 +439,13 @@ interface SVGImageAttributes extends SVGCoreAttributes, SVGPresentationAttribute
     width?: MaybeSignal<number | string>;
     height?: MaybeSignal<number | string>;
     preserveAspectRatio?: MaybeSignal<PreserveAspectRatio>;
-    crossorigin?: MaybeSignal<"anonymous" | "use-credentials">;
+    crossorigin?: MaybeSignal<CrossOrigin>;
+    decoding?: MaybeSignal<Decoding>;
 }
 
-interface SVGSwitchAttributes extends SVGCoreAttributes, SVGPresentationAttributes, SVGEventHandlers { }
+interface SVGSwitchAttributes extends SVGCoreAttributes, SVGPresentationAttributes, SVGConditionalProcessingAttributes, SVGEventHandlers { }
 
-interface SVGForeignObjectAttributes extends SVGCoreAttributes, SVGPresentationAttributes, SVGEventHandlers {
+interface SVGForeignObjectAttributes extends SVGCoreAttributes, SVGPresentationAttributes, SVGConditionalProcessingAttributes, SVGEventHandlers {
     x?: MaybeSignal<number | string>;
     y?: MaybeSignal<number | string>;
     width?: MaybeSignal<number | string>;
@@ -403,7 +481,9 @@ interface SVGRadialGradientAttributes extends SVGCoreAttributes, SVGPresentation
 
 interface SVGStopAttributes extends SVGCoreAttributes, SVGPresentationAttributes {
     offset?: MaybeSignal<number | string>;
+    "stop-color"?: MaybeSignal<SVGColor>;
     stopColor?: MaybeSignal<SVGColor>;
+    "stop-opacity"?: MaybeSignal<number | string>;
     stopOpacity?: MaybeSignal<number | string>;
 }
 
@@ -423,11 +503,11 @@ interface SVGPatternAttributes extends SVGCoreAttributes, SVGPresentationAttribu
 }
 
 // Clipping & Masking
-interface SVGClipPathAttributes extends SVGCoreAttributes, SVGPresentationAttributes {
+interface SVGClipPathAttributes extends SVGCoreAttributes, SVGPresentationAttributes, SVGConditionalProcessingAttributes {
     clipPathUnits?: MaybeSignal<Units>;
 }
 
-interface SVGMaskAttributes extends SVGCoreAttributes, SVGPresentationAttributes {
+interface SVGMaskAttributes extends SVGCoreAttributes, SVGPresentationAttributes, SVGConditionalProcessingAttributes {
     x?: MaybeSignal<number | string>;
     y?: MaybeSignal<number | string>;
     width?: MaybeSignal<number | string>;
@@ -448,8 +528,22 @@ interface SVGMarkerAttributes extends SVGCoreAttributes, SVGPresentationAttribut
     orient?: MaybeSignal<"auto" | "auto-start-reverse" | number | string>;
 }
 
-// Filter Elements
+// =============================================================================
+// FILTER ELEMENTS (with proper presentation attributes)
+// =============================================================================
+
 type FilterIn = "SourceGraphic" | "SourceAlpha" | "BackgroundImage" | "BackgroundAlpha" | "FillPaint" | "StrokePaint" | string;
+
+/**
+ * Common filter primitive attributes
+ */
+interface SVGFilterPrimitiveAttributes extends SVGCoreAttributes {
+    x?: MaybeSignal<number | string>;
+    y?: MaybeSignal<number | string>;
+    width?: MaybeSignal<number | string>;
+    height?: MaybeSignal<number | string>;
+    result?: MaybeSignal<string>;
+}
 
 interface SVGFilterAttributes extends SVGCoreAttributes, SVGPresentationAttributes {
     x?: MaybeSignal<number | string>;
@@ -460,35 +554,20 @@ interface SVGFilterAttributes extends SVGCoreAttributes, SVGPresentationAttribut
     primitiveUnits?: MaybeSignal<Units>;
 }
 
-interface SVGFeBlendAttributes extends SVGCoreAttributes {
+interface SVGFeBlendAttributes extends SVGFilterPrimitiveAttributes, SVGPresentationAttributes {
     in?: MaybeSignal<FilterIn>;
     in2?: MaybeSignal<FilterIn>;
     mode?: MaybeSignal<"normal" | "multiply" | "screen" | "overlay" | "darken" | "lighten" | "color-dodge" | "color-burn" | "hard-light" | "soft-light" | "difference" | "exclusion" | "hue" | "saturation" | "color" | "luminosity">;
-    result?: MaybeSignal<string>;
-    x?: MaybeSignal<number | string>;
-    y?: MaybeSignal<number | string>;
-    width?: MaybeSignal<number | string>;
-    height?: MaybeSignal<number | string>;
 }
 
-interface SVGFeColorMatrixAttributes extends SVGCoreAttributes {
+interface SVGFeColorMatrixAttributes extends SVGFilterPrimitiveAttributes, SVGPresentationAttributes {
     in?: MaybeSignal<FilterIn>;
     type?: MaybeSignal<"matrix" | "saturate" | "hueRotate" | "luminanceToAlpha">;
     values?: MaybeSignal<string>;
-    result?: MaybeSignal<string>;
-    x?: MaybeSignal<number | string>;
-    y?: MaybeSignal<number | string>;
-    width?: MaybeSignal<number | string>;
-    height?: MaybeSignal<number | string>;
 }
 
-interface SVGFeComponentTransferAttributes extends SVGCoreAttributes {
+interface SVGFeComponentTransferAttributes extends SVGFilterPrimitiveAttributes, SVGPresentationAttributes {
     in?: MaybeSignal<FilterIn>;
-    result?: MaybeSignal<string>;
-    x?: MaybeSignal<number | string>;
-    y?: MaybeSignal<number | string>;
-    width?: MaybeSignal<number | string>;
-    height?: MaybeSignal<number | string>;
 }
 
 interface SVGFeFuncAttributes extends SVGCoreAttributes {
@@ -501,7 +580,7 @@ interface SVGFeFuncAttributes extends SVGCoreAttributes {
     offset?: MaybeSignal<number | string>;
 }
 
-interface SVGFeCompositeAttributes extends SVGCoreAttributes {
+interface SVGFeCompositeAttributes extends SVGFilterPrimitiveAttributes, SVGPresentationAttributes {
     in?: MaybeSignal<FilterIn>;
     in2?: MaybeSignal<FilterIn>;
     operator?: MaybeSignal<"over" | "in" | "out" | "atop" | "xor" | "lighter" | "arithmetic">;
@@ -509,14 +588,9 @@ interface SVGFeCompositeAttributes extends SVGCoreAttributes {
     k2?: MaybeSignal<number | string>;
     k3?: MaybeSignal<number | string>;
     k4?: MaybeSignal<number | string>;
-    result?: MaybeSignal<string>;
-    x?: MaybeSignal<number | string>;
-    y?: MaybeSignal<number | string>;
-    width?: MaybeSignal<number | string>;
-    height?: MaybeSignal<number | string>;
 }
 
-interface SVGFeConvolveMatrixAttributes extends SVGCoreAttributes {
+interface SVGFeConvolveMatrixAttributes extends SVGFilterPrimitiveAttributes, SVGPresentationAttributes {
     in?: MaybeSignal<FilterIn>;
     order?: MaybeSignal<string>;
     kernelMatrix?: MaybeSignal<string>;
@@ -525,149 +599,93 @@ interface SVGFeConvolveMatrixAttributes extends SVGCoreAttributes {
     targetX?: MaybeSignal<number>;
     targetY?: MaybeSignal<number>;
     edgeMode?: MaybeSignal<"duplicate" | "wrap" | "none">;
-    preserveAlpha?: MaybeSignal<boolean>;
-    result?: MaybeSignal<string>;
-    x?: MaybeSignal<number | string>;
-    y?: MaybeSignal<number | string>;
-    width?: MaybeSignal<number | string>;
-    height?: MaybeSignal<number | string>;
+    preserveAlpha?: MaybeSignal<boolean | "true" | "false">;
 }
 
-interface SVGFeDiffuseLightingAttributes extends SVGCoreAttributes, SVGPresentationAttributes {
+interface SVGFeDiffuseLightingAttributes extends SVGFilterPrimitiveAttributes, SVGPresentationAttributes {
     in?: MaybeSignal<FilterIn>;
     surfaceScale?: MaybeSignal<number | string>;
     diffuseConstant?: MaybeSignal<number | string>;
-    result?: MaybeSignal<string>;
-    x?: MaybeSignal<number | string>;
-    y?: MaybeSignal<number | string>;
-    width?: MaybeSignal<number | string>;
-    height?: MaybeSignal<number | string>;
+    "lighting-color"?: MaybeSignal<SVGColor>;
+    lightingColor?: MaybeSignal<SVGColor>;
 }
 
-interface SVGFeDisplacementMapAttributes extends SVGCoreAttributes {
+interface SVGFeDisplacementMapAttributes extends SVGFilterPrimitiveAttributes, SVGPresentationAttributes {
     in?: MaybeSignal<FilterIn>;
     in2?: MaybeSignal<FilterIn>;
     scale?: MaybeSignal<number | string>;
     xChannelSelector?: MaybeSignal<"R" | "G" | "B" | "A">;
     yChannelSelector?: MaybeSignal<"R" | "G" | "B" | "A">;
-    result?: MaybeSignal<string>;
-    x?: MaybeSignal<number | string>;
-    y?: MaybeSignal<number | string>;
-    width?: MaybeSignal<number | string>;
-    height?: MaybeSignal<number | string>;
 }
 
-interface SVGFeDropShadowAttributes extends SVGCoreAttributes, SVGPresentationAttributes {
+interface SVGFeDropShadowAttributes extends SVGFilterPrimitiveAttributes, SVGPresentationAttributes {
     in?: MaybeSignal<FilterIn>;
     dx?: MaybeSignal<number | string>;
     dy?: MaybeSignal<number | string>;
     stdDeviation?: MaybeSignal<number | string>;
-    result?: MaybeSignal<string>;
-    x?: MaybeSignal<number | string>;
-    y?: MaybeSignal<number | string>;
-    width?: MaybeSignal<number | string>;
-    height?: MaybeSignal<number | string>;
-}
-
-interface SVGFeFloodAttributes extends SVGCoreAttributes, SVGPresentationAttributes {
+    "flood-color"?: MaybeSignal<SVGColor>;
     floodColor?: MaybeSignal<SVGColor>;
+    "flood-opacity"?: MaybeSignal<number | string>;
     floodOpacity?: MaybeSignal<number | string>;
-    result?: MaybeSignal<string>;
-    x?: MaybeSignal<number | string>;
-    y?: MaybeSignal<number | string>;
-    width?: MaybeSignal<number | string>;
-    height?: MaybeSignal<number | string>;
 }
 
-interface SVGFeGaussianBlurAttributes extends SVGCoreAttributes {
+interface SVGFeFloodAttributes extends SVGFilterPrimitiveAttributes, SVGPresentationAttributes {
+    "flood-color"?: MaybeSignal<SVGColor>;
+    floodColor?: MaybeSignal<SVGColor>;
+    "flood-opacity"?: MaybeSignal<number | string>;
+    floodOpacity?: MaybeSignal<number | string>;
+}
+
+interface SVGFeGaussianBlurAttributes extends SVGFilterPrimitiveAttributes, SVGPresentationAttributes {
     in?: MaybeSignal<FilterIn>;
     stdDeviation?: MaybeSignal<number | string>;
     edgeMode?: MaybeSignal<"duplicate" | "wrap" | "none">;
-    result?: MaybeSignal<string>;
-    x?: MaybeSignal<number | string>;
-    y?: MaybeSignal<number | string>;
-    width?: MaybeSignal<number | string>;
-    height?: MaybeSignal<number | string>;
 }
 
-interface SVGFeImageAttributes extends SVGCoreAttributes, SVGPresentationAttributes {
+interface SVGFeImageAttributes extends SVGFilterPrimitiveAttributes, SVGPresentationAttributes {
     href?: MaybeSignal<string>;
     "xlink:href"?: MaybeSignal<string>;
     preserveAspectRatio?: MaybeSignal<PreserveAspectRatio>;
-    crossorigin?: MaybeSignal<"anonymous" | "use-credentials">;
-    result?: MaybeSignal<string>;
-    x?: MaybeSignal<number | string>;
-    y?: MaybeSignal<number | string>;
-    width?: MaybeSignal<number | string>;
-    height?: MaybeSignal<number | string>;
+    crossorigin?: MaybeSignal<CrossOrigin>;
 }
 
-interface SVGFeMergeAttributes extends SVGCoreAttributes {
-    result?: MaybeSignal<string>;
-    x?: MaybeSignal<number | string>;
-    y?: MaybeSignal<number | string>;
-    width?: MaybeSignal<number | string>;
-    height?: MaybeSignal<number | string>;
-}
+interface SVGFeMergeAttributes extends SVGFilterPrimitiveAttributes, SVGPresentationAttributes { }
 
 interface SVGFeMergeNodeAttributes extends SVGCoreAttributes {
     in?: MaybeSignal<FilterIn>;
 }
 
-interface SVGFeMorphologyAttributes extends SVGCoreAttributes {
+interface SVGFeMorphologyAttributes extends SVGFilterPrimitiveAttributes, SVGPresentationAttributes {
     in?: MaybeSignal<FilterIn>;
     operator?: MaybeSignal<"erode" | "dilate">;
     radius?: MaybeSignal<number | string>;
-    result?: MaybeSignal<string>;
-    x?: MaybeSignal<number | string>;
-    y?: MaybeSignal<number | string>;
-    width?: MaybeSignal<number | string>;
-    height?: MaybeSignal<number | string>;
 }
 
-interface SVGFeOffsetAttributes extends SVGCoreAttributes {
+interface SVGFeOffsetAttributes extends SVGFilterPrimitiveAttributes, SVGPresentationAttributes {
     in?: MaybeSignal<FilterIn>;
     dx?: MaybeSignal<number | string>;
     dy?: MaybeSignal<number | string>;
-    result?: MaybeSignal<string>;
-    x?: MaybeSignal<number | string>;
-    y?: MaybeSignal<number | string>;
-    width?: MaybeSignal<number | string>;
-    height?: MaybeSignal<number | string>;
 }
 
-interface SVGFeSpecularLightingAttributes extends SVGCoreAttributes, SVGPresentationAttributes {
+interface SVGFeSpecularLightingAttributes extends SVGFilterPrimitiveAttributes, SVGPresentationAttributes {
     in?: MaybeSignal<FilterIn>;
     surfaceScale?: MaybeSignal<number | string>;
     specularConstant?: MaybeSignal<number | string>;
     specularExponent?: MaybeSignal<number | string>;
-    result?: MaybeSignal<string>;
-    x?: MaybeSignal<number | string>;
-    y?: MaybeSignal<number | string>;
-    width?: MaybeSignal<number | string>;
-    height?: MaybeSignal<number | string>;
+    "lighting-color"?: MaybeSignal<SVGColor>;
+    lightingColor?: MaybeSignal<SVGColor>;
 }
 
-interface SVGFeTileAttributes extends SVGCoreAttributes {
+interface SVGFeTileAttributes extends SVGFilterPrimitiveAttributes, SVGPresentationAttributes {
     in?: MaybeSignal<FilterIn>;
-    result?: MaybeSignal<string>;
-    x?: MaybeSignal<number | string>;
-    y?: MaybeSignal<number | string>;
-    width?: MaybeSignal<number | string>;
-    height?: MaybeSignal<number | string>;
 }
 
-interface SVGFeTurbulenceAttributes extends SVGCoreAttributes {
+interface SVGFeTurbulenceAttributes extends SVGFilterPrimitiveAttributes, SVGPresentationAttributes {
     baseFrequency?: MaybeSignal<number | string>;
     numOctaves?: MaybeSignal<number>;
     seed?: MaybeSignal<number>;
     stitchTiles?: MaybeSignal<"stitch" | "noStitch">;
     type?: MaybeSignal<"fractalNoise" | "turbulence">;
-    result?: MaybeSignal<string>;
-    x?: MaybeSignal<number | string>;
-    y?: MaybeSignal<number | string>;
-    width?: MaybeSignal<number | string>;
-    height?: MaybeSignal<number | string>;
 }
 
 // Light source elements
@@ -693,14 +711,11 @@ interface SVGFeSpotLightAttributes extends SVGCoreAttributes {
     limitingConeAngle?: MaybeSignal<number | string>;
 }
 
-// Animation Elements
-interface SVGAnimateAttributes extends SVGCoreAttributes {
-    attributeName?: MaybeSignal<string>;
-    attributeType?: MaybeSignal<"CSS" | "XML" | "auto">;
-    from?: MaybeSignal<string>;
-    to?: MaybeSignal<string>;
-    by?: MaybeSignal<string>;
-    values?: MaybeSignal<string>;
+// =============================================================================
+// ANIMATION ELEMENTS (with href support)
+// =============================================================================
+
+interface SVGAnimationTimingAttributes {
     begin?: MaybeSignal<string>;
     dur?: MaybeSignal<string>;
     end?: MaybeSignal<string>;
@@ -710,45 +725,43 @@ interface SVGAnimateAttributes extends SVGCoreAttributes {
     repeatCount?: MaybeSignal<number | "indefinite">;
     repeatDur?: MaybeSignal<string>;
     fill?: MaybeSignal<"freeze" | "remove">;
+}
+
+interface SVGAnimationValueAttributes {
     calcMode?: MaybeSignal<"discrete" | "linear" | "paced" | "spline">;
+    values?: MaybeSignal<string>;
     keyTimes?: MaybeSignal<string>;
     keySplines?: MaybeSignal<string>;
+    from?: MaybeSignal<string>;
+    to?: MaybeSignal<string>;
+    by?: MaybeSignal<string>;
+}
+
+interface SVGAnimationAdditionAttributes {
     additive?: MaybeSignal<"replace" | "sum">;
     accumulate?: MaybeSignal<"none" | "sum">;
 }
 
-interface SVGAnimateMotionAttributes extends SVGCoreAttributes {
+interface SVGAnimationTargetAttributes {
+    href?: MaybeSignal<string>;
+    "xlink:href"?: MaybeSignal<string>;
+}
+
+interface SVGAnimateAttributes extends SVGCoreAttributes, SVGAnimationTimingAttributes, SVGAnimationValueAttributes, SVGAnimationAdditionAttributes, SVGAnimationTargetAttributes, SVGEventHandlers {
+    attributeName?: MaybeSignal<string>;
+    attributeType?: MaybeSignal<"CSS" | "XML" | "auto">;
+}
+
+interface SVGAnimateMotionAttributes extends SVGCoreAttributes, SVGAnimationTimingAttributes, SVGAnimationValueAttributes, SVGAnimationAdditionAttributes, SVGAnimationTargetAttributes, SVGEventHandlers {
     path?: MaybeSignal<string>;
     keyPoints?: MaybeSignal<string>;
     rotate?: MaybeSignal<"auto" | "auto-reverse" | number | string>;
     origin?: MaybeSignal<string>;
-    // Inherits animation timing attributes
-    begin?: MaybeSignal<string>;
-    dur?: MaybeSignal<string>;
-    end?: MaybeSignal<string>;
-    repeatCount?: MaybeSignal<number | "indefinite">;
-    repeatDur?: MaybeSignal<string>;
-    fill?: MaybeSignal<"freeze" | "remove">;
-    calcMode?: MaybeSignal<"discrete" | "linear" | "paced" | "spline">;
-    keyTimes?: MaybeSignal<string>;
-    keySplines?: MaybeSignal<string>;
 }
 
-interface SVGAnimateTransformAttributes extends SVGCoreAttributes {
+interface SVGAnimateTransformAttributes extends SVGCoreAttributes, SVGAnimationTimingAttributes, SVGAnimationValueAttributes, SVGAnimationAdditionAttributes, SVGAnimationTargetAttributes, SVGEventHandlers {
     attributeName?: MaybeSignal<string>;
     type?: MaybeSignal<"translate" | "scale" | "rotate" | "skewX" | "skewY">;
-    from?: MaybeSignal<string>;
-    to?: MaybeSignal<string>;
-    by?: MaybeSignal<string>;
-    values?: MaybeSignal<string>;
-    begin?: MaybeSignal<string>;
-    dur?: MaybeSignal<string>;
-    end?: MaybeSignal<string>;
-    repeatCount?: MaybeSignal<number | "indefinite">;
-    repeatDur?: MaybeSignal<string>;
-    fill?: MaybeSignal<"freeze" | "remove">;
-    additive?: MaybeSignal<"replace" | "sum">;
-    accumulate?: MaybeSignal<"none" | "sum">;
 }
 
 interface SVGMpathAttributes extends SVGCoreAttributes {
@@ -756,18 +769,9 @@ interface SVGMpathAttributes extends SVGCoreAttributes {
     "xlink:href"?: MaybeSignal<string>;
 }
 
-interface SVGSetAttributes extends SVGCoreAttributes {
+interface SVGSetAttributes extends SVGCoreAttributes, SVGAnimationTimingAttributes, SVGAnimationTargetAttributes, SVGEventHandlers {
     attributeName?: MaybeSignal<string>;
     to?: MaybeSignal<string>;
-    begin?: MaybeSignal<string>;
-    dur?: MaybeSignal<string>;
-    end?: MaybeSignal<string>;
-    min?: MaybeSignal<string>;
-    max?: MaybeSignal<string>;
-    restart?: MaybeSignal<"always" | "whenNotActive" | "never">;
-    repeatCount?: MaybeSignal<number | "indefinite">;
-    repeatDur?: MaybeSignal<string>;
-    fill?: MaybeSignal<"freeze" | "remove">;
 }
 
 // Descriptive Elements
@@ -788,6 +792,8 @@ interface SVGElementPropsMap {
     image: SVGImageAttributes;
     switch: SVGSwitchAttributes;
     foreignObject: SVGForeignObjectAttributes;
+    a: SVGAAttributes;
+    view: SVGViewAttributes;
 
     // Shapes
     rect: SVGRectAttributes;
@@ -873,15 +879,6 @@ type SVGChild =
 // SVG FACTORY TYPES
 // =============================================================================
 
-/**
- * Factory for SVG container elements (can have children)
- * 
- * Signatures:
- * - (props, children) - props object + function children
- * - (props) - props only
- * - (children) - function children only
- * - () - no arguments
- */
 interface SVGElementFactory<K extends keyof SVGElementPropsMap> {
     (props: SVGElementPropsMap[K], children: () => void): SVGElement;
     (children: () => void): SVGElement;
@@ -889,24 +886,10 @@ interface SVGElementFactory<K extends keyof SVGElementPropsMap> {
     (): SVGElement;
 }
 
-/**
- * Factory for SVG void elements (no children allowed)
- */
 interface SVGVoidElementFactory<K extends keyof SVGElementPropsMap> {
     (props?: SVGElementPropsMap[K]): SVGElement;
 }
 
-/**
- * Factory for SVG text elements (can have text content or tspan children)
- * 
- * Signatures:
- * - (props, text) - props + text content
- * - (props, children) - props + tspan children
- * - (props) - props only
- * - (text) - text content only
- * - (signal) - reactive text
- * - () - no arguments
- */
 interface SVGTextElementFactory<K extends keyof SVGElementPropsMap> {
     (props: SVGElementPropsMap[K], text: string | number | Signal<unknown>): SVGElement;
     (props: SVGElementPropsMap[K], children: () => void): SVGElement;
@@ -920,6 +903,7 @@ interface SVGTextElementFactory<K extends keyof SVGElementPropsMap> {
 // =============================================================================
 
 const SVG_NS = "http://www.w3.org/2000/svg";
+const XLINK_NS = "http://www.w3.org/1999/xlink";
 
 class SVGCaptureContext implements Context {
     nodes: Node[] = [];
@@ -928,6 +912,50 @@ class SVGCaptureContext implements Context {
         return node;
     }
 }
+
+/**
+ * Map of camelCase to kebab-case for presentation attributes
+ */
+const CAMEL_TO_KEBAB: Record<string, string> = {
+    fillOpacity: "fill-opacity",
+    fillRule: "fill-rule",
+    strokeOpacity: "stroke-opacity",
+    strokeWidth: "stroke-width",
+    strokeLinecap: "stroke-linecap",
+    strokeLinejoin: "stroke-linejoin",
+    strokeDasharray: "stroke-dasharray",
+    strokeDashoffset: "stroke-dashoffset",
+    strokeMiterlimit: "stroke-miterlimit",
+    clipPath: "clip-path",
+    clipRule: "clip-rule",
+    colorInterpolation: "color-interpolation",
+    colorInterpolationFilters: "color-interpolation-filters",
+    fontFamily: "font-family",
+    fontSize: "font-size",
+    fontStyle: "font-style",
+    fontWeight: "font-weight",
+    fontVariant: "font-variant",
+    fontStretch: "font-stretch",
+    textAnchor: "text-anchor",
+    dominantBaseline: "dominant-baseline",
+    letterSpacing: "letter-spacing",
+    wordSpacing: "word-spacing",
+    textDecoration: "text-decoration",
+    shapeRendering: "shape-rendering",
+    textRendering: "text-rendering",
+    imageRendering: "image-rendering",
+    pointerEvents: "pointer-events",
+    transformOrigin: "transform-origin",
+    vectorEffect: "vector-effect",
+    markerStart: "marker-start",
+    markerMid: "marker-mid",
+    markerEnd: "marker-end",
+    stopColor: "stop-color",
+    stopOpacity: "stop-opacity",
+    floodColor: "flood-color",
+    floodOpacity: "flood-opacity",
+    lightingColor: "lighting-color",
+};
 
 function applySVGProps(element: SVGElement, props: Record<string, unknown>): void {
     for (const [key, value] of Object.entries(props)) {
@@ -938,17 +966,24 @@ function applySVGProps(element: SVGElement, props: Record<string, unknown>): voi
             element.addEventListener(eventName, value as EventListener);
         } else if (isSignal(value)) {
             effect(() => {
-                element.setAttribute(key, String((value as Signal<unknown>).value));
+                const attrName = CAMEL_TO_KEBAB[key] ?? key;
+                if (key.startsWith("xlink:")) {
+                    element.setAttributeNS(XLINK_NS, key, String((value as Signal<unknown>).value));
+                } else {
+                    element.setAttribute(attrName, String((value as Signal<unknown>).value));
+                }
             });
         } else {
-            element.setAttribute(key, String(value));
+            const attrName = CAMEL_TO_KEBAB[key] ?? key;
+            if (key.startsWith("xlink:")) {
+                element.setAttributeNS(XLINK_NS, key, String(value));
+            } else {
+                element.setAttribute(attrName, String(value));
+            }
         }
     }
 }
 
-/**
- * Check if value is a props object (not a function child)
- */
 function isSVGPropsObject(value: unknown): value is Record<string, unknown> {
     return (
         typeof value === "object" &&
@@ -958,9 +993,6 @@ function isSVGPropsObject(value: unknown): value is Record<string, unknown> {
     );
 }
 
-/**
- * Factory for SVG container elements (can have children)
- */
 function createSVGElement<K extends keyof SVGElementPropsMap>(
     tag: string
 ): SVGElementFactory<K> {
@@ -973,24 +1005,19 @@ function createSVGElement<K extends keyof SVGElementPropsMap>(
         let props: Record<string, unknown> | null = null;
         let childrenFn: (() => void) | null = null;
 
-        // Parse arguments
         if (typeof arg1 === "function") {
-            // (children: () => void)
             childrenFn = arg1;
         } else if (isSVGPropsObject(arg1)) {
-            // (props, children?) or (props)
             props = arg1 as Record<string, unknown>;
             if (typeof arg2 === "function") {
                 childrenFn = arg2;
             }
         }
 
-        // Apply props
         if (props) {
             applySVGProps(element, props);
         }
 
-        // Process children
         if (childrenFn) {
             const captureCtx = new SVGCaptureContext();
             pushContext(captureCtx);
@@ -1009,9 +1036,6 @@ function createSVGElement<K extends keyof SVGElementPropsMap>(
     }) as SVGElementFactory<K>;
 }
 
-/**
- * Factory for SVG void elements (no children)
- */
 function createSVGVoidElement<K extends keyof SVGElementPropsMap>(
     tag: string
 ): SVGVoidElementFactory<K> {
@@ -1025,9 +1049,6 @@ function createSVGVoidElement<K extends keyof SVGElementPropsMap>(
     };
 }
 
-/**
- * Factory for SVG text elements (can have text content)
- */
 function createSVGTextElement<K extends keyof SVGElementPropsMap>(
     tag: string
 ): SVGTextElementFactory<K> {
@@ -1038,15 +1059,12 @@ function createSVGTextElement<K extends keyof SVGElementPropsMap>(
         const element = document.createElementNS(SVG_NS, tag);
 
         if (typeof arg1 === "string" || typeof arg1 === "number") {
-            // (text)
             element.textContent = String(arg1);
         } else if (isSignal(arg1)) {
-            // (signal)
             effect(() => {
                 element.textContent = String(arg1.value);
             });
         } else if (isSVGPropsObject(arg1)) {
-            // (props, text?) or (props, children?)
             applySVGProps(element, arg1 as Record<string, unknown>);
 
             if (typeof arg2 === "string" || typeof arg2 === "number") {
@@ -1056,7 +1074,6 @@ function createSVGTextElement<K extends keyof SVGElementPropsMap>(
                     element.textContent = String(arg2.value);
                 });
             } else if (typeof arg2 === "function") {
-                // Children function for nested tspans
                 const captureCtx = new SVGCaptureContext();
                 pushContext(captureCtx);
                 try {
@@ -1088,6 +1105,8 @@ export const use = createSVGVoidElement<"use">("use");
 export const image = createSVGVoidElement<"image">("image");
 export const svgSwitch = createSVGElement<"switch">("switch");
 export const foreignObject = createSVGElement<"foreignObject">("foreignObject");
+export const a = createSVGElement<"a">("a");
+export const view = createSVGVoidElement<"view">("view");
 
 // Basic Shapes
 export const rect = createSVGVoidElement<"rect">("rect");
@@ -1162,6 +1181,7 @@ export type {
     // Core
     SVGPresentationAttributes,
     SVGCoreAttributes,
+    SVGConditionalProcessingAttributes,
     SVGEventHandlers,
 
     // Elements
@@ -1172,6 +1192,8 @@ export type {
     SVGUseAttributes,
     SVGImageAttributes,
     SVGForeignObjectAttributes,
+    SVGAAttributes,
+    SVGViewAttributes,
 
     // Shapes
     SVGRectAttributes,
@@ -1200,11 +1222,17 @@ export type {
 
     // Filters
     SVGFilterAttributes,
+    SVGFilterPrimitiveAttributes,
     SVGFeGaussianBlurAttributes,
     SVGFeDropShadowAttributes,
+    SVGFeBlendAttributes,
+    SVGFeColorMatrixAttributes,
+    SVGFeCompositeAttributes,
+    SVGFeOffsetAttributes,
 
     // Animation
     SVGAnimateAttributes,
     SVGAnimateMotionAttributes,
     SVGAnimateTransformAttributes,
+    SVGSetAttributes,
 };
