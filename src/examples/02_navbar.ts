@@ -24,8 +24,8 @@ function NavLink(text: string, href: string) {
       fontSize: "0.95rem",
       transition: "color 0.2s"
     },
-    onmouseover: (e) => e.target.style.color = "#000",
-    onmouseout: (e) => e.target.style.color = "#666"
+    onmouseover: (e) => (e.target as HTMLElement).style.color = "#000",
+    onmouseout: (e) => (e.target as HTMLElement).style.color = "#666"
   }, text);
 }
 
@@ -41,7 +41,7 @@ export function Navbar() {
     }
   }, () => {
     // Logo
-    h3({ style: { margin: 0, fontSize: "1.5rem" } }, "Flick");
+    h3({ style: { margin: "0", fontSize: "1.5rem" } }, "Flick");
 
     // Links container
     div({ style: { display: "flex", gap: "2rem", alignItems: "center" } }, () => {
