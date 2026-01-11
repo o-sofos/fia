@@ -508,11 +508,6 @@ interface StrictCSSProperties {
   scrollPadding?: CSSLength;
   scrollSnapType?: string;
   scrollSnapAlign?: string;
-
-  // SVG-related
-  fill?: CSSColor;
-  stroke?: CSSColor;
-  strokeWidth?: CSSLength;
 }
 
 // =============================================================================
