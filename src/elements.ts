@@ -197,7 +197,8 @@ function applyStyle(element: HTMLElement, value: unknown): void {
     element.setAttribute("style", value);
   } else if (typeof value === "object" && value !== null) {
     for (const [prop, val] of Object.entries(value as Record<string, string>)) {
-      element.style.setProperty(prop, val);
+      // Use direct assignment to support camelCase properties (e.g. flexDirection)
+      (element.style as any)[prop] = val;
     }
   }
 }
