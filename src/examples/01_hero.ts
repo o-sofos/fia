@@ -73,5 +73,7 @@ export function Hero() {
   });
 }
 
-// Render the component
-Hero();
+// Only run if executed directly
+if (import.meta.main) {
+  Hero();
+}
