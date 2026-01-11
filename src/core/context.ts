@@ -3,6 +3,8 @@
  *
  * Manages the parent element stack for automatic child mounting.
  * Elements created inside a parent's callback are automatically appended.
+ * 
+ * Stack based LIFO system
  */
 
 /**
