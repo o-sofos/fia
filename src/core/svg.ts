@@ -5,7 +5,7 @@
  * SVG elements require a different namespace than HTML elements.
  */
 
-import { getCurrentContext, pushContext, popContext, type Context } from "./context";
+import { getCurrentExecutionContext, pushExecutionContext, popExecutionContext, type ExecutionContext } from "./context";
 import { effect, type Signal } from "./reactivity";
 
 // =============================================================================
@@ -905,7 +905,7 @@ interface SVGTextElementFactory<K extends keyof SVGElementPropsMap> {
 const SVG_NS = "http://www.w3.org/2000/svg";
 const XLINK_NS = "http://www.w3.org/1999/xlink";
 
-class SVGCaptureContext implements Context {
+class SVGCaptureContext implements ExecutionContext {
     nodes: Node[] = [];
     appendChild(node: Node): Node {
         this.nodes.push(node);
@@ -1020,18 +1020,18 @@ function createSVGElement<K extends keyof SVGElementPropsMap>(
 
         if (childrenFn) {
             const captureCtx = new SVGCaptureContext();
-            pushContext(captureCtx);
+            pushExecutionContext(captureCtx);
             try {
                 childrenFn();
             } finally {
-                popContext();
+                popExecutionContext();
             }
             for (const node of captureCtx.nodes) {
                 element.appendChild(node);
             }
         }
 
-        getCurrentContext().appendChild(element);
+        getCurrentExecutionContext().appendChild(element);
         return element;
     }) as SVGElementFactory<K>;
 }
@@ -1044,7 +1044,7 @@ function createSVGVoidElement<K extends keyof SVGElementPropsMap>(
         if (props) {
             applySVGProps(element, props as Record<string, unknown>);
         }
-        getCurrentContext().appendChild(element);
+        getCurrentExecutionContext().appendChild(element);
         return element;
     };
 }
@@ -1075,11 +1075,11 @@ function createSVGTextElement<K extends keyof SVGElementPropsMap>(
                 });
             } else if (typeof arg2 === "function") {
                 const captureCtx = new SVGCaptureContext();
-                pushContext(captureCtx);
+                pushExecutionContext(captureCtx);
                 try {
                     arg2();
                 } finally {
-                    popContext();
+                    popExecutionContext();
                 }
                 for (const node of captureCtx.nodes) {
                     element.appendChild(node);
@@ -1087,7 +1087,7 @@ function createSVGTextElement<K extends keyof SVGElementPropsMap>(
             }
         }
 
-        getCurrentContext().appendChild(element);
+        getCurrentExecutionContext().appendChild(element);
         return element;
     }) as SVGTextElementFactory<K>;
 }

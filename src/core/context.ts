@@ -1,5 +1,5 @@
 /**
- * Flick Context System
+ * Flick Context Execution System
  *
  * Manages the parent element stack for automatic child mounting.
  * Elements created inside a parent's callback are automatically appended.
@@ -9,42 +9,42 @@
  * Interface for any object that can act as a parent context.
  * Usually an HTMLElement, but can be a proxy for reactive blocks.
  */
-export interface Context {
+export interface ExecutionContext {
   appendChild(node: Node): Node;
 }
 
 /** Stack of parent elements/contexts */
-const contextStack: Context[] = [];
+const executionContextStack: ExecutionContext[] = [];
 
 /**
- * Push a context onto the stack
+ * Push an execution context onto the stack
  * @internal
  */
-export function pushContext(context: Context): void {
-  contextStack.push(context);
+export function pushExecutionContext(context: ExecutionContext): void {
+  executionContextStack.push(context);
 }
 
 /**
- * Pop the top context
+ * Pop the top execution context
  * @internal
  */
-export function popContext(): void {
-  contextStack.pop();
+export function popExecutionContext(): void {
+  executionContextStack.pop();
 }
 
 /**
- * Get the current parent context
+ * Get the current execution context
  * Returns document.body if no context is set
  * @internal
  */
-export function getCurrentContext(): Context {
-  return contextStack[contextStack.length - 1] ?? document.body;
+export function getCurrentExecutionContext(): ExecutionContext {
+  return executionContextStack[executionContextStack.length - 1] ?? document.body;
 }
 
 /**
- * Check if we're inside a context (not at root level)
+ * Check if we're inside an execution context (not at root level)
  * @internal
  */
-export function hasContext(): boolean {
-  return contextStack.length > 0;
+export function hasExecutionContext(): boolean {
+  return executionContextStack.length > 0;
 }

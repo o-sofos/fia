@@ -5,14 +5,14 @@
  * Full TypeScript autocomplete with strict attribute types.
  */
 
-import { pushContext, popContext, getCurrentContext, type Context } from "./context";
+import { pushExecutionContext, popExecutionContext, getCurrentExecutionContext, type ExecutionContext } from "./context";
 import { effect, type Signal } from "./reactivity";
 
 // =============================================================================
 // CAPTURE CONTEXT
 // =============================================================================
 
-class CaptureContext implements Context {
+class CaptureContext implements ExecutionContext {
   nodes: Node[] = [];
   appendChild(node: Node): Node {
     this.nodes.push(node);
@@ -1110,7 +1110,7 @@ export interface VoidElementFactory<K extends keyof HTMLElementTagNameMap> {
 // CHILD HANDLING
 // =============================================================================
 
-function appendChild(parent: HTMLElement | Context, child: Child | ((el: any) => void)): void {
+function appendChild(parent: HTMLElement | ExecutionContext, child: Child | ((el: any) => void)): void {
   if (child === null || child === undefined || child === false || child === true) {
     return;
   }
@@ -1153,11 +1153,11 @@ function appendChild(parent: HTMLElement | Context, child: Child | ((el: any) =>
       activeNodes = [];
 
       const captureCtx = new CaptureContext();
-      pushContext(captureCtx);
+      pushExecutionContext(captureCtx);
       try {
         (child as () => void)();
       } finally {
-        popContext();
+        popExecutionContext();
       }
 
       if (typeof (target as HTMLElement).insertBefore === "function") {
@@ -1379,7 +1379,7 @@ function createElement<K extends keyof HTMLElementTagNameMap>(
       appendChild(element, child);
     }
 
-    getCurrentContext().appendChild(element);
+    getCurrentExecutionContext().appendChild(element);
 
     return element;
   };
@@ -1395,7 +1395,7 @@ function createVoidElement<K extends keyof HTMLElementTagNameMap>(
       applyProps(element, props);
     }
 
-    getCurrentContext().appendChild(element);
+    getCurrentExecutionContext().appendChild(element);
 
     return element;
   };

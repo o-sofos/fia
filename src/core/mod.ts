@@ -85,11 +85,11 @@ export {
 // =============================================================================
 
 export {
-    pushContext,
-    popContext,
-    getCurrentContext,
-    hasContext,
-    type Context,
+    pushExecutionContext as pushContext,
+    popExecutionContext as popContext,
+    getCurrentExecutionContext as getCurrentContext,
+    hasExecutionContext as hasContext,
+    type ExecutionContext as Context,
 } from "./context";
 
 // =============================================================================
