@@ -28,8 +28,6 @@ export function isSignal(value: unknown): value is Signal<unknown> {
   if (value === null || value === undefined) {
     return false;
   }
-  // Signal is a function with a .value getter
-  // Must be a function (our signals are callable) with a value getter
   if (typeof value !== "function") {
     return false;
   }
@@ -44,7 +42,6 @@ export type Renderable = string | number | boolean | null | undefined;
 export type Child =
   | string
   | number
-  | boolean
   | boolean
   | Signal<Renderable>
   | (() => void)
@@ -89,7 +86,7 @@ type ReferrerPolicy =
   | "no-referrer" | "no-referrer-when-downgrade" | "origin" | "origin-when-cross-origin"
   | "same-origin" | "strict-origin" | "strict-origin-when-cross-origin" | "unsafe-url" | "";
 
-type Target = "_self" | "_blank" | "_parent" | "_top";
+type Target = "_self" | "_blank" | "_parent" | "_top" | (string & {});
 
 type Dir = "ltr" | "rtl" | "auto";
 
@@ -100,7 +97,24 @@ type ThScope = "row" | "col" | "rowgroup" | "colgroup";
 type Autocomplete =
   | "off" | "on" | "name" | "email" | "username" | "new-password" | "current-password"
   | "one-time-code" | "organization" | "street-address" | "country" | "country-name"
-  | "postal-code" | "cc-name" | "cc-number" | "cc-exp" | "cc-csc" | "tel" | "url";
+  | "postal-code" | "cc-name" | "cc-number" | "cc-exp" | "cc-csc" | "tel" | "url"
+  | (string & {});
+
+type TrackKind = "subtitles" | "captions" | "descriptions" | "chapters" | "metadata";
+
+type LinkAs = "audio" | "document" | "embed" | "fetch" | "font" | "image" | "object" | "script" | "style" | "track" | "video" | "worker";
+
+type HttpEquiv = "content-type" | "default-style" | "refresh" | "x-ua-compatible" | "content-security-policy";
+
+type AreaShape = "rect" | "circle" | "poly" | "default";
+
+type Sandbox =
+  | "allow-downloads" | "allow-forms" | "allow-modals" | "allow-orientation-lock"
+  | "allow-pointer-lock" | "allow-popups" | "allow-popups-to-escape-sandbox"
+  | "allow-presentation" | "allow-same-origin" | "allow-scripts"
+  | "allow-top-navigation" | "allow-top-navigation-by-user-activation"
+  | "allow-top-navigation-to-custom-protocols"
+  | (string & {});
 
 // =============================================================================
 // STRICT CSS TYPES
@@ -485,7 +499,6 @@ interface StrictCSSProperties {
   columns?: string;
   columnCount?: "auto" | number | CSSGlobalValues;
   columnWidth?: CSSLength;
-  // columnGap?: CSSGap;
   columnRule?: string;
   columnRuleWidth?: CSSLength;
   columnRuleStyle?: CSSBorderStyle;
@@ -553,11 +566,39 @@ interface GlobalAttributes {
   autoCapitalize?: MaybeSignal<AutoCapitalize>;
 
   // Boolean
-  hidden?: MaybeSignal<boolean>;
+  hidden?: MaybeSignal<boolean | "until-found">;
   inert?: MaybeSignal<boolean>;
 
   // Popover
   popover?: MaybeSignal<"auto" | "manual">;
+
+  // Security
+  nonce?: MaybeSignal<string>;
+
+  // Translation
+  translate?: MaybeSignal<"yes" | "no">;
+
+  // Microdata
+  itemScope?: MaybeSignal<boolean>;
+  itemType?: MaybeSignal<string>;
+  itemId?: MaybeSignal<string>;
+  itemProp?: MaybeSignal<string>;
+  itemRef?: MaybeSignal<string>;
+
+  // Custom element
+  is?: MaybeSignal<string>;
+
+  // Part (for shadow DOM styling)
+  part?: MaybeSignal<string>;
+
+  // Slot
+  slot?: MaybeSignal<string>;
+
+  // Export parts
+  exportparts?: MaybeSignal<string>;
+
+  // Anchor positioning (new)
+  anchor?: MaybeSignal<string>;
 }
 
 type DataAttributes = { [K in `data-${string}`]?: MaybeSignal<string | number | boolean> };
@@ -592,6 +633,17 @@ interface InputAttrs extends GlobalAttributes {
   size?: MaybeSignal<number>;
   list?: MaybeSignal<string>;
   form?: MaybeSignal<string>;
+  formAction?: MaybeSignal<string>;
+  formMethod?: MaybeSignal<FormMethod>;
+  formEnctype?: MaybeSignal<FormEnctype>;
+  formNoValidate?: MaybeSignal<boolean>;
+  formTarget?: MaybeSignal<Target>;
+  width?: MaybeSignal<number>;
+  height?: MaybeSignal<number>;
+  src?: MaybeSignal<string>;
+  alt?: MaybeSignal<string>;
+  capture?: MaybeSignal<"user" | "environment" | boolean>;
+  dirname?: MaybeSignal<string>;
 }
 
 interface TextAreaAttrs extends GlobalAttributes {
@@ -610,6 +662,7 @@ interface TextAreaAttrs extends GlobalAttributes {
   maxLength?: MaybeSignal<number>;
   wrap?: MaybeSignal<Wrap>;
   form?: MaybeSignal<string>;
+  dirname?: MaybeSignal<string>;
 }
 
 interface SelectAttrs extends GlobalAttributes {
@@ -630,6 +683,11 @@ interface OptionAttrs extends GlobalAttributes {
   label?: MaybeSignal<string>;
 }
 
+interface OptgroupAttrs extends GlobalAttributes {
+  label?: MaybeSignal<string>;
+  disabled?: MaybeSignal<boolean>;
+}
+
 interface ButtonAttrs extends GlobalAttributes {
   type?: MaybeSignal<ButtonType>;
   name?: MaybeSignal<string>;
@@ -644,6 +702,8 @@ interface ButtonAttrs extends GlobalAttributes {
   formTarget?: MaybeSignal<Target>;
   popoverTarget?: MaybeSignal<string>;
   popoverTargetAction?: MaybeSignal<"toggle" | "show" | "hide">;
+  commandfor?: MaybeSignal<string>;
+  command?: MaybeSignal<string>;
 }
 
 interface FormAttrs extends GlobalAttributes {
@@ -654,10 +714,26 @@ interface FormAttrs extends GlobalAttributes {
   noValidate?: MaybeSignal<boolean>;
   autocomplete?: MaybeSignal<"on" | "off">;
   name?: MaybeSignal<string>;
+  acceptCharset?: MaybeSignal<string>;
+  rel?: MaybeSignal<string>;
 }
 
 interface LabelAttrs extends GlobalAttributes {
   htmlFor?: MaybeSignal<string>;
+  for?: MaybeSignal<string>;
+}
+
+interface FieldsetAttrs extends GlobalAttributes {
+  disabled?: MaybeSignal<boolean>;
+  form?: MaybeSignal<string>;
+  name?: MaybeSignal<string>;
+}
+
+interface OutputAttrs extends GlobalAttributes {
+  htmlFor?: MaybeSignal<string>;
+  for?: MaybeSignal<string>;
+  form?: MaybeSignal<string>;
+  name?: MaybeSignal<string>;
 }
 
 interface AnchorAttrs extends GlobalAttributes {
@@ -669,6 +745,7 @@ interface AnchorAttrs extends GlobalAttributes {
   type?: MaybeSignal<string>;
   referrerPolicy?: MaybeSignal<ReferrerPolicy>;
   ping?: MaybeSignal<string>;
+  attributionSrc?: MaybeSignal<string>;
 }
 
 interface ImgAttrs extends GlobalAttributes {
@@ -685,12 +762,14 @@ interface ImgAttrs extends GlobalAttributes {
   isMap?: MaybeSignal<boolean>;
   referrerPolicy?: MaybeSignal<ReferrerPolicy>;
   fetchPriority?: MaybeSignal<FetchPriority>;
+  elementTiming?: MaybeSignal<string>;
+  attributionSrc?: MaybeSignal<string>;
 }
 
 interface VideoAttrs extends GlobalAttributes {
   src?: MaybeSignal<string>;
-  width?: MaybeSignal<number>;
-  height?: MaybeSignal<number>;
+  width?: MaybeSignal<number | string>;
+  height?: MaybeSignal<number | string>;
   poster?: MaybeSignal<string>;
   preload?: MaybeSignal<Preload>;
   autoplay?: MaybeSignal<boolean>;
@@ -701,6 +780,9 @@ interface VideoAttrs extends GlobalAttributes {
   crossOrigin?: MaybeSignal<CrossOrigin>;
   currentTime?: MaybeSignal<number>;
   volume?: MaybeSignal<number>;
+  disablePictureInPicture?: MaybeSignal<boolean>;
+  disableRemotePlayback?: MaybeSignal<boolean>;
+  controlsList?: MaybeSignal<string>;
 }
 
 interface AudioAttrs extends GlobalAttributes {
@@ -713,6 +795,26 @@ interface AudioAttrs extends GlobalAttributes {
   crossOrigin?: MaybeSignal<CrossOrigin>;
   currentTime?: MaybeSignal<number>;
   volume?: MaybeSignal<number>;
+  disableRemotePlayback?: MaybeSignal<boolean>;
+  controlsList?: MaybeSignal<string>;
+}
+
+interface SourceAttrs extends GlobalAttributes {
+  src?: MaybeSignal<string>;
+  type?: MaybeSignal<string>;
+  srcset?: MaybeSignal<string>;
+  sizes?: MaybeSignal<string>;
+  media?: MaybeSignal<string>;
+  width?: MaybeSignal<number>;
+  height?: MaybeSignal<number>;
+}
+
+interface TrackAttrs extends GlobalAttributes {
+  src?: MaybeSignal<string>;
+  kind?: MaybeSignal<TrackKind>;
+  srclang?: MaybeSignal<string>;
+  label?: MaybeSignal<string>;
+  default?: MaybeSignal<boolean>;
 }
 
 interface CanvasAttrs extends GlobalAttributes {
@@ -727,9 +829,46 @@ interface IframeAttrs extends GlobalAttributes {
   width?: MaybeSignal<number | string>;
   height?: MaybeSignal<number | string>;
   loading?: MaybeSignal<Loading>;
-  sandbox?: MaybeSignal<string>;
+  sandbox?: MaybeSignal<Sandbox | string>;
   allow?: MaybeSignal<string>;
   referrerPolicy?: MaybeSignal<ReferrerPolicy>;
+  allowFullscreen?: MaybeSignal<boolean>;
+  credentialless?: MaybeSignal<boolean>;
+  csp?: MaybeSignal<string>;
+}
+
+interface EmbedAttrs extends GlobalAttributes {
+  src?: MaybeSignal<string>;
+  type?: MaybeSignal<string>;
+  width?: MaybeSignal<number | string>;
+  height?: MaybeSignal<number | string>;
+}
+
+interface ObjectAttrs extends GlobalAttributes {
+  data?: MaybeSignal<string>;
+  type?: MaybeSignal<string>;
+  name?: MaybeSignal<string>;
+  width?: MaybeSignal<number | string>;
+  height?: MaybeSignal<number | string>;
+  form?: MaybeSignal<string>;
+  useMap?: MaybeSignal<string>;
+}
+
+interface MapAttrs extends GlobalAttributes {
+  name?: MaybeSignal<string>;
+}
+
+interface AreaAttrs extends GlobalAttributes {
+  alt?: MaybeSignal<string>;
+  coords?: MaybeSignal<string>;
+  download?: MaybeSignal<string | boolean>;
+  href?: MaybeSignal<string>;
+  hreflang?: MaybeSignal<string>;
+  ping?: MaybeSignal<string>;
+  referrerPolicy?: MaybeSignal<ReferrerPolicy>;
+  rel?: MaybeSignal<string>;
+  shape?: MaybeSignal<AreaShape>;
+  target?: MaybeSignal<Target>;
 }
 
 interface ProgressAttrs extends GlobalAttributes {
@@ -748,6 +887,10 @@ interface MeterAttrs extends GlobalAttributes {
 
 interface TimeAttrs extends GlobalAttributes {
   dateTime?: MaybeSignal<string>;
+}
+
+interface DataElemAttrs extends GlobalAttributes {
+  value?: MaybeSignal<string>;
 }
 
 interface DialogAttrs extends GlobalAttributes {
@@ -770,8 +913,25 @@ interface ThAttrs extends TableCellAttrs {
   abbr?: MaybeSignal<string>;
 }
 
+interface ColAttrs extends GlobalAttributes {
+  span?: MaybeSignal<number>;
+}
+
+interface ColgroupAttrs extends GlobalAttributes {
+  span?: MaybeSignal<number>;
+}
+
 interface BlockquoteAttrs extends GlobalAttributes {
   cite?: MaybeSignal<string>;
+}
+
+interface QAttrs extends GlobalAttributes {
+  cite?: MaybeSignal<string>;
+}
+
+interface ModAttrs extends GlobalAttributes {
+  cite?: MaybeSignal<string>;
+  dateTime?: MaybeSignal<string>;
 }
 
 interface OlAttrs extends GlobalAttributes {
@@ -784,34 +944,141 @@ interface LiAttrs extends GlobalAttributes {
   value?: MaybeSignal<number>;
 }
 
+interface LinkAttrs extends GlobalAttributes {
+  href?: MaybeSignal<string>;
+  rel?: MaybeSignal<string>;
+  type?: MaybeSignal<string>;
+  media?: MaybeSignal<string>;
+  as?: MaybeSignal<LinkAs>;
+  crossOrigin?: MaybeSignal<CrossOrigin>;
+  integrity?: MaybeSignal<string>;
+  referrerPolicy?: MaybeSignal<ReferrerPolicy>;
+  sizes?: MaybeSignal<string>;
+  disabled?: MaybeSignal<boolean>;
+  hreflang?: MaybeSignal<string>;
+  fetchPriority?: MaybeSignal<FetchPriority>;
+  imageSrcset?: MaybeSignal<string>;
+  imageSizes?: MaybeSignal<string>;
+  blocking?: MaybeSignal<"render">;
+  color?: MaybeSignal<string>;
+}
+
+interface MetaAttrs extends GlobalAttributes {
+  name?: MaybeSignal<string>;
+  content?: MaybeSignal<string>;
+  charset?: MaybeSignal<string>;
+  httpEquiv?: MaybeSignal<HttpEquiv | string>;
+  media?: MaybeSignal<string>;
+}
+
+interface BaseAttrs extends GlobalAttributes {
+  href?: MaybeSignal<string>;
+  target?: MaybeSignal<Target>;
+}
+
+interface ScriptAttrs extends GlobalAttributes {
+  src?: MaybeSignal<string>;
+  type?: MaybeSignal<string>;
+  async?: MaybeSignal<boolean>;
+  defer?: MaybeSignal<boolean>;
+  crossOrigin?: MaybeSignal<CrossOrigin>;
+  integrity?: MaybeSignal<string>;
+  noModule?: MaybeSignal<boolean>;
+  referrerPolicy?: MaybeSignal<ReferrerPolicy>;
+  fetchPriority?: MaybeSignal<FetchPriority>;
+  blocking?: MaybeSignal<"render">;
+  attributionSrc?: MaybeSignal<string>;
+}
+
+interface StyleAttrs extends GlobalAttributes {
+  media?: MaybeSignal<string>;
+  blocking?: MaybeSignal<"render">;
+}
+
+interface SlotAttrs extends GlobalAttributes {
+  name?: MaybeSignal<string>;
+}
+
+interface TemplateAttrs extends GlobalAttributes {
+  shadowrootmode?: MaybeSignal<"open" | "closed">;
+  shadowrootdelegatesfocus?: MaybeSignal<boolean>;
+  shadowrootclonable?: MaybeSignal<boolean>;
+  shadowrootserializable?: MaybeSignal<boolean>;
+}
+
 // =============================================================================
 // ELEMENT PROPS MAP
 // =============================================================================
 
 interface ElementPropsMap {
+  // Form elements
   input: InputAttrs;
   textarea: TextAreaAttrs;
   select: SelectAttrs;
   option: OptionAttrs;
+  optgroup: OptgroupAttrs;
   button: ButtonAttrs;
   form: FormAttrs;
   label: LabelAttrs;
+  fieldset: FieldsetAttrs;
+  output: OutputAttrs;
+
+  // Links & navigation
   a: AnchorAttrs;
+
+  // Media
   img: ImgAttrs;
   video: VideoAttrs;
   audio: AudioAttrs;
+  source: SourceAttrs;
+  track: TrackAttrs;
   canvas: CanvasAttrs;
+
+  // Embedded content
   iframe: IframeAttrs;
+  embed: EmbedAttrs;
+  object: ObjectAttrs;
+  map: MapAttrs;
+  area: AreaAttrs;
+
+  // Progress & Meter
   progress: ProgressAttrs;
   meter: MeterAttrs;
+
+  // Time & Data
   time: TimeAttrs;
+  data: DataElemAttrs;
+
+  // Interactive
   dialog: DialogAttrs;
   details: DetailsAttrs;
+
+  // Table
   td: TableCellAttrs;
   th: ThAttrs;
+  col: ColAttrs;
+  colgroup: ColgroupAttrs;
+
+  // Quotes & modifications
   blockquote: BlockquoteAttrs;
+  q: QAttrs;
+  ins: ModAttrs;
+  del: ModAttrs;
+
+  // Lists
   ol: OlAttrs;
   li: LiAttrs;
+
+  // Document metadata
+  link: LinkAttrs;
+  meta: MetaAttrs;
+  base: BaseAttrs;
+  script: ScriptAttrs;
+  style: StyleAttrs;
+
+  // Web components
+  slot: SlotAttrs;
+  template: TemplateAttrs;
 }
 
 // =============================================================================
@@ -828,23 +1095,13 @@ export type ElementProps<K extends keyof HTMLElementTagNameMap> =
 // ELEMENT FACTORY TYPES
 // =============================================================================
 
-/**
- * Factory for normal elements (can have children)
- */
 export interface ElementFactory<K extends keyof HTMLElementTagNameMap> {
-  // Overload: Text content + Click handler (for convenient buttons)
   (content: MaybeSignal<string | number>, onclick: (event: MouseEvent) => void): HTMLElementTagNameMap[K];
-  // Overload: Text content + Props (convenience)
   (content: MaybeSignal<string | number>, props: ElementProps<K>): HTMLElementTagNameMap[K];
-  // Standard signatures
   (props: ElementProps<K>, ...children: (Child | ((ref: HTMLElementTagNameMap[K]) => void))[]): HTMLElementTagNameMap[K];
   (...children: (Child | ((ref: HTMLElementTagNameMap[K]) => void))[]): HTMLElementTagNameMap[K];
 }
 
-/**
- * Factory for void elements (cannot have children)
- * Examples: input, img, br, hr, meta, link, etc.
- */
 export interface VoidElementFactory<K extends keyof HTMLElementTagNameMap> {
   (props?: ElementProps<K>): HTMLElementTagNameMap[K];
 }
@@ -929,6 +1186,68 @@ function appendChild(parent: HTMLElement | Context, child: Child | ((el: any) =>
 // PROP APPLICATION
 // =============================================================================
 
+/**
+ * Map of camelCase prop names to their HTML attribute equivalents
+ */
+const PROP_TO_ATTR: Record<string, string> = {
+  className: "class",
+  htmlFor: "for",
+  httpEquiv: "http-equiv",
+  acceptCharset: "accept-charset",
+  accessKey: "accesskey",
+  autoCapitalize: "autocapitalize",
+  autoComplete: "autocomplete",
+  autoFocus: "autofocus",
+  autoPlay: "autoplay",
+  colSpan: "colspan",
+  contentEditable: "contenteditable",
+  crossOrigin: "crossorigin",
+  dateTime: "datetime",
+  defaultChecked: "checked",
+  defaultValue: "value",
+  encType: "enctype",
+  enterKeyHint: "enterkeyhint",
+  fetchPriority: "fetchpriority",
+  formAction: "formaction",
+  formEnctype: "formenctype",
+  formMethod: "formmethod",
+  formNoValidate: "formnovalidate",
+  formTarget: "formtarget",
+  hrefLang: "hreflang",
+  inputMode: "inputmode",
+  isMap: "ismap",
+  maxLength: "maxlength",
+  minLength: "minlength",
+  noModule: "nomodule",
+  noValidate: "novalidate",
+  playsInline: "playsinline",
+  readOnly: "readonly",
+  referrerPolicy: "referrerpolicy",
+  rowSpan: "rowspan",
+  srcDoc: "srcdoc",
+  srcLang: "srclang",
+  srcSet: "srcset",
+  tabIndex: "tabindex",
+  useMap: "usemap",
+  itemScope: "itemscope",
+  itemType: "itemtype",
+  itemId: "itemid",
+  itemProp: "itemprop",
+  itemRef: "itemref",
+  popoverTarget: "popovertarget",
+  popoverTargetAction: "popovertargetaction",
+  shadowRootMode: "shadowrootmode",
+  shadowRootDelegatesFocus: "shadowrootdelegatesfocus",
+  shadowRootClonable: "shadowrootclonable",
+  shadowRootSerializable: "shadowrootserializable",
+  controlsList: "controlslist",
+  disablePictureInPicture: "disablepictureinpicture",
+  disableRemotePlayback: "disableremoteplayback",
+  allowFullscreen: "allowfullscreen",
+  attributionSrc: "attributionsrc",
+  elementTiming: "elementtiming",
+};
+
 function assignProp(element: HTMLElement, key: string, value: unknown): void {
   if (key === "class") {
     applyClass(element, value);
@@ -950,12 +1269,12 @@ function assignProp(element: HTMLElement, key: string, value: unknown): void {
     (element as any)[key] = value;
   } else if (typeof value === "boolean") {
     if (value) {
-      element.setAttribute(key, "");
+      element.setAttribute(PROP_TO_ATTR[key] ?? key, "");
     } else {
-      element.removeAttribute(key);
+      element.removeAttribute(PROP_TO_ATTR[key] ?? key);
     }
   } else {
-    element.setAttribute(key, String(value));
+    element.setAttribute(PROP_TO_ATTR[key] ?? key, String(value));
   }
 }
 
@@ -972,7 +1291,6 @@ function applyProps<K extends keyof HTMLElementTagNameMap>(
       const eventName = key.slice(2).toLowerCase();
       element.addEventListener(eventName, value as EventListener);
     } else if (isSignal(value)) {
-      // Reactive prop - re-apply when signal changes
       effect(() => {
         assignProp(element, key, value.value);
       });
@@ -1034,7 +1352,6 @@ function createElement<K extends keyof HTMLElementTagNameMap>(
         props = arg2 as ElementProps<K>;
         allChildren = [content, ...rest];
       } else if (typeof arg2 === "function" && !isSignal(arg2) && (tag === "button" || tag === "a")) {
-        // Assume onclick for interactive elements if not a signal
         props = { onclick: arg2 } as unknown as ElementProps<K>;
         allChildren = [content, ...rest];
       } else {
@@ -1068,9 +1385,6 @@ function createElement<K extends keyof HTMLElementTagNameMap>(
   };
 }
 
-/**
- * Create a void element factory (no children allowed)
- */
 function createVoidElement<K extends keyof HTMLElementTagNameMap>(
   tag: K
 ): VoidElementFactory<K> {
@@ -1153,6 +1467,7 @@ export const figure = createElement("figure");
 export const figcaption = createElement("figcaption");
 export const hgroup = createElement("hgroup");
 export const search = createElement("search");
+export const address = createElement("address");
 
 // Media elements
 export const img: VoidElementFactory<"img"> = createVoidElement("img");
@@ -1165,6 +1480,7 @@ export const track: VoidElementFactory<"track"> = createVoidElement("track");
 export const iframe = createElement("iframe");
 export const embed: VoidElementFactory<"embed"> = createVoidElement("embed");
 export const object = createElement("object");
+export const map = createElement("map");
 
 // Interactive elements
 export const details = createElement("details");
@@ -1180,7 +1496,6 @@ export const blockquote = createElement("blockquote");
 export const q = createElement("q");
 export const cite = createElement("cite");
 export const abbr = createElement("abbr");
-export const address = createElement("address");
 export const time = createElement("time");
 export const small = createElement("small");
 export const sub = createElement("sub");
@@ -1207,14 +1522,80 @@ export const meter = createElement("meter");
 export const template = createElement("template");
 export const slot = createElement("slot");
 
-// Area/Base/Link/Meta (void elements)
+// Document metadata (void elements)
 export const area: VoidElementFactory<"area"> = createVoidElement("area");
 export const base: VoidElementFactory<"base"> = createVoidElement("base");
 export const link: VoidElementFactory<"link"> = createVoidElement("link");
 export const meta: VoidElementFactory<"meta"> = createVoidElement("meta");
+
+// Script/Style (typically used differently but included for completeness)
+export const script = createElement("script");
+export const style = createElement("style");
+export const noscript = createElement("noscript");
 
 // Deprecated but sometimes needed
 export const b = createElement("b");
 export const i = createElement("i");
 export const u = createElement("u");
 export const s = createElement("s");
+
+// =============================================================================
+// TYPE EXPORTS
+// =============================================================================
+
+export type {
+  // Attribute interfaces
+  GlobalAttributes,
+  InputAttrs,
+  TextAreaAttrs,
+  SelectAttrs,
+  OptionAttrs,
+  OptgroupAttrs,
+  ButtonAttrs,
+  FormAttrs,
+  LabelAttrs,
+  FieldsetAttrs,
+  OutputAttrs,
+  AnchorAttrs,
+  ImgAttrs,
+  VideoAttrs,
+  AudioAttrs,
+  SourceAttrs,
+  TrackAttrs,
+  CanvasAttrs,
+  IframeAttrs,
+  EmbedAttrs,
+  ObjectAttrs,
+  MapAttrs,
+  AreaAttrs,
+  ProgressAttrs,
+  MeterAttrs,
+  TimeAttrs,
+  DataElemAttrs,
+  DialogAttrs,
+  DetailsAttrs,
+  TableCellAttrs,
+  ThAttrs,
+  ColAttrs,
+  ColgroupAttrs,
+  BlockquoteAttrs,
+  QAttrs,
+  ModAttrs,
+  OlAttrs,
+  LiAttrs,
+  LinkAttrs,
+  MetaAttrs,
+  BaseAttrs,
+  ScriptAttrs,
+  StyleAttrs,
+  SlotAttrs,
+  TemplateAttrs,
+
+  // CSS
+  StrictCSSProperties,
+
+  // Utility types
+  EventHandlers,
+  DataAttributes,
+  AriaAttributes,
+};
