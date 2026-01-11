@@ -20,14 +20,22 @@ class CaptureContext implements Context {
 }
 
 /**
+ * Check if a value is a Signal (has .value property)
+ */
+export function isSignal(value: unknown): value is Signal<unknown> {
+  return (
+    value !== null &&
+    typeof value === "object" &&
+    "value" in value &&
+    Object.getOwnPropertyDescriptor(value, "value")?.get !== undefined
+  );
+}
+
+/**
  * Append a child to an element
  */
 function appendChild(parent: HTMLElement | Context, child: Child): void {
   const target = parent instanceof HTMLElement ? parent : parent;
-  // If parent is not an HTMLElement (i.e. it's a proxy Context), 
-  // we just call appendChild. This handles nested proxies naturally.
-  // Wait, if parent is CaptureContext, appendChild is defined.
-  // But logic below creates text nodes etc.
   
   if (child === null || child === undefined) {
     return;
@@ -52,14 +60,7 @@ function appendChild(parent: HTMLElement | Context, child: Child): void {
     let activeNodes: Node[] = [];
 
     effect(() => {
-      // 1. Clean up old nodes
-      // Since this effect might run multiple times, we need to remove the previous elements
-      // from the DOM to avoid duplication.
-      // Note: If nodes were captured in a CaptureContext, 'remove()' might fail or be no-op 
-      // if they haven't been attached to real DOM yet. But typically 'effect' runs
-      // synchronously immediately (initial run), then asynchronously later?
-      // Our effect implementation is synchronous.
-      
+      // Clean up old nodes
       for (const node of activeNodes) {
         if (node.parentNode) {
           node.parentNode.removeChild(node);
@@ -67,7 +68,7 @@ function appendChild(parent: HTMLElement | Context, child: Child): void {
       }
       activeNodes = [];
 
-      // 2. Run the function in a capture context
+      // Run the function in a capture context
       const captureCtx = new CaptureContext();
       pushContext(captureCtx);
       try {
@@ -76,44 +77,18 @@ function appendChild(parent: HTMLElement | Context, child: Child): void {
         popContext();
       }
 
-      // 3. Move new nodes to the correct place (after anchor)
-      // If parent is a real HTMLElement:
+      // Move new nodes to the correct place (after anchor)
       if (typeof (target as any).insertBefore === 'function') {
         const realParent = target as HTMLElement;
         const referenceParams = anchor.nextSibling;
         
         for (const node of captureCtx.nodes) {
-          realParent.insertBefore(node, referenceParams); // If ref is null, appends to end
+          realParent.insertBefore(node, referenceParams); 
           activeNodes.push(node);
         }
       } else {
-         // Parent is a CaptureContext. We just push them up.
-         // But we need to maintain order relative to 'anchor'.
-         // Since CaptureContext just maintains a list, re-inserting is tricky without
-         // proper list splicing support.
-         // Limitation: Reactive functions inside a CaptureContext (nested reactivity inside function)
-         // might be tricky with this simple implementation.
-         // BUT standard usage is: div(() => { ... })
-         // div is an HTMLElement. So target IS an HTMLElement usually.
-         // It's only a CaptureContext if we are INSIDE another reactive function.
-         // In that case, we are building the list for the OUTSIDE effect.
-         // The outside effect will handle attachment.
-         // So for now, we just append to the parent context in order.
-         // Actually, if we are in a capture context, 'anchor' is in captureCtx.nodes.
-         // We should insert 'blockNodes' after 'anchor' in 'target.nodes'.
-         // This requires CaptureContext to support splice/insert.
-         // Let's assume for now target is HTMLElement for the common case.
-         // If it's not, we might append to end (which might be wrong order if other siblings exist).
-         
-         // Fix: Only support direct DOM manipulation for now. Nested reactive functions ok as long as parent is real.
-         // If parent is CaptureContext, we just append. This means nested reactivity re-renders entire parent list?
-         // No, the inner effect runs independently.
-         // For a recursive VDOM-less system, handling nested reactive inserts into a detached list is hard.
-         // Simple solution: CaptureContext should support `insertBefore`.
-         // Let's assume it does or casting.
-         
+         // Parent is a CaptureContext.
          const captureParent = target as CaptureContext;
-         // Find anchor index
          const index = captureParent.nodes.indexOf(anchor);
          if (index !== -1) {
             captureParent.nodes.splice(index + 1, 0, ...captureCtx.nodes);
@@ -125,48 +100,71 @@ function appendChild(parent: HTMLElement | Context, child: Child): void {
     });
   }
 }
-export type ElementProps = {
-  [key: string]: unknown;
-  class?: string | Record<string, boolean>;
-  style?: Partial<CSSStyleDeclaration> | string;
-};
 
 /** A child can be a string, number, signal, or render function */
 export type Child = string | number | Signal<unknown> | (() => void) | HTMLElement | null | undefined;
 
 /**
- * Check if a value is a Signal (has .value property)
+ * MaybeSignal type helps with "Smart Signals"
  */
-function isSignal(value: unknown): value is Signal<unknown> {
-  return (
-    value !== null &&
-    typeof value === "object" &&
-    "value" in value &&
-    Object.getOwnPropertyDescriptor(value, "value")?.get !== undefined
-  );
+export type MaybeSignal<T> = T | Signal<T>;
+
+/**
+ * Strict Element Props mapped from HTMLElementTagNameMap
+ */
+export type ElementProps<T extends HTMLElement> = {
+  [K in keyof Omit<T, 'style' | 'class'>]?: MaybeSignal<T[K]>;
+} & {
+  class?: MaybeSignal<string | Record<string, MaybeSignal<boolean>>>;
+  style?: MaybeSignal<string | Partial<CSSStyleDeclaration> | Record<string, string>>;
+  [key: string]: any; // Allow data-* attributes and others not in strict types
+};
+
+/**
+ * Assign a single property/attribute to an element
+ */
+function assignProp(element: HTMLElement, key: string, value: unknown) {
+  if (key === "class") {
+    applyClass(element, value);
+  } else if (key === "style") {
+    applyStyle(element, value);
+  } else {
+    // Smart Property Assignment
+    // For these keys, the property state is more important/richer than the attribute
+    if (key === "value" || key === "checked" || key === "selected" || key === "muted") {
+      (element as any)[key] = value;
+    } else if (typeof value === "boolean") {
+      // Handle boolean attributes (disabled, readonly, required, open, etc.)
+      // Note: 'readonly' attribute maps to 'readOnly' property, so we use attribute for safety/simplicity here.
+      if (value) {
+        element.setAttribute(key, "");
+      } else {
+        element.removeAttribute(key);
+      }
+    } else {
+      // Default to attribute
+      element.setAttribute(key, String(value));
+    }
+  }
 }
 
 /**
  * Apply props to an element
  */
-function applyProps(element: HTMLElement, props: ElementProps): void {
+function applyProps(element: HTMLElement, props: Record<string, any>): void {
   for (const [key, value] of Object.entries(props)) {
-    if (key === "class") {
-      applyClass(element, value);
-    } else if (key === "style") {
-      applyStyle(element, value);
-    } else if (key.startsWith("on") && typeof value === "function") {
+    if (key.startsWith("on") && typeof value === "function") {
       // Event handler
       const eventName = key.slice(2).toLowerCase();
       element.addEventListener(eventName, value as EventListener);
     } else if (isSignal(value)) {
-      // Reactive attribute
+      // Reactive prop
       effect(() => {
-        element.setAttribute(key, String((value as Signal<unknown>).value));
+        assignProp(element, key, value.value);
       });
     } else if (value !== null && value !== undefined) {
-      // Static attribute
-      element.setAttribute(key, String(value));
+      // Static prop
+      assignProp(element, key, value);
     }
   }
 }
@@ -178,12 +176,22 @@ function applyClass(element: HTMLElement, value: unknown): void {
   if (typeof value === "string") {
     element.className = value;
   } else if (typeof value === "object" && value !== null) {
-    // Object form: { active: isActive.value }
+    // Object form: { active: isActive.value } needs to be handled?
+    // If usage is class: { active: isActive }, applyProps sees object. 
+    // isSignal check is top level.
+    // If value is object { active: true }, keys are static.
+    // If nested signals? 
+    // Flick philosophy: use signal for whole prop or computed signal.
+    // user: class: computed(() => ({ active: isActive.value }))
     const classes: string[] = [];
-    for (const [className, condition] of Object.entries(value as Record<string, boolean>)) {
-      if (condition) {
-        classes.push(className);
-      }
+    for (const [className, condition] of Object.entries(value as Record<string, unknown>)) {
+        // If condition is signal?
+        // Current implementation expects boolean.
+        // If nested signal support is needed, applyClass logic needs to be reactive.
+        // But simpler to just unwrap boolean.
+        if (condition) {
+           classes.push(className);
+        }
     }
     element.className = classes.join(" ");
   }
@@ -197,7 +205,7 @@ function applyStyle(element: HTMLElement, value: unknown): void {
     element.setAttribute("style", value);
   } else if (typeof value === "object" && value !== null) {
     for (const [prop, val] of Object.entries(value as Record<string, string>)) {
-      // Use direct assignment to support camelCase properties (e.g. flexDirection)
+      // Direct assignment supports camelCase properties
       (element.style as any)[prop] = val;
     }
   }
@@ -208,7 +216,7 @@ function applyStyle(element: HTMLElement, value: unknown): void {
  * Type for element factory functions
  */
 export type ElementFactory<K extends keyof HTMLElementTagNameMap> = (
-  propsOrChild?: ElementProps | Child,
+  propsOrChild?: ElementProps<HTMLElementTagNameMap[K]> | Child,
   ...children: Child[]
 ) => HTMLElementTagNameMap[K];
 
@@ -217,12 +225,12 @@ export type ElementFactory<K extends keyof HTMLElementTagNameMap> = (
  */
 function createElement<K extends keyof HTMLElementTagNameMap>(
   tag: K
-): (propsOrChild?: ElementProps | Child, ...children: Child[]) => HTMLElementTagNameMap[K] {
-  return (propsOrChild?: ElementProps | Child, ...children: Child[]): HTMLElementTagNameMap[K] => {
+): ElementFactory<K> {
+  return (propsOrChild?: ElementProps<HTMLElementTagNameMap[K]> | Child, ...children: Child[]): HTMLElementTagNameMap[K] => {
     const element = document.createElement(tag);
 
     // Determine if first arg is props or a child
-    let props: ElementProps | null = null;
+    let props: Record<string, any> | null = null;
     let allChildren: Child[] = [];
 
     if (propsOrChild !== undefined) {
@@ -234,7 +242,7 @@ function createElement<K extends keyof HTMLElementTagNameMap>(
         typeof propsOrChild !== "function"
       ) {
         // It's a props object
-        props = propsOrChild as ElementProps;
+        props = propsOrChild as Record<string, any>;
         allChildren = children;
       } else {
         // It's a child
@@ -255,144 +263,82 @@ function createElement<K extends keyof HTMLElementTagNameMap>(
     // Auto-mount to current context
     getCurrentContext().appendChild(element);
 
-    return element;
+    return element as HTMLElementTagNameMap[K];
   };
 }
 
 // Text elements
-/** HTML <div> element */
-export const div: ElementFactory<"div"> = createElement("div");
-/** HTML <span> element */
-export const span: ElementFactory<"span"> = createElement("span");
-/** HTML <p> element */
-export const p: ElementFactory<"p"> = createElement("p");
-/** HTML <h1> element */
-export const h1: ElementFactory<"h1"> = createElement("h1");
-/** HTML <h2> element */
-export const h2: ElementFactory<"h2"> = createElement("h2");
-/** HTML <h3> element */
-export const h3: ElementFactory<"h3"> = createElement("h3");
-/** HTML <h4> element */
-export const h4: ElementFactory<"h4"> = createElement("h4");
-/** HTML <h5> element */
-export const h5: ElementFactory<"h5"> = createElement("h5");
-/** HTML <h6> element */
-export const h6: ElementFactory<"h6"> = createElement("h6");
-/** HTML <a> element */
-export const a: ElementFactory<"a"> = createElement("a");
-/** HTML <strong> element */
-export const strong: ElementFactory<"strong"> = createElement("strong");
-/** HTML <em> element */
-export const em: ElementFactory<"em"> = createElement("em");
-/** HTML <code> element */
-export const code: ElementFactory<"code"> = createElement("code");
-/** HTML <pre> element */
-export const pre: ElementFactory<"pre"> = createElement("pre");
+export const div = createElement("div");
+export const span = createElement("span");
+export const p = createElement("p");
+export const h1 = createElement("h1");
+export const h2 = createElement("h2");
+export const h3 = createElement("h3");
+export const h4 = createElement("h4");
+export const h5 = createElement("h5");
+export const h6 = createElement("h6");
+export const a = createElement("a");
+export const strong = createElement("strong");
+export const em = createElement("em");
+export const code = createElement("code");
+export const pre = createElement("pre");
 
 // Form elements
-/** HTML <form> element */
-export const form: ElementFactory<"form"> = createElement("form");
-/** HTML <input> element */
-export const input: ElementFactory<"input"> = createElement("input");
-/** HTML <textarea> element */
-export const textarea: ElementFactory<"textarea"> = createElement("textarea");
-/** HTML <select> element */
-export const select: ElementFactory<"select"> = createElement("select");
-/** HTML <option> element */
-export const option: ElementFactory<"option"> = createElement("option");
-/** HTML <button> element */
-export const button: ElementFactory<"button"> = createElement("button");
-/** HTML <label> element */
-export const label: ElementFactory<"label"> = createElement("label");
-/** HTML <fieldset> element */
-export const fieldset: ElementFactory<"fieldset"> = createElement("fieldset");
-/** HTML <legend> element */
-export const legend: ElementFactory<"legend"> = createElement("legend");
+export const form = createElement("form");
+export const input = createElement("input");
+export const textarea = createElement("textarea");
+export const select = createElement("select");
+export const option = createElement("option");
+export const button = createElement("button");
+export const label = createElement("label");
+export const fieldset = createElement("fieldset");
+export const legend = createElement("legend");
 
 // List elements
-/** HTML <ul> element */
-export const ul: ElementFactory<"ul"> = createElement("ul");
-/** HTML <ol> element */
-export const ol: ElementFactory<"ol"> = createElement("ol");
-/** HTML <li> element */
-export const li: ElementFactory<"li"> = createElement("li");
+export const ul = createElement("ul");
+export const ol = createElement("ol");
+export const li = createElement("li");
 
 // Table elements
-/** HTML <table> element */
-export const table: ElementFactory<"table"> = createElement("table");
-/** HTML <thead> element */
-export const thead: ElementFactory<"thead"> = createElement("thead");
-/** HTML <tbody> element */
-export const tbody: ElementFactory<"tbody"> = createElement("tbody");
-/** HTML <tfoot> element */
-export const tfoot: ElementFactory<"tfoot"> = createElement("tfoot");
-/** HTML <tr> element */
-export const tr: ElementFactory<"tr"> = createElement("tr");
-/** HTML <td> element */
-export const td: ElementFactory<"td"> = createElement("td");
-/** HTML <th> element */
-export const th: ElementFactory<"th"> = createElement("th");
+export const table = createElement("table");
+export const thead = createElement("thead");
+export const tbody = createElement("tbody");
+export const tfoot = createElement("tfoot");
+export const tr = createElement("tr");
+export const td = createElement("td");
+export const th = createElement("th");
 
 // Semantic elements
-/** HTML <header> element */
-export const header: ElementFactory<"header"> = createElement("header");
-/** HTML <footer> element */
-export const footer: ElementFactory<"footer"> = createElement("footer");
-/** HTML <nav> element */
-export const nav: ElementFactory<"nav"> = createElement("nav");
-/** HTML <main> element */
-export const main: ElementFactory<"main"> = createElement("main");
-/** HTML <section> element */
-export const section: ElementFactory<"section"> = createElement("section");
-/** HTML <article> element */
-export const article: ElementFactory<"article"> = createElement("article");
-/** HTML <aside> element */
-export const aside: ElementFactory<"aside"> = createElement("aside");
+export const header = createElement("header");
+export const footer = createElement("footer");
+export const nav = createElement("nav");
+export const main = createElement("main");
+export const section = createElement("section");
+export const article = createElement("article");
+export const aside = createElement("aside");
 
 // Media elements
-/** HTML <img> element */
-export const img: ElementFactory<"img"> = createElement("img");
-/** HTML <video> element */
-export const video: ElementFactory<"video"> = createElement("video");
-/** HTML <audio> element */
-export const audio: ElementFactory<"audio"> = createElement("audio");
-/** HTML <canvas> element */
-export const canvas: ElementFactory<"canvas"> = createElement("canvas");
+export const img = createElement("img");
+export const video = createElement("video");
+export const audio = createElement("audio");
+export const canvas = createElement("canvas");
 
 // Other common elements
-/** HTML <br> element */
-export const br: ElementFactory<"br"> = createElement("br");
-/** HTML <hr> element */
-export const hr: ElementFactory<"hr"> = createElement("hr");
-/** HTML <blockquote> element */
-export const blockquote: ElementFactory<"blockquote"> = createElement("blockquote");
-/** HTML <details> element */
-export const details: ElementFactory<"details"> = createElement("details");
-/** HTML <summary> element */
-export const summary: ElementFactory<"summary"> = createElement("summary");
-/** HTML <dialog> element */
-export const dialog: ElementFactory<"dialog"> = createElement("dialog");
-/** HTML <progress> element */
-export const progress: ElementFactory<"progress"> = createElement("progress");
-/** HTML <abbr> element */
-export const abbr: ElementFactory<"abbr"> = createElement("abbr");
-/** HTML <address> element */
-export const address: ElementFactory<"address"> = createElement("address");
-/** HTML <time> element */
-export const time: ElementFactory<"time"> = createElement("time");
-/** HTML <small> element */
-export const small: ElementFactory<"small"> = createElement("small");
-/** HTML <sub> element */
-export const sub: ElementFactory<"sub"> = createElement("sub");
-/** HTML <sup> element */
-export const sup: ElementFactory<"sup"> = createElement("sup");
-/** HTML <mark> element */
-export const mark: ElementFactory<"mark"> = createElement("mark");
-/** HTML <del> element */
-export const del: ElementFactory<"del"> = createElement("del");
-/** HTML <ins> element */
-export const ins: ElementFactory<"ins"> = createElement("ins");
-/** HTML <kbd> element */
-export const kbd: ElementFactory<"kbd"> = createElement("kbd");
-/** HTML <samp> element */
-export const samp: ElementFactory<"samp"> = createElement("samp");
+export const br = createElement("br");
+export const hr = createElement("hr");
+export const blockquote = createElement("blockquote");
+export const details = createElement("details");
+export const summary = createElement("summary");
+export const dialog = createElement("dialog");
+export const progress = createElement("progress");
+export const abbr = createElement("abbr");
+export const address = createElement("address");
+export const time = createElement("time");
+export const small = createElement("small");
+export const sub = createElement("sub");
+export const sup = createElement("sup");
+export const mark = createElement("mark");
+export const del = createElement("del");
+export const ins = createElement("ins");
+export const kbd = createElement("kbd");
+export const samp = createElement("samp");

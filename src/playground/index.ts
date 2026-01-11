@@ -1,10 +1,10 @@
-import { div } from "../core/elements"
+import { button, input } from "../core/elements"
 import { $ } from "../core/reactivity"
 
 export function Playground(){
     let a = $(1)
 
-    div("eva")
-
+    input({type:"number"})
+    button("ah")
     console.log(a.value)
 }
