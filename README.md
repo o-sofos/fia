@@ -49,8 +49,8 @@ const count = $(0);
 div({ class: "app" }, () => {
   h1("Counter App");
   p("Count: ", count);
-  button("Increment", () => count.value++);
-  button("Decrement", () => count.value--);
+  button("Increment", { onclick: () => count.value++ });
+  button("Decrement", { onclick: () => count.value-- });
 });
 ```
 
@@ -60,45 +60,28 @@ That's it. No build step, no configuration, no boilerplate.
 
 ## 📐 Element Signatures
 
-Flick elements are functions that create and mount DOM nodes. Understanding their signatures is key to using Flick effectively.
+Flick elements follow a **Unified API** with 8 consistent overloads. Every element function accepts consistent combinations of `Content`, `Props`, and `Children`.
 
-### Normal Elements
+### The 8 Overloads
 
-Elements like `div`, `button`, `span`, `p`, etc. support multiple call signatures:
+1. **Empty**: `div()`
+2. **Content**: `div("Hello")` or `div(count)`
+3. **Props**: `div({ class: "box" })`
+4. **Children**: `div(() => { ... })`
+5. **Props + Children**: `div({ class: "box" }, () => { ... })`
+6. **Content + Props**: `button("Save", { class: "primary" })`
+7. **Content + Children**: `div("Header", () => { ... })`
+8. **All Three**: `div("Title", { id: "main" }, () => { ... })`
 
-```typescript
-// Signature 1: Props + function child (MOST COMMON)
-div(props: ElementProps, children: () => void): HTMLDivElement
-
-// Signature 2: Function child only
-div(children: () => void): HTMLDivElement
-
-// Signature 3: Props only
-div(props: ElementProps): HTMLDivElement
-
-// Signature 4: Simple content (string, number, or signal)
-div(content: string | number | Signal): HTMLDivElement
-
-// Signature 5: Content + onclick (button/a only)
-button(content: string | number | Signal, onclick: (e: MouseEvent) => void): HTMLButtonElement
-
-// Signature 6: Content + props
-button(content: string | number | Signal, props: ElementProps): HTMLButtonElement
-
-// Signature 7: No arguments
-div(): HTMLDivElement
-```
+**Note**: "Content" can be a string, number, or Signal. "Children" is always a callback function `(el) => void`.
 
 ### Void Elements
 
-Elements like `input`, `img`, `br`, `hr` cannot have children:
+Elements like `input`, `img`, `br`, `hr` cannot have children. They only accept optional properties:
 
 ```typescript
-// Only signature: Optional props
-input(props?: InputProps): HTMLInputElement
-img(props?: ImgProps): HTMLImageElement
-br(): HTMLBRElement
-hr(): HTMLHRElement
+input({ type: "text", placeholder: "Name" });
+br();
 ```
 
 ### The Golden Rule: Function Children for Nesting
@@ -110,109 +93,55 @@ hr(): HTMLHRElement
 div({ class: "parent" }, () => {
   h1("Title");
   p("Paragraph");
-  span("Nested content");
 });
 
 // ❌ WRONG - Elements mount BEFORE div processes them
 div({ class: "parent" }, h1("Title"), p("Paragraph"));
 ```
 
-Why? When you write `div(h1(), p())`, JavaScript evaluates `h1()` and `p()` first. These elements immediately mount to the current context (likely `document.body`), then their return values are passed to `div()`.
-
-With `() => { h1(); p(); }`, the function is passed to `div()` first. The div pushes itself as the context, then executes the function, so children mount inside the div.
-
 ### Signature Examples
 
 #### 1. Props + Function Child
-The most common pattern for complex UIs:
+The most common pattern for container elements:
 
 ```typescript
 div({ class: "card", id: "user-card" }, () => {
   h1("User Profile");
   p("Welcome back!");
-  button("Edit", () => console.log("edit clicked"));
 });
 ```
 
-#### 2. Function Child Only
-When you don't need props:
-
-```typescript
-div(() => {
-  h1("Hello World");
-  p("No props needed here");
-});
-```
-
-#### 3. Props Only
-For leaf elements or containers styled via CSS:
-
-```typescript
-div({ class: "spacer", style: { height: "20px" } });
-div({ id: "mount-point" });
-```
-
-#### 4. Simple Content
-For text-only elements:
-
-```typescript
-h1("Page Title");
-p("A simple paragraph");
-span(123);
-p(signal); // Reactive - updates when signal changes
-```
-
-#### 5. Content + Click Handler (button/a only)
-Convenient shorthand for interactive elements:
-
-```typescript
-button("Click me", () => console.log("clicked"));
-button("Submit", () => form.submit());
-a("Navigate", () => router.push("/home"));
-
-// With signals
-const count = $(0);
-button(count, () => count.value++); // Shows "0", "1", "2"...
-```
-
-#### 6. Content + Props
-When you need both content and additional props:
+#### 2. Content + Props
+Perfect for leaf elements like buttons and labels:
 
 ```typescript
 button("Submit", { 
   class: "btn-primary", 
-  disabled: isLoading,
-  type: "submit" 
+  onclick: () => submitForm() 
 });
 
-button(count, { 
-  id: "counter-btn",
-  onclick: () => count.value++
-});
+label("Email:", { for: "email" });
 ```
 
-#### 7. Void Elements
-No children allowed:
+#### 3. Reactive Content
+Pass a signal directly as content:
 
 ```typescript
-input({ type: "text", placeholder: "Enter name" });
-input({ type: "checkbox", checked: isChecked });
-img({ src: "/logo.png", alt: "Logo" });
-br();
-hr();
+const count = $(0);
+p(count); // Updates text automatically
+h1("Count: ", count); // "Count: 0"
 ```
 
 ### Complete Pattern Reference
 
 | Pattern | Example | Use Case |
 |---------|---------|----------|
-| `div(() => {...})` | `div(() => { h1(); p(); })` | Nesting elements |
+| `div(() => {...})` | `div(() => { h1(); })` | Nesting elements |
 | `div({ props })` | `div({ class: "box" })` | Props only |
 | `div({ props }, () => {...})` | `div({ id: "app" }, () => {...})` | Props + nested children |
 | `div("text")` | `p("Hello")` | Simple text content |
 | `div(signal)` | `span(count)` | Reactive text |
-| `button("text", fn)` | `button("Go", () => {...})` | Quick click handler |
-| `button("text", { props })` | `button("Go", { class: "btn" })` | Content + props |
+| `button("text", { props })` | `button("Go", { onclick: ... })` | Content + props (Standard) |
 | `input({ props })` | `input({ type: "email" })` | Void elements |
 
 ### What NOT to Do
@@ -328,10 +257,12 @@ div({ class: "todo-app" }, () => {
       placeholder: "What needs to be done?"
     });
     
-    button("Add", () => {
-      if (newTodo.value.trim()) {
-        todos.value = [...todos.value, newTodo.value];
-        newTodo.value = "";
+    button("Add", {
+      onclick: () => {
+        if (newTodo.value.trim()) {
+          todos.value = [...todos.value, newTodo.value];
+          newTodo.value = "";
+        }
       }
     });
   });
@@ -362,9 +293,9 @@ div(() => {
   p("Doubled: ", doubled);
   p("Even: ", $(() => isEven.value ? "Yes" : "No"));
   
-  button("++", () => count.value++);
-  button("--", () => count.value--);
-  button("Reset", () => count.value = 0);
+  button("++", { onclick: () => count.value++ });
+  button("--", { onclick: () => count.value-- });
+  button("Reset", { onclick: () => count.value = 0 });
 });
 ```
 
@@ -376,7 +307,7 @@ const showDetails = $(false);
 div(() => {
   button(
     $(() => showDetails.value ? "Hide" : "Show"),
-    () => showDetails.value = !showDetails.value
+    { onclick: () => showDetails.value = !showDetails.value }
   );
   
   // Conditional content inside function child
@@ -395,9 +326,11 @@ div(() => {
 const items = $(["Apple", "Banana", "Cherry"]);
 
 div(() => {
-  button("Add", () => {
-    items.value = [...items.value, `Item ${items.value.length + 1}`];
-  });
+    button("Add", {
+      onclick: () => {
+        items.value = [...items.value, `Item ${items.value.length + 1}`];
+      }
+    });
   
   ul(() => {
     items.value.forEach((item, i) => {
