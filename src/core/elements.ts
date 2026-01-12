@@ -640,135 +640,260 @@ type AriaAttributes = { [K in `aria-${string}`]?: MaybeSignal<string | number | 
 // ELEMENT-SPECIFIC ATTRIBUTES
 // =============================================================================
 
+/**
+ * Base attributes shared by all input types.
+ */
 interface BaseInputAttrs extends GlobalAttributes {
+  /** Name of the form control. Submitted with the form. */
   name?: MaybeSignal<string>;
+  /** The control is unavailable for interaction. */
   disabled?: MaybeSignal<boolean>;
+  /** ID of the form the element belongs to. */
   form?: MaybeSignal<string>;
+  /** Automatically focus the element when the page loads. */
   autofocus?: MaybeSignal<boolean>;
+  /** Hint for form autofill feature. */
   autocomplete?: MaybeSignal<Autocomplete>;
+  /** ID of a `<datalist>` element. */
   list?: MaybeSignal<string>; // Most support list, except file/hidden/button
 }
 
 // Text-like inputs
+/**
+ * Attributes for text-based inputs (text, password, search, tel, url).
+ */
 interface InputTextAttrs extends BaseInputAttrs {
+  /** Type of the input control. Defaults to "text". */
   type?: MaybeSignal<"text" | "password" | "search" | "tel" | "url">;
+  /** Current value of the control. */
   value?: MaybeSignal<string | number>;
+  /** Initial value of the control. */
   defaultValue?: MaybeSignal<string>;
+  /** Text that appears in the form control when it has no value set. */
   placeholder?: MaybeSignal<string>;
+  /** The user cannot edit the value. */
   readOnly?: MaybeSignal<boolean>;
+  /** The value is required for form submission. */
   required?: MaybeSignal<boolean>;
+  /** Minimum length of value. */
   minLength?: MaybeSignal<number>;
+  /** Maximum length of value. */
   maxLength?: MaybeSignal<number>;
+  /** Regex pattern the value must match. */
   pattern?: MaybeSignal<string>;
+  /** Size of the control. */
   size?: MaybeSignal<number>;
+  /** Directionality of the element's text. */
   dirname?: MaybeSignal<string>;
 }
 
+/**
+ * Attributes for email inputs.
+ */
 interface InputEmailAttrs extends BaseInputAttrs {
+  /** Type of the input control. */
   type: MaybeSignal<"email">;
+  /** Current value of the control. */
   value?: MaybeSignal<string>;
+  /** Initial value of the control. */
   defaultValue?: MaybeSignal<string>;
+  /** Text that appears in the form control when it has no value set. */
   placeholder?: MaybeSignal<string>;
+  /** The user cannot edit the value. */
   readOnly?: MaybeSignal<boolean>;
+  /** The value is required for form submission. */
   required?: MaybeSignal<boolean>;
+  /** Minimum length of value. */
   minLength?: MaybeSignal<number>;
+  /** Maximum length of value. */
   maxLength?: MaybeSignal<number>;
+  /** Regex pattern the value must match. */
   pattern?: MaybeSignal<string>;
+  /** Size of the control. */
   size?: MaybeSignal<number>;
+  /** Whether to allow multiple values. */
   multiple?: MaybeSignal<boolean>;
 }
 
 // Numeric
+/**
+ * Attributes for numeric inputs.
+ */
 interface InputNumberAttrs extends BaseInputAttrs {
+  /** Type of the input control. */
   type: MaybeSignal<"number">;
+  /** Current value of the control. */
   value?: MaybeSignal<number | string>;
+  /** Initial value of the control. */
   defaultValue?: MaybeSignal<number | string>;
+  /** Text that appears in the form control when it has no value set. */
   placeholder?: MaybeSignal<string>;
+  /** The user cannot edit the value. */
   readOnly?: MaybeSignal<boolean>;
+  /** The value is required for form submission. */
   required?: MaybeSignal<boolean>;
+  /** Minimum value. */
   min?: MaybeSignal<string | number>;
+  /** Maximum value. */
   max?: MaybeSignal<string | number>;
+  /** Incremental bounds for numeric values. */
   step?: MaybeSignal<string | number>;
 }
 
+/**
+ * Attributes for range inputs (sliders).
+ */
 interface InputRangeAttrs extends BaseInputAttrs {
+  /** Type of the input control. */
   type: MaybeSignal<"range">;
+  /** Current value of the control. */
   value?: MaybeSignal<number | string>;
+  /** Initial value of the control. */
   defaultValue?: MaybeSignal<number | string>;
+  /** Minimum value. */
   min?: MaybeSignal<string | number>;
+  /** Maximum value. */
   max?: MaybeSignal<string | number>;
+  /** Incremental bounds. */
   step?: MaybeSignal<string | number>;
 }
 
 // Time/Date
+/**
+ * Attributes for date and time inputs.
+ */
 interface InputDateAttrs extends BaseInputAttrs {
+  /** Type of the input control. */
   type: MaybeSignal<"date" | "datetime-local" | "month" | "time" | "week">;
+  /** Current value of the control. */
   value?: MaybeSignal<string>;
+  /** Initial value of the control. */
   defaultValue?: MaybeSignal<string>;
+  /** The user cannot edit the value. */
   readOnly?: MaybeSignal<boolean>;
+  /** The value is required for form submission. */
   required?: MaybeSignal<boolean>;
+  /** Minimum value. */
   min?: MaybeSignal<string>;
+  /** Maximum value. */
   max?: MaybeSignal<string>;
+  /** Incremental bounds. */
   step?: MaybeSignal<string | number>;
 }
 
 // Boolean
+/**
+ * Attributes for checkbox and radio inputs.
+ */
 interface InputCheckboxAttrs extends BaseInputAttrs {
+  /** Type of the input control. */
   type: MaybeSignal<"checkbox" | "radio">;
+  /** Whether the control is checked. */
   checked?: MaybeSignal<boolean>;
+  /** The initial checked state. */
   defaultChecked?: MaybeSignal<boolean>;
+  /** Visual indeterminate state for checkboxes. */
   indeterminate?: MaybeSignal<boolean>; // Only for checkbox but harmless for radio
+  /** The value is required (must be checked). */
   required?: MaybeSignal<boolean>; // Required means "must be checked"
+  /** Value submitted when checked. */
   value?: MaybeSignal<string>; // Value submitted when checked
 }
 
 // File
+/**
+ * Attributes for file inputs.
+ */
 interface InputFileAttrs extends BaseInputAttrs {
+  /** Type of the input control. */
   type: MaybeSignal<"file">;
+  /** File types accepted by the file upload. */
   accept?: MaybeSignal<string>;
+  /** Whether to allow multiple files. */
   multiple?: MaybeSignal<boolean>;
+  /** The value is required. */
   required?: MaybeSignal<boolean>;
+  /** Media capture source. */
   capture?: MaybeSignal<"user" | "environment" | boolean>;
+  /** File input value is uncontrolled/read-only via value prop. */
   value?: never; // Uncontrolled
 }
 
 // Color
+/**
+ * Attributes for color input.
+ */
 interface InputColorAttrs extends BaseInputAttrs {
+  /** Type of the input control. */
   type: MaybeSignal<"color">;
+  /** Current value of the control (hex color). */
   value?: MaybeSignal<string>;
+  /** Initial value of the control. */
   defaultValue?: MaybeSignal<string>;
 }
 
 // Hidden
+/**
+ * Attributes for hidden input.
+ */
 interface InputHiddenAttrs extends BaseInputAttrs {
+  /** Type of the input control. */
   type: MaybeSignal<"hidden">;
+  /** Current value of the control. */
   value?: MaybeSignal<string | number>;
 }
 
 // Buttons
+/**
+ * Attributes for input buttons (submit, reset, button).
+ */
 interface InputButtonAttrs extends BaseInputAttrs {
+  /** Type of the input control. */
   type: MaybeSignal<"submit" | "reset" | "button">;
+  /** Button label. */
   value?: MaybeSignal<string>; // Button label
+  /** URL for form submission. */
   formAction?: MaybeSignal<string>;
+  /** HTTP method for form submission. */
   formMethod?: MaybeSignal<FormMethod>;
+  /** Encoding type for form submission. */
   formEnctype?: MaybeSignal<FormEnctype>;
+  /** Bypasses form validation. */
   formNoValidate?: MaybeSignal<boolean>;
+  /** Browsing context for form submission. */
   formTarget?: MaybeSignal<Target>;
 }
 
+/**
+ * Attributes for image inputs.
+ */
 interface InputImageAttrs extends BaseInputAttrs {
+  /** Type of the input control. */
   type: MaybeSignal<"image">;
+  /** Source URL of the image. */
   src?: MaybeSignal<string>;
+  /** Alternate text for the image. */
   alt?: MaybeSignal<string>;
+  /** Width of the image. */
   width?: MaybeSignal<number>;
+  /** Height of the image. */
   height?: MaybeSignal<number>;
+  /** URL for form submission. */
   formAction?: MaybeSignal<string>;
+  /** HTTP method for form submission. */
   formMethod?: MaybeSignal<FormMethod>;
+  /** Encoding type for form submission. */
   formEnctype?: MaybeSignal<FormEnctype>;
+  /** Bypasses form validation. */
   formNoValidate?: MaybeSignal<boolean>;
+  /** Browsing context for form submission. */
   formTarget?: MaybeSignal<Target>;
 }
 
+/**
+ * discriminated Union of all possible Input attribute types.
+ * Narrows properties based on the `type` attribute.
+ */
 type InputAttrs =
   | InputTextAttrs
   | InputEmailAttrs
@@ -782,48 +907,93 @@ type InputAttrs =
   | InputButtonAttrs
   | InputImageAttrs;
 
+/**
+ * Attributes for textarea elements.
+ */
 interface TextAreaAttrs extends GlobalAttributes {
+  /** Name of the control. */
   name?: MaybeSignal<string>;
+  /** Current value of the control. */
   value?: MaybeSignal<string>;
+  /** Initial value of the control. */
   defaultValue?: MaybeSignal<string>;
+  /** Placeholder text. */
   placeholder?: MaybeSignal<string>;
+  /** The control is unavailable for interaction. */
   disabled?: MaybeSignal<boolean>;
+  /** The user cannot edit the value. */
   readOnly?: MaybeSignal<boolean>;
+  /** The value is required. */
   required?: MaybeSignal<boolean>;
+  /** Automatically focus the element when the page loads. */
   autofocus?: MaybeSignal<boolean>;
+  /** Hint for form autofill feature. */
   autocomplete?: MaybeSignal<Autocomplete>;
+  /** Visible height in text lines. */
   rows?: MaybeSignal<number>;
+  /** Visible width in average character widths. */
   cols?: MaybeSignal<number>;
+  /** Minimum length of value. */
   minLength?: MaybeSignal<number>;
+  /** Maximum length of value. */
   maxLength?: MaybeSignal<number>;
+  /** How the text should be wrapped. */
   wrap?: MaybeSignal<Wrap>;
+  /** ID of the form the element belongs to. */
   form?: MaybeSignal<string>;
+  /** Directionality of the element's text. */
   dirname?: MaybeSignal<string>;
 }
 
+/**
+ * Attributes for select elements.
+ */
 interface SelectAttrs extends GlobalAttributes {
+  /** Name of the control. */
   name?: MaybeSignal<string>;
+  /** The control is unavailable for interaction. */
   disabled?: MaybeSignal<boolean>;
+  /** The value is required. */
   required?: MaybeSignal<boolean>;
+  /** Automatically focus the element when the page loads. */
   autofocus?: MaybeSignal<boolean>;
+  /** Whether to allow multiple values. */
   multiple?: MaybeSignal<boolean>;
+  /** Number of visible options. */
   size?: MaybeSignal<number>;
+  /** ID of the form the element belongs to. */
   form?: MaybeSignal<string>;
+  /** Hint for form autofill feature. */
   autocomplete?: MaybeSignal<Autocomplete>;
 }
 
+/**
+ * Attributes for option elements.
+ */
 interface OptionAttrs extends GlobalAttributes {
+  /** Value submitted with the form. */
   value?: MaybeSignal<string>;
+  /** The option is unavailable for interaction. */
   disabled?: MaybeSignal<boolean>;
+  /** Whether the option is selected. */
   selected?: MaybeSignal<boolean>;
+  /** Shorter label for the option. */
   label?: MaybeSignal<string>;
 }
 
+/**
+ * Attributes for optgroup elements.
+ */
 interface OptgroupAttrs extends GlobalAttributes {
+  /** Label for the group of options. */
   label?: MaybeSignal<string>;
+  /** The group is unavailable for interaction. */
   disabled?: MaybeSignal<boolean>;
 }
 
+/**
+ * Attributes for button elements.
+ */
 interface ButtonAttrs extends GlobalAttributes {
   /** The behavior of the button. */
   type?: MaybeSignal<ButtonType>;
@@ -857,303 +1027,603 @@ interface ButtonAttrs extends GlobalAttributes {
   command?: MaybeSignal<string>;
 }
 
+/**
+ * Attributes for form elements.
+ */
 interface FormAttrs extends GlobalAttributes {
+  /** URL to use for form submission. */
   action?: MaybeSignal<string>;
+  /** HTTP method to use for form submission. */
   method?: MaybeSignal<FormMethod>;
+  /** Encoding type to use for form submission. */
   enctype?: MaybeSignal<FormEnctype>;
+  /** Browsing context for form submission. */
   target?: MaybeSignal<Target>;
+  /** Bypasses form validation. */
   noValidate?: MaybeSignal<boolean>;
+  /** Hint for form autofill feature. */
   autocomplete?: MaybeSignal<"on" | "off">;
+  /** Name of the form. */
   name?: MaybeSignal<string>;
+  /** Character encodings allowed for submission. */
   acceptCharset?: MaybeSignal<string>;
+  /** Relationship to the target resource. */
   rel?: MaybeSignal<string>;
 }
 
+/**
+ * Attributes for label elements.
+ */
 interface LabelAttrs extends GlobalAttributes {
+  /** ID of the element the label is bound to. */
   htmlFor?: MaybeSignal<string>;
+  /** Alias for htmlFor. */
   for?: MaybeSignal<string>;
 }
 
+/**
+ * Attributes for fieldset elements.
+ */
 interface FieldsetAttrs extends GlobalAttributes {
+  /** The group is unavailable for interaction. */
   disabled?: MaybeSignal<boolean>;
+  /** ID of the form the element belongs to. */
   form?: MaybeSignal<string>;
+  /** Name of the group. */
   name?: MaybeSignal<string>;
 }
 
+/**
+ * Attributes for output elements.
+ */
 interface OutputAttrs extends GlobalAttributes {
+  /** ID of the element the output is bound to. */
   htmlFor?: MaybeSignal<string>;
+  /** Alias for htmlFor. */
   for?: MaybeSignal<string>;
+  /** ID of the form the element belongs to. */
   form?: MaybeSignal<string>;
+  /** Name of the control. */
   name?: MaybeSignal<string>;
 }
 
+/**
+ * Attributes for anchor elements.
+ */
 interface AnchorAttrs extends GlobalAttributes {
+  /** URL of the linked resource. */
   href?: MaybeSignal<string>;
+  /** Browsing context for the linked resource. */
   target?: MaybeSignal<Target>;
+  /** Relationship to the linked resource. */
   rel?: MaybeSignal<string>;
+  /** Prompts the user to download the linked resource. */
   download?: MaybeSignal<string | boolean>;
+  /** Language of the linked resource. */
   hreflang?: MaybeSignal<string>;
+  /** Media type of the linked resource. */
   type?: MaybeSignal<string>;
+  /** Referrer policy for fetches initiated by the element. */
   referrerPolicy?: MaybeSignal<ReferrerPolicy>;
+  /** URLs to ping for tracking. */
   ping?: MaybeSignal<string>;
+  /** Experimental attribution source. */
   attributionSrc?: MaybeSignal<string>;
 }
 
+/**
+ * Attributes for image elements.
+ */
 interface ImgAttrs extends GlobalAttributes {
+  /** Source URL of the image. */
   src?: MaybeSignal<string>;
+  /** Alternate text for the image. */
   alt?: MaybeSignal<string>;
+  /** Intrinsic width of the image. */
   width?: MaybeSignal<number | string>;
+  /** Intrinsic height of the image. */
   height?: MaybeSignal<number | string>;
+  /** How the browser should load the image. */
   loading?: MaybeSignal<Loading>;
+  /** Image decoding hint. */
   decoding?: MaybeSignal<Decoding>;
+  /** CORS settings for the image. */
   crossOrigin?: MaybeSignal<CrossOrigin>;
+  /** Set of source URLs for responsive display. */
   srcset?: MaybeSignal<string>;
+  /** Media conditions for selecting a source. */
   sizes?: MaybeSignal<string>;
+  /** Name of an image map to use. */
   useMap?: MaybeSignal<string>;
+  /** Whether the image is a server-side image map. */
   isMap?: MaybeSignal<boolean>;
+  /** Referrer policy for fetches. */
   referrerPolicy?: MaybeSignal<ReferrerPolicy>;
+  /** Fetch priority hint. */
   fetchPriority?: MaybeSignal<FetchPriority>;
+  /** Experimental element timing. */
   elementTiming?: MaybeSignal<string>;
+  /** Experimental attribution source. */
   attributionSrc?: MaybeSignal<string>;
 }
 
+/**
+ * Attributes for video elements.
+ */
 interface VideoAttrs extends GlobalAttributes {
+  /** Source URL of the video. */
   src?: MaybeSignal<string>;
+  /** Display width of the video. */
   width?: MaybeSignal<number | string>;
+  /** Display height of the video. */
   height?: MaybeSignal<number | string>;
+  /** URL of an image to show while downloading. */
   poster?: MaybeSignal<string>;
+  /** Hint for how much of the video to preload. */
   preload?: MaybeSignal<Preload>;
+  /** Whether to play automatically. */
   autoplay?: MaybeSignal<boolean>;
+  /** Whether to loop the video. */
   loop?: MaybeSignal<boolean>;
+  /** Whether to mute the audio. */
   muted?: MaybeSignal<boolean>;
+  /** Whether to show playback controls. */
   controls?: MaybeSignal<boolean>;
+  /** Whether to play inline on mobile. */
   playsInline?: MaybeSignal<boolean>;
+  /** CORS settings for valid requests. */
   crossOrigin?: MaybeSignal<CrossOrigin>;
+  /** Initial playback position. */
   currentTime?: MaybeSignal<number>;
+  /** Audio volume (0.0 to 1.0). */
   volume?: MaybeSignal<number>;
+  /** Prevents Picture-in-Picture mode. */
   disablePictureInPicture?: MaybeSignal<boolean>;
+  /** Prevents remote playback (casting). */
   disableRemotePlayback?: MaybeSignal<boolean>;
+  /** Controls to display/hide (nodownload, nofullscreen, noremoteplayback). */
   controlsList?: MaybeSignal<string>;
 }
 
+/**
+ * Attributes for audio elements.
+ */
 interface AudioAttrs extends GlobalAttributes {
+  /** Source URL of the audio. */
   src?: MaybeSignal<string>;
+  /** Hint for how much of the audio to preload. */
   preload?: MaybeSignal<Preload>;
+  /** Whether to play automatically. */
   autoplay?: MaybeSignal<boolean>;
+  /** Whether to loop the audio. */
   loop?: MaybeSignal<boolean>;
+  /** Whether to mute the audio. */
   muted?: MaybeSignal<boolean>;
+  /** Whether to show playback controls. */
   controls?: MaybeSignal<boolean>;
+  /** CORS settings. */
   crossOrigin?: MaybeSignal<CrossOrigin>;
+  /** Initial playback position. */
   currentTime?: MaybeSignal<number>;
+  /** Audio volume (0.0 to 1.0). */
   volume?: MaybeSignal<number>;
+  /** Prevents remote playback. */
   disableRemotePlayback?: MaybeSignal<boolean>;
+  /** Controls to display/hide. */
   controlsList?: MaybeSignal<string>;
 }
 
+/**
+ * Attributes for source elements (in video, audio, picture).
+ */
 interface SourceAttrs extends GlobalAttributes {
+  /** Address of the media resource. */
   src?: MaybeSignal<string>;
+  /** MIME type of the resource. */
   type?: MaybeSignal<string>;
+  /** Source set for responsive images. */
   srcset?: MaybeSignal<string>;
+  /** Media conditions for image sources. */
   sizes?: MaybeSignal<string>;
+  /** Media query for the resource. */
   media?: MaybeSignal<string>;
+  /** Width of the image resource. */
   width?: MaybeSignal<number>;
+  /** Height of the image resource. */
   height?: MaybeSignal<number>;
 }
 
+/**
+ * Attributes for track elements (subtitles, captions).
+ */
 interface TrackAttrs extends GlobalAttributes {
+  /** Address of the track. */
   src?: MaybeSignal<string>;
+  /** Kind of text track. */
   kind?: MaybeSignal<TrackKind>;
+  /** Language of the track text. */
   srclang?: MaybeSignal<string>;
+  /** User-readable title of the track. */
   label?: MaybeSignal<string>;
+  /** Whether to enable the track by default. */
   default?: MaybeSignal<boolean>;
 }
 
+/**
+ * Attributes for canvas elements.
+ */
 interface CanvasAttrs extends GlobalAttributes {
+  /** Coordinate space width. */
   width?: MaybeSignal<number>;
+  /** Coordinate space height. */
   height?: MaybeSignal<number>;
 }
 
+/**
+ * Attributes for iframe elements.
+ */
 interface IframeAttrs extends GlobalAttributes {
+  /** Address of the resource. */
   src?: MaybeSignal<string>;
+  /** HTML content of the page to show. */
   srcdoc?: MaybeSignal<string>;
+  /** Name of the browsing context. */
   name?: MaybeSignal<string>;
+  /** Width of the frame. */
   width?: MaybeSignal<number | string>;
+  /** Height of the frame. */
   height?: MaybeSignal<number | string>;
+  /** How the browser should load the iframe. */
   loading?: MaybeSignal<Loading>;
+  /** Security rules for nested content. */
   sandbox?: MaybeSignal<Sandbox | string>;
+  /** Feature policy to apply. */
   allow?: MaybeSignal<string>;
+  /** Referrer policy for fetches. */
   referrerPolicy?: MaybeSignal<ReferrerPolicy>;
+  /** Whether to allow fullscreen mode. */
   allowFullscreen?: MaybeSignal<boolean>;
+  /** Whether to load without specific credentials. */
   credentialless?: MaybeSignal<boolean>;
+  /** Content Security Policy to apply. */
   csp?: MaybeSignal<string>;
 }
 
+/**
+ * Attributes for embed elements.
+ */
 interface EmbedAttrs extends GlobalAttributes {
+  /** Address of the resource. */
   src?: MaybeSignal<string>;
+  /** MIME type of the resource. */
   type?: MaybeSignal<string>;
+  /** Display width. */
   width?: MaybeSignal<number | string>;
+  /** Display height. */
   height?: MaybeSignal<number | string>;
 }
 
+/**
+ * Attributes for object elements.
+ */
 interface ObjectAttrs extends GlobalAttributes {
+  /** Address of the resource. */
   data?: MaybeSignal<string>;
+  /** MIME type of the resource. */
   type?: MaybeSignal<string>;
+  /** Name of the browsing context. */
   name?: MaybeSignal<string>;
+  /** Display width. */
   width?: MaybeSignal<number | string>;
+  /** Display height. */
   height?: MaybeSignal<number | string>;
+  /** ID of the form the element belongs to. */
   form?: MaybeSignal<string>;
+  /** Name of image map to use. */
   useMap?: MaybeSignal<string>;
 }
 
+/**
+ * Attributes for map elements.
+ */
 interface MapAttrs extends GlobalAttributes {
+  /** Name of the image map. */
   name?: MaybeSignal<string>;
 }
 
+/**
+ * Attributes for area elements.
+ */
 interface AreaAttrs extends GlobalAttributes {
+  /** Alternate text for the area. */
   alt?: MaybeSignal<string>;
+  /** Coordinates for the shape. */
   coords?: MaybeSignal<string>;
+  /** Prompts the user to download the resource. */
   download?: MaybeSignal<string | boolean>;
+  /** Hyperlink target. */
   href?: MaybeSignal<string>;
+  /** Language of the linked resource. */
   hreflang?: MaybeSignal<string>;
+  /** URLs to ping for tracking. */
   ping?: MaybeSignal<string>;
+  /** Referrer policy for fetches. */
   referrerPolicy?: MaybeSignal<ReferrerPolicy>;
+  /** Relationship to the linked resource. */
   rel?: MaybeSignal<string>;
+  /** Shape of the area. */
   shape?: MaybeSignal<AreaShape>;
+  /** Browsing context for the link. */
   target?: MaybeSignal<Target>;
 }
 
+/**
+ * Attributes for progress elements.
+ */
 interface ProgressAttrs extends GlobalAttributes {
+  /** Current value of the progress. */
   value?: MaybeSignal<number>;
+  /** Maximum value of the progress. */
   max?: MaybeSignal<number>;
 }
 
+/**
+ * Attributes for meter elements.
+ */
 interface MeterAttrs extends GlobalAttributes {
+  /** Current value of the meter. */
   value?: MaybeSignal<number>;
+  /** Minimum value. */
   min?: MaybeSignal<number>;
+  /** Maximum value. */
   max?: MaybeSignal<number>;
+  /** Upper bound of the low end of the range. */
   low?: MaybeSignal<number>;
+  /** Lower bound of the high end of the range. */
   high?: MaybeSignal<number>;
+  /** Optimum value in the range. */
   optimum?: MaybeSignal<number>;
 }
 
+/**
+ * Attributes for time elements.
+ */
 interface TimeAttrs extends GlobalAttributes {
+  /** Machine-readable equivalent of the time. */
   dateTime?: MaybeSignal<string>;
 }
 
+/**
+ * Attributes for data elements.
+ */
 interface DataElemAttrs extends GlobalAttributes {
+  /** Machine-readable value. */
   value?: MaybeSignal<string>;
 }
 
+/**
+ * Attributes for dialog elements.
+ */
 interface DialogAttrs extends GlobalAttributes {
+  /** Whether the dialog is open. */
   open?: MaybeSignal<boolean>;
 }
 
+/**
+ * Attributes for details elements.
+ */
 interface DetailsAttrs extends GlobalAttributes {
+  /** Whether the details are visible. */
   open?: MaybeSignal<boolean>;
+  /** Name of the details group. */
   name?: MaybeSignal<string>;
 }
 
+/**
+ * Attributes for table cell elements (td).
+ */
 interface TableCellAttrs extends GlobalAttributes {
+  /** Number of columns to span. */
   colSpan?: MaybeSignal<number>;
+  /** Number of rows to span. */
   rowSpan?: MaybeSignal<number>;
+  /** IDs of headers for this cell. */
   headers?: MaybeSignal<string>;
 }
 
+/**
+ * Attributes for table header elements (th).
+ */
 interface ThAttrs extends TableCellAttrs {
+  /** Scope of the header. */
   scope?: MaybeSignal<ThScope>;
+  /** Abbreviation for the header content. */
   abbr?: MaybeSignal<string>;
 }
 
+/**
+ * Attributes for table column elements.
+ */
 interface ColAttrs extends GlobalAttributes {
+  /** Number of columns to span. */
   span?: MaybeSignal<number>;
 }
 
+/**
+ * Attributes for table column group elements.
+ */
 interface ColgroupAttrs extends GlobalAttributes {
+  /** Number of columns to span. */
   span?: MaybeSignal<number>;
 }
 
+/**
+ * Attributes for blockquote elements.
+ */
 interface BlockquoteAttrs extends GlobalAttributes {
+  /** URL of the source. */
   cite?: MaybeSignal<string>;
 }
 
+/**
+ * Attributes for quote elements (q).
+ */
 interface QAttrs extends GlobalAttributes {
+  /** URL of the source. */
   cite?: MaybeSignal<string>;
 }
 
+/**
+ * Attributes for modification elements (ins, del).
+ */
 interface ModAttrs extends GlobalAttributes {
+  /** URL of the source explaining the change. */
   cite?: MaybeSignal<string>;
+  /** Date and time of the change. */
   dateTime?: MaybeSignal<string>;
 }
 
+/**
+ * Attributes for ordered list elements.
+ */
 interface OlAttrs extends GlobalAttributes {
+  /** Starting value of the list. */
   start?: MaybeSignal<number>;
+  /** Whether the list is reversed. */
   reversed?: MaybeSignal<boolean>;
+  /** Type of list marker. */
   type?: MaybeSignal<"1" | "a" | "A" | "i" | "I">;
 }
 
+/**
+ * Attributes for list item elements.
+ */
 interface LiAttrs extends GlobalAttributes {
+  /** Value of the list item. */
   value?: MaybeSignal<number>;
 }
 
+/**
+ * Attributes for link elements.
+ */
 interface LinkAttrs extends GlobalAttributes {
+  /** URL of the linked resource. */
   href?: MaybeSignal<string>;
+  /** Relationship to the linked resource. */
   rel?: MaybeSignal<string>;
+  /** Media type of the linked resource. */
   type?: MaybeSignal<string>;
+  /** Media query for the resource. */
   media?: MaybeSignal<string>;
+  /** Potential destination for a preload request. */
   as?: MaybeSignal<LinkAs>;
+  /** CORS settings. */
   crossOrigin?: MaybeSignal<CrossOrigin>;
+  /** Integrity metadata. */
   integrity?: MaybeSignal<string>;
+  /** Referrer policy for fetches. */
   referrerPolicy?: MaybeSignal<ReferrerPolicy>;
+  /** Sizes for icons. */
   sizes?: MaybeSignal<string>;
+  /** Whether the link is disabled. */
   disabled?: MaybeSignal<boolean>;
+  /** Language of the linked resource. */
   hreflang?: MaybeSignal<string>;
+  /** Fetch priority hint. */
   fetchPriority?: MaybeSignal<FetchPriority>;
+  /** Source set for responsive images. */
   imageSrcset?: MaybeSignal<string>;
+  /** Sizes for responsive images. */
   imageSizes?: MaybeSignal<string>;
+  /** Whether the element is blocking. */
   blocking?: MaybeSignal<"render">;
+  /** Color for mask-icon. */
   color?: MaybeSignal<string>;
 }
 
+/**
+ * Attributes for meta elements.
+ */
 interface MetaAttrs extends GlobalAttributes {
+  /** Metadata name. */
   name?: MaybeSignal<string>;
+  /** Metadata value. */
   content?: MaybeSignal<string>;
+  /** Character encoding. */
   charset?: MaybeSignal<string>;
+  /** Pragma directive. */
   httpEquiv?: MaybeSignal<HttpEquiv | string>;
+  /** Media query. */
   media?: MaybeSignal<string>;
 }
 
+/**
+ * Attributes for base element.
+ */
 interface BaseAttrs extends GlobalAttributes {
+  /** Base URL for relative URLs. */
   href?: MaybeSignal<string>;
+  /** Default browsing context. */
   target?: MaybeSignal<Target>;
 }
 
+/**
+ * Attributes for script elements.
+ */
 interface ScriptAttrs extends GlobalAttributes {
+  /** Address of the resource. */
   src?: MaybeSignal<string>;
+  /** Type of script. */
   type?: MaybeSignal<string>;
+  /** Execute asynchronously. */
   async?: MaybeSignal<boolean>;
+  /** Defer execution. */
   defer?: MaybeSignal<boolean>;
+  /** CORS settings. */
   crossOrigin?: MaybeSignal<CrossOrigin>;
+  /** Integrity metadata. */
   integrity?: MaybeSignal<string>;
+  /** Disallow execution in module systems. */
   noModule?: MaybeSignal<boolean>;
+  /** Referrer policy for fetches. */
   referrerPolicy?: MaybeSignal<ReferrerPolicy>;
+  /** Fetch priority hint. */
   fetchPriority?: MaybeSignal<FetchPriority>;
+  /** Whether the element is blocking. */
   blocking?: MaybeSignal<"render">;
+  /** Experimental attribution source. */
   attributionSrc?: MaybeSignal<string>;
 }
 
+/**
+ * Attributes for style elements.
+ */
 interface StyleAttrs extends GlobalAttributes {
+  /** Media query for the style. */
   media?: MaybeSignal<string>;
+  /** Whether the element is blocking. */
   blocking?: MaybeSignal<"render">;
 }
 
+/**
+ * Attributes for slot elements.
+ */
 interface SlotAttrs extends GlobalAttributes {
+  /** Name of the slot. */
   name?: MaybeSignal<string>;
 }
 
+/**
+ * Attributes for template elements.
+ */
 interface TemplateAttrs extends GlobalAttributes {
+  /** Shadow DOM mode. */
   shadowrootmode?: MaybeSignal<"open" | "closed">;
+  /** Whether to delegate focus. */
   shadowrootdelegatesfocus?: MaybeSignal<boolean>;
+  /** Whether the shadow root is clonable. */
   shadowrootclonable?: MaybeSignal<boolean>;
+  /** Whether the shadow root is serializable. */
   shadowrootserializable?: MaybeSignal<boolean>;
 }
 
