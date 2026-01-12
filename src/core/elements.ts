@@ -18,7 +18,7 @@
  */
 
 import { pushExecutionContext, popExecutionContext, getCurrentExecutionContext } from "./context";
-import { effect, type Signal } from "./reactivity";
+import { $, effect, type Signal } from "./reactivity";
 
 
 
@@ -2440,7 +2440,13 @@ function createElement<K extends keyof HTMLElementTagNameMap>(
     }
 
     if (content !== undefined) {
-      applyContent(element, content);
+      // Auto-wrap zero-arity functions in signals for reactivity
+      if (typeof content === "function" && !isSignal(content)) {
+        // It's a thunk, wrap it in a computed
+        applyContent(element, $(<() => string>content));
+      } else {
+        applyContent(element, content);
+      }
     }
 
     if (children) {
@@ -2492,11 +2498,17 @@ function isChildrenCallback<E extends HTMLElement>(
   return typeof value === "function" && !isSignal(value);
 }
 
+// Helper to check for zero-arity functions (thunks) that returns primitives
+function isContentThunk(value: unknown): value is () => string | number {
+  return typeof value === "function" && value.length === 0 && !isSignal(value);
+}
+
 function isContent(value: unknown): value is MaybeSignal<string | number> {
   return (
     typeof value === "string" ||
     typeof value === "number" ||
-    isSignal(value)
+    isSignal(value) ||
+    isContentThunk(value)
   );
 }
 

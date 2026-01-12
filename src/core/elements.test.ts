@@ -49,6 +49,15 @@ describe("Element System - Unified API", () => {
             text.value = "Updated";
             expect(el.textContent).toBe("Updated");
         });
+
+        it("should auto-wrap function thunks as signals", () => {
+            const count = $(1);
+            // Pass raw function () => string
+            const el = div(() => `Count: ${count()}`);
+            expect(el.textContent).toBe("Count: 1");
+            count(2);
+            expect(el.textContent).toBe("Count: 2");
+        });
     });
 
     describe("Overload 3: element(props)", () => {
