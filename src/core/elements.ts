@@ -17,7 +17,7 @@
  * 8. element(content, props, children)
  */
 
-import { pushExecutionContext, popExecutionContext, getCurrentExecutionContext, type ExecutionContext } from "./context";
+import { pushExecutionContext, popExecutionContext, getCurrentExecutionContext } from "./context";
 import { effect, type Signal } from "./reactivity";
 
 
@@ -64,11 +64,7 @@ export type Child =
 // STRICT ATTRIBUTE TYPES
 // =============================================================================
 
-type InputType =
-  | "text" | "password" | "email" | "number" | "tel" | "url"
-  | "search" | "date" | "time" | "datetime-local" | "month" | "week"
-  | "color" | "file" | "hidden" | "checkbox" | "radio"
-  | "range" | "submit" | "reset" | "button" | "image";
+
 
 type InputMode = "none" | "text" | "decimal" | "numeric" | "tel" | "search" | "email" | "url";
 
@@ -644,78 +640,147 @@ type AriaAttributes = { [K in `aria-${string}`]?: MaybeSignal<string | number | 
 // ELEMENT-SPECIFIC ATTRIBUTES
 // =============================================================================
 
-interface InputAttrs extends GlobalAttributes {
-  /** Type of the input control. */
-  type?: MaybeSignal<InputType>;
-  /** Name of the form control. Submitted with the form. */
+interface BaseInputAttrs extends GlobalAttributes {
   name?: MaybeSignal<string>;
-  /** Current value of the control. */
-  value?: MaybeSignal<string | number>;
-  /** Initial value of the control. */
-  defaultValue?: MaybeSignal<string>;
-  /** Text that appears in the form control when it has no value set. */
-  placeholder?: MaybeSignal<string>;
-  /** The control is unavailable for interaction. */
   disabled?: MaybeSignal<boolean>;
-  /** The user cannot edit the value. */
-  readOnly?: MaybeSignal<boolean>;
-  /** The value is required for form submission. */
-  required?: MaybeSignal<boolean>;
-  /** Automatically focus the element when the page loads. */
-  autofocus?: MaybeSignal<boolean>;
-  /** Hint for form autofill feature. */
-  autocomplete?: MaybeSignal<Autocomplete>;
-  /** Minimum value. */
-  min?: MaybeSignal<string | number>;
-  /** Maximum value. */
-  max?: MaybeSignal<string | number>;
-  /** Incremental bounds for numeric or date-time values. */
-  step?: MaybeSignal<string | number>;
-  /** Minimum length of value. */
-  minLength?: MaybeSignal<number>;
-  /** Maximum length of value. */
-  maxLength?: MaybeSignal<number>;
-  /** Regex pattern the value must match. */
-  pattern?: MaybeSignal<string>;
-  /** Whether to allow multiple values. */
-  multiple?: MaybeSignal<boolean>;
-  /** File types accepted by the file upload. */
-  accept?: MaybeSignal<string>;
-  /** Whether the control is checked. */
-  checked?: MaybeSignal<boolean>;
-  /** The initial checked state. */
-  defaultChecked?: MaybeSignal<boolean>;
-  /** Visual indeterminate state for checkboxes. */
-  indeterminate?: MaybeSignal<boolean>;
-  /** Size of the control. */
-  size?: MaybeSignal<number>;
-  /** ID of a `<datalist>` element. */
-  list?: MaybeSignal<string>;
-  /** ID of the form the element belongs to. */
   form?: MaybeSignal<string>;
-  /** URL for form submission. */
-  formAction?: MaybeSignal<string>;
-  /** HTTP method for form submission. */
-  formMethod?: MaybeSignal<FormMethod>;
-  /** Encoding type for form submission. */
-  formEnctype?: MaybeSignal<FormEnctype>;
-  /** Bypasses form validation. */
-  formNoValidate?: MaybeSignal<boolean>;
-  /** Browsing context for form submission. */
-  formTarget?: MaybeSignal<Target>;
-  /** Width of the image input. */
-  width?: MaybeSignal<number>;
-  /** Height of the image input. */
-  height?: MaybeSignal<number>;
-  /** Source URL of the image input. */
-  src?: MaybeSignal<string>;
-  /** Alternate text for the image input. */
-  alt?: MaybeSignal<string>;
-  /** Media capture source. */
-  capture?: MaybeSignal<"user" | "environment" | boolean>;
-  /** Directionality of the element's text. */
+  autofocus?: MaybeSignal<boolean>;
+  autocomplete?: MaybeSignal<Autocomplete>;
+  list?: MaybeSignal<string>; // Most support list, except file/hidden/button
+}
+
+// Text-like inputs
+interface InputTextAttrs extends BaseInputAttrs {
+  type?: MaybeSignal<"text" | "password" | "search" | "tel" | "url">;
+  value?: MaybeSignal<string | number>;
+  defaultValue?: MaybeSignal<string>;
+  placeholder?: MaybeSignal<string>;
+  readOnly?: MaybeSignal<boolean>;
+  required?: MaybeSignal<boolean>;
+  minLength?: MaybeSignal<number>;
+  maxLength?: MaybeSignal<number>;
+  pattern?: MaybeSignal<string>;
+  size?: MaybeSignal<number>;
   dirname?: MaybeSignal<string>;
 }
+
+interface InputEmailAttrs extends BaseInputAttrs {
+  type: MaybeSignal<"email">;
+  value?: MaybeSignal<string>;
+  defaultValue?: MaybeSignal<string>;
+  placeholder?: MaybeSignal<string>;
+  readOnly?: MaybeSignal<boolean>;
+  required?: MaybeSignal<boolean>;
+  minLength?: MaybeSignal<number>;
+  maxLength?: MaybeSignal<number>;
+  pattern?: MaybeSignal<string>;
+  size?: MaybeSignal<number>;
+  multiple?: MaybeSignal<boolean>;
+}
+
+// Numeric
+interface InputNumberAttrs extends BaseInputAttrs {
+  type: MaybeSignal<"number">;
+  value?: MaybeSignal<number | string>;
+  defaultValue?: MaybeSignal<number | string>;
+  placeholder?: MaybeSignal<string>;
+  readOnly?: MaybeSignal<boolean>;
+  required?: MaybeSignal<boolean>;
+  min?: MaybeSignal<string | number>;
+  max?: MaybeSignal<string | number>;
+  step?: MaybeSignal<string | number>;
+}
+
+interface InputRangeAttrs extends BaseInputAttrs {
+  type: MaybeSignal<"range">;
+  value?: MaybeSignal<number | string>;
+  defaultValue?: MaybeSignal<number | string>;
+  min?: MaybeSignal<string | number>;
+  max?: MaybeSignal<string | number>;
+  step?: MaybeSignal<string | number>;
+}
+
+// Time/Date
+interface InputDateAttrs extends BaseInputAttrs {
+  type: MaybeSignal<"date" | "datetime-local" | "month" | "time" | "week">;
+  value?: MaybeSignal<string>;
+  defaultValue?: MaybeSignal<string>;
+  readOnly?: MaybeSignal<boolean>;
+  required?: MaybeSignal<boolean>;
+  min?: MaybeSignal<string>;
+  max?: MaybeSignal<string>;
+  step?: MaybeSignal<string | number>;
+}
+
+// Boolean
+interface InputCheckboxAttrs extends BaseInputAttrs {
+  type: MaybeSignal<"checkbox" | "radio">;
+  checked?: MaybeSignal<boolean>;
+  defaultChecked?: MaybeSignal<boolean>;
+  indeterminate?: MaybeSignal<boolean>; // Only for checkbox but harmless for radio
+  required?: MaybeSignal<boolean>; // Required means "must be checked"
+  value?: MaybeSignal<string>; // Value submitted when checked
+}
+
+// File
+interface InputFileAttrs extends BaseInputAttrs {
+  type: MaybeSignal<"file">;
+  accept?: MaybeSignal<string>;
+  multiple?: MaybeSignal<boolean>;
+  required?: MaybeSignal<boolean>;
+  capture?: MaybeSignal<"user" | "environment" | boolean>;
+  value?: never; // Uncontrolled
+}
+
+// Color
+interface InputColorAttrs extends BaseInputAttrs {
+  type: MaybeSignal<"color">;
+  value?: MaybeSignal<string>;
+  defaultValue?: MaybeSignal<string>;
+}
+
+// Hidden
+interface InputHiddenAttrs extends BaseInputAttrs {
+  type: MaybeSignal<"hidden">;
+  value?: MaybeSignal<string | number>;
+}
+
+// Buttons
+interface InputButtonAttrs extends BaseInputAttrs {
+  type: MaybeSignal<"submit" | "reset" | "button">;
+  value?: MaybeSignal<string>; // Button label
+  formAction?: MaybeSignal<string>;
+  formMethod?: MaybeSignal<FormMethod>;
+  formEnctype?: MaybeSignal<FormEnctype>;
+  formNoValidate?: MaybeSignal<boolean>;
+  formTarget?: MaybeSignal<Target>;
+}
+
+interface InputImageAttrs extends BaseInputAttrs {
+  type: MaybeSignal<"image">;
+  src?: MaybeSignal<string>;
+  alt?: MaybeSignal<string>;
+  width?: MaybeSignal<number>;
+  height?: MaybeSignal<number>;
+  formAction?: MaybeSignal<string>;
+  formMethod?: MaybeSignal<FormMethod>;
+  formEnctype?: MaybeSignal<FormEnctype>;
+  formNoValidate?: MaybeSignal<boolean>;
+  formTarget?: MaybeSignal<Target>;
+}
+
+type InputAttrs =
+  | InputTextAttrs
+  | InputEmailAttrs
+  | InputNumberAttrs
+  | InputRangeAttrs
+  | InputDateAttrs
+  | InputCheckboxAttrs
+  | InputFileAttrs
+  | InputColorAttrs
+  | InputHiddenAttrs
+  | InputButtonAttrs
+  | InputImageAttrs;
 
 interface TextAreaAttrs extends GlobalAttributes {
   name?: MaybeSignal<string>;
