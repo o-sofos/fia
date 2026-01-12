@@ -871,18 +871,18 @@ interface SVGElementPropsMap {
 // SVG FACTORY TYPES
 // =============================================================================
 
-interface SVGElementFactory<K extends keyof SVGElementPropsMap> {
+export interface SVGElementFactory<K extends keyof SVGElementPropsMap> {
     (props: SVGElementPropsMap[K], children: () => void): SVGElement;
     (children: () => void): SVGElement;
     (props: SVGElementPropsMap[K]): SVGElement;
     (): SVGElement;
 }
 
-interface SVGVoidElementFactory<K extends keyof SVGElementPropsMap> {
+export interface SVGVoidElementFactory<K extends keyof SVGElementPropsMap> {
     (props?: SVGElementPropsMap[K]): SVGElement;
 }
 
-interface SVGTextElementFactory<K extends keyof SVGElementPropsMap> {
+export interface SVGTextElementFactory<K extends keyof SVGElementPropsMap> {
     (props: SVGElementPropsMap[K], text: string | number | Signal<unknown>): SVGElement;
     (props: SVGElementPropsMap[K], children: () => void): SVGElement;
     (props: SVGElementPropsMap[K]): SVGElement;
@@ -1089,81 +1089,81 @@ function createSVGTextElement<K extends keyof SVGElementPropsMap>(
 // =============================================================================
 
 // Root & Container Elements
-export const svg = createSVGElement<"svg">("svg");
-export const g = createSVGElement<"g">("g");
-export const defs = createSVGElement<"defs">("defs");
-export const symbol = createSVGElement<"symbol">("symbol");
-export const use = createSVGVoidElement<"use">("use");
-export const image = createSVGVoidElement<"image">("image");
-export const svgSwitch = createSVGElement<"switch">("switch");
-export const foreignObject = createSVGElement<"foreignObject">("foreignObject");
-export const a = createSVGElement<"a">("a");
-export const view = createSVGVoidElement<"view">("view");
+export const svg: SVGElementFactory<"svg"> = createSVGElement<"svg">("svg");
+export const g: SVGElementFactory<"g"> = createSVGElement<"g">("g");
+export const defs: SVGElementFactory<"defs"> = createSVGElement<"defs">("defs");
+export const symbol: SVGElementFactory<"symbol"> = createSVGElement<"symbol">("symbol");
+export const use: SVGVoidElementFactory<"use"> = createSVGVoidElement<"use">("use");
+export const image: SVGVoidElementFactory<"image"> = createSVGVoidElement<"image">("image");
+export const svgSwitch: SVGElementFactory<"switch"> = createSVGElement<"switch">("switch");
+export const foreignObject: SVGElementFactory<"foreignObject"> = createSVGElement<"foreignObject">("foreignObject");
+export const a: SVGElementFactory<"a"> = createSVGElement<"a">("a");
+export const view: SVGVoidElementFactory<"view"> = createSVGVoidElement<"view">("view");
 
 // Basic Shapes
-export const rect = createSVGVoidElement<"rect">("rect");
-export const circle = createSVGVoidElement<"circle">("circle");
-export const ellipse = createSVGVoidElement<"ellipse">("ellipse");
-export const line = createSVGVoidElement<"line">("line");
-export const polyline = createSVGVoidElement<"polyline">("polyline");
-export const polygon = createSVGVoidElement<"polygon">("polygon");
-export const path = createSVGVoidElement<"path">("path");
+export const rect: SVGVoidElementFactory<"rect"> = createSVGVoidElement<"rect">("rect");
+export const circle: SVGVoidElementFactory<"circle"> = createSVGVoidElement<"circle">("circle");
+export const ellipse: SVGVoidElementFactory<"ellipse"> = createSVGVoidElement<"ellipse">("ellipse");
+export const line: SVGVoidElementFactory<"line"> = createSVGVoidElement<"line">("line");
+export const polyline: SVGVoidElementFactory<"polyline"> = createSVGVoidElement<"polyline">("polyline");
+export const polygon: SVGVoidElementFactory<"polygon"> = createSVGVoidElement<"polygon">("polygon");
+export const path: SVGVoidElementFactory<"path"> = createSVGVoidElement<"path">("path");
 
 // Text Elements
-export const text = createSVGTextElement<"text">("text");
-export const tspan = createSVGTextElement<"tspan">("tspan");
-export const textPath = createSVGTextElement<"textPath">("textPath");
+export const text: SVGTextElementFactory<"text"> = createSVGTextElement<"text">("text");
+export const tspan: SVGTextElementFactory<"tspan"> = createSVGTextElement<"tspan">("tspan");
+export const textPath: SVGTextElementFactory<"textPath"> = createSVGTextElement<"textPath">("textPath");
 
 // Gradient Elements
-export const linearGradient = createSVGElement<"linearGradient">("linearGradient");
-export const radialGradient = createSVGElement<"radialGradient">("radialGradient");
-export const stop = createSVGVoidElement<"stop">("stop");
-export const pattern = createSVGElement<"pattern">("pattern");
+export const linearGradient: SVGElementFactory<"linearGradient"> = createSVGElement<"linearGradient">("linearGradient");
+export const radialGradient: SVGElementFactory<"radialGradient"> = createSVGElement<"radialGradient">("radialGradient");
+export const stop: SVGVoidElementFactory<"stop"> = createSVGVoidElement<"stop">("stop");
+export const pattern: SVGElementFactory<"pattern"> = createSVGElement<"pattern">("pattern");
 
 // Clipping & Masking
-export const clipPath = createSVGElement<"clipPath">("clipPath");
-export const svgMask = createSVGElement<"mask">("mask");
-export const marker = createSVGElement<"marker">("marker");
+export const clipPath: SVGElementFactory<"clipPath"> = createSVGElement<"clipPath">("clipPath");
+export const svgMask: SVGElementFactory<"mask"> = createSVGElement<"mask">("mask");
+export const marker: SVGElementFactory<"marker"> = createSVGElement<"marker">("marker");
 
 // Filter Elements
-export const svgFilter = createSVGElement<"filter">("filter");
-export const feBlend = createSVGVoidElement<"feBlend">("feBlend");
-export const feColorMatrix = createSVGVoidElement<"feColorMatrix">("feColorMatrix");
-export const feComponentTransfer = createSVGElement<"feComponentTransfer">("feComponentTransfer");
-export const feFuncR = createSVGVoidElement<"feFuncR">("feFuncR");
-export const feFuncG = createSVGVoidElement<"feFuncG">("feFuncG");
-export const feFuncB = createSVGVoidElement<"feFuncB">("feFuncB");
-export const feFuncA = createSVGVoidElement<"feFuncA">("feFuncA");
-export const feComposite = createSVGVoidElement<"feComposite">("feComposite");
-export const feConvolveMatrix = createSVGVoidElement<"feConvolveMatrix">("feConvolveMatrix");
-export const feDiffuseLighting = createSVGElement<"feDiffuseLighting">("feDiffuseLighting");
-export const feDisplacementMap = createSVGVoidElement<"feDisplacementMap">("feDisplacementMap");
-export const feDropShadow = createSVGVoidElement<"feDropShadow">("feDropShadow");
-export const feFlood = createSVGVoidElement<"feFlood">("feFlood");
-export const feGaussianBlur = createSVGVoidElement<"feGaussianBlur">("feGaussianBlur");
-export const feImage = createSVGVoidElement<"feImage">("feImage");
-export const feMerge = createSVGElement<"feMerge">("feMerge");
-export const feMergeNode = createSVGVoidElement<"feMergeNode">("feMergeNode");
-export const feMorphology = createSVGVoidElement<"feMorphology">("feMorphology");
-export const feOffset = createSVGVoidElement<"feOffset">("feOffset");
-export const feSpecularLighting = createSVGElement<"feSpecularLighting">("feSpecularLighting");
-export const feTile = createSVGVoidElement<"feTile">("feTile");
-export const feTurbulence = createSVGVoidElement<"feTurbulence">("feTurbulence");
-export const feDistantLight = createSVGVoidElement<"feDistantLight">("feDistantLight");
-export const fePointLight = createSVGVoidElement<"fePointLight">("fePointLight");
-export const feSpotLight = createSVGVoidElement<"feSpotLight">("feSpotLight");
+export const svgFilter: SVGElementFactory<"filter"> = createSVGElement<"filter">("filter");
+export const feBlend: SVGVoidElementFactory<"feBlend"> = createSVGVoidElement<"feBlend">("feBlend");
+export const feColorMatrix: SVGVoidElementFactory<"feColorMatrix"> = createSVGVoidElement<"feColorMatrix">("feColorMatrix");
+export const feComponentTransfer: SVGElementFactory<"feComponentTransfer"> = createSVGElement<"feComponentTransfer">("feComponentTransfer");
+export const feFuncR: SVGVoidElementFactory<"feFuncR"> = createSVGVoidElement<"feFuncR">("feFuncR");
+export const feFuncG: SVGVoidElementFactory<"feFuncG"> = createSVGVoidElement<"feFuncG">("feFuncG");
+export const feFuncB: SVGVoidElementFactory<"feFuncB"> = createSVGVoidElement<"feFuncB">("feFuncB");
+export const feFuncA: SVGVoidElementFactory<"feFuncA"> = createSVGVoidElement<"feFuncA">("feFuncA");
+export const feComposite: SVGVoidElementFactory<"feComposite"> = createSVGVoidElement<"feComposite">("feComposite");
+export const feConvolveMatrix: SVGVoidElementFactory<"feConvolveMatrix"> = createSVGVoidElement<"feConvolveMatrix">("feConvolveMatrix");
+export const feDiffuseLighting: SVGElementFactory<"feDiffuseLighting"> = createSVGElement<"feDiffuseLighting">("feDiffuseLighting");
+export const feDisplacementMap: SVGVoidElementFactory<"feDisplacementMap"> = createSVGVoidElement<"feDisplacementMap">("feDisplacementMap");
+export const feDropShadow: SVGVoidElementFactory<"feDropShadow"> = createSVGVoidElement<"feDropShadow">("feDropShadow");
+export const feFlood: SVGVoidElementFactory<"feFlood"> = createSVGVoidElement<"feFlood">("feFlood");
+export const feGaussianBlur: SVGVoidElementFactory<"feGaussianBlur"> = createSVGVoidElement<"feGaussianBlur">("feGaussianBlur");
+export const feImage: SVGVoidElementFactory<"feImage"> = createSVGVoidElement<"feImage">("feImage");
+export const feMerge: SVGElementFactory<"feMerge"> = createSVGElement<"feMerge">("feMerge");
+export const feMergeNode: SVGVoidElementFactory<"feMergeNode"> = createSVGVoidElement<"feMergeNode">("feMergeNode");
+export const feMorphology: SVGVoidElementFactory<"feMorphology"> = createSVGVoidElement<"feMorphology">("feMorphology");
+export const feOffset: SVGVoidElementFactory<"feOffset"> = createSVGVoidElement<"feOffset">("feOffset");
+export const feSpecularLighting: SVGElementFactory<"feSpecularLighting"> = createSVGElement<"feSpecularLighting">("feSpecularLighting");
+export const feTile: SVGVoidElementFactory<"feTile"> = createSVGVoidElement<"feTile">("feTile");
+export const feTurbulence: SVGVoidElementFactory<"feTurbulence"> = createSVGVoidElement<"feTurbulence">("feTurbulence");
+export const feDistantLight: SVGVoidElementFactory<"feDistantLight"> = createSVGVoidElement<"feDistantLight">("feDistantLight");
+export const fePointLight: SVGVoidElementFactory<"fePointLight"> = createSVGVoidElement<"fePointLight">("fePointLight");
+export const feSpotLight: SVGElementFactory<"feSpotLight"> = createSVGElement<"feSpotLight">("feSpotLight");
 
 // Animation Elements
-export const animate = createSVGVoidElement<"animate">("animate");
-export const animateMotion = createSVGElement<"animateMotion">("animateMotion");
-export const animateTransform = createSVGVoidElement<"animateTransform">("animateTransform");
-export const mpath = createSVGVoidElement<"mpath">("mpath");
-export const svgSet = createSVGVoidElement<"set">("set");
+export const animate: SVGVoidElementFactory<"animate"> = createSVGVoidElement<"animate">("animate");
+export const animateMotion: SVGElementFactory<"animateMotion"> = createSVGElement<"animateMotion">("animateMotion");
+export const animateTransform: SVGVoidElementFactory<"animateTransform"> = createSVGVoidElement<"animateTransform">("animateTransform");
+export const mpath: SVGVoidElementFactory<"mpath"> = createSVGVoidElement<"mpath">("mpath");
+export const svgSet: SVGVoidElementFactory<"set"> = createSVGVoidElement<"set">("set");
 
 // Descriptive Elements
-export const desc = createSVGTextElement<"desc">("desc");
-export const svgTitle = createSVGTextElement<"title">("title");
-export const metadata = createSVGElement<"metadata">("metadata");
+export const desc: SVGTextElementFactory<"desc"> = createSVGTextElement<"desc">("desc");
+export const svgTitle: SVGTextElementFactory<"title"> = createSVGTextElement<"title">("title");
+export const metadata: SVGElementFactory<"metadata"> = createSVGElement<"metadata">("metadata");
 
 // =============================================================================
 // TYPE EXPORTS
