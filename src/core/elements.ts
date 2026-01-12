@@ -99,9 +99,23 @@ type Wrap = "soft" | "hard";
 type ThScope = "row" | "col" | "rowgroup" | "colgroup";
 
 type Autocomplete =
-  | "off" | "on" | "name" | "email" | "username" | "new-password" | "current-password"
-  | "one-time-code" | "organization" | "street-address" | "country" | "country-name"
-  | "postal-code" | "cc-name" | "cc-number" | "cc-exp" | "cc-csc" | "tel" | "url"
+  | "off" | "on"
+  // Name
+  | "name" | "honorific-prefix" | "given-name" | "additional-name" | "family-name" | "honorific-suffix" | "nickname"
+  | "username" | "new-password" | "current-password" | "one-time-code" | "webauthn"
+  | "organization-title" | "organization" | "street-address"
+  // Address
+  | "address-line1" | "address-line2" | "address-line3" | "address-level4" | "address-level3" | "address-level2" | "address-level1"
+  | "country" | "country-name" | "postal-code"
+  // Payment
+  | "cc-name" | "cc-given-name" | "cc-additional-name" | "cc-family-name" | "cc-number" | "cc-exp" | "cc-exp-month" | "cc-exp-year" | "cc-csc" | "cc-type"
+  | "transaction-currency" | "transaction-amount"
+  // Contact
+  | "language" | "bday" | "bday-day" | "bday-month" | "bday-year" | "sex" | "url" | "photo"
+  | "tel" | "tel-country-code" | "tel-national" | "tel-area-code" | "tel-local" | "tel-local-prefix" | "tel-local-suffix" | "tel-extension"
+  | "email" | "impp"
+  // Scoped (common)
+  | "shipping street-address" | "billing street-address" | "shipping postal-code" | "billing postal-code"
   | (string & {});
 
 
@@ -110,6 +124,23 @@ type LinkAs = "audio" | "document" | "embed" | "fetch" | "font" | "image" | "obj
 
 type HttpEquiv = "content-type" | "default-style" | "refresh" | "x-ua-compatible" | "content-security-policy";
 
+type LinkRel =
+  | "alternate" | "author" | "canonical" | "help" | "icon" | "license"
+  | "manifest" | "modulepreload" | "next" | "pingback" | "preconnect"
+  | "prefetch" | "preload" | "prerender" | "prev" | "search" | "stylesheet"
+  | (string & {});
+
+type AnchorRel =
+  | "alternate" | "author" | "bookmark" | "external" | "help" | "license"
+  | "next" | "nofollow" | "noopener" | "noreferrer" | "opener" | "prev"
+  | "search" | "tag"
+  | (string & {});
+
+type ControlsList =
+  | "nodownload" | "nofullscreen" | "noremoteplayback"
+  | "nodownload nofullscreen" | "nodownload noremoteplayback"
+  | "nofullscreen noremoteplayback" | "nodownload nofullscreen noremoteplayback"
+  | (string & {});
 
 type Sandbox =
   | "allow-downloads" | "allow-forms" | "allow-modals" | "allow-orientation-lock"
@@ -1313,7 +1344,7 @@ interface BaseFormAttrs extends GlobalAttributes {
   /** Character encodings allowed for submission. */
   acceptCharset?: MaybeSignal<string>;
   /** Relationship to the target resource. */
-  rel?: MaybeSignal<string>;
+  rel?: MaybeSignal<AnchorRel>;
 }
 
 // 1. Post: method="post" allows enctype
@@ -1383,7 +1414,7 @@ interface AnchorAttrs extends GlobalAttributes {
   /** Browsing context for the linked resource. */
   target?: MaybeSignal<Target>;
   /** Relationship to the linked resource. */
-  rel?: MaybeSignal<string>;
+  rel?: MaybeSignal<AnchorRel>;
   /** Prompts the user to download the linked resource. */
   download?: MaybeSignal<string | boolean>;
   /** Language of the linked resource. */
@@ -1469,7 +1500,7 @@ interface VideoAttrs extends GlobalAttributes {
   /** Prevents remote playback (casting). */
   disableRemotePlayback?: MaybeSignal<boolean>;
   /** Controls to display/hide (nodownload, nofullscreen, noremoteplayback). */
-  controlsList?: MaybeSignal<string>;
+  controlsList?: MaybeSignal<ControlsList>;
 }
 
 /**
@@ -1497,7 +1528,7 @@ interface AudioAttrs extends GlobalAttributes {
   /** Prevents remote playback. */
   disableRemotePlayback?: MaybeSignal<boolean>;
   /** Controls to display/hide. */
-  controlsList?: MaybeSignal<string>;
+  controlsList?: MaybeSignal<ControlsList>;
 }
 
 /**
@@ -1603,7 +1634,7 @@ interface IframeAttrs extends GlobalAttributes {
   /** How the browser should load the iframe. */
   loading?: MaybeSignal<Loading>;
   /** Security rules for nested content. */
-  sandbox?: MaybeSignal<Sandbox | string>;
+  sandbox?: MaybeSignal<Sandbox>;
   /** Feature policy to apply. */
   allow?: MaybeSignal<string>;
   /** Referrer policy for fetches. */
@@ -1675,7 +1706,7 @@ interface BaseAreaAttrs extends GlobalAttributes {
   /** Referrer policy for fetches. */
   referrerPolicy?: MaybeSignal<ReferrerPolicy>;
   /** Relationship to the linked resource. */
-  rel?: MaybeSignal<string>;
+  rel?: MaybeSignal<AnchorRel>;
   /** Browsing context for the link. */
   target?: MaybeSignal<Target>;
 }
@@ -1913,7 +1944,7 @@ interface LinkIconAttrs extends BaseLinkAttrs {
 
 interface LinkBaseAttrs extends BaseLinkAttrs {
   /** Relationship to the linked resource. */
-  rel?: MaybeSignal<string>; // Catch-all for other rels
+  rel?: MaybeSignal<LinkRel>;
   /** Media query. */
   media?: MaybeSignal<string>;
   /** Preload destination. */
