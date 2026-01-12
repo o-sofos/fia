@@ -20,17 +20,7 @@
 import { pushExecutionContext, popExecutionContext, getCurrentExecutionContext, type ExecutionContext } from "./context";
 import { effect, type Signal } from "./reactivity";
 
-// =============================================================================
-// CAPTURE CONTEXT
-// =============================================================================
 
-class CaptureContext implements ExecutionContext {
-  nodes: Node[] = [];
-  appendChild(node: Node): Node {
-    this.nodes.push(node);
-    return node;
-  }
-}
 
 // =============================================================================
 // TYPE UTILITIES
@@ -1239,83 +1229,6 @@ export interface VoidElementFactory<K extends keyof HTMLElementTagNameMap> {
    * @param props - Element attributes and event handlers
    */
   (props?: ElementProps<K>): HTMLElementTagNameMap[K];
-}
-
-// =============================================================================
-// CHILD HANDLING
-// =============================================================================
-
-function appendChild(parent: HTMLElement | ExecutionContext, child: Child | ((el: any) => void)): void {
-  if (child === null || child === undefined || child === false || child === true) {
-    return;
-  }
-
-  if (Array.isArray(child)) {
-    for (const c of child) {
-      appendChild(parent, c);
-    }
-    return;
-  }
-
-  const target = parent;
-
-  if (typeof child === "string" || typeof child === "number") {
-    target.appendChild(document.createTextNode(String(child)));
-  } else if (child instanceof HTMLElement) {
-    target.appendChild(child);
-  } else if (isSignal(child)) {
-    const textNode = document.createTextNode("");
-    effect(() => {
-      const v = child.value;
-      textNode.textContent = (v === null || v === undefined) ? "" : String(v);
-    });
-    target.appendChild(textNode);
-  } else if (typeof child === "function") {
-    if (child.length > 0) {
-      (child as (el: any) => void)(target);
-      return;
-    }
-    const anchor = document.createTextNode("");
-    target.appendChild(anchor);
-
-    let activeNodes: Node[] = [];
-
-    effect(() => {
-      for (const node of activeNodes) {
-        if (node.parentNode) {
-          node.parentNode.removeChild(node);
-        }
-      }
-      activeNodes = [];
-
-      const captureCtx = new CaptureContext();
-      pushExecutionContext(captureCtx);
-      try {
-        (child as () => void)();
-      } finally {
-        popExecutionContext();
-      }
-
-      if (typeof (target as HTMLElement).insertBefore === "function") {
-        const realParent = target as HTMLElement;
-        const referenceNode = anchor.nextSibling;
-
-        for (const node of captureCtx.nodes) {
-          realParent.insertBefore(node, referenceNode);
-          activeNodes.push(node);
-        }
-      } else {
-        const captureParent = target as CaptureContext;
-        const index = captureParent.nodes.indexOf(anchor);
-        if (index !== -1) {
-          captureParent.nodes.splice(index + 1, 0, ...captureCtx.nodes);
-        } else {
-          captureParent.nodes.push(...captureCtx.nodes);
-        }
-        activeNodes.push(...captureCtx.nodes);
-      }
-    });
-  }
 }
 
 // =============================================================================

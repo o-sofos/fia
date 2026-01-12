@@ -88,7 +88,7 @@ describe("Element System - Unified API", () => {
 
         it("should provide element reference in callback", () => {
             let ref: HTMLDivElement | undefined;
-            const el = div((_r) => {
+            const el = div((r) => {
                 ref = r;
             });
             expect(ref).toBe(el);
@@ -106,7 +106,7 @@ describe("Element System - Unified API", () => {
 
     describe("Overload 5: element(props, children)", () => {
         it("should create element with props and children", () => {
-            const el = div({ class: "parent" }, (el) => {
+            const el = div({ class: "parent" }, (_el) => {
                 span("Child");
             });
             expect(el.className).toBe("parent");
@@ -116,7 +116,7 @@ describe("Element System - Unified API", () => {
 
         it("should work with event handlers and children", () => {
             let clicked = false;
-            const el = button({ onclick: () => { clicked = true; } }, (el) => {
+            const el = button({ onclick: () => { clicked = true; } }, (_el) => {
                 span("Click me");
             });
             expect(el.textContent).toBe("Click me");
@@ -145,7 +145,7 @@ describe("Element System - Unified API", () => {
 
     describe("Overload 7: element(content, children)", () => {
         it("should create element with content and children", () => {
-            const el = div("Title", (el) => {
+            const el = div("Title", (_el) => {
                 p("Paragraph");
             });
             expect(el.childNodes[0].textContent).toBe("Title");
@@ -155,7 +155,7 @@ describe("Element System - Unified API", () => {
 
     describe("Overload 8: element(content, props, children)", () => {
         it("should create element with content, props, and children", () => {
-            const el = div("Header", { class: "section" }, (el) => {
+            const el = div("Header", { class: "section" }, (_el) => {
                 p("Body content");
             });
             expect(el.className).toBe("section");
@@ -167,7 +167,7 @@ describe("Element System - Unified API", () => {
             const title = $("Title");
             const isActive = $(false);
 
-            const el = div(title, { class: { active: isActive } }, (el) => {
+            const el = div(title, { class: { active: isActive } }, (_el) => {
                 span("Content");
             });
 
@@ -248,7 +248,7 @@ describe("Element System - Unified API", () => {
     describe("Event Handling", () => {
         it("should handle click events", () => {
             let count = 0;
-            const el = button({ onclick: () => count++ }, (el) => {
+            const el = button({ onclick: () => count++ }, (_el) => {
                 span("Click");
             });
 
@@ -277,7 +277,7 @@ describe("Element System - Unified API", () => {
     describe("Real-World Patterns", () => {
         it("should create a button with icon and text", () => {
             const el = button({ class: "primary", onclick: () => { } }, (_el) => {
-                span({ class: "icon" }, (el) => { });
+                span({ class: "icon" }, (_el) => { });
                 span("Save");
             });
 
@@ -315,7 +315,7 @@ describe("Element System - Unified API", () => {
         it("should create a dynamic list", () => {
             const items = $(["Apple", "Banana", "Cherry"]);
 
-            const list = ul((el) => {
+            const list = ul((_el) => {
                 for (const item of items.value) {
                     li(item);
                 }
@@ -329,12 +329,12 @@ describe("Element System - Unified API", () => {
             const title = $("Card Title");
             const isExpanded = $(false);
 
-            const card = div({ class: { card: true, expanded: isExpanded } }, (el) => {
+            const card = div({ class: { card: true, expanded: isExpanded } }, (_el) => {
                 h1(title, { class: "card-title" });
-                div({ class: "card-body" }, (el) => {
+                div({ class: "card-body" }, (_el) => {
                     p("Card content goes here");
                 });
-                button({ onclick: () => { isExpanded.value = !isExpanded.value; } }, (el) => {
+                button({ onclick: () => { isExpanded.value = !isExpanded.value; } }, (_el) => {
                     span("Toggle");
                 });
             });
