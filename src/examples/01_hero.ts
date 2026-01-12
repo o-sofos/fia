@@ -21,32 +21,32 @@ export function Hero() {
       backgroundColor: "#f9f9f9"
     }
   }, () => {
-    h1({ 
-      style: { 
-        fontSize: "3.5rem", 
+    h1("Build Faster with Flick", {
+      style: {
+        fontSize: "3.5rem",
         marginBottom: "1rem",
         color: "#1a1a1a"
-      } 
-    }, "Build Faster with Flick");
+      }
+    });
 
-    p({ 
-      style: { 
-        fontSize: "1.25rem", 
-        color: "#666", 
+    p("The 2KB framework for modern web apps. No JSX. No VDOM. Just JavaScript.", {
+      style: {
+        fontSize: "1.25rem",
+        color: "#666",
         marginBottom: "2rem",
         maxWidth: "600px",
-        margin: "0 auto 2rem auto" 
-      } 
-    }, "The 2KB framework for modern web apps. No JSX. No VDOM. Just JavaScript.");
+        margin: "0 auto 2rem auto"
+      }
+    });
 
-    div({ 
-      style: { 
-        display: "flex", 
-        gap: "1rem", 
-        justifyContent: "center" 
-      } 
+    div({
+      style: {
+        display: "flex",
+        gap: "1rem",
+        justifyContent: "center"
+      }
     }, () => {
-      button({
+      button("Get Started", {
         style: {
           padding: "0.8rem 1.5rem",
           background: "#222",
@@ -56,9 +56,9 @@ export function Hero() {
           fontWeight: "600",
           cursor: "pointer"
         }
-      }, "Get Started");
+      });
 
-      button({
+      button("Documentation", {
         style: {
           padding: "0.8rem 1.5rem",
           background: "white",
@@ -68,7 +68,7 @@ export function Hero() {
           fontWeight: "600",
           cursor: "pointer"
         }
-      }, "Documentation");
+      });
     });
   });
 }

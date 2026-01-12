@@ -3,6 +3,18 @@
  *
  * Factory functions for all HTML elements that auto-mount to parent context.
  * Full TypeScript autocomplete with strict attribute types.
+ * 
+ * Unified API - all elements follow the same pattern.
+ * 
+ * Overloads:
+ * 1. element()
+ * 2. element(content)
+ * 3. element(props)
+ * 4. element(children)
+ * 5. element(props, children)
+ * 6. element(content, props)
+ * 7. element(content, children)
+ * 8. element(content, props, children)
  */
 
 import { pushExecutionContext, popExecutionContext, getCurrentExecutionContext, type ExecutionContext } from "./context";
@@ -30,12 +42,8 @@ class CaptureContext implements ExecutionContext {
  * @returns True if the value is a Signal
  */
 export function isSignal(value: unknown): value is Signal<unknown> {
-  if (value === null || value === undefined) {
-    return false;
-  }
-  if (typeof value !== "function") {
-    return false;
-  }
+  if (value === null || value === undefined) return false;
+  if (typeof value !== "function") return false;
   const descriptor = Object.getOwnPropertyDescriptor(value, "value");
   return descriptor !== undefined && descriptor.get !== undefined;
 }
@@ -47,6 +55,9 @@ export function isSignal(value: unknown): value is Signal<unknown> {
 export type MaybeSignal<T> = T | Signal<T>;
 
 export type Renderable = string | number | boolean | null | undefined;
+
+/** Children callback - receives element reference, creates children inside */
+type ChildrenCallback<E extends HTMLElement> = (el: E) => void;
 
 export type Child =
   | string
@@ -1187,8 +1198,10 @@ export type ElementProps<K extends keyof HTMLElementTagNameMap> =
   & AriaAttributes;
 
 // =============================================================================
-// ELEMENT FACTORY TYPES
+// ELEMENT FACTORY TYPES - UNIFIED API
 // =============================================================================
+
+type E<K extends keyof HTMLElementTagNameMap> = HTMLElementTagNameMap[K];
 
 /**
  * Factory function for creating HTML elements.
@@ -1197,33 +1210,22 @@ export type ElementProps<K extends keyof HTMLElementTagNameMap> =
  * @template K - The HTML tag name key from HTMLElementTagNameMap
  */
 export interface ElementFactory<K extends keyof HTMLElementTagNameMap> {
-  /**
-   * Create an element with simple text/signal content and a click handler.
-   * @param content - Text, number, or signal to display
-   * @param onclick - Click event handler
-   */
-  (content: MaybeSignal<string | number>, onclick: (event: MouseEvent) => void): HTMLElementTagNameMap[K];
-
-  /**
-   * Create an element with simple text/signal content, properties, and children.
-   * @param content - Text, number, or signal to display
-   * @param props - Element attributes and event handlers
-   * @param children - Nested child elements or functions
-   */
-  (content: MaybeSignal<string | number>, props: ElementProps<K>, ...children: (Child | ((ref: HTMLElementTagNameMap[K]) => void))[]): HTMLElementTagNameMap[K];
-
-  /**
-   * Create an element with properties and children.
-   * @param props - Element attributes and event handlers
-   * @param children - Nested child elements or functions
-   */
-  (props: ElementProps<K>, ...children: (Child | ((ref: HTMLElementTagNameMap[K]) => void))[]): HTMLElementTagNameMap[K];
-
-  /**
-   * Create an element with children only.
-   * @param children - Nested child elements or functions
-   */
-  (...children: (Child | ((ref: HTMLElementTagNameMap[K]) => void))[]): HTMLElementTagNameMap[K];
+  /** 1. Empty element */
+  (): E<K>;
+  /** 2. Text content only */
+  (content: MaybeSignal<string | number>): E<K>;
+  /** 3. Props only */
+  (props: ElementProps<K>): E<K>;
+  /** 4. Children callback only */
+  (children: ChildrenCallback<E<K>>): E<K>;
+  /** 5. Props + children */
+  (props: ElementProps<K>, children: ChildrenCallback<E<K>>): E<K>;
+  /** 6. Content + props */
+  (content: MaybeSignal<string | number>, props: ElementProps<K>): E<K>;
+  /** 7. Content + children */
+  (content: MaybeSignal<string | number>, children: ChildrenCallback<E<K>>): E<K>;
+  /** 8. Content + props + children */
+  (content: MaybeSignal<string | number>, props: ElementProps<K>, children: ChildrenCallback<E<K>>): E<K>;
 }
 
 /**
@@ -1317,7 +1319,7 @@ function appendChild(parent: HTMLElement | ExecutionContext, child: Child | ((el
 }
 
 // =============================================================================
-// PROP APPLICATION
+// PROP APPLICATION - PROP TO ATTRIBUTE MAP
 // =============================================================================
 
 /**
@@ -1417,17 +1419,13 @@ function applyProps<K extends keyof HTMLElementTagNameMap>(
   props: ElementProps<K>
 ): void {
   for (const [key, value] of Object.entries(props)) {
-    if (value === null || value === undefined) {
-      continue;
-    }
+    if (value === null || value === undefined) continue;
 
     if (key.startsWith("on") && typeof value === "function") {
       const eventName = key.slice(2).toLowerCase();
       element.addEventListener(eventName, value as EventListener);
     } else if (isSignal(value)) {
-      effect(() => {
-        assignProp(element, key, value.value);
-      });
+      effect(() => assignProp(element, key, value.value));
     } else {
       assignProp(element, key, value);
     }
@@ -1438,11 +1436,6 @@ function applyClass(element: HTMLElement, value: unknown): void {
   if (typeof value === "string") {
     element.className = value;
   } else if (typeof value === "object" && value !== null) {
-    // If any value in the object is a signal, we need to re-run the whole class string generation
-    // OR we can make individual classes toggle reactively.
-    // The previous implementation was static. We make it reactive.
-
-    // Check if any property value is a signal
     const entries = Object.entries(value as Record<string, unknown>);
     const hasSignal = entries.some(([_, v]) => isSignal(v));
 
@@ -1450,12 +1443,9 @@ function applyClass(element: HTMLElement, value: unknown): void {
       const classes: string[] = [];
       for (const [className, condition] of entries) {
         const isActive = isSignal(condition) ? condition.value : condition;
-        if (isActive) {
-          classes.push(className);
-        }
+        if (isActive) classes.push(className);
       }
-      element.className = classes.join(" "); // This overwrites existing classes? 
-      // Note: `element.className = ...` overwrites. The `class` prop usually controls the whole attribute.
+      element.className = classes.join(" ");
     };
 
     if (hasSignal) {
@@ -1473,14 +1463,48 @@ function applyStyle(element: HTMLElement, value: unknown): void {
     for (const [prop, val] of Object.entries(value as Record<string, unknown>)) {
       if (isSignal(val)) {
         effect(() => {
-          // @ts-ignore
-          element.style[prop] = val.value;
+          (element.style as any)[prop] = val.value;
         });
       } else {
-        // @ts-ignore
-        element.style[prop] = val;
+        (element.style as any)[prop] = val;
       }
     }
+  }
+}
+
+// =============================================================================
+// CONTENT APPLICATION
+// =============================================================================
+
+function applyContent(
+  element: HTMLElement,
+  content: MaybeSignal<string | number>
+): void {
+  if (isSignal(content)) {
+    const textNode = document.createTextNode("");
+    effect(() => {
+      const v = content.value;
+      textNode.textContent = v == null ? "" : String(v);
+    });
+    element.appendChild(textNode);
+  } else {
+    element.appendChild(document.createTextNode(String(content)));
+  }
+}
+
+// =============================================================================
+// CHILDREN EXECUTION
+// =============================================================================
+
+function executeChildren<E extends HTMLElement>(
+  element: E,
+  children: ChildrenCallback<E>
+): void {
+  pushExecutionContext(element);
+  try {
+    children(element);
+  } finally {
+    popExecutionContext();
   }
 }
 
@@ -1497,53 +1521,61 @@ function applyStyle(element: HTMLElement, value: unknown): void {
 function createElement<K extends keyof HTMLElementTagNameMap>(
   tag: K
 ): ElementFactory<K> {
-  // @ts-ignore - Dynamic definition
   return (
-    arg1?: ElementProps<K> | Child | MaybeSignal<string | number>,
-    arg2?: Child | ElementProps<K> | ((e: MouseEvent) => void),
-    ...rest: Child[]
-  ): HTMLElementTagNameMap[K] => {
+    arg1?: MaybeSignal<string | number> | ElementProps<K> | ChildrenCallback<E<K>>,
+    arg2?: ElementProps<K> | ChildrenCallback<E<K>>,
+    arg3?: ChildrenCallback<E<K>>
+  ): E<K> => {
     const element = document.createElement(tag);
 
-    let props: ElementProps<K> | null = null;
-    let allChildren: (Child | ((el: any) => void))[] = [];
+    // Parse arguments based on types
+    let content: MaybeSignal<string | number> | undefined;
+    let props: ElementProps<K> | undefined;
+    let children: ChildrenCallback<E<K>> | undefined;
 
-    const isSimpleContent = typeof arg1 === "string" || typeof arg1 === "number" || isSignal(arg1);
-
-    if (isSimpleContent) {
-      const content = arg1 as Child;
-
-      if (typeof arg2 === "object" && arg2 !== null && !(arg2 instanceof HTMLElement) && !isSignal(arg2) && !Array.isArray(arg2)) {
-        props = arg2 as ElementProps<K>;
-        allChildren = [content, ...rest];
-      } else if (typeof arg2 === "function" && !isSignal(arg2) && (tag === "button" || tag === "a")) {
-        props = { onclick: arg2 } as unknown as ElementProps<K>;
-        allChildren = [content, ...rest];
-      } else {
-        allChildren = [content, arg2 as Child, ...rest];
+    if (arg1 === undefined) {
+      // 1. element()
+    } else if (isContent(arg1)) {
+      content = arg1;
+      if (arg2 === undefined) {
+        // 2. element(content)
+      } else if (isProps<K>(arg2)) {
+        props = arg2;
+        if (arg3 !== undefined) {
+          // 8. element(content, props, children)
+          children = arg3;
+        }
+        // else 6. element(content, props)
+      } else if (isChildrenCallback<E<K>>(arg2)) {
+        // 7. element(content, children)
+        children = arg2;
       }
-    } else if (
-      typeof arg1 === "object" &&
-      arg1 !== null &&
-      !(arg1 instanceof HTMLElement) &&
-      !isSignal(arg1) &&
-      typeof arg1 !== "function" &&
-      !Array.isArray(arg1)
-    ) {
-      props = arg1 as ElementProps<K>;
-      allChildren = [arg2 as Child, ...rest];
-    } else {
-      allChildren = [arg1 as Child, arg2 as Child, ...rest];
+    } else if (isProps<K>(arg1)) {
+      props = arg1;
+      if (isChildrenCallback<E<K>>(arg2)) {
+        // 5. element(props, children)
+        children = arg2;
+      }
+      // else 3. element(props)
+    } else if (isChildrenCallback<E<K>>(arg1)) {
+      // 4. element(children)
+      children = arg1;
     }
 
+    // Apply in order: props, content, children
     if (props) {
       applyProps(element, props);
     }
 
-    for (const child of allChildren) {
-      appendChild(element, child);
+    if (content !== undefined) {
+      applyContent(element, content);
     }
 
+    if (children) {
+      executeChildren(element, children);
+    }
+
+    // Mount to current context
     getCurrentExecutionContext().appendChild(element);
 
     return element;
@@ -1559,17 +1591,41 @@ function createElement<K extends keyof HTMLElementTagNameMap>(
 function createVoidElement<K extends keyof HTMLElementTagNameMap>(
   tag: K
 ): VoidElementFactory<K> {
-  return (props?: ElementProps<K>): HTMLElementTagNameMap[K] => {
+  return (props?: ElementProps<K>): E<K> => {
     const element = document.createElement(tag);
-
-    if (props) {
-      applyProps(element, props);
-    }
-
+    if (props) applyProps(element, props);
     getCurrentExecutionContext().appendChild(element);
-
     return element;
   };
+}
+
+// =============================================================================
+// HELPER: TYPE GUARDS
+// =============================================================================
+
+function isProps<K extends keyof HTMLElementTagNameMap>(
+  value: unknown
+): value is ElementProps<K> {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    !isSignal(value) &&
+    !Array.isArray(value)
+  );
+}
+
+function isChildrenCallback<E extends HTMLElement>(
+  value: unknown
+): value is ChildrenCallback<E> {
+  return typeof value === "function" && !isSignal(value);
+}
+
+function isContent(value: unknown): value is MaybeSignal<string | number> {
+  return (
+    typeof value === "string" ||
+    typeof value === "number" ||
+    isSignal(value)
+  );
 }
 
 // =============================================================================

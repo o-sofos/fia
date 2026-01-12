@@ -17,36 +17,36 @@ import { Contact } from "./04_contact";
 
 // Our main App component
 export function LandingPage() {
-  div({ 
-    style: { 
+  div({
+    style: {
       fontFamily: "system-ui, -apple-system, sans-serif",
       margin: "0",
       padding: "0",
       minHeight: "100vh",
       display: "flex",
       flexDirection: "column"
-    } 
+    }
   }, () => {
     // Header
     Navbar();
-    
+
     // Main Content
     div({ style: { flex: "1" } }, () => {
       Hero();
       Features();
       Contact();
     });
-    
+
     // Footer
-    div({ 
-      style: { 
-        padding: "2rem", 
-        background: "#222", 
-        color: "#fff", 
+    div("© 2026 Flick Framework. Built with 0 dependencies.", {
+      style: {
+        padding: "2rem",
+        background: "#222",
+        color: "#fff",
         textAlign: "center",
         fontSize: "0.9rem"
-      } 
-    }, "© 2026 Flick Framework. Built with 0 dependencies.");
+      }
+    });
   });
 }
 

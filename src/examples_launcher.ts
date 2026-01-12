@@ -23,7 +23,7 @@ export function ExamplesLauncher() {
         overflowY: "auto"
       }
     }, () => {
-      h1({ style: { fontSize: "1.2rem", marginBottom: "1.5rem", marginTop: "0" } }, "Flick Examples");
+      h1("Flick Examples", { style: { fontSize: "1.2rem", marginBottom: "1.5rem", marginTop: "0" } });
 
       const examples = [
         { id: "01", name: "01. Hero", component: Hero },
@@ -39,7 +39,7 @@ export function ExamplesLauncher() {
           li({ style: { marginBottom: "0.5rem" } }, () => {
             const isActive = $(() => currentExample.value === ex.id);
 
-            button({
+            button(ex.name, {
               style: {
                 width: "100%",
                 padding: "0.75rem 1rem",
@@ -51,10 +51,10 @@ export function ExamplesLauncher() {
                 cursor: "pointer",
                 fontWeight: isActive.value ? "600" : "normal",
                 boxShadow: isActive.value ? "0 1px 2px rgba(0,0,0,0.05)" : "none",
-                transition: "all 0.2s"
+                transition: "all 0.2s",
               },
               onclick: () => currentExample.value = ex.id
-            }, ex.name);
+            });
           });
         });
       });

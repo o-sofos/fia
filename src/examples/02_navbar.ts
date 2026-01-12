@@ -15,7 +15,7 @@ import { div, nav, a, h3, button } from "../core/elements";
 // Reusable Component: NavLink
 // Just a plain function that returns an element!
 function NavLink(text: string, href: string) {
-  return a({
+  return a(text, {
     href,
     style: {
       textDecoration: "none",
@@ -26,7 +26,7 @@ function NavLink(text: string, href: string) {
     },
     onmouseover: (e) => (e.target as HTMLElement).style.color = "#000",
     onmouseout: (e) => (e.target as HTMLElement).style.color = "#666"
-  }, text);
+  });
 }
 
 export function Navbar() {
@@ -41,7 +41,7 @@ export function Navbar() {
     }
   }, () => {
     // Logo
-    h3({ style: { margin: "0", fontSize: "1.5rem" } }, "Flick");
+    h3("Flick", { style: { margin: "0", fontSize: "1.5rem" } });
 
     // Links container
     div({ style: { display: "flex", gap: "2rem", alignItems: "center" } }, () => {
@@ -49,9 +49,9 @@ export function Navbar() {
       NavLink("Features", "#features");
       NavLink("Docs", "#docs");
       NavLink("Blog", "#blog");
-      
+
       // CTA Button
-      button({
+      button("Download", {
         style: {
           padding: "0.5rem 1rem",
           background: "#000",
@@ -62,7 +62,7 @@ export function Navbar() {
           fontWeight: "bold",
           fontSize: "0.9rem"
         }
-      }, "Download");
+      });
     });
   });
 }

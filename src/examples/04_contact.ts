@@ -41,9 +41,9 @@ export function Contact() {
           boxShadow: "0 4px 6px rgba(0,0,0,0.1)"
         }
       }, () => {
-        h2({ style: { margin: "0 0 1rem 0" } }, "Message Sent! 🚀");
+        h2("Message Sent! 🚀", { style: { margin: "0 0 1rem 0" } });
         p("Thanks so much. We'll be in touch soon.");
-        button({
+        button("Send another", {
           onclick: () => sent.value = false,
           style: {
             marginTop: "1rem",
@@ -53,7 +53,7 @@ export function Contact() {
             borderRadius: "4px",
             cursor: "pointer"
           }
-        }, "Send another");
+        });
       });
       return;
     }
@@ -75,10 +75,10 @@ export function Contact() {
         message.value = "";
       }
     }, () => {
-      h2({ style: { textAlign: "center", marginBottom: "1rem" } }, "Contact Us");
+      h2("Contact Us", { style: { textAlign: "center", marginBottom: "1rem" } });
 
       div({ style: { display: "flex", flexDirection: "column", gap: "0.5rem" } }, () => {
-        p({ style: { margin: "0", fontSize: "0.9rem", fontWeight: "bold" } }, "Email");
+        p("Email", { style: { margin: "0", fontSize: "0.9rem", fontWeight: "bold" } });
         input({
           type: "email",
           placeholder: "hello@example.com",
@@ -89,7 +89,7 @@ export function Contact() {
       });
 
       div({ style: { display: "flex", flexDirection: "column", gap: "0.5rem" } }, () => {
-        p({ style: { margin: "0", fontSize: "0.9rem", fontWeight: "bold" } }, "Message");
+        p("Message", { style: { margin: "0", fontSize: "0.9rem", fontWeight: "bold" } });
         textarea({
           placeholder: "How can we help?",
           value: message.value,
@@ -98,7 +98,7 @@ export function Contact() {
         });
       });
 
-      button({
+      button("Send Message", {
         type: "submit",
         style: {
           padding: "1rem",
@@ -111,7 +111,7 @@ export function Contact() {
           fontSize: "1rem",
           marginTop: "1rem"
         }
-      }, "Send Message");
+      });
 
       // Reactive preview
       p({ style: { fontSize: "0.8rem", color: "#888", textAlign: "center", minHeight: "1.2em" } },
