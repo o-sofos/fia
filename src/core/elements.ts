@@ -2099,17 +2099,30 @@ export interface ElementFactory<K extends keyof HTMLElementTagNameMap> {
   /** 2. Text content only */
   (content: MaybeSignal<string | number>): E<K>;
   /** 3. Props only */
-  (props: ElementProps<K>): E<K>;
+  <const P extends ElementProps<K>>(props: P): E<K> & P;
   /** 4. Children callback only */
   (children: ChildrenCallback<E<K>>): E<K>;
   /** 5. Props + children */
-  (props: ElementProps<K>, children: ChildrenCallback<E<K>>): E<K>;
+  <const P extends ElementProps<K>>(
+    props: P,
+    children: (element: E<K> & P) => void
+  ): E<K> & P;
   /** 6. Content + props */
-  (content: MaybeSignal<string | number>, props: ElementProps<K>): E<K>;
+  <const P extends ElementProps<K>>(
+    content: MaybeSignal<string | number>,
+    props: P
+  ): E<K> & P;
   /** 7. Content + children */
-  (content: MaybeSignal<string | number>, children: ChildrenCallback<E<K>>): E<K>;
+  (
+    content: MaybeSignal<string | number>,
+    children: ChildrenCallback<E<K>>
+  ): E<K>;
   /** 8. Content + props + children */
-  (content: MaybeSignal<string | number>, props: ElementProps<K>, children: ChildrenCallback<E<K>>): E<K>;
+  <const P extends ElementProps<K>>(
+    content: MaybeSignal<string | number>,
+    props: P,
+    children: (element: E<K> & P) => void
+  ): E<K> & P;
 }
 
 /**
@@ -2443,7 +2456,7 @@ function createElement<K extends keyof HTMLElementTagNameMap>(
       // Auto-wrap zero-arity functions in signals for reactivity
       if (typeof content === "function" && !isSignal(content)) {
         // It's a thunk, wrap it in a computed
-        applyContent(element, $(<() => string>content));
+        applyContent(element, $(content as () => string));
       } else {
         applyContent(element, content);
       }
