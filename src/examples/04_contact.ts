@@ -67,7 +67,7 @@ export function Contact() {
         gap: "1rem",
         textAlign: "left"
       },
-      onsubmit: (e) => {
+      onSubmit: (e) => {
         e.preventDefault();
         console.log("Sending:", email.value, message.value);
         sent.value = true;
@@ -83,7 +83,7 @@ export function Contact() {
           type: "email",
           placeholder: "hello@example.com",
           value: email.value, // Bind value
-          oninput: (e) => email.value = (e.currentTarget).value, // Update signal
+          onInput: (e) => email.value = (e.currentTarget).value, // Update signal
           style: { padding: "0.8rem", borderRadius: "4px", border: "1px solid #ccc", fontSize: "1rem" }
         });
       });
@@ -93,7 +93,7 @@ export function Contact() {
         textarea({
           placeholder: "How can we help?",
           value: message.value,
-          oninput: (e) => message.value = (e.currentTarget).value,
+          onInput: (e) => message.value = (e.currentTarget).value,
           style: { padding: "0.8rem", borderRadius: "4px", border: "1px solid #ccc", minHeight: "100px", fontFamily: "inherit", fontSize: "1rem" }
         });
       });

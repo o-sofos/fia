@@ -24,8 +24,8 @@ function NavLink(text: string, href: string) {
       fontSize: "0.95rem",
       transition: "color 0.2s"
     },
-    onmouseover: (e) => (e.target as HTMLElement).style.color = "#000",
-    onmouseout: (e) => (e.target as HTMLElement).style.color = "#666"
+    onMouseOver: (e) => (e.target as HTMLElement).style.color = "#000",
+    onMouseOut: (e) => (e.target as HTMLElement).style.color = "#666"
   });
 }
 

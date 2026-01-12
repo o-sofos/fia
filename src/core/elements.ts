@@ -792,12 +792,11 @@ type ReactiveCSSProperties = {
 // EVENT HANDLER TYPES
 // =============================================================================
 
-type EventHandlers<E extends Element> = {
-  [K in keyof HTMLElementEventMap as `on${K}`]?: (
-    this: E,
-    event: Omit<HTMLElementEventMap[K], "currentTarget"> & { currentTarget: E }
-  ) => void;
-};
+
+import type { DomEvents } from "./events";
+
+type EventHandlers<E extends Element> = DomEvents<E>;
+
 
 // =============================================================================
 // GLOBAL ATTRIBUTES (shared by all elements)
