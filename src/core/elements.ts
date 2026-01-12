@@ -2088,6 +2088,55 @@ export type ElementProps<K extends keyof HTMLElementTagNameMap> =
 type E<K extends keyof HTMLElementTagNameMap> = HTMLElementTagNameMap[K];
 
 /**
+ * Splits a string literal `S` by delimiter `D` into a tuple of strings.
+ */
+type SplitString<S extends string, D extends string> =
+  string extends S ? string[] :
+  S extends "" ? [] :
+  S extends `${infer T}${D}${infer U}` ? [T, ...SplitString<U, D>] :
+  [S];
+
+/**
+ * Extracts the union of class names from properties `P`.
+ */
+type ClassNames<P> =
+  P extends { class: infer C } ? (C extends string ? SplitString<C, " ">[number] : string) :
+  P extends { className: infer C } ? (C extends string ? SplitString<C, " ">[number] : string) :
+  string;
+
+/**
+ * A stricter `DOMTokenList` that only accepts known class names.
+ */
+interface TypedDOMTokenList<T extends string> extends Omit<DOMTokenList, "contains" | "add" | "remove" | "toggle" | "replace"> {
+  contains(token: T): boolean;
+  add(...tokens: string[]): void; // Allow adding new classes
+  remove(...tokens: string[]): void; // Allow removing any class
+  toggle(token: T, force?: boolean): boolean;
+  replace(oldToken: T, newToken: string): boolean;
+
+  // Re-include index signature and iterator
+  [index: number]: string;
+  [Symbol.iterator](): IterableIterator<string>;
+  readonly length: number;
+  value: string;
+  item(index: number): string | null;
+  keys(): IterableIterator<number>;
+  values(): IterableIterator<string>;
+  entries(): IterableIterator<[number, string]>;
+  forEach(callbackfn: (value: string, key: number, parent: DOMTokenList) => void, thisArg?: any): void;
+  supports(token: string): boolean;
+  toString(): string;
+}
+
+/**
+ * Intersection helper that includes the typed classList.
+ * Omit classList from base to prevent wide 'string' type from leaking.
+ */
+type SmartElement<K extends keyof HTMLElementTagNameMap, P> = Omit<E<K>, "classList"> & P & {
+  classList: TypedDOMTokenList<ClassNames<P>>;
+};
+
+/**
  * Factory function for creating HTML elements.
  * Supports signal content, properties, and children overloads.
  *
@@ -2099,19 +2148,19 @@ export interface ElementFactory<K extends keyof HTMLElementTagNameMap> {
   /** 2. Text content only */
   (content: MaybeSignal<string | number>): E<K>;
   /** 3. Props only */
-  <const P extends ElementProps<K>>(props: P): E<K> & P;
+  <const P extends ElementProps<K>>(props: P): SmartElement<K, P>;
   /** 4. Children callback only */
   (children: ChildrenCallback<E<K>>): E<K>;
   /** 5. Props + children */
   <const P extends ElementProps<K>>(
     props: P,
-    children: (element: E<K> & P) => void
-  ): E<K> & P;
+    children: (element: SmartElement<K, P>) => void
+  ): SmartElement<K, P>;
   /** 6. Content + props */
   <const P extends ElementProps<K>>(
     content: MaybeSignal<string | number>,
     props: P
-  ): E<K> & P;
+  ): SmartElement<K, P>;
   /** 7. Content + children */
   (
     content: MaybeSignal<string | number>,
@@ -2121,8 +2170,8 @@ export interface ElementFactory<K extends keyof HTMLElementTagNameMap> {
   <const P extends ElementProps<K>>(
     content: MaybeSignal<string | number>,
     props: P,
-    children: (element: E<K> & P) => void
-  ): E<K> & P;
+    children: (element: SmartElement<K, P>) => void
+  ): SmartElement<K, P>;
 }
 
 /**

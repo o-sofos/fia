@@ -77,10 +77,10 @@ describe("Element System - Unified API", () => {
         it("should apply reactive props", () => {
             const disabled = $(false);
             const el = button({ disabled });
-            expect((el as HTMLButtonElement).disabled).toBe(false);
+            expect((el as unknown as HTMLButtonElement).disabled).toBe(false);
 
             disabled.value = true;
-            expect((el as HTMLButtonElement).disabled).toBe(true);
+            expect((el as unknown as HTMLButtonElement).disabled).toBe(true);
         });
     });
 
@@ -247,10 +247,10 @@ describe("Element System - Unified API", () => {
         it("should apply reactive style properties", () => {
             const color = $("red");
             const el = div({ style: { color } });
-            expect((el as HTMLElement).style.color).toBe("red");
+            expect((el as unknown as HTMLElement).style.color).toBe("red");
 
             color.value = "blue";
-            expect((el as HTMLElement).style.color).toBe("blue");
+            expect((el as unknown as HTMLElement).style.color).toBe("blue");
         });
     });
 
