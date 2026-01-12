@@ -8,7 +8,7 @@ describe("Array Reactivity", () => {
 
         effect(() => {
             // Read value to track dependency
-            const _ = list.value;
+            void list.value;
             updateCount++;
         });
 
@@ -26,7 +26,7 @@ describe("Array Reactivity", () => {
         let updateCount = 0;
 
         effect(() => {
-            const _ = list.value;
+            void list.value;
             updateCount++;
         });
 
