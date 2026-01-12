@@ -104,7 +104,7 @@ type Autocomplete =
   | "postal-code" | "cc-name" | "cc-number" | "cc-exp" | "cc-csc" | "tel" | "url"
   | (string & {});
 
-type TrackKind = "subtitles" | "captions" | "descriptions" | "chapters" | "metadata";
+
 
 type LinkAs = "audio" | "document" | "embed" | "fetch" | "font" | "image" | "object" | "script" | "style" | "track" | "video" | "worker";
 
@@ -1240,38 +1240,78 @@ interface AudioAttrs extends GlobalAttributes {
 /**
  * Attributes for source elements (in video, audio, picture).
  */
-interface SourceAttrs extends GlobalAttributes {
-  /** Address of the media resource. */
-  src?: MaybeSignal<string>;
+interface BaseSourceAttrs extends GlobalAttributes {
   /** MIME type of the resource. */
   type?: MaybeSignal<string>;
-  /** Source set for responsive images. */
-  srcset?: MaybeSignal<string>;
-  /** Media conditions for image sources. */
-  sizes?: MaybeSignal<string>;
-  /** Media query for the resource. */
-  media?: MaybeSignal<string>;
   /** Width of the image resource. */
   width?: MaybeSignal<number>;
   /** Height of the image resource. */
   height?: MaybeSignal<number>;
 }
 
+// 1. Media Source (video/audio): src required, no srcset/sizes
+interface SourceMediaAttrs extends BaseSourceAttrs {
+  /** Address of the media resource. */
+  src: MaybeSignal<string>;
+  /** Source set for responsive images. */
+  srcset?: never;
+  /** Media conditions for image sources. */
+  sizes?: never;
+  /** Media query for the resource. */
+  media?: never; // Often not used in simple audio/video source selection, but spec allows it. strictness here separates it from picture.
+}
+
+// 2. Image Source (picture): srcset required, no src
+interface SourceImageAttrs extends BaseSourceAttrs {
+  /** Address of the media resource. */
+  src?: never;
+  /** Source set for responsive images. Required for picture sources. */
+  srcset: MaybeSignal<string>;
+  /** Media conditions for image sources. */
+  sizes?: MaybeSignal<string>;
+  /** Media query for the resource. */
+  media?: MaybeSignal<string>;
+}
+
+/**
+ * Attributes for source elements (in video, audio, picture).
+ * Discriminated union based on context (src vs srcset).
+ */
+type SourceAttrs = SourceMediaAttrs | SourceImageAttrs;
+
 /**
  * Attributes for track elements (subtitles, captions).
  */
-interface TrackAttrs extends GlobalAttributes {
+interface BaseTrackAttrs extends GlobalAttributes {
   /** Address of the track. */
   src?: MaybeSignal<string>;
-  /** Kind of text track. */
-  kind?: MaybeSignal<TrackKind>;
-  /** Language of the track text. */
-  srclang?: MaybeSignal<string>;
   /** User-readable title of the track. */
   label?: MaybeSignal<string>;
   /** Whether to enable the track by default. */
   default?: MaybeSignal<boolean>;
 }
+
+// 1. Subtitles: kind="subtitles" requires srclang
+interface TrackSubtitlesAttrs extends BaseTrackAttrs {
+  /** Kind of text track. */
+  kind: MaybeSignal<"subtitles">;
+  /** Language of the track text. Required for subtitles. */
+  srclang: MaybeSignal<string>;
+}
+
+// 2. Other Tracks: srclang optional
+interface TrackOtherAttrs extends BaseTrackAttrs {
+  /** Kind of text track. */
+  kind?: MaybeSignal<"captions" | "descriptions" | "chapters" | "metadata">;
+  /** Language of the track text. */
+  srclang?: MaybeSignal<string>;
+}
+
+/**
+ * Attributes for track elements (subtitles, captions).
+ * Discriminated union based on `kind`.
+ */
+type TrackAttrs = TrackSubtitlesAttrs | TrackOtherAttrs;
 
 /**
  * Attributes for canvas elements.
@@ -1694,11 +1734,23 @@ interface BaseAttrs extends GlobalAttributes {
 /**
  * Attributes for script elements.
  */
-interface ScriptAttrs extends GlobalAttributes {
-  /** Address of the resource. */
-  src?: MaybeSignal<string>;
+interface BaseScriptAttrs extends GlobalAttributes {
   /** Type of script. */
   type?: MaybeSignal<string>;
+  /** Disallow execution in module systems. */
+  noModule?: MaybeSignal<boolean>;
+  /** Fetch priority hint. */
+  fetchPriority?: MaybeSignal<FetchPriority>;
+  /** Whether the element is blocking. */
+  blocking?: MaybeSignal<"render">;
+  /** Experimental attribution source. */
+  attributionSrc?: MaybeSignal<string>;
+}
+
+// 1. External Script: src required, async/defer allowed
+interface ScriptExternalAttrs extends BaseScriptAttrs {
+  /** Address of the resource. */
+  src: MaybeSignal<string>;
   /** Execute asynchronously. */
   async?: MaybeSignal<boolean>;
   /** Defer execution. */
@@ -1707,17 +1759,31 @@ interface ScriptAttrs extends GlobalAttributes {
   crossOrigin?: MaybeSignal<CrossOrigin>;
   /** Integrity metadata. */
   integrity?: MaybeSignal<string>;
-  /** Disallow execution in module systems. */
-  noModule?: MaybeSignal<boolean>;
   /** Referrer policy for fetches. */
   referrerPolicy?: MaybeSignal<ReferrerPolicy>;
-  /** Fetch priority hint. */
-  fetchPriority?: MaybeSignal<FetchPriority>;
-  /** Whether the element is blocking. */
-  blocking?: MaybeSignal<"render">;
-  /** Experimental attribution source. */
-  attributionSrc?: MaybeSignal<string>;
 }
+
+// 2. Inline Script: src forbidden, async/defer forbidden
+interface ScriptInlineAttrs extends BaseScriptAttrs {
+  /** Address of the resource. */
+  src?: never;
+  /** Execute asynchronously. */
+  async?: never;
+  /** Defer execution. */
+  defer?: never;
+  /** CORS settings. */
+  crossOrigin?: never;
+  /** Integrity metadata. */
+  integrity?: never;
+  /** Referrer policy for fetches. */
+  referrerPolicy?: never;
+}
+
+/**
+ * Attributes for script elements.
+ * Discriminated union based on presence of `src`.
+ */
+type ScriptAttrs = ScriptExternalAttrs | ScriptInlineAttrs;
 
 /**
  * Attributes for style elements.
