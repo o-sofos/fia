@@ -1,10 +1,12 @@
-import { button, input } from "../core/elements"
-import { $ } from "../core/reactivity"
+import { div } from "../core/mod";
 
-export function Playground(){
-    let a = $(1)
+export default (() => {
+    div({ id: "test", class: "a b hi-bro i oh-my-god" }, (divRef) => {
+        if (divRef.id === "test") {
+            console.log("It works!");
+        }
 
-    input({type:"number"})
-    button("ah")
-    console.log(a.value)
-}
+        if (divRef.classList.contains("xsadasd")) {
+        }
+    })
+})();
