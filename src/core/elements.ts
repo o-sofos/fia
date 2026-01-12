@@ -274,7 +274,19 @@ type CSSPlaceContent = "normal" | "stretch" | "center" | "start" | "end" | "flex
 
 type CSSPlaceSelf = "auto" | "normal" | "stretch" | "center" | "start" | "end" | "flex-start" | "flex-end" | "baseline" | CSSGlobalValues | (string & {});
 
-type CSSLength = string | number | CSSGlobalValues;
+type CSSLengthUnit = "px" | "rem" | "em" | "vw" | "vh" | "%" | "cm" | "mm" | "in" | "pt" | "pc" | "ex" | "ch" | "vmin" | "vmax";
+
+type CSSLength =
+  | "0"
+  | "auto"
+  | `${number}${CSSLengthUnit}`
+  | `calc(${string})`
+  | `var(--${string})`
+  | `${string} ${string}`
+  | "fit-content"
+  | "max-content"
+  | "min-content"
+  | CSSGlobalValues;
 
 // =============================================================================
 // CSS COLORS - STRICT & OBJECT BASED
