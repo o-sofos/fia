@@ -1,12 +1,17 @@
-import { div } from "../core/mod";
+import { $, button, div } from "../core/mod";
 
 export default (() => {
-    div({ id: "test", class: "a b hi-bro i oh-my-god" }, (divRef) => {
-        if (divRef.id === "test") {
-            console.log("It works!");
-        }
 
-        if (divRef.classList.contains("xsadasd")) {
-        }
-    })
+  const style = $({
+    color: "red",
+  });
+
+  button('update color', {
+    onclick: () => {
+      style.value = { ...style.value, color: style.value.color === "red" ? "blue" : "red" };
+    }
+  });
+
+  div("hey bro", { style });
+
 })();

@@ -169,6 +169,77 @@ ul(() => {
 
 ---
 
+## 🛡️ Advanced Type System
+
+Flick leverages TypeScript's mapped types and conditional inference to provide an IDE experience that catches errors *before* you run your code.
+
+### 🎨 Strict CSS Typing
+
+Flick ships with a hand-tuned CSS type definition that goes beyond `string`. It understands strict values for properties while allowing any string for flexibility (e.g. CSS variables).
+
+```typescript
+// ✅ Autocomplete for strict values
+div({ 
+  style: { 
+    display: "flex",       // "flex" | "grid" | "block" ...
+    justifyContent: "cen"  // Suggests "center"
+  } 
+});
+
+// ✅ Valid units validation
+div({ style: { width: 100 } }); // Error: Type 'number' is not assignable to 'string'
+div({ style: { width: "100px" } }); // OK
+```
+
+### 🧠 Intelligent Event Inference
+
+The type system knows exactly what element you are working on, even inside callbacks.
+
+```typescript
+input({
+  oninput: (e) => {
+    // e.currentTarget is inferred as HTMLInputElement
+    // ✅ Autocomplete works for .value, .checked, etc.
+    console.log(e.currentTarget.value.toUpperCase());
+  }
+});
+
+// ❌ Error: Property 'value' does not exist on type 'HTMLDivElement'
+div({ 
+  onclick: (e) => console.log(e.currentTarget.value) 
+});
+```
+
+### 🔒 Attribute Safety
+
+Global attributes (like `id`, `class`) and element-specific attributes (like `href` for `a`, `src` for `img`) are strictly separated.
+
+```typescript
+// ✅ Valid attributes for img
+img({ src: "cat.jpg", alt: "A cute cat" });
+
+// ❌ Error: Property 'href' does not exist on type 'ImgAttributes'
+img({ href: "google.com" });
+```
+
+### 🚦 Signal-Aware Props
+
+All properties strictly accept `T | Signal<T>`.
+
+```typescript
+const isLoading = $(false);
+
+button({ 
+  // ✅ Boolean prop accepts boolean signal
+  disabled: isLoading,
+  
+  // ❌ Error: Type 'boolean' is not assignable to type 'string'
+  class: isLoading 
+});
+```
+
+---
+
 ## 💡 Core Concepts
 
 ### Reactive Values
