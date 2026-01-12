@@ -2,7 +2,7 @@ import { $, button, div } from "../core/mod";
 
 export default (() => {
 
-  const style = $({
+  const style = $<{ color: "red" | "blue" }>({
     color: "red",
   });
 
