@@ -1104,7 +1104,7 @@ export type ElementProps<K extends keyof HTMLElementTagNameMap> =
 
 export interface ElementFactory<K extends keyof HTMLElementTagNameMap> {
   (content: MaybeSignal<string | number>, onclick: (event: MouseEvent) => void): HTMLElementTagNameMap[K];
-  (content: MaybeSignal<string | number>, props: ElementProps<K>): HTMLElementTagNameMap[K];
+  (content: MaybeSignal<string | number>, props: ElementProps<K>, ...children: (Child | ((ref: HTMLElementTagNameMap[K]) => void))[]): HTMLElementTagNameMap[K];
   (props: ElementProps<K>, ...children: (Child | ((ref: HTMLElementTagNameMap[K]) => void))[]): HTMLElementTagNameMap[K];
   (...children: (Child | ((ref: HTMLElementTagNameMap[K]) => void))[]): HTMLElementTagNameMap[K];
 }

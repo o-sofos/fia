@@ -29,6 +29,7 @@ export type { Signal, WritableSignal } from "./reactivity";
 // =============================================================================
 
 export * from "./elements";
+export * from "./mount";
 
 // =============================================================================
 // SVG ELEMENTS
