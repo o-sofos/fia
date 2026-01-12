@@ -523,6 +523,69 @@ div({ class: "box" }, (el) => {
 
 ---
 
+---
+
+## 🏆 Best Practices
+
+### 1. Components are Functions
+
+Don't overcomplicate components. They are just functions that run once. You don't need `class` or `return`.
+
+```typescript
+// ✅ Good: Simple function, named props
+function UserCard({ name, role }: { name: Signal<string>, role: string }) {
+  div({ class: "card" }, () => {
+    h2(name);
+    p(role);
+  });
+}
+
+// Usage
+UserCard({ name: userName, role: "Admin" });
+```
+
+### 2. Immutable Object Updates
+
+Flick uses **reference equality** to detect changes. If you have an object signal, you must replace the object to trigger updates.
+
+```typescript
+const state = $({ count: 0 });
+
+// ❌ Won't trigger update (same reference)
+state.value.count++;
+
+// ✅ Triggers update (new reference)
+state.value = { ...state.value, count: state.value.count + 1 };
+```
+
+### 3. Granular Signals
+
+For complex state, prefer multiple small signals over one giant object signal. This ensures only the relevant parts of the UI update.
+
+```typescript
+// ⚠️ Triggers all listeners on every change
+const bigState = $({ name: "Evan", age: 25, theme: "dark" });
+
+// ✅ Updates independently and efficiently
+const name = $("Evan");
+const age = $(25);
+const theme = $("dark");
+```
+
+### 4. Computed Signals for Derived State
+
+Don't manually update related state. Use computed signals to ensure data consistency.
+
+```typescript
+const firstName = $("John");
+const lastName = $("Doe");
+
+// ✅ Automatically updates when dependencies change
+const fullName = $(() => `${firstName.value} ${lastName.value}`);
+```
+
+---
+
 ## 🛠️ Development
 
 ```bash
