@@ -694,6 +694,8 @@ type EventHandlers<E extends Element> = {
 // GLOBAL ATTRIBUTES (shared by all elements)
 // =============================================================================
 
+import type { FlickAriaAttributes, AriaRole } from "./aria";
+
 interface GlobalAttributes {
   // Core
   /** Unique identifier for the element. */
@@ -715,9 +717,107 @@ interface GlobalAttributes {
   /** The rendered text content of the element. */
   innerText?: MaybeSignal<string | number>;
 
-  // Accessibility
+  // Accessibility (Strict Types)
   /** ARIA role indicating the semantic purpose of the element. */
-  role?: MaybeSignal<string>;
+  role?: MaybeSignal<AriaRole>;
+  /** Identifies the currently active element when focus is on a composite widget, combobox, textbox, group, or application. */
+  ariaActiveDescendant?: MaybeSignal<FlickAriaAttributes["ariaActiveDescendant"]>;
+  /** Indicates whether assistive technologies will present all, or only parts of, the changed region based on the change notifications defined by the aria-relevant attribute. */
+  ariaAtomic?: MaybeSignal<FlickAriaAttributes["ariaAtomic"]>;
+  /** Indicates whether inputting text could trigger display of one or more predictions of the user's intended value for an input and specifies how predictions would be presented if they were made. */
+  ariaAutoComplete?: MaybeSignal<FlickAriaAttributes["ariaAutoComplete"]>;
+  /** Indicates an element is being modified and that assistive technologies MAY want to wait until the modifications are complete before exposing them to the user. */
+  ariaBusy?: MaybeSignal<FlickAriaAttributes["ariaBusy"]>;
+  /** Indicates the current "checked" state of checkboxes, radio buttons, and other widgets. */
+  ariaChecked?: MaybeSignal<FlickAriaAttributes["ariaChecked"]>;
+  /** Defines the total number of columns in a table, grid, or treegrid. */
+  ariaColCount?: MaybeSignal<FlickAriaAttributes["ariaColCount"]>;
+  /** Defines an element's column index or position with respect to the total number of columns within a table, grid, or treegrid. */
+  ariaColIndex?: MaybeSignal<FlickAriaAttributes["ariaColIndex"]>;
+  /** Defines the number of columns spanned by a cell or gridcell within a table, grid, or treegrid. */
+  ariaColSpan?: MaybeSignal<FlickAriaAttributes["ariaColSpan"]>;
+  /** Identifies the element (or elements) that controls the current element. */
+  ariaControls?: MaybeSignal<FlickAriaAttributes["ariaControls"]>;
+  /** Indicates the element that represents the current item within a container or set of related elements. */
+  ariaCurrent?: MaybeSignal<FlickAriaAttributes["ariaCurrent"]>;
+  /** Identifies the element (or elements) that describes the object. */
+  ariaDescribedBy?: MaybeSignal<FlickAriaAttributes["ariaDescribedBy"]>;
+  /** Identifies the element that provides a detailed, extended description for the object. */
+  ariaDetails?: MaybeSignal<FlickAriaAttributes["ariaDetails"]>;
+  /** Indicates that the element is perceivable but disabled, so it is not editable or otherwise operable. */
+  ariaDisabled?: MaybeSignal<FlickAriaAttributes["ariaDisabled"]>;
+  /** Indicates what functions can be performed when a dragged object is released on the drop target. */
+  ariaDropEffect?: MaybeSignal<FlickAriaAttributes["ariaDropEffect"]>;
+  /** Identifies the element that provides an error message for the object. */
+  ariaErrorMessage?: MaybeSignal<FlickAriaAttributes["ariaErrorMessage"]>;
+  /** Indicates whether the element, or another grouping element it controls, is currently expanded or collapsed. */
+  ariaExpanded?: MaybeSignal<FlickAriaAttributes["ariaExpanded"]>;
+  /** Identifies the next element (or elements) in an alternate reading order of content which, at the user's discretion, allows assistive technology to override the general default of reading in document source order. */
+  ariaFlowTo?: MaybeSignal<FlickAriaAttributes["ariaFlowTo"]>;
+  /** Indicates an element's "grabbed" state in a drag-and-drop operation. */
+  ariaGrabbed?: MaybeSignal<FlickAriaAttributes["ariaGrabbed"]>;
+  /** Indicates the availability and type of interactive popup element, such as menu or dialog, that can be triggered by an element. */
+  ariaHasPopup?: MaybeSignal<FlickAriaAttributes["ariaHasPopup"]>;
+  /** Indicates whether the element is exposed to an accessibility API. */
+  ariaHidden?: MaybeSignal<FlickAriaAttributes["ariaHidden"]>;
+  /** Indicates the entered value does not conform to the format expected by the application. */
+  ariaInvalid?: MaybeSignal<FlickAriaAttributes["ariaInvalid"]>;
+  /** Indicates keyboard shortcuts that an author has implemented to activate or give focus to an element. */
+  ariaKeyShortcuts?: MaybeSignal<FlickAriaAttributes["ariaKeyShortcuts"]>;
+  /** Defines a string value that labels the current element. */
+  ariaLabel?: MaybeSignal<FlickAriaAttributes["ariaLabel"]>;
+  /** Identifies the element (or elements) that labels the current element. */
+  ariaLabelledBy?: MaybeSignal<FlickAriaAttributes["ariaLabelledBy"]>;
+  /** Defines the hierarchical level of an element within a structure. */
+  ariaLevel?: MaybeSignal<FlickAriaAttributes["ariaLevel"]>;
+  /** Indicates that an element will be updated, and describes the types of updates the user agents, assistive technologies, and user can expect from the live region. */
+  ariaLive?: MaybeSignal<FlickAriaAttributes["ariaLive"]>;
+  /** Indicates whether an element is modal when displayed. */
+  ariaModal?: MaybeSignal<FlickAriaAttributes["ariaModal"]>;
+  /** Indicates whether a text box accepts multiple lines of input or only a single line. */
+  ariaMultiLine?: MaybeSignal<FlickAriaAttributes["ariaMultiLine"]>;
+  /** Indicates that the user may select more than one item from the current selectable descendants. */
+  ariaMultiSelectable?: MaybeSignal<FlickAriaAttributes["ariaMultiSelectable"]>;
+  /** Indicates whether the element's orientation is horizontal, vertical, or unknown/ambiguous. */
+  ariaOrientation?: MaybeSignal<FlickAriaAttributes["ariaOrientation"]>;
+  /** Identifies an element (or elements) in order to define a visual, functional, or contextual parent/child relationship between DOM elements where the DOM hierarchy cannot be used to represent the relationship. */
+  ariaOwns?: MaybeSignal<FlickAriaAttributes["ariaOwns"]>;
+  /** Defines a short hint (a word or short phrase) intended to aid the user with data entry when the control has no value. A hint could be a sample value or a brief description of the expected format. */
+  ariaPlaceholder?: MaybeSignal<FlickAriaAttributes["ariaPlaceholder"]>;
+  /** Defines an element's number or position in the current set of listitems or treeitems. Not required if all elements in the set are present in the DOM. */
+  ariaPosInSet?: MaybeSignal<FlickAriaAttributes["ariaPosInSet"]>;
+  /** Indicates the current "pressed" state of toggle buttons. */
+  ariaPressed?: MaybeSignal<FlickAriaAttributes["ariaPressed"]>;
+  /** Indicates that the element is not editable, but is otherwise operable. */
+  ariaReadOnly?: MaybeSignal<FlickAriaAttributes["ariaReadOnly"]>;
+  /** Indicates what notifications the user agent will trigger when the accessibility tree within a live region is modified. */
+  ariaRelevant?: MaybeSignal<FlickAriaAttributes["ariaRelevant"]>;
+  /** Indicates that user input is required on the element before a form may be submitted. */
+  ariaRequired?: MaybeSignal<FlickAriaAttributes["ariaRequired"]>;
+  /** Defines a human-readable, author-localized description for the role of an element. */
+  ariaRoleDescription?: MaybeSignal<FlickAriaAttributes["ariaRoleDescription"]>;
+  /** Defines the total number of rows in a table, grid, or treegrid. */
+  ariaRowCount?: MaybeSignal<FlickAriaAttributes["ariaRowCount"]>;
+  /** Defines an element's row index or position with respect to the total number of rows within a table, grid, or treegrid. */
+  ariaRowIndex?: MaybeSignal<FlickAriaAttributes["ariaRowIndex"]>;
+  /** Defines the number of rows spanned by a cell or gridcell within a table, grid, or treegrid. */
+  ariaRowSpan?: MaybeSignal<FlickAriaAttributes["ariaRowSpan"]>;
+  /** Indicates the current "selected" state of various widgets. */
+  ariaSelected?: MaybeSignal<FlickAriaAttributes["ariaSelected"]>;
+  /** Defines the number of items in the current set of listitems or treeitems. Not required if all elements in the set are present in the DOM. */
+  ariaSetSize?: MaybeSignal<FlickAriaAttributes["ariaSetSize"]>;
+  /** Indicates if items in a table or grid are sorted in ascending or descending order. */
+  ariaSort?: MaybeSignal<FlickAriaAttributes["ariaSort"]>;
+  /** Defines the maximum allowed value for a range widget. */
+  ariaValueMax?: MaybeSignal<FlickAriaAttributes["ariaValueMax"]>;
+  /** Defines the minimum allowed value for a range widget. */
+  ariaValueMin?: MaybeSignal<FlickAriaAttributes["ariaValueMin"]>;
+  /** Defines the current value for a range widget. */
+  ariaValueNow?: MaybeSignal<FlickAriaAttributes["ariaValueNow"]>;
+  /** Defines the human readable text alternative of aria-valuenow for a range widget. */
+  ariaValueText?: MaybeSignal<FlickAriaAttributes["ariaValueText"]>;
+
+  // Accessibility (Legacy)
   /** Indicates if the element can take input focus. */
   tabIndex?: MaybeSignal<number>;
 

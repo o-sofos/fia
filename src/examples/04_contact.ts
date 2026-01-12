@@ -14,9 +14,9 @@
 import { $, div, form, input, button, p, h2, textarea } from "../core/mod";
 
 export function Contact() {
-  const email = $("");
-  const message = $("");
-  const sent = $(false);
+  const email = $<string>("");
+  const message = $<string>("");
+  const sent = $<boolean>(false);
 
   div({
     style: {
