@@ -276,7 +276,7 @@ describe("Element System - Unified API", () => {
 
     describe("Real-World Patterns", () => {
         it("should create a button with icon and text", () => {
-            const el = button({ class: "primary", onclick: () => { } }, (_el) => {
+            const el = button({ class: "btn-primary", onclick: () => { } }, (_el) => {
                 span({ class: "icon" }, (_el) => { });
                 span("Save");
             });

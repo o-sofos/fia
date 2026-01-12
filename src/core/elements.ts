@@ -276,7 +276,141 @@ type CSSPlaceSelf = "auto" | "normal" | "stretch" | "center" | "start" | "end" |
 
 type CSSLength = string | number | CSSGlobalValues;
 
-type CSSColor = string | CSSGlobalValues;
+// =============================================================================
+// CSS COLORS - STRICT & OBJECT BASED
+// =============================================================================
+
+export interface ColorRGB {
+  type: "rgb";
+  r: number;
+  g: number;
+  b: number;
+  a?: number;
+}
+
+export interface ColorHSL {
+  type: "hsl";
+  h: number;
+  s: number;
+  l: number;
+  a?: number;
+}
+
+export interface ColorHWB {
+  type: "hwb";
+  h: number;
+  w: number;
+  b: number;
+  a?: number;
+}
+
+export interface ColorOKLCH {
+  type: "oklch";
+  l: number;
+  c: number;
+  h: number;
+  a?: number;
+}
+
+export interface ColorLab {
+  type: "lab";
+  l: number;
+  a: number;
+  b: number;
+  alpha?: number;
+}
+
+export interface ColorLCH {
+  type: "lch";
+  l: number;
+  c: number;
+  h: number;
+  alpha?: number;
+}
+
+export interface ColorOKLab {
+  type: "oklab";
+  l: number;
+  a: number;
+  b: number;
+  alpha?: number;
+}
+
+export interface ColorHex {
+  type: "hex";
+  value: string;
+}
+
+export interface ColorFunction {
+  type: "color";
+  space: "srgb" | "srgb-linear" | "display-p3" | "a98-rgb" | "prophoto-rgb" | "rec2020" | "xyz" | "xyz-d50" | "xyz-d65" | (string & {});
+  components: [number, number, number];
+  alpha?: number;
+}
+
+export interface ColorMix {
+  type: "color-mix";
+  method: string; // e.g., "in lch", "in srgb"
+  color1: CSSColor | string;
+  percentage1?: number;
+  color2: CSSColor | string;
+  percentage2?: number;
+}
+
+type CSSNamedColor =
+  | "aliceblue" | "antiquewhite" | "aqua" | "aquamarine" | "azure"
+  | "beige" | "bisque" | "black" | "blanchedalmond" | "blue"
+  | "blueviolet" | "brown" | "burlywood" | "cadetblue" | "chartreuse"
+  | "chocolate" | "coral" | "cornflowerblue" | "cornsilk" | "crimson"
+  | "cyan" | "darkblue" | "darkcyan" | "darkgoldenrod" | "darkgray"
+  | "darkgreen" | "darkgrey" | "darkkhaki" | "darkmagenta" | "darkolivegreen"
+  | "darkorange" | "darkorchid" | "darkred" | "darksalmon" | "darkseagreen"
+  | "darkslateblue" | "darkslategray" | "darkslategrey" | "darkturquoise" | "darkviolet"
+  | "deeppink" | "deepskyblue" | "dimgray" | "dimgrey" | "dodgerblue"
+  | "firebrick" | "floralwhite" | "forestgreen" | "fuchsia" | "gainsboro"
+  | "ghostwhite" | "gold" | "goldenrod" | "gray" | "green"
+  | "greenyellow" | "grey" | "honeydew" | "hotpink" | "indianred"
+  | "indigo" | "ivory" | "khaki" | "lavender" | "lavenderblush"
+  | "lawngreen" | "lemonchiffon" | "lightblue" | "lightcoral" | "lightcyan"
+  | "lightgoldenrodyellow" | "lightgray" | "lightgreen" | "lightgrey" | "lightpink"
+  | "lightsalmon" | "lightseagreen" | "lightskyblue" | "lightslategray" | "lightslategrey"
+  | "lightsteelblue" | "lightyellow" | "lime" | "limegreen" | "linen"
+  | "magenta" | "maroon" | "mediumaquamarine" | "mediumblue" | "mediumorchid"
+  | "mediumpurple" | "mediumseagreen" | "mediumslateblue" | "mediumspringgreen" | "mediumturquoise"
+  | "mediumvioletred" | "midnightblue" | "mintcream" | "mistyrose" | "moccasin"
+  | "navajowhite" | "navy" | "oldlace" | "olive" | "olivedrab"
+  | "orange" | "orangered" | "orchid" | "palegoldenrod" | "palegreen"
+  | "paleturquoise" | "palevioletred" | "papayawhip" | "peachpuff" | "peru"
+  | "pink" | "plum" | "powderblue" | "purple" | "rebeccapurple"
+  | "red" | "rosybrown" | "royalblue" | "saddlebrown" | "salmon"
+  | "sandybrown" | "seagreen" | "seashell" | "sienna" | "silver"
+  | "skyblue" | "slateblue" | "slategray" | "slategrey" | "snow"
+  | "springgreen" | "steelblue" | "tan" | "teal" | "thistle"
+  | "tomato" | "transparent" | "turquoise" | "violet" | "wheat"
+  | "white" | "whitesmoke" | "yellow" | "yellowgreen"
+  | "currentColor";
+
+/**
+ * Strict CSS Color type.
+ * Supports:
+ * - Named colors (autocomplete)
+ * - Object literals ({ type: 'rgb', ... })
+ * - Any string (hex, var, etc.)
+ */
+type CSSColor =
+  | CSSNamedColor
+  | ColorRGB
+  | ColorHSL
+  | ColorHWB
+  | ColorOKLCH
+  | ColorLab
+  | ColorLCH
+  | ColorOKLab
+  | ColorHex
+  | ColorFunction
+  | ColorMix
+  | CSSGlobalValues
+  | (string & {});
 
 /**
  * Strict CSS properties interface with autocomplete
@@ -1938,7 +2072,7 @@ interface ElementPropsMap {
 /**
  * The specific props object for a given HTML tag `K`.
  * Combines element-specific attributes, global attributes, event handlers, data attributes, and ARIA attributes.
- * 
+ *
  * @template K - The HTML tag name key
  */
 export type ElementProps<K extends keyof HTMLElementTagNameMap> =
@@ -1956,7 +2090,7 @@ type E<K extends keyof HTMLElementTagNameMap> = HTMLElementTagNameMap[K];
 /**
  * Factory function for creating HTML elements.
  * Supports signal content, properties, and children overloads.
- * 
+ *
  * @template K - The HTML tag name key from HTMLElementTagNameMap
  */
 export interface ElementFactory<K extends keyof HTMLElementTagNameMap> {
@@ -1980,7 +2114,7 @@ export interface ElementFactory<K extends keyof HTMLElementTagNameMap> {
 
 /**
  * Factory function for creating void HTML elements (no children).
- * 
+ *
  * @template K - The HTML tag name key from HTMLElementTagNameMap
  */
 export interface VoidElementFactory<K extends keyof HTMLElementTagNameMap> {
@@ -2129,6 +2263,71 @@ function applyClass(element: HTMLElement, value: unknown): void {
   }
 }
 
+function transformStyleValue(value: unknown): string {
+  if (value === null || value === undefined) return "";
+
+  if (typeof value === "object") {
+    // Check for Color Objects
+    const v = value as any;
+    if (v.type === "rgb") {
+      return v.a !== undefined
+        ? `rgba(${v.r}, ${v.g}, ${v.b}, ${v.a})`
+        : `rgb(${v.r}, ${v.g}, ${v.b})`;
+    }
+    if (v.type === "hsl") {
+      return v.a !== undefined
+        ? `hsla(${v.h}, ${v.s}%, ${v.l}%, ${v.a})`
+        : `hsl(${v.h}, ${v.s}%, ${v.l}%)`;
+    }
+    if (v.type === "hwb") {
+      return v.a !== undefined
+        ? `hwb(${v.h} ${v.w}% ${v.b}% / ${v.a})`
+        : `hwb(${v.h} ${v.w}% ${v.b}%)`;
+    }
+    if (v.type === "oklch") {
+      return v.a !== undefined
+        ? `oklch(${v.l}% ${v.c} ${v.h} / ${v.a})`
+        : `oklch(${v.l}% ${v.c} ${v.h})`;
+    }
+    if (v.type === "lab") {
+      return v.alpha !== undefined
+        ? `lab(${v.l}% ${v.a} ${v.b} / ${v.alpha})`
+        : `lab(${v.l}% ${v.a} ${v.b})`;
+    }
+    if (v.type === "lch") {
+      return v.alpha !== undefined
+        ? `lch(${v.l}% ${v.c} ${v.h} / ${v.alpha})`
+        : `lch(${v.l}% ${v.c} ${v.h})`;
+    }
+    if (v.type === "oklab") {
+      return v.alpha !== undefined
+        ? `oklab(${v.l}% ${v.a} ${v.b} / ${v.alpha})`
+        : `oklab(${v.l}% ${v.a} ${v.b})`;
+    }
+    if (v.type === "hex") {
+      return v.value;
+    }
+    if (v.type === "color") {
+      const comps = v.components.join(" ");
+      return v.alpha !== undefined
+        ? `color(${v.space} ${comps} / ${v.alpha})`
+        : `color(${v.space} ${comps})`;
+    }
+    if (v.type === "color-mix") {
+      const c1 = typeof v.color1 === 'object' ? transformStyleValue(v.color1) : v.color1;
+      const c2 = typeof v.color2 === 'object' ? transformStyleValue(v.color2) : v.color2;
+      const p1 = v.percentage1 !== undefined ? `${v.percentage1}%` : "";
+      const p2 = v.percentage2 !== undefined ? `${v.percentage2}%` : "";
+      // color-mix(in lch, blue 40%, red)
+      return `color-mix(${v.method}, ${c1} ${p1}, ${c2} ${p2})`;
+    }
+
+    // ... extend for other object types if needed
+  }
+
+  return String(value);
+}
+
 function applyStyle(element: HTMLElement, value: unknown): void {
   if (typeof value === "string") {
     element.setAttribute("style", value);
@@ -2136,10 +2335,10 @@ function applyStyle(element: HTMLElement, value: unknown): void {
     for (const [prop, val] of Object.entries(value as Record<string, unknown>)) {
       if (isSignal(val)) {
         effect(() => {
-          (element.style as any)[prop] = val.value;
+          (element.style as any)[prop] = transformStyleValue(val.value);
         });
       } else {
-        (element.style as any)[prop] = val;
+        (element.style as any)[prop] = transformStyleValue(val);
       }
     }
   }
