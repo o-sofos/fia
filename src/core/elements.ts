@@ -156,6 +156,84 @@ type Sandbox =
 
 type CSSGlobalValues = "inherit" | "initial" | "revert" | "revert-layer" | "unset";
 
+type CSSTransform =
+  | "none"
+  | `matrix(${string})`
+  | `translate(${string})`
+  | `translateX(${string})`
+  | `translateY(${string})`
+  | `scale(${string})`
+  | `scaleX(${string})`
+  | `scaleY(${string})`
+  | `rotate(${string})`
+  | `skew(${string})`
+  | `skewX(${string})`
+  | `skewY(${string})`
+  | `matrix3d(${string})`
+  | `translate3d(${string})`
+  | `translateZ(${string})`
+  | `scale3d(${string})`
+  | `scaleZ(${string})`
+  | `rotate3d(${string})`
+  | `rotateX(${string})`
+  | `rotateY(${string})`
+  | `rotateZ(${string})`
+  | `perspective(${string})`
+  | (string & {});
+
+type CSSFilter =
+  | "none"
+  | `blur(${string})`
+  | `brightness(${string})`
+  | `contrast(${string})`
+  | `drop-shadow(${string})`
+  | `grayscale(${string})`
+  | `hue-rotate(${string})`
+  | `invert(${string})`
+  | `opacity(${string})`
+  | `saturate(${string})`
+  | `sepia(${string})`
+  | `url(${string})`
+  | (string & {});
+
+type CSSWillChange =
+  | "auto"
+  | "scroll-position"
+  | "contents"
+  | "transform"
+  | "opacity"
+  | "left"
+  | "top"
+  | "right"
+  | "bottom"
+  | (string & {});
+
+type CSSMixBlendMode =
+  | "normal" | "multiply" | "screen" | "overlay" | "darken" | "lighten"
+  | "color-dodge" | "color-burn" | "hard-light" | "soft-light" | "difference"
+  | "exclusion" | "hue" | "saturation" | "color" | "luminosity"
+  | "plus-darker" | "plus-lighter"
+  | CSSGlobalValues;
+
+type CSSBoxShadow =
+  | "none"
+  | `inset ${string}`
+  | `${string} inset`
+  | (string & {});
+
+type CSSContain =
+  | "none"
+  | "strict"
+  | "content"
+  | "size"
+  | "layout"
+  | "style"
+  | "paint"
+  | "inline-size"
+  | "block-size"
+  | (string & {});
+
+
 type CSSDisplay =
   | "block" | "inline" | "inline-block" | "flex" | "inline-flex"
   | "grid" | "inline-grid" | "flow-root" | "none" | "contents"
@@ -632,7 +710,7 @@ interface StrictCSSProperties {
   emptyCells?: "show" | "hide" | CSSGlobalValues;
 
   // Transform
-  transform?: string;
+  transform?: CSSTransform;
   transformOrigin?: CSSTransformOrigin;
   transformStyle?: "flat" | "preserve-3d" | CSSGlobalValues;
   perspective?: CSSLength;
@@ -670,10 +748,10 @@ interface StrictCSSProperties {
   objectPosition?: CSSObjectPosition;
 
   // Filters & Effects
-  filter?: string;
-  backdropFilter?: string;
-  mixBlendMode?: string;
-  boxShadow?: string;
+  filter?: CSSFilter;
+  backdropFilter?: CSSFilter;
+  mixBlendMode?: CSSMixBlendMode;
+  boxShadow?: CSSBoxShadow;
 
   // Columns
   columns?: string;
@@ -691,8 +769,8 @@ interface StrictCSSProperties {
   quotes?: string;
   counterIncrement?: string;
   counterReset?: string;
-  willChange?: string;
-  contain?: string;
+  willChange?: CSSWillChange;
+  contain?: CSSContain;
   isolation?: "auto" | "isolate" | CSSGlobalValues;
   aspectRatio?: "auto" | string | number | CSSGlobalValues;
   accentColor?: CSSColor;
