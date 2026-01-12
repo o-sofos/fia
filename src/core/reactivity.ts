@@ -280,7 +280,7 @@ function createComputed<T>(compute: () => T): Signal<T> {
 /**
  * Main $ function - creates signals or computed values
  */
-export function $<T>(initial: T): [T] extends [() => infer R] ? Signal<R> : WritableSignal<T>;
+export function $<const T>(initial: T): [T] extends [() => infer R] ? Signal<R> : WritableSignal<T>;
 export function $<T>(initial: T): Signal<T> | WritableSignal<T> {
   return typeof initial === "function"
     ? createComputed(initial as () => T)
