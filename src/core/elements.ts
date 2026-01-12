@@ -64,15 +64,13 @@ export type Child =
 // STRICT ATTRIBUTE TYPES
 // =============================================================================
 
-
-
 type InputMode = "none" | "text" | "decimal" | "numeric" | "tel" | "search" | "email" | "url";
 
 type AutoCapitalize = "off" | "none" | "on" | "sentences" | "words" | "characters";
 
 type EnterKeyHint = "enter" | "done" | "go" | "next" | "previous" | "search" | "send";
 
-type ButtonType = "submit" | "reset" | "button";
+
 
 type FormMethod = "get" | "post" | "dialog";
 
@@ -994,9 +992,7 @@ interface OptgroupAttrs extends GlobalAttributes {
 /**
  * Attributes for button elements.
  */
-interface ButtonAttrs extends GlobalAttributes {
-  /** The behavior of the button. */
-  type?: MaybeSignal<ButtonType>;
+interface BaseButtonAttrs extends GlobalAttributes {
   /** Name of the button. Submitted with the form. */
   name?: MaybeSignal<string>;
   /** Value associated with the button. */
@@ -1007,6 +1003,22 @@ interface ButtonAttrs extends GlobalAttributes {
   autofocus?: MaybeSignal<boolean>;
   /** ID of the form the element belongs to. */
   form?: MaybeSignal<string>;
+  /** ID of the element to control via popover API. */
+  popoverTarget?: MaybeSignal<string>;
+  /** Action to perform on the popover target. */
+  popoverTargetAction?: MaybeSignal<"toggle" | "show" | "hide">;
+  /** (Experimental) ID of element this button commands. */
+  commandfor?: MaybeSignal<string>;
+  /** (Experimental) Command to execute. */
+  command?: MaybeSignal<string>;
+}
+
+/**
+ * Attributes for submit buttons (default).
+ */
+interface ButtonSubmitAttrs extends BaseButtonAttrs {
+  /** The behavior of the button. Defaults to "submit". */
+  type?: MaybeSignal<"submit">;
   /** URL for form submission. */
   formAction?: MaybeSignal<string>;
   /** HTTP method for form submission. */
@@ -1017,15 +1029,27 @@ interface ButtonAttrs extends GlobalAttributes {
   formNoValidate?: MaybeSignal<boolean>;
   /** Browsing context for form submission. */
   formTarget?: MaybeSignal<Target>;
-  /** ID of the element to control via popover API. */
-  popoverTarget?: MaybeSignal<string>;
-  /** Action to perform on the popover target. */
-  popoverTargetAction?: MaybeSignal<"toggle" | "show" | "hide">;
-  /** (Experimental) ID of element this button commands. */
-  commandfor?: MaybeSignal<string>;
-  /** (Experimental) Command to execute. */
-  command?: MaybeSignal<string>;
 }
+
+/**
+ * Attributes for reset and standard buttons.
+ */
+interface ButtonRestAttrs extends BaseButtonAttrs {
+  /** The behavior of the button. */
+  type: MaybeSignal<"reset" | "button">;
+  // These attributes are not valid on type="button" / "reset"
+  formAction?: never;
+  formMethod?: never;
+  formEnctype?: never;
+  formNoValidate?: never;
+  formTarget?: never;
+}
+
+/**
+ * Attributes for button elements.
+ * Discriminated union based on `type`.
+ */
+type ButtonAttrs = ButtonSubmitAttrs | ButtonRestAttrs;
 
 /**
  * Attributes for form elements.
@@ -1506,56 +1530,156 @@ interface LiAttrs extends GlobalAttributes {
 /**
  * Attributes for link elements.
  */
-interface LinkAttrs extends GlobalAttributes {
+interface BaseLinkAttrs extends GlobalAttributes {
   /** URL of the linked resource. */
   href?: MaybeSignal<string>;
-  /** Relationship to the linked resource. */
-  rel?: MaybeSignal<string>;
   /** Media type of the linked resource. */
   type?: MaybeSignal<string>;
-  /** Media query for the resource. */
-  media?: MaybeSignal<string>;
-  /** Potential destination for a preload request. */
-  as?: MaybeSignal<LinkAs>;
   /** CORS settings. */
   crossOrigin?: MaybeSignal<CrossOrigin>;
   /** Integrity metadata. */
   integrity?: MaybeSignal<string>;
   /** Referrer policy for fetches. */
   referrerPolicy?: MaybeSignal<ReferrerPolicy>;
-  /** Sizes for icons. */
-  sizes?: MaybeSignal<string>;
-  /** Whether the link is disabled. */
-  disabled?: MaybeSignal<boolean>;
   /** Language of the linked resource. */
   hreflang?: MaybeSignal<string>;
   /** Fetch priority hint. */
   fetchPriority?: MaybeSignal<FetchPriority>;
-  /** Source set for responsive images. */
-  imageSrcset?: MaybeSignal<string>;
-  /** Sizes for responsive images. */
-  imageSizes?: MaybeSignal<string>;
   /** Whether the element is blocking. */
   blocking?: MaybeSignal<"render">;
   /** Color for mask-icon. */
   color?: MaybeSignal<string>;
+  /** Whether the link is disabled. */
+  disabled?: MaybeSignal<boolean>;
 }
+
+interface LinkPreloadAttrs extends BaseLinkAttrs {
+  /** Relationship to the linked resource. */
+  rel: MaybeSignal<"preload" | "modulepreload">;
+  /** Potential destination for a preload request. Required for preload. */
+  as: MaybeSignal<LinkAs>;
+  /** Media query for the resource. */
+  media?: MaybeSignal<string>;
+  /** Source set for responsive images. */
+  imageSrcset?: MaybeSignal<string>;
+  /** Sizes for responsive images. */
+  imageSizes?: MaybeSignal<string>;
+  /** Sizes for icons. */
+  sizes?: never;
+}
+
+interface LinkStylesheetAttrs extends BaseLinkAttrs {
+  /** Relationship to the linked resource. */
+  rel: MaybeSignal<"stylesheet">;
+  /** Media query for the resource. */
+  media?: MaybeSignal<string>;
+  /** Preload destination. */
+  as?: never;
+  /** Sizes for icons. */
+  sizes?: never;
+}
+
+interface LinkIconAttrs extends BaseLinkAttrs {
+  /** Relationship to the linked resource. */
+  rel: MaybeSignal<"icon" | "apple-touch-icon">;
+  /** Sizes for icons. */
+  sizes?: MaybeSignal<string>;
+  /** Media query. */
+  media?: MaybeSignal<string>;
+  /** Preload destination. */
+  as?: never;
+}
+
+interface LinkBaseAttrs extends BaseLinkAttrs {
+  /** Relationship to the linked resource. */
+  rel?: MaybeSignal<string>; // Catch-all for other rels
+  /** Media query. */
+  media?: MaybeSignal<string>;
+  /** Preload destination. */
+  as?: MaybeSignal<LinkAs>;
+  /** Sizes for icons. */
+  sizes?: MaybeSignal<string>;
+  /** Source set for responsive images. */
+  imageSrcset?: MaybeSignal<string>;
+  /** Sizes for responsive images. */
+  imageSizes?: MaybeSignal<string>;
+}
+
+/**
+ * Attributes for link elements.
+ * Discriminated union based on `rel`.
+ */
+type LinkAttrs =
+  | LinkPreloadAttrs
+  | LinkStylesheetAttrs
+  | LinkIconAttrs
+  | LinkBaseAttrs;
 
 /**
  * Attributes for meta elements.
  */
-interface MetaAttrs extends GlobalAttributes {
-  /** Metadata name. */
-  name?: MaybeSignal<string>;
-  /** Metadata value. */
-  content?: MaybeSignal<string>;
-  /** Character encoding. */
-  charset?: MaybeSignal<string>;
-  /** Pragma directive. */
-  httpEquiv?: MaybeSignal<HttpEquiv | string>;
+// Base attributes for all meta tags
+interface BaseMetaAttrs extends GlobalAttributes {
   /** Media query. */
   media?: MaybeSignal<string>;
 }
+
+// 1. Standard Metadata: name + content
+interface MetaNameAttrs extends BaseMetaAttrs {
+  /** Metadata name. */
+  name: MaybeSignal<string>;
+  /** Metadata value. */
+  content: MaybeSignal<string>;
+
+  httpEquiv?: never;
+  charset?: never;
+  property?: never;
+}
+
+// 2. Pragma Directives: http-equiv + content
+interface MetaHttpEquivAttrs extends BaseMetaAttrs {
+  /** Pragma directive. */
+  httpEquiv: MaybeSignal<HttpEquiv | string>;
+  /** Metadata value. */
+  content: MaybeSignal<string>;
+
+  name?: never;
+  charset?: never;
+  property?: never;
+}
+
+// 3. Character Encoding: charset only
+interface MetaCharsetAttrs extends BaseMetaAttrs {
+  /** Character encoding. */
+  charset: MaybeSignal<string>;
+
+  name?: never;
+  httpEquiv?: never;
+  content?: never;
+  property?: never;
+}
+
+// 4. OpenGraph / RDFa: property + content
+interface MetaPropertyAttrs extends BaseMetaAttrs {
+  /** Property name (e.g. "og:title"). */
+  property: MaybeSignal<string>;
+  /** Metadata value. */
+  content: MaybeSignal<string>;
+
+  name?: never;
+  httpEquiv?: never;
+  charset?: never;
+}
+
+/**
+ * Attributes for meta elements.
+ * Discriminated union based on usage mode.
+ */
+type MetaAttrs =
+  | MetaNameAttrs
+  | MetaHttpEquivAttrs
+  | MetaCharsetAttrs
+  | MetaPropertyAttrs;
 
 /**
  * Attributes for base element.
