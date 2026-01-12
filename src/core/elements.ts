@@ -110,7 +110,6 @@ type LinkAs = "audio" | "document" | "embed" | "fetch" | "font" | "image" | "obj
 
 type HttpEquiv = "content-type" | "default-style" | "refresh" | "x-ua-compatible" | "content-security-policy";
 
-type AreaShape = "rect" | "circle" | "poly" | "default";
 
 type Sandbox =
   | "allow-downloads" | "allow-forms" | "allow-modals" | "allow-orientation-lock"
@@ -1054,13 +1053,9 @@ type ButtonAttrs = ButtonSubmitAttrs | ButtonRestAttrs;
 /**
  * Attributes for form elements.
  */
-interface FormAttrs extends GlobalAttributes {
+interface BaseFormAttrs extends GlobalAttributes {
   /** URL to use for form submission. */
   action?: MaybeSignal<string>;
-  /** HTTP method to use for form submission. */
-  method?: MaybeSignal<FormMethod>;
-  /** Encoding type to use for form submission. */
-  enctype?: MaybeSignal<FormEnctype>;
   /** Browsing context for form submission. */
   target?: MaybeSignal<Target>;
   /** Bypasses form validation. */
@@ -1074,6 +1069,28 @@ interface FormAttrs extends GlobalAttributes {
   /** Relationship to the target resource. */
   rel?: MaybeSignal<string>;
 }
+
+// 1. Post: method="post" allows enctype
+interface FormPostAttrs extends BaseFormAttrs {
+  /** HTTP method to use for form submission. */
+  method: MaybeSignal<"post">;
+  /** Encoding type to use for form submission. */
+  enctype?: MaybeSignal<FormEnctype>;
+}
+
+// 2. Get/Dialog: enctype is ignored/invalid
+interface FormGetAttrs extends BaseFormAttrs {
+  /** HTTP method to use for form submission. */
+  method?: MaybeSignal<"get" | "dialog">;
+  /** Encoding type to use for form submission. */
+  enctype?: never;
+}
+
+/**
+ * Attributes for form elements.
+ * Discriminated union based on `method`.
+ */
+type FormAttrs = FormPostAttrs | FormGetAttrs;
 
 /**
  * Attributes for label elements.
@@ -1398,11 +1415,9 @@ interface MapAttrs extends GlobalAttributes {
 /**
  * Attributes for area elements.
  */
-interface AreaAttrs extends GlobalAttributes {
+interface BaseAreaAttrs extends GlobalAttributes {
   /** Alternate text for the area. */
   alt?: MaybeSignal<string>;
-  /** Coordinates for the shape. */
-  coords?: MaybeSignal<string>;
   /** Prompts the user to download the resource. */
   download?: MaybeSignal<string | boolean>;
   /** Hyperlink target. */
@@ -1415,11 +1430,31 @@ interface AreaAttrs extends GlobalAttributes {
   referrerPolicy?: MaybeSignal<ReferrerPolicy>;
   /** Relationship to the linked resource. */
   rel?: MaybeSignal<string>;
-  /** Shape of the area. */
-  shape?: MaybeSignal<AreaShape>;
   /** Browsing context for the link. */
   target?: MaybeSignal<Target>;
 }
+
+// 1. Default Shape: Covers entire image, no coords allowed
+interface AreaDefaultAttrs extends BaseAreaAttrs {
+  /** Shape of the area. */
+  shape: MaybeSignal<"default">;
+  /** Coordinates for the shape. */
+  coords?: never;
+}
+
+// 2. Geometric Shapes: coords required
+interface AreaGeometricAttrs extends BaseAreaAttrs {
+  /** Shape of the area. */
+  shape?: MaybeSignal<"rect" | "circle" | "poly">;
+  /** Coordinates for the shape. */
+  coords: MaybeSignal<string>;
+}
+
+/**
+ * Attributes for area elements.
+ * Discriminated union based on `shape`.
+ */
+type AreaAttrs = AreaDefaultAttrs | AreaGeometricAttrs;
 
 /**
  * Attributes for progress elements.
