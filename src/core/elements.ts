@@ -24,6 +24,11 @@ class CaptureContext implements ExecutionContext {
 // TYPE UTILITIES
 // =============================================================================
 
+/**
+ * Checks if a value is a Signal.
+ * @param value - The value to check
+ * @returns True if the value is a Signal
+ */
 export function isSignal(value: unknown): value is Signal<unknown> {
   if (value === null || value === undefined) {
     return false;
@@ -35,6 +40,10 @@ export function isSignal(value: unknown): value is Signal<unknown> {
   return descriptor !== undefined && descriptor.get !== undefined;
 }
 
+/**
+ * A value that can be either a static value `T` or a `Signal<T>`.
+ * Used for reactive properties and content.
+ */
 export type MaybeSignal<T> = T | Signal<T>;
 
 export type Renderable = string | number | boolean | null | undefined;
@@ -547,36 +556,55 @@ type EventHandlers<E extends Element> = {
 
 interface GlobalAttributes {
   // Core
+  /** Unique identifier for the element. */
   id?: MaybeSignal<string>;
+  /** CSS class(es) for the element. Can be a string or an object of { className: boolean }. */
   class?: MaybeSignal<string> | Record<string, MaybeSignal<boolean>>;
+  /** Inline CSS styles. Can be a string or an object of strict style properties. */
   style?: MaybeSignal<string> | MaybeSignal<ReactiveCSSProperties>;
+  /** Advisory information for the element (tooltip). */
   title?: MaybeSignal<string>;
+  /** Language of the element's content. */
   lang?: MaybeSignal<string>;
+  /** Text directionality. */
   dir?: MaybeSignal<Dir>;
 
   // Content
+  /** The text content of the element and its descendants. */
   textContent?: MaybeSignal<string | number>;
+  /** The rendered text content of the element. */
   innerText?: MaybeSignal<string | number>;
 
   // Accessibility
+  /** ARIA role indicating the semantic purpose of the element. */
   role?: MaybeSignal<string>;
+  /** Indicates if the element can take input focus. */
   tabIndex?: MaybeSignal<number>;
 
   // Editing
+  /** Indicates whether the element is editable. */
   contentEditable?: MaybeSignal<"true" | "false" | "plaintext-only">;
+  /** Indicates whether spell checking is allowed. */
   spellcheck?: MaybeSignal<boolean>;
+  /** Indicates whether the element is draggable. */
   draggable?: MaybeSignal<boolean>;
 
   // Input hints
+  /** Hint for the type of data that might be entered by the user. */
   inputMode?: MaybeSignal<InputMode>;
+  /** Hint for the action label (or icon) to present for the enter key on virtual keyboards. */
   enterKeyHint?: MaybeSignal<EnterKeyHint>;
+  /** Controls whether and how text input is automatically capitalized. */
   autoCapitalize?: MaybeSignal<AutoCapitalize>;
 
   // Boolean
+  /** Indicates whether the element is not yet, or is no longer, relevant. */
   hidden?: MaybeSignal<boolean | "until-found">;
+  /** Indicates that the browser should ignore this section. */
   inert?: MaybeSignal<boolean>;
 
   // Popover
+  /** Designates an element as a popover element. */
   popover?: MaybeSignal<"auto" | "manual">;
 
   // Security
@@ -616,40 +644,75 @@ type AriaAttributes = { [K in `aria-${string}`]?: MaybeSignal<string | number | 
 // =============================================================================
 
 interface InputAttrs extends GlobalAttributes {
+  /** Type of the input control. */
   type?: MaybeSignal<InputType>;
+  /** Name of the form control. Submitted with the form. */
   name?: MaybeSignal<string>;
+  /** Current value of the control. */
   value?: MaybeSignal<string | number>;
+  /** Initial value of the control. */
   defaultValue?: MaybeSignal<string>;
+  /** Text that appears in the form control when it has no value set. */
   placeholder?: MaybeSignal<string>;
+  /** The control is unavailable for interaction. */
   disabled?: MaybeSignal<boolean>;
+  /** The user cannot edit the value. */
   readOnly?: MaybeSignal<boolean>;
+  /** The value is required for form submission. */
   required?: MaybeSignal<boolean>;
+  /** Automatically focus the element when the page loads. */
   autofocus?: MaybeSignal<boolean>;
+  /** Hint for form autofill feature. */
   autocomplete?: MaybeSignal<Autocomplete>;
+  /** Minimum value. */
   min?: MaybeSignal<string | number>;
+  /** Maximum value. */
   max?: MaybeSignal<string | number>;
+  /** Incremental bounds for numeric or date-time values. */
   step?: MaybeSignal<string | number>;
+  /** Minimum length of value. */
   minLength?: MaybeSignal<number>;
+  /** Maximum length of value. */
   maxLength?: MaybeSignal<number>;
+  /** Regex pattern the value must match. */
   pattern?: MaybeSignal<string>;
+  /** Whether to allow multiple values. */
   multiple?: MaybeSignal<boolean>;
+  /** File types accepted by the file upload. */
   accept?: MaybeSignal<string>;
+  /** Whether the control is checked. */
   checked?: MaybeSignal<boolean>;
+  /** The initial checked state. */
   defaultChecked?: MaybeSignal<boolean>;
+  /** Visual indeterminate state for checkboxes. */
   indeterminate?: MaybeSignal<boolean>;
+  /** Size of the control. */
   size?: MaybeSignal<number>;
+  /** ID of a `<datalist>` element. */
   list?: MaybeSignal<string>;
+  /** ID of the form the element belongs to. */
   form?: MaybeSignal<string>;
+  /** URL for form submission. */
   formAction?: MaybeSignal<string>;
+  /** HTTP method for form submission. */
   formMethod?: MaybeSignal<FormMethod>;
+  /** Encoding type for form submission. */
   formEnctype?: MaybeSignal<FormEnctype>;
+  /** Bypasses form validation. */
   formNoValidate?: MaybeSignal<boolean>;
+  /** Browsing context for form submission. */
   formTarget?: MaybeSignal<Target>;
+  /** Width of the image input. */
   width?: MaybeSignal<number>;
+  /** Height of the image input. */
   height?: MaybeSignal<number>;
+  /** Source URL of the image input. */
   src?: MaybeSignal<string>;
+  /** Alternate text for the image input. */
   alt?: MaybeSignal<string>;
+  /** Media capture source. */
   capture?: MaybeSignal<"user" | "environment" | boolean>;
+  /** Directionality of the element's text. */
   dirname?: MaybeSignal<string>;
 }
 
@@ -696,20 +759,35 @@ interface OptgroupAttrs extends GlobalAttributes {
 }
 
 interface ButtonAttrs extends GlobalAttributes {
+  /** The behavior of the button. */
   type?: MaybeSignal<ButtonType>;
+  /** Name of the button. Submitted with the form. */
   name?: MaybeSignal<string>;
+  /** Value associated with the button. */
   value?: MaybeSignal<string>;
+  /** The control is unavailable for interaction. */
   disabled?: MaybeSignal<boolean>;
+  /** Automatically focus the element when the page loads. */
   autofocus?: MaybeSignal<boolean>;
+  /** ID of the form the element belongs to. */
   form?: MaybeSignal<string>;
+  /** URL for form submission. */
   formAction?: MaybeSignal<string>;
+  /** HTTP method for form submission. */
   formMethod?: MaybeSignal<FormMethod>;
+  /** Encoding type for form submission. */
   formEnctype?: MaybeSignal<FormEnctype>;
+  /** Bypasses form validation. */
   formNoValidate?: MaybeSignal<boolean>;
+  /** Browsing context for form submission. */
   formTarget?: MaybeSignal<Target>;
+  /** ID of the element to control via popover API. */
   popoverTarget?: MaybeSignal<string>;
+  /** Action to perform on the popover target. */
   popoverTargetAction?: MaybeSignal<"toggle" | "show" | "hide">;
+  /** (Experimental) ID of element this button commands. */
   commandfor?: MaybeSignal<string>;
+  /** (Experimental) Command to execute. */
   command?: MaybeSignal<string>;
 }
 
@@ -1017,6 +1095,10 @@ interface TemplateAttrs extends GlobalAttributes {
 // ELEMENT PROPS MAP
 // =============================================================================
 
+/**
+ * Mapping of HTML tag names to their specific attribute interfaces.
+ * Used to infer strict prop types for each element.
+ */
 interface ElementPropsMap {
   // Form elements
   input: InputAttrs;
@@ -1092,6 +1174,12 @@ interface ElementPropsMap {
 // ELEMENT PROPS TYPE
 // =============================================================================
 
+/**
+ * The specific props object for a given HTML tag `K`.
+ * Combines element-specific attributes, global attributes, event handlers, data attributes, and ARIA attributes.
+ * 
+ * @template K - The HTML tag name key
+ */
 export type ElementProps<K extends keyof HTMLElementTagNameMap> =
   (K extends keyof ElementPropsMap ? ElementPropsMap[K] : GlobalAttributes)
   & EventHandlers<HTMLElementTagNameMap[K]>
@@ -1102,14 +1190,52 @@ export type ElementProps<K extends keyof HTMLElementTagNameMap> =
 // ELEMENT FACTORY TYPES
 // =============================================================================
 
+/**
+ * Factory function for creating HTML elements.
+ * Supports signal content, properties, and children overloads.
+ * 
+ * @template K - The HTML tag name key from HTMLElementTagNameMap
+ */
 export interface ElementFactory<K extends keyof HTMLElementTagNameMap> {
+  /**
+   * Create an element with simple text/signal content and a click handler.
+   * @param content - Text, number, or signal to display
+   * @param onclick - Click event handler
+   */
   (content: MaybeSignal<string | number>, onclick: (event: MouseEvent) => void): HTMLElementTagNameMap[K];
+
+  /**
+   * Create an element with simple text/signal content, properties, and children.
+   * @param content - Text, number, or signal to display
+   * @param props - Element attributes and event handlers
+   * @param children - Nested child elements or functions
+   */
   (content: MaybeSignal<string | number>, props: ElementProps<K>, ...children: (Child | ((ref: HTMLElementTagNameMap[K]) => void))[]): HTMLElementTagNameMap[K];
+
+  /**
+   * Create an element with properties and children.
+   * @param props - Element attributes and event handlers
+   * @param children - Nested child elements or functions
+   */
   (props: ElementProps<K>, ...children: (Child | ((ref: HTMLElementTagNameMap[K]) => void))[]): HTMLElementTagNameMap[K];
+
+  /**
+   * Create an element with children only.
+   * @param children - Nested child elements or functions
+   */
   (...children: (Child | ((ref: HTMLElementTagNameMap[K]) => void))[]): HTMLElementTagNameMap[K];
 }
 
+/**
+ * Factory function for creating void HTML elements (no children).
+ * 
+ * @template K - The HTML tag name key from HTMLElementTagNameMap
+ */
 export interface VoidElementFactory<K extends keyof HTMLElementTagNameMap> {
+  /**
+   * Create a void element (e.g., <input>, <br>).
+   * @param props - Element attributes and event handlers
+   */
   (props?: ElementProps<K>): HTMLElementTagNameMap[K];
 }
 
@@ -1362,6 +1488,12 @@ function applyStyle(element: HTMLElement, value: unknown): void {
 // ELEMENT FACTORY
 // =============================================================================
 
+/**
+ * Creates an element factory for a specific HTML tag.
+ * 
+ * @param tag - The HTML tag name (e.g., "div", "span")
+ * @returns An `ElementFactory` function for creating elements of that type
+ */
 function createElement<K extends keyof HTMLElementTagNameMap>(
   tag: K
 ): ElementFactory<K> {
@@ -1418,6 +1550,12 @@ function createElement<K extends keyof HTMLElementTagNameMap>(
   };
 }
 
+/**
+ * Creates a void element factory (no children allowed).
+ * 
+ * @param tag - The HTML tag name (e.g., "input", "br")
+ * @returns A `VoidElementFactory` function
+ */
 function createVoidElement<K extends keyof HTMLElementTagNameMap>(
   tag: K
 ): VoidElementFactory<K> {
