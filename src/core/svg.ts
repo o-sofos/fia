@@ -1089,80 +1089,141 @@ function createSVGTextElement<K extends keyof SVGElementPropsMap>(
 // =============================================================================
 
 // Root & Container Elements
+/** SVG Root definition. */
 export const svg: SVGElementFactory<"svg"> = createSVGElement<"svg">("svg");
+/** Group container definition. */
 export const g: SVGElementFactory<"g"> = createSVGElement<"g">("g");
+/** Definitions container. */
 export const defs: SVGElementFactory<"defs"> = createSVGElement<"defs">("defs");
+/** Symbol definition. */
 export const symbol: SVGElementFactory<"symbol"> = createSVGElement<"symbol">("symbol");
+/** Use element (instantiation). */
 export const use: SVGVoidElementFactory<"use"> = createSVGVoidElement<"use">("use");
+/** Image element. */
 export const image: SVGVoidElementFactory<"image"> = createSVGVoidElement<"image">("image");
+/** Switch conditional container. */
 export const svgSwitch: SVGElementFactory<"switch"> = createSVGElement<"switch">("switch");
+/** Foreign object container. */
 export const foreignObject: SVGElementFactory<"foreignObject"> = createSVGElement<"foreignObject">("foreignObject");
+/** Anchor link. */
 export const a: SVGElementFactory<"a"> = createSVGElement<"a">("a");
+/** View definition. */
 export const view: SVGVoidElementFactory<"view"> = createSVGVoidElement<"view">("view");
 
 // Basic Shapes
+/** Rectangle shape. */
 export const rect: SVGVoidElementFactory<"rect"> = createSVGVoidElement<"rect">("rect");
+/** Circle shape. */
 export const circle: SVGVoidElementFactory<"circle"> = createSVGVoidElement<"circle">("circle");
+/** Ellipse shape. */
 export const ellipse: SVGVoidElementFactory<"ellipse"> = createSVGVoidElement<"ellipse">("ellipse");
+/** Line shape. */
 export const line: SVGVoidElementFactory<"line"> = createSVGVoidElement<"line">("line");
+/** Polyline shape. */
 export const polyline: SVGVoidElementFactory<"polyline"> = createSVGVoidElement<"polyline">("polyline");
+/** Polygon shape. */
 export const polygon: SVGVoidElementFactory<"polygon"> = createSVGVoidElement<"polygon">("polygon");
+/** Path shape. */
 export const path: SVGVoidElementFactory<"path"> = createSVGVoidElement<"path">("path");
 
 // Text Elements
+/** Text element. */
 export const text: SVGTextElementFactory<"text"> = createSVGTextElement<"text">("text");
+/** Text span element. */
 export const tspan: SVGTextElementFactory<"tspan"> = createSVGTextElement<"tspan">("tspan");
+/** Text path element. */
 export const textPath: SVGTextElementFactory<"textPath"> = createSVGTextElement<"textPath">("textPath");
 
 // Gradient Elements
+/** Linear gradient definition. */
 export const linearGradient: SVGElementFactory<"linearGradient"> = createSVGElement<"linearGradient">("linearGradient");
+/** Radial gradient definition. */
 export const radialGradient: SVGElementFactory<"radialGradient"> = createSVGElement<"radialGradient">("radialGradient");
+/** Gradient stop definition. */
 export const stop: SVGVoidElementFactory<"stop"> = createSVGVoidElement<"stop">("stop");
+/** Pattern definition. */
 export const pattern: SVGElementFactory<"pattern"> = createSVGElement<"pattern">("pattern");
 
 // Clipping & Masking
+/** Clip path definition. */
 export const clipPath: SVGElementFactory<"clipPath"> = createSVGElement<"clipPath">("clipPath");
+/** Mask definition. */
 export const svgMask: SVGElementFactory<"mask"> = createSVGElement<"mask">("mask");
+/** Marker definition. */
 export const marker: SVGElementFactory<"marker"> = createSVGElement<"marker">("marker");
 
 // Filter Elements
+/** Filter definition. */
 export const svgFilter: SVGElementFactory<"filter"> = createSVGElement<"filter">("filter");
+/** Blend filter. */
 export const feBlend: SVGVoidElementFactory<"feBlend"> = createSVGVoidElement<"feBlend">("feBlend");
+/** Color matrix filter. */
 export const feColorMatrix: SVGVoidElementFactory<"feColorMatrix"> = createSVGVoidElement<"feColorMatrix">("feColorMatrix");
+/** Component transfer filter. */
 export const feComponentTransfer: SVGElementFactory<"feComponentTransfer"> = createSVGElement<"feComponentTransfer">("feComponentTransfer");
+/** Function R filter. */
 export const feFuncR: SVGVoidElementFactory<"feFuncR"> = createSVGVoidElement<"feFuncR">("feFuncR");
+/** Function G filter. */
 export const feFuncG: SVGVoidElementFactory<"feFuncG"> = createSVGVoidElement<"feFuncG">("feFuncG");
+/** Function B filter. */
 export const feFuncB: SVGVoidElementFactory<"feFuncB"> = createSVGVoidElement<"feFuncB">("feFuncB");
+/** Function A filter. */
 export const feFuncA: SVGVoidElementFactory<"feFuncA"> = createSVGVoidElement<"feFuncA">("feFuncA");
+/** Composite filter. */
 export const feComposite: SVGVoidElementFactory<"feComposite"> = createSVGVoidElement<"feComposite">("feComposite");
+/** Convolve matrix filter. */
 export const feConvolveMatrix: SVGVoidElementFactory<"feConvolveMatrix"> = createSVGVoidElement<"feConvolveMatrix">("feConvolveMatrix");
+/** Diffuse lighting filter. */
 export const feDiffuseLighting: SVGElementFactory<"feDiffuseLighting"> = createSVGElement<"feDiffuseLighting">("feDiffuseLighting");
+/** Displacement map filter. */
 export const feDisplacementMap: SVGVoidElementFactory<"feDisplacementMap"> = createSVGVoidElement<"feDisplacementMap">("feDisplacementMap");
+/** Drop shadow filter. */
 export const feDropShadow: SVGVoidElementFactory<"feDropShadow"> = createSVGVoidElement<"feDropShadow">("feDropShadow");
+/** Flood filter. */
 export const feFlood: SVGVoidElementFactory<"feFlood"> = createSVGVoidElement<"feFlood">("feFlood");
+/** Gaussian blur filter. */
 export const feGaussianBlur: SVGVoidElementFactory<"feGaussianBlur"> = createSVGVoidElement<"feGaussianBlur">("feGaussianBlur");
+/** Image filter. */
 export const feImage: SVGVoidElementFactory<"feImage"> = createSVGVoidElement<"feImage">("feImage");
+/** Merge filter. */
 export const feMerge: SVGElementFactory<"feMerge"> = createSVGElement<"feMerge">("feMerge");
+/** Merge node filter. */
 export const feMergeNode: SVGVoidElementFactory<"feMergeNode"> = createSVGVoidElement<"feMergeNode">("feMergeNode");
+/** Morphology filter. */
 export const feMorphology: SVGVoidElementFactory<"feMorphology"> = createSVGVoidElement<"feMorphology">("feMorphology");
+/** Offset filter. */
 export const feOffset: SVGVoidElementFactory<"feOffset"> = createSVGVoidElement<"feOffset">("feOffset");
+/** Specular lighting filter. */
 export const feSpecularLighting: SVGElementFactory<"feSpecularLighting"> = createSVGElement<"feSpecularLighting">("feSpecularLighting");
+/** Tile filter. */
 export const feTile: SVGVoidElementFactory<"feTile"> = createSVGVoidElement<"feTile">("feTile");
+/** Turbulence filter. */
 export const feTurbulence: SVGVoidElementFactory<"feTurbulence"> = createSVGVoidElement<"feTurbulence">("feTurbulence");
+/** Distant light. */
 export const feDistantLight: SVGVoidElementFactory<"feDistantLight"> = createSVGVoidElement<"feDistantLight">("feDistantLight");
+/** Point light. */
 export const fePointLight: SVGVoidElementFactory<"fePointLight"> = createSVGVoidElement<"fePointLight">("fePointLight");
+/** Spot light. */
 export const feSpotLight: SVGElementFactory<"feSpotLight"> = createSVGElement<"feSpotLight">("feSpotLight");
 
 // Animation Elements
+/** Animate definition. */
 export const animate: SVGVoidElementFactory<"animate"> = createSVGVoidElement<"animate">("animate");
+/** Animate motion definition. */
 export const animateMotion: SVGElementFactory<"animateMotion"> = createSVGElement<"animateMotion">("animateMotion");
+/** Animate transform definition. */
 export const animateTransform: SVGVoidElementFactory<"animateTransform"> = createSVGVoidElement<"animateTransform">("animateTransform");
+/** Multi-path animation definition. */
 export const mpath: SVGVoidElementFactory<"mpath"> = createSVGVoidElement<"mpath">("mpath");
+/** Set definition. */
 export const svgSet: SVGVoidElementFactory<"set"> = createSVGVoidElement<"set">("set");
 
 // Descriptive Elements
+/** Description definition. */
 export const desc: SVGTextElementFactory<"desc"> = createSVGTextElement<"desc">("desc");
+/** Title definition. */
 export const svgTitle: SVGTextElementFactory<"title"> = createSVGTextElement<"title">("title");
+/** Metadata definition. */
 export const metadata: SVGElementFactory<"metadata"> = createSVGElement<"metadata">("metadata");
 
 // =============================================================================

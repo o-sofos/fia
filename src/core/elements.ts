@@ -441,136 +441,244 @@ function isContent(value: unknown): value is MaybeSignal<string | number> {
 // =============================================================================
 
 // Text elements
+/** Generic container definition. */
 export const div: ElementFactory<"div"> = createElement("div");
+/** Generic inline container definition. */
 export const span: ElementFactory<"span"> = createElement("span");
+/** Paragraph definition. */
 export const p: ElementFactory<"p"> = createElement("p");
+/** Heading 1 definition. */
 export const h1: ElementFactory<"h1"> = createElement("h1");
+/** Heading 2 definition. */
 export const h2: ElementFactory<"h2"> = createElement("h2");
+/** Heading 3 definition. */
 export const h3: ElementFactory<"h3"> = createElement("h3");
+/** Heading 4 definition. */
 export const h4: ElementFactory<"h4"> = createElement("h4");
+/** Heading 5 definition. */
 export const h5: ElementFactory<"h5"> = createElement("h5");
+/** Heading 6 definition. */
 export const h6: ElementFactory<"h6"> = createElement("h6");
+/** Anchor link definition. */
 export const a: ElementFactory<"a"> = createElement("a");
+/** Strong emphasis definition. */
 export const strong: ElementFactory<"strong"> = createElement("strong");
+/** Emphasis definition. */
 export const em: ElementFactory<"em"> = createElement("em");
+/** Inline code definition. */
 export const code: ElementFactory<"code"> = createElement("code");
+/** Preformatted text definition. */
 export const pre: ElementFactory<"pre"> = createElement("pre");
 
 // Form elements
+/** Form definition. */
 export const form: ElementFactory<"form"> = createElement("form");
+/** Input field definition. */
 export const input: VoidElementFactory<"input"> = createVoidElement("input");
+/** Textarea definition. */
 export const textarea: ElementFactory<"textarea"> = createElement("textarea");
+/** Select dropdown definition. */
 export const select: ElementFactory<"select"> = createElement("select");
+/** Option definition. */
 export const option: ElementFactory<"option"> = createElement("option");
+/** Option group definition. */
 export const optgroup: ElementFactory<"optgroup"> = createElement("optgroup");
+/** Button definition. */
 export const button: ElementFactory<"button"> = createElement("button");
+/** Label definition. */
 export const label: ElementFactory<"label"> = createElement("label");
+/** Fieldset definition. */
 export const fieldset: ElementFactory<"fieldset"> = createElement("fieldset");
+/** Legend definition. */
 export const legend: ElementFactory<"legend"> = createElement("legend");
+/** Data list definition. */
 export const datalist: ElementFactory<"datalist"> = createElement("datalist");
+/** Output definition. */
 export const output: ElementFactory<"output"> = createElement("output");
 
 // List elements
+/** Unordered list definition. */
 export const ul: ElementFactory<"ul"> = createElement("ul");
+/** Ordered list definition. */
 export const ol: ElementFactory<"ol"> = createElement("ol");
+/** List item definition. */
 export const li: ElementFactory<"li"> = createElement("li");
+/** Description list definition. */
 export const dl: ElementFactory<"dl"> = createElement("dl");
+/** Description term definition. */
 export const dt: ElementFactory<"dt"> = createElement("dt");
+/** Description details definition. */
 export const dd: ElementFactory<"dd"> = createElement("dd");
 
 // Table elements
+/** Table container definition. */
 export const table: ElementFactory<"table"> = createElement("table");
+/** Table header definition. */
 export const thead: ElementFactory<"thead"> = createElement("thead");
+/** Table body definition. */
 export const tbody: ElementFactory<"tbody"> = createElement("tbody");
+/** Table footer definition. */
 export const tfoot: ElementFactory<"tfoot"> = createElement("tfoot");
+/** Table row definition. */
 export const tr: ElementFactory<"tr"> = createElement("tr");
+/** Table data cell definition. */
 export const td: ElementFactory<"td"> = createElement("td");
+/** Table header cell definition. */
 export const th: ElementFactory<"th"> = createElement("th");
+/** Table caption definition. */
 export const caption: ElementFactory<"caption"> = createElement("caption");
+/** Column group definition. */
 export const colgroup: ElementFactory<"colgroup"> = createElement("colgroup");
+/** Column definition. */
 export const col: VoidElementFactory<"col"> = createVoidElement("col");
 
 // Semantic elements
+/** Header definition. */
 export const header: ElementFactory<"header"> = createElement("header");
+/** Footer definition. */
 export const footer: ElementFactory<"footer"> = createElement("footer");
+/** Navigation definition. */
 export const nav: ElementFactory<"nav"> = createElement("nav");
+/** Main content definition. */
 export const main: ElementFactory<"main"> = createElement("main");
+/** Section definition. */
 export const section: ElementFactory<"section"> = createElement("section");
+/** Article definition. */
 export const article: ElementFactory<"article"> = createElement("article");
+/** Aside content definition. */
 export const aside: ElementFactory<"aside"> = createElement("aside");
+/** Figure definition. */
 export const figure: ElementFactory<"figure"> = createElement("figure");
+/** Figure caption definition. */
 export const figcaption: ElementFactory<"figcaption"> = createElement("figcaption");
+/** Header group definition. */
 export const hgroup: ElementFactory<"hgroup"> = createElement("hgroup");
+/** Search definition. */
 export const search: ElementFactory<"search"> = createElement("search");
+/** Address definition. */
 export const address: ElementFactory<"address"> = createElement("address");
 
 // Media elements
+/** Image definition. */
 export const img: VoidElementFactory<"img"> = createVoidElement("img");
+/** Video definition. */
 export const video: ElementFactory<"video"> = createElement("video");
+/** Audio definition. */
 export const audio: ElementFactory<"audio"> = createElement("audio");
+/** Canvas definition. */
 export const canvas: ElementFactory<"canvas"> = createElement("canvas");
+/** Picture definition. */
 export const picture: ElementFactory<"picture"> = createElement("picture");
+/** Source definition. */
 export const source: VoidElementFactory<"source"> = createVoidElement("source");
+/** Track definition. */
 export const track: VoidElementFactory<"track"> = createVoidElement("track");
+/** Iframe definition. */
 export const iframe: ElementFactory<"iframe"> = createElement("iframe");
+/** Embed definition. */
 export const embed: VoidElementFactory<"embed"> = createVoidElement("embed");
+/** Object definition. */
 export const object: ElementFactory<"object"> = createElement("object");
+/** Map definition. */
 export const map: ElementFactory<"map"> = createElement("map");
 
 // Interactive elements
+/** Details definition. */
 export const details: ElementFactory<"details"> = createElement("details");
+/** Summary definition. */
 export const summary: ElementFactory<"summary"> = createElement("summary");
+/** Dialog definition. */
 export const dialog: ElementFactory<"dialog"> = createElement("dialog");
+/** Menu definition. */
 export const menu: ElementFactory<"menu"> = createElement("menu");
 
 // Text-level elements
+/** Line break definition. */
 export const br: VoidElementFactory<"br"> = createVoidElement("br");
+/** Horizontal rule definition. */
 export const hr: VoidElementFactory<"hr"> = createVoidElement("hr");
+/** Word break opportunity definition. */
 export const wbr: VoidElementFactory<"wbr"> = createVoidElement("wbr");
+/** Blockquote definition. */
 export const blockquote: ElementFactory<"blockquote"> = createElement("blockquote");
+/** Inline quotation definition. */
 export const q: ElementFactory<"q"> = createElement("q");
+/** Citation definition. */
 export const cite: ElementFactory<"cite"> = createElement("cite");
+/** Abbreviation definition. */
 export const abbr: ElementFactory<"abbr"> = createElement("abbr");
+/** Time definition. */
 export const time: ElementFactory<"time"> = createElement("time");
+/** Small print definition. */
 export const small: ElementFactory<"small"> = createElement("small");
+/** Subscript definition. */
 export const sub: ElementFactory<"sub"> = createElement("sub");
+/** Superscript definition. */
 export const sup: ElementFactory<"sup"> = createElement("sup");
+/** Marked text definition. */
 export const mark: ElementFactory<"mark"> = createElement("mark");
+/** Deleted text definition. */
 export const del: ElementFactory<"del"> = createElement("del");
+/** Inserted text definition. */
 export const ins: ElementFactory<"ins"> = createElement("ins");
+/** Keyboard input definition. */
 export const kbd: ElementFactory<"kbd"> = createElement("kbd");
+/** Sample output definition. */
 export const samp: ElementFactory<"samp"> = createElement("samp");
+/** Variable definition. */
 export const var_: ElementFactory<"var"> = createElement("var");
+/** Definition definition. */
 export const dfn: ElementFactory<"dfn"> = createElement("dfn");
+/** Bi-directional isolation definition. */
 export const bdi: ElementFactory<"bdi"> = createElement("bdi");
+/** Bi-directional override definition. */
 export const bdo: ElementFactory<"bdo"> = createElement("bdo");
+/** Ruby annotation definition. */
 export const ruby: ElementFactory<"ruby"> = createElement("ruby");
+/** Ruby text definition. */
 export const rt: ElementFactory<"rt"> = createElement("rt");
+/** Ruby parenthesis definition. */
 export const rp: ElementFactory<"rp"> = createElement("rp");
+/** Data definition. */
 export const data: ElementFactory<"data"> = createElement("data");
 
 // Progress/Meter
+/** Progress bar definition. */
 export const progress: ElementFactory<"progress"> = createElement("progress");
+/** Scalar measurement definition. */
 export const meter: ElementFactory<"meter"> = createElement("meter");
 
 // Template/Slot
+/** Template definition. */
 export const template: ElementFactory<"template"> = createElement("template");
+/** Shadow DOM slot definition. */
 export const slot: ElementFactory<"slot"> = createElement("slot");
 
 // Document metadata (void elements)
+/** Area definition. */
 export const area: VoidElementFactory<"area"> = createVoidElement("area");
+/** Base URL definition. */
 export const base: VoidElementFactory<"base"> = createVoidElement("base");
+/** Link definition. */
 export const link: VoidElementFactory<"link"> = createVoidElement("link");
+/** Metadata definition. */
 export const meta: VoidElementFactory<"meta"> = createVoidElement("meta");
 
 // Script/Style (typically used differently but included for completeness)
+/** Script definition. */
 export const script: ElementFactory<"script"> = createElement("script");
+/** Style definition. */
 export const style: ElementFactory<"style"> = createElement("style");
+/** Noscript definition. */
 export const noscript: ElementFactory<"noscript"> = createElement("noscript");
 
 // Deprecated but sometimes needed
+/** Bold definition. */
 export const b: ElementFactory<"b"> = createElement("b");
+/** Italic definition. */
 export const i: ElementFactory<"i"> = createElement("i");
+/** Underline definition. */
 export const u: ElementFactory<"u"> = createElement("u");
+/** Strikethrough definition. */
 export const s: ElementFactory<"s"> = createElement("s");
 
