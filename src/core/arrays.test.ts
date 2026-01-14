@@ -3,7 +3,7 @@ import { $, effect } from "./reactivity";
 
 describe("Array Reactivity", () => {
     it("should NOT update when mutating the array in place (push)", () => {
-        const list = $(["Apple"]);
+        const list = $<("Apple" | "Banana")[]>(["Apple"]);
         let updateCount = 0;
 
         effect(() => {
@@ -16,13 +16,13 @@ describe("Array Reactivity", () => {
         expect(updateCount).toBe(1);
 
         // Mutation - SHOULD NOT TRIGGER
-        list.value.push("Banana");
+        list.value.push("Apple");
         expect(updateCount).toBe(1); // Still 1
         expect(list.value).toContain("Banana"); // Value changed reference did not
     });
 
     it("should update when replacing the array (immutable update)", () => {
-        const list = $(["Apple"]);
+        const list = $<("Apple" | "Banana")[]>(["Apple"]);
         let updateCount = 0;
 
         effect(() => {

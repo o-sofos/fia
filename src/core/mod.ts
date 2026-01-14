@@ -97,4 +97,4 @@ export {
 // TYPE UTILITIES
 // =============================================================================
 
-export type { MaybeSignal, Child, ElementProps, ElementFactory, VoidElementFactory } from "./elements";
+export type { MaybeSignal, Child, ElementProps, ElementFactory, VoidElementFactory } from "../types/index";

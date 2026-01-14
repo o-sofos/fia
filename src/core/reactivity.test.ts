@@ -4,7 +4,7 @@ import { $, effect, batch } from "./reactivity";
 describe("Reactivity System", () => {
     describe("Signals", () => {
         it("should hold and update values via function call", () => {
-            const count = $(0);
+            const count = $<number>(0);
             expect(count()).toBe(0);
 
             count(5);
@@ -12,7 +12,7 @@ describe("Reactivity System", () => {
         });
 
         it("should hold and update values via .value property", () => {
-            const count = $(0);
+            const count = $<number>(0);
             expect(count.value).toBe(0);
 
             count.value = 10;
@@ -20,7 +20,7 @@ describe("Reactivity System", () => {
         });
 
         it("should not trigger effects when value is unchanged (Object.is)", () => {
-            const count = $(0);
+            const count = $<number>(0);
             let runs = 0;
 
             effect(() => {
@@ -37,7 +37,7 @@ describe("Reactivity System", () => {
         });
 
         it("should handle NaN correctly (Object.is)", () => {
-            const val = $(NaN);
+            const val = $<number>(NaN);
             let runs = 0;
 
             effect(() => {
@@ -51,7 +51,7 @@ describe("Reactivity System", () => {
         });
 
         it("should trigger effects on value change", () => {
-            const count = $(0);
+            const count = $<number>(0);
             let observed = -1;
 
             effect(() => {
@@ -64,7 +64,7 @@ describe("Reactivity System", () => {
         });
 
         it("should allow reading without tracking via peek()", () => {
-            const count = $(0);
+            const count = $<number>(0);
             let runs = 0;
 
             effect(() => {
@@ -80,7 +80,7 @@ describe("Reactivity System", () => {
 
     describe("Computed", () => {
         it("should derive values from signals", () => {
-            const count = $(2);
+            const count = $<number>(2);
             const doubled = $(() => count.value * 2);
 
             expect(doubled()).toBe(4);
@@ -88,7 +88,7 @@ describe("Reactivity System", () => {
         });
 
         it("should update when dependencies change", () => {
-            const count = $(1);
+            const count = $<number>(1);
             const doubled = $(() => count.value * 2);
 
             expect(doubled.value).toBe(2);
@@ -98,7 +98,7 @@ describe("Reactivity System", () => {
         });
 
         it("should chain computed values", () => {
-            const count = $(1);
+            const count = $<number>(1);
             const doubled = $(() => count.value * 2);
             const quadrupled = $(() => doubled.value * 2);
 
@@ -111,7 +111,7 @@ describe("Reactivity System", () => {
 
         it("should be lazy - only recompute when read", () => {
             let computeCount = 0;
-            const count = $(1);
+            const count = $<number>(1);
             const doubled = $(() => {
                 computeCount++;
                 return count.value * 2;
@@ -130,7 +130,7 @@ describe("Reactivity System", () => {
         });
 
         it("should allow peeking without tracking", () => {
-            const count = $(5);
+            const count = $<number>(5);
             const doubled = $(() => count.value * 2);
 
             let runs = 0;
@@ -156,8 +156,8 @@ describe("Reactivity System", () => {
         });
 
         it("should track multiple dependencies", () => {
-            const first = $("John");
-            const last = $("Doe");
+            const first = $<"John" | "Jane">("John");
+            const last = $<"Doe" | "Smith">("Doe");
             let fullName = "";
 
             effect(() => {
@@ -173,8 +173,8 @@ describe("Reactivity System", () => {
         });
 
         it("should cleanup stale dependencies on re-run", () => {
-            const show = $(true);
-            const msg = $("Hello");
+            const show = $<boolean>(true);
+            const msg = $<"Hello" | "World" | "Ignored">("Hello");
             let runs = 0;
 
             effect(() => {
@@ -197,7 +197,7 @@ describe("Reactivity System", () => {
         });
 
         it("should be disposable", () => {
-            const count = $(0);
+            const count = $<number>(0);
             let runs = 0;
 
             const dispose = effect(() => {
@@ -216,8 +216,8 @@ describe("Reactivity System", () => {
         });
 
         it("should handle nested effects independently", () => {
-            const outer = $(0);
-            const inner = $(0);
+            const outer = $<number>(0);
+            const inner = $<number>(0);
             let outerRuns = 0;
             let innerRuns = 0;
 
@@ -240,7 +240,7 @@ describe("Reactivity System", () => {
 
     describe("Batching", () => {
         it("should batch multiple updates into single effect run", () => {
-            const count = $(0);
+            const count = $<number>(0);
             let runs = 0;
 
             effect(() => {
@@ -260,8 +260,8 @@ describe("Reactivity System", () => {
         });
 
         it("should deduplicate effects within a batch", () => {
-            const a = $(0);
-            const b = $(0);
+            const a = $<number>(0);
+            const b = $<number>(0);
             let runs = 0;
 
             effect(() => {
@@ -280,7 +280,7 @@ describe("Reactivity System", () => {
         });
 
         it("should support nested batches", () => {
-            const count = $(0);
+            const count = $<number>(0);
             let runs = 0;
 
             effect(() => {
@@ -306,7 +306,7 @@ describe("Reactivity System", () => {
     describe("Edge Cases", () => {
         it("should handle circular computed dependencies gracefully", () => {
             // This tests that we don't infinite loop
-            const count = $(1);
+            const count = $<number>(1);
             let computeRuns = 0;
 
             const derived = $(() => {
@@ -322,7 +322,7 @@ describe("Reactivity System", () => {
         });
 
         it("should handle effects that modify their own dependencies", () => {
-            const count = $(0);
+            const count = $<number>(0);
             let runs = 0;
 
             effect(() => {
@@ -338,7 +338,7 @@ describe("Reactivity System", () => {
         });
 
         it("should handle signals with object values", () => {
-            const obj = $({ a: 1 });
+            const obj = $<{ a: number }>({ a: 1 });
             let runs = 0;
 
             effect(() => {
@@ -358,7 +358,7 @@ describe("Reactivity System", () => {
         });
 
         it("should handle disposal during effect execution", () => {
-            const count = $(0);
+            const count = $<number>(0);
             let dispose: (() => void) | undefined;
             let runs = 0;
 
