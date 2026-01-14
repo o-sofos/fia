@@ -299,6 +299,16 @@ function executeChildren<E extends HTMLElement>(
 /**
  * Creates an element factory for a specific HTML tag.
  * 
+ * The returned factory supports 8 overloads for flexibility:
+ * 1. `div()` - Empty element
+ * 2. `div(content)` - Text or Signal content
+ * 3. `div(props)` - Attributes and event listeners
+ * 4. `div(childrenCallback)` - Nesting
+ * 5. `div(props, children)`
+ * 6. `div(content, props)`
+ * 7. `div(content, children)`
+ * 8. `div(content, props, children)`
+ * 
  * @param tag - The HTML tag name (e.g., "div", "span")
  * @returns An `ElementFactory` function for creating elements of that type
  */
@@ -372,8 +382,10 @@ function createElement<K extends keyof HTMLElementTagNameMap>(
   };
 }
 
+
 /**
  * Creates a void element factory (no children allowed).
+ * Void elements like `<input>`, `<br>`, `<img>` cannot have children.
  * 
  * @param tag - The HTML tag name (e.g., "input", "br")
  * @returns A `VoidElementFactory` function

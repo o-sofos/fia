@@ -76,8 +76,18 @@ function cleanupSubscriber(sub: Subscriber): void {
 }
 
 /**
- * Batch multiple signal updates
- * Effects run once after all updates complete
+ * Batch multiple signal updates into a single effect run.
+ * 
+ * Usage:
+ * ```ts
+ * batch(() => {
+ *   count.value = 1;
+ *   name.value = "John";
+ * });
+ * // Effects run only once here
+ * ```
+ * 
+ * @param fn - The function containing state updates to batch
  */
 export function batch(fn: () => void): void {
   batchDepth++;
@@ -97,8 +107,17 @@ export function batch(fn: () => void): void {
 }
 
 /**
- * Create a reactive effect
- * Returns a dispose function to stop the effect
+ * Create a reactive effect that runs whenever its dependencies change.
+ * 
+ * Usage:
+ * ```ts
+ * effect(() => {
+ *   console.log("Count is:", count.value);
+ * });
+ * ```
+ * 
+ * @param fn - The effect function to run
+ * @returns A dispose function to stop the effect
  */
 export function effect(fn: EffectFn): () => void {
   let active = true;
@@ -278,7 +297,21 @@ function createComputed<T>(compute: () => T): Signal<T> {
 }
 
 /**
- * Main $ function - creates signals or computed values
+ * Create a signal or computed value.
+ * 
+ * **Signal (State):**
+ * ```ts
+ * const count = $(0);
+ * count.value++;
+ * ```
+ * 
+ * **Computed (Derived State):**
+ * ```ts
+ * const double = $(() => count.value * 2);
+ * ```
+ * 
+ * @param initial - The initial value or a computation function
+ * @returns A writable Signal for values, or a readonly Signal for functions
  */
 export function $<const T>(initial: T): [T] extends [() => infer R] ? Signal<R> : WritableSignal<T>;
 export function $<T>(initial: T): Signal<T> | WritableSignal<T> {

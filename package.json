@@ -3,6 +3,11 @@
   "private": true,
   "version": "0.2.6",
   "type": "module",
+  "engines": {
+    "node": ">=18.0.0",
+    "bun": ">=1.0.0",
+    "deno": ">=1.30.0"
+  },
   "scripts": {
     "dev": "bun run dev.ts",
     "test": "bun test"
