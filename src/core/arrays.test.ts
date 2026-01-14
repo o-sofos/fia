@@ -16,7 +16,7 @@ describe("Array Reactivity", () => {
         expect(updateCount).toBe(1);
 
         // Mutation - SHOULD NOT TRIGGER
-        list.value.push("Apple");
+        list.value.push("Banana");
         expect(updateCount).toBe(1); // Still 1
         expect(list.value).toContain("Banana"); // Value changed reference did not
     });
