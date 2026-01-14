@@ -5,7 +5,7 @@
 
 > **No JSX. No VDOM. No Jank.**
 >
-> Flick is a 2KB framework for building reactive UIs with signals and plain functions.
+> With a tiny 4KB core runtime, Flick is the perfect framework for building reactive UIs with signals and plain functions.
 
 ---
 
@@ -17,7 +17,7 @@ Most frameworks add layers of abstraction between you and the DOM. Flick gives y
 
 - ✨ **Reactive values** - `$()` creates values that automatically update the UI
 - 🎯 **Direct DOM** - No virtual DOM, no diffing, just native browser APIs
-- 📦 **2KB total** - Smaller than the frameworks claiming to be minimal
+- 📦 **4KB/5KB** - Core runtime is ~4KB, full library with types is ~5KB (gzipped)
 - 🔒 **Zero dependencies** - No supply chain risks, no version conflicts
 - 📘 **Fully typed** - Complete TypeScript support with autocomplete
 - 🚀 **No build required** - Import from JSR and start building
