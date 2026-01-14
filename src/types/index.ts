@@ -787,6 +787,18 @@ interface GlobalAttributes {
     /** The rendered text content of the element. */
     innerText?: MaybeSignal<string | number>;
 
+    /** 
+     * Reactive list rendering. 
+     * If provided, the children callback will be called for each item in the array.
+     */
+    each?: Signal<any[]>;
+
+    /**
+     * Unique key function for list items. 
+     * Recommended for performance if items have stable IDs.
+     */
+    key?: (item: any) => any;
+
     // Accessibility (Strict Types)
     /** ARIA role indicating the semantic purpose of the element. */
     role?: MaybeSignal<AriaRole>;
@@ -2336,23 +2348,27 @@ export interface ElementFactory<K extends keyof HTMLElementTagNameMap> {
     /** 5. Props + children */
     <const P extends ElementProps<K>>(
         props: P,
-        children: (element: SmartElement<K, P>) => void
+        children: P extends { each: Signal<infer T[]> } 
+            ?(item: T, index: number) => HTMLElement
+            : (element: SmartElement<K, P>) => void
     ): SmartElement<K, P>;
-    /** 6. Content + props */
-    <const P extends ElementProps<K>>(
-        content: MaybeSignal<string | number>,
+/** 6. Content + props */
+<const P extends ElementProps < K >> (
+    content: MaybeSignal<string | number>,
         props: P
     ): SmartElement<K, P>;
-    /** 7. Content + children */
-    (
-        content: MaybeSignal<string | number>,
-        children: ChildrenCallback<E<K>>
-    ): E<K>;
-    /** 8. Content + props + children */
-    <const P extends ElementProps<K>>(
-        content: MaybeSignal<string | number>,
+/** 7. Content + children */
+(
+    content: MaybeSignal<string | number>,
+    children: ChildrenCallback<E<K>>
+): E<K>;
+/** 8. Content + props + children */
+<const P extends ElementProps < K >> (
+    content: MaybeSignal<string | number>,
         props: P,
-        children: (element: SmartElement<K, P>) => void
+            children: P extends { each: Signal < infer T[] > } 
+            ?(item: T, index: number) => HTMLElement
+            : (element: SmartElement<K, P>) => void
     ): SmartElement<K, P>;
 }
 

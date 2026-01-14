@@ -20,6 +20,8 @@
 import type { ChildrenCallback, E, ElementFactory, VoidElementFactory, ElementProps, MaybeSignal } from "../types";
 import { pushExecutionContext, popExecutionContext, getCurrentExecutionContext } from "./context";
 import { $, effect, type Signal } from "./reactivity";
+import { reconcileList } from "./reconcile";
+import { registerEventHandler } from "./events";
 
 // =============================================================================
 // TYPE UTILITIES
@@ -142,7 +144,8 @@ function applyProps<K extends keyof HTMLElementTagNameMap>(
 
     if (key.startsWith("on") && typeof value === "function") {
       const eventName = key.slice(2).toLowerCase();
-      element.addEventListener(eventName, value as EventListener);
+      // Use global delegation
+      registerEventHandler(element, eventName, value as EventListener);
     } else if (isSignal(value)) {
       effect(() => assignProp(element, key, value.value));
     } else {
@@ -372,7 +375,19 @@ function createElement<K extends keyof HTMLElementTagNameMap>(
     }
 
     if (children) {
-      executeChildren(element, children);
+      if (props && 'each' in props && props.each && isSignal(props.each)) {
+        // Handle Keyed List Reconciliation
+        // children is treated as render callback: (item, index) => HTMLElement
+        reconcileList(
+          element,
+          props.each as Signal<unknown[]>,
+          children as unknown as (item: unknown, index: number) => HTMLElement,
+          props.key as ((item: unknown) => unknown) | undefined
+        );
+      } else {
+        // Standard Children Execution
+        executeChildren(element, children as ChildrenCallback<E<K>>);
+      }
     }
 
     // Mount to current context
