@@ -1,11 +1,11 @@
 /**
- * @module @flick/core
+ * @module @fia/core
  *
- * Flick - A 2KB framework for building reactive UIs with signals and plain functions.
+ * Fia - A 2KB framework for building reactive UIs with signals and plain functions.
  *
  * @example
  * ```typescript
- * import { $, div, h1, button, p } from "@flick/core";
+ * import { $, div, h1, button, p } from "@fia/core";
  *
  * const count = $(0);
  *
@@ -36,8 +36,8 @@ export * from "./mount";
 // =============================================================================
 
 // SVG elements are in a separate namespace to avoid conflicts with HTML elements
-// Import as: import { svg } from "@flick/core/svg";
-// Or: import * as SVG from "@flick/core/svg";
+// Import as: import { svg } from "@fia/core/svg";
+// Or: import * as SVG from "@fia/core/svg";
 
 // Re-export commonly used SVG elements with svg prefix for convenience
 export {

@@ -1,11 +1,11 @@
-# Flick
+# Fia
 
-[![jsr:@flick/core](https://jsr.io/badges/@flick/core)](https://jsr.io/@flick/core)
-[![jsr:@flick/core_score](https://jsr.io/badges/@flick/core/score)](https://jsr.io/@flick/core)
+[![jsr:@fia/core](https://jsr.io/badges/@fia/core)](https://jsr.io/@fia/core)
+[![jsr:@fia/core_score](https://jsr.io/badges/@fia/core/score)](https://jsr.io/@fia/core)
 
 > **No JSX. No VDOM. No Jank.**
 >
-> Flick is a 2KB framework for building reactive UIs with signals and plain functions.
+> Fia is a 2KB framework for building reactive UIs with signals and plain functions.
 
 ---
 
@@ -13,7 +13,7 @@
 
 ### Native Speed. Declarative Fluency.
 
-Most frameworks add layers of abstraction between you and the DOM. Flick gives you just enough to be productive:
+Most frameworks add layers of abstraction between you and the DOM. Fia gives you just enough to be productive:
 
 - ✨ **Reactive values** - `$()` creates values that automatically update the UI
 - 🎯 **Direct DOM** - No virtual DOM, no diffing, just native browser APIs
@@ -24,7 +24,7 @@ Most frameworks add layers of abstraction between you and the DOM. Flick gives y
 
 ## 🧠 Philosophy
 
-Flick is built on three principles:
+Fia is built on three principles:
 
 * **Minimal abstraction** - We give you `$()` for reactivity and functions for elements. That's it.
 * **Zero dependencies** - No supply chain risk, no version conflicts, no surprises.
@@ -36,13 +36,13 @@ Flick is built on three principles:
 
 ```typescript
 // Import from JSR (Deno, Bun, Node with JSR support)
-import { $ } from "jsr:@flick/core";
+import { $ } from "jsr:@fia/core";
 ```
 
 ### Quick Start
 
 ```typescript
-import { $, div, h1, button, p } from "jsr:@flick/core";
+import { $, div, h1, button, p } from "jsr:@fia/core";
 
 const count = $(0);
 
@@ -60,7 +60,7 @@ That's it. No build step, no configuration, no boilerplate.
 
 ## 📐 Element Signatures
 
-Flick elements follow a **Unified API** with 8 consistent overloads. Every element function accepts consistent combinations of `Content`, `Props`, and `Children`.
+Fia elements follow a **Unified API** with 8 consistent overloads. Every element function accepts consistent combinations of `Content`, `Props`, and `Children`.
 
 ### The 8 Overloads
 
@@ -171,11 +171,11 @@ ul(() => {
 
 ## 🛡️ Advanced Type System
 
-Flick leverages TypeScript's mapped types and conditional inference to provide an IDE experience that catches errors *before* you run your code.
+Fia leverages TypeScript's mapped types and conditional inference to provide an IDE experience that catches errors *before* you run your code.
 
 ### 🎨 Strict CSS Typing
 
-Flick ships with a hand-tuned CSS type definition that goes beyond `string`. It understands strict values for properties while allowing any string for flexibility (e.g. CSS variables).
+Fia ships with a hand-tuned CSS type definition that goes beyond `string`. It understands strict values for properties while allowing any string for flexibility (e.g. CSS variables).
 
 ```typescript
 // ✅ Autocomplete for strict values
@@ -247,7 +247,7 @@ button({
 Use `$()` to create values that automatically update the UI when they change.
 
 ```typescript
-import { $ } from "jsr:@flick/core";
+import { $ } from "jsr:@fia/core";
 
 // Create reactive values
 const name = $("World");
@@ -258,7 +258,7 @@ const isActive = $(false);
 console.log(name.value); // "World"
 
 // Write with .value
-name.value = "Flick";
+name.value = "Fia";
 count.value++;
 isActive.value = !isActive.value;
 ```
@@ -313,7 +313,7 @@ button({
 ### Todo App
 
 ```typescript
-import { $, div, h1, input, button, ul, li } from "jsr:@flick/core";
+import { $, div, h1, input, button, ul, li } from "jsr:@fia/core";
 
 const todos = $(["Buy milk", "Walk dog"]);
 const newTodo = $("");
@@ -353,7 +353,7 @@ div({ class: "todo-app" }, () => {
 ### Counter with Computed Values
 
 ```typescript
-import { $, div, p, button } from "jsr:@flick/core";
+import { $, div, p, button } from "jsr:@fia/core";
 
 const count = $(0);
 const doubled = $(() => count.value * 2);
@@ -546,7 +546,7 @@ UserCard({ name: userName, role: "Admin" });
 
 ### 2. Immutable Object Updates
 
-Flick uses **reference equality** to detect changes. If you have an object signal, you must replace the object to trigger updates.
+Fia uses **reference equality** to detect changes. If you have an object signal, you must replace the object to trigger updates.
 
 ```typescript
 const state = $({ count: 0 });

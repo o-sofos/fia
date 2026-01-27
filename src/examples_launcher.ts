@@ -23,7 +23,7 @@ export function ExamplesLauncher() {
         overflowY: "auto"
       }
     }, () => {
-      h1("Flick Examples", { style: { fontSize: "1.2rem", marginBottom: "1.5rem", marginTop: "0" } });
+      h1("Fia Examples", { style: { fontSize: "1.2rem", marginBottom: "1.5rem", marginTop: "0" } });
 
       const examples = [
         { id: "01", name: "01. Hero", component: Hero },
