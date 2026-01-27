@@ -21,8 +21,8 @@
 // REACTIVITY
 // =============================================================================
 
-export { $, signal, effect, batch } from "./reactivity";
-export type { Signal, WritableSignal } from "./reactivity";
+export { $, signal, effect, batch } from "./reactivity/reactivity";
+export type { Signal, WritableSignal } from "./reactivity/reactivity";
 
 // =============================================================================
 // HTML ELEMENTS
@@ -79,7 +79,7 @@ export {
     desc as svgDesc,
     svgTitle,
     metadata as svgMetadata,
-} from "./svg";
+} from "./svg/svg";
 
 // =============================================================================
 // CONTEXT (Advanced)
@@ -91,7 +91,7 @@ export {
     getCurrentExecutionContext as getCurrentContext,
     hasExecutionContext as hasContext,
     type ExecutionContext as Context,
-} from "./context";
+} from "./context/context";
 
 // =============================================================================
 // TYPE UTILITIES

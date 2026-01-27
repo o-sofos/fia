@@ -9,7 +9,7 @@
  * 2. Layout: Managing global layout structure
  */
 
-import { div } from "../core/elements";
+import { div } from "../core/elements/elements";
 import { Navbar } from "./02_navbar";
 import { Hero } from "./01_hero";
 import { Features } from "./03_features";

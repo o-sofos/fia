@@ -5,8 +5,8 @@
  * SVG elements require a different namespace than HTML elements.
  */
 
-import { getCurrentExecutionContext, pushExecutionContext, popExecutionContext, type ExecutionContext } from "./context";
-import { effect, type Signal, isSignal, type MaybeSignal } from "./reactivity";
+import { getCurrentExecutionContext, pushExecutionContext, popExecutionContext, type ExecutionContext } from "../context/context";
+import { effect, type Signal, isSignal, type MaybeSignal } from "../reactivity/reactivity";
 
 
 // =============================================================================

@@ -10,7 +10,7 @@
  * 3. Nesting elements (children)
  */
 
-import { div, section, h1, p, button } from "../core/elements";
+import { div, section, h1, p, button } from "../core/elements/elements";
 
 export function Hero() {
   section({

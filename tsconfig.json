@@ -21,6 +21,8 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
     "noEmitOnError": true,
+    "incremental": true,
+    "tsBuildInfoFile": "./.tsbuildinfo",
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist", "benchmark_repo"]

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "bun:test";
-import { $, effect } from "./reactivity";
+import { $, effect } from "./reactivity/reactivity";
 
 describe("Array Reactivity", () => {
     it("should NOT update when mutating the array in place (push)", () => {

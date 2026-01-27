@@ -1,4 +1,4 @@
-import type { MaybeSignal } from "../reactivity";
+import type { MaybeSignal } from "../reactivity/reactivity";
 
 export type CSSGlobalValues = "inherit" | "initial" | "revert" | "revert-layer" | "unset";
 

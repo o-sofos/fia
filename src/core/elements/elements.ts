@@ -17,8 +17,8 @@
  * 8. element(content, props, children)
  */
 
-import { pushExecutionContext, popExecutionContext, getCurrentExecutionContext } from "../context";
-import { $, effect, type Signal, type MaybeSignal, isSignal } from "../reactivity";
+import { pushExecutionContext, popExecutionContext, getCurrentExecutionContext } from "../context/context";
+import { $, effect, type Signal, type MaybeSignal, isSignal } from "../reactivity/reactivity";
 import type { ElementProps } from "../attributes/html-attributes";
 
 export { type MaybeSignal, isSignal };
