@@ -4,5 +4,8 @@
   "license": "MIT",
   "exports": {
     ".": "./src/core/mod.ts"
+  },
+  "publish": {
+    "exclude": ["benchmark_repo", "src/examples", "src/playground", "test_*.ts"]
   }
 }
