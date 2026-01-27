@@ -1,4 +1,4 @@
-import { $, button, h1, h2, h3, h4, h5, h6, p } from "../core/mod";
+import { $, button, h1, h2, h3, h4, h5, h6, input, p } from "../core/mod";
 
 export default (() => {
   const count = $(0);
