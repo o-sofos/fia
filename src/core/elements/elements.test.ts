@@ -1,8 +1,8 @@
 import { GlobalRegistrator } from "@happy-dom/global-registrator";
 import { describe, it, expect, beforeEach } from "bun:test";
 import { div, button, input, h1, span, a, p, ul, li, label } from "./elements";
-import { $ } from "./reactivity";
-import { hasExecutionContext, popExecutionContext } from "./context";
+import { $ } from "../reactivity";
+import { hasExecutionContext, popExecutionContext } from "../context";
 
 try {
     GlobalRegistrator.register();

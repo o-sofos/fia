@@ -1,8 +1,8 @@
 
-import type { MaybeSignal } from "./reactivity";
-import type { ReactiveCSSProperties } from "./css-types";
-import type { DomEvents } from "./events";
-import type { AriaValueFor, AriaStateValue, AriaRole } from "./aria";
+import type { MaybeSignal } from "../reactivity";
+import type { ReactiveCSSProperties } from "../css/css-types";
+import type { DomEvents } from "../events";
+import type { AriaValueFor, AriaStateValue, AriaRole } from "../aria";
 
 // =============================================================================
 // GLOBAL ATTRIBUTES (shared by all elements)

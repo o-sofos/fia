@@ -28,7 +28,7 @@ export type { Signal, WritableSignal } from "./reactivity";
 // HTML ELEMENTS
 // =============================================================================
 
-export * from "./elements";
+export * from "./elements/elements";
 export * from "./mount";
 
 // =============================================================================
@@ -97,4 +97,4 @@ export {
 // TYPE UTILITIES
 // =============================================================================
 
-export type { MaybeSignal, Child, ElementProps, ElementFactory, VoidElementFactory } from "./elements";
+export type { MaybeSignal, Child, ElementProps, ElementFactory, VoidElementFactory } from "./elements/elements";
