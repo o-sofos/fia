@@ -12,7 +12,7 @@
  * div({ class: "app" }, () => {
  *   h1("Counter App");
  *   p("Count: ", count);
- *   button("Increment", () => count.value++);
+ *   button("Increment", { onclick: () => count.value++ });
  * });
  * ```
  */
