@@ -6,20 +6,8 @@
  */
 
 import { getCurrentExecutionContext, pushExecutionContext, popExecutionContext, type ExecutionContext } from "./context";
-import { effect, type Signal } from "./reactivity";
+import { effect, type Signal, isSignal, type MaybeSignal } from "./reactivity";
 
-// =============================================================================
-// SVG TYPE UTILITIES
-// =============================================================================
-
-type MaybeSignal<T> = T | Signal<T>;
-
-function isSignal(value: unknown): value is Signal<unknown> {
-    if (value === null || value === undefined) return false;
-    if (typeof value !== "function") return false;
-    const descriptor = Object.getOwnPropertyDescriptor(value, "value");
-    return descriptor !== undefined && descriptor.get !== undefined;
-}
 
 // =============================================================================
 // SVG PRESENTATION ATTRIBUTES

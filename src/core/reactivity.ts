@@ -289,3 +289,21 @@ export function $<T>(initial: T): Signal<T> | WritableSignal<T> {
 
 // Named export for API compatibility
 export { $ as signal };
+
+/**
+ * A value that can be either a static value `T` or a `Signal<T>`.
+ * Used for reactive properties and content.
+ */
+export type MaybeSignal<T> = T | Signal<T>;
+
+/**
+ * Checks if a value is a Signal.
+ * @param value - The value to check
+ * @returns True if the value is a Signal
+ */
+export function isSignal(value: unknown): value is Signal<unknown> {
+  if (value === null || value === undefined) return false;
+  if (typeof value !== "function") return false;
+  const descriptor = Object.getOwnPropertyDescriptor(value, "value");
+  return descriptor !== undefined && descriptor.get !== undefined;
+}

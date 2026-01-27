@@ -42,7 +42,7 @@ describe("Element System - Unified API", () => {
         });
 
         it("should create element with signal content", () => {
-            const text = $("Initial");
+            const text = $<string>("Initial");
             const el = div(text);
             expect(el.textContent).toBe("Initial");
 
@@ -51,7 +51,7 @@ describe("Element System - Unified API", () => {
         });
 
         it("should auto-wrap function thunks as signals", () => {
-            const count = $(1);
+            const count = $<number>(1);
             // Pass raw function () => string
             const el = div(() => `Count: ${count()}`);
             expect(el.textContent).toBe("Count: 1");
@@ -75,7 +75,7 @@ describe("Element System - Unified API", () => {
         });
 
         it("should apply reactive props", () => {
-            const disabled = $(false);
+            const disabled = $<boolean>(false);
             const el = button({ disabled });
             expect((el as unknown as HTMLButtonElement).disabled).toBe(false);
 
@@ -142,7 +142,7 @@ describe("Element System - Unified API", () => {
         });
 
         it("should work with signal content and props", () => {
-            const text = $("Dynamic");
+            const text = $<string>("Dynamic");
             const el = span(text, { id: "dynamic-span" });
             expect(el.textContent).toBe("Dynamic");
             expect(el.id).toBe("dynamic-span");
@@ -173,8 +173,8 @@ describe("Element System - Unified API", () => {
         });
 
         it("should work with all reactive features", () => {
-            const title = $("Title");
-            const isActive = $(false);
+            const title = $<string>("Title");
+            const isActive = $<boolean>(false);
 
             const el = div(title, { class: { active: isActive } }, (_el) => {
                 span("Content");
@@ -199,7 +199,7 @@ describe("Element System - Unified API", () => {
         });
 
         it("should handle reactive input value", () => {
-            const value = $("");
+            const value = $<string>("");
             const el = input({ type: "text", value });
             expect(el.value).toBe("");
 
@@ -221,7 +221,7 @@ describe("Element System - Unified API", () => {
         });
 
         it("should apply object class (reactive)", () => {
-            const isActive = $(false);
+            const isActive = $<boolean>(false);
             const el = div({ class: { active: isActive, static: true } });
 
             expect(el.classList.contains("active")).toBe(false);
@@ -245,7 +245,7 @@ describe("Element System - Unified API", () => {
         });
 
         it("should apply reactive style properties", () => {
-            const color = $("red");
+            const color = $<string>("red");
             const el = div({ style: { color } });
             expect((el as unknown as HTMLElement).style.color).toBe("red");
 
@@ -271,8 +271,8 @@ describe("Element System - Unified API", () => {
             let blurred = false;
 
             const el = input({
-                onfocus: () => { focused = true; },
-                onblur: () => { blurred = true; },
+                onFocus: () => { focused = true; },
+                onBlur: () => { blurred = true; },
             });
 
             el.dispatchEvent(new FocusEvent("focus"));
@@ -297,7 +297,7 @@ describe("Element System - Unified API", () => {
         it("should create a navigation link", () => {
             const el = a("Dashboard", {
                 href: "/dashboard",
-                onclick: (e) => e.preventDefault(),
+                onclick: (e: Event) => e.preventDefault(),
             });
 
             expect(el.textContent).toBe("Dashboard");
@@ -305,7 +305,7 @@ describe("Element System - Unified API", () => {
         });
 
         it("should create a form input with label", () => {
-            const value = $("");
+            const value = $<string>("");
 
             const container = div((_el) => {
                 label("Email", { for: "email-input" });
@@ -322,7 +322,7 @@ describe("Element System - Unified API", () => {
         });
 
         it("should create a dynamic list", () => {
-            const items = $(["Apple", "Banana", "Cherry"]);
+            const items = $<string[]>(["Apple", "Banana", "Cherry"]);
 
             const list = ul((_el) => {
                 for (const item of items.value) {
@@ -335,8 +335,8 @@ describe("Element System - Unified API", () => {
         });
 
         it("should create a card component pattern", () => {
-            const title = $("Card Title");
-            const isExpanded = $(false);
+            const title = $<string>("Card Title");
+            const isExpanded = $<boolean>(false);
 
             const card = div({ class: { card: true, expanded: isExpanded } }, (_el) => {
                 h1(title, { class: "card-title" });
@@ -371,7 +371,7 @@ describe("Element System - Unified API", () => {
         });
 
         it("should handle rapid reactive updates", () => {
-            const count = $(0);
+            const count = $<number>(0);
             const el = div(count);
 
             for (let i = 0; i < 100; i++) {

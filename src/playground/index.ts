@@ -15,4 +15,5 @@ export default (() => {
   const onclick = () => count.value++
 
   button("increment", { onclick });
+
 })();
