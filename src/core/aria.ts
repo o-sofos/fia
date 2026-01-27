@@ -1,198 +1,450 @@
-/**
- * strict ARIA types for Flick
- * Based on WAI-ARIA 1.2
- */
+export type AccessibilityOptions =
+	| { __type: "role"; role: AriaRole }
+	| { __type: "state"; state: AriaState; value: AriaStateValue<AriaState> }
+	| { __type: "property"; property: AriaProperty; value: AriaPropertyValue<AriaProperty> };
 
-// =============================================================================
-// ARIA ROLES
-// =============================================================================
+// Value type definitions
+type AriaBoolean = "true" | "false";
+type AriaTristate = AriaBoolean | "mixed";
+type AriaIdReference = string;
+type AriaIdReferenceList = string;
+type AriaUndefineable<T extends string> = T | "undefined";
 
-export type AriaRole =
-    | "alert"
-    | "alertdialog"
-    | "application"
-    | "article"
-    | "banner"
-    | "button"
-    | "cell"
-    | "checkbox"
-    | "columnheader"
-    | "combobox"
-    | "command"
-    | "complementary"
-    | "composite"
-    | "contentinfo"
-    | "definition"
-    | "dialog"
-    | "directory"
-    | "document"
-    | "feed"
-    | "figure"
-    | "form"
-    | "grid"
-    | "gridcell"
-    | "group"
-    | "heading"
-    | "img"
-    | "input"
-    | "landmark"
-    | "link"
-    | "list"
-    | "listbox"
-    | "listitem"
-    | "log"
-    | "main"
-    | "marquee"
-    | "math"
-    | "menu"
-    | "menubar"
-    | "menuitem"
-    | "menuitemcheckbox"
-    | "menuitemradio"
-    | "navigation"
-    | "note"
-    | "option"
-    | "presentation"
-    | "progressbar"
-    | "radio"
-    | "radiogroup"
-    | "range"
-    | "region"
-    | "roletype"
-    | "row"
-    | "rowgroup"
-    | "rowheader"
-    | "scrollbar"
-    | "search"
-    | "searchbox"
-    | "section"
-    | "sectionhead"
-    | "select"
-    | "separator"
-    | "slider"
-    | "spinbutton"
-    | "status"
-    | "structure"
-    | "switch"
-    | "tab"
-    | "table"
-    | "tablist"
-    | "tabpanel"
-    | "term"
-    | "text"
-    | "textbox"
-    | "timer"
-    | "toolbar"
-    | "tooltip"
-    | "tree"
-    | "treegrid"
-    | "treeitem"
-    | "widget"
-    | "window"
-    | "none"
-    | (string & {}); // Allow custom roles but preserve autocomplete
+export type AriaHasPopupValue = AriaBoolean | "menu" | "listbox" | "tree" | "grid" | "dialog" | "non-modal-dialog";
 
-// =============================================================================
-// ARIA ATTRIBUTES
-// =============================================================================
+interface AriaStateValueMap {
+	// Simple boolean
+	"aria-busy": AriaBoolean;
+	"aria-disabled": AriaBoolean;
+	"aria-selected": AriaBoolean | "undefined";
 
-export interface FlickAriaAttributes {
-    /** Identifies the currently active element when focus is on a composite widget, combobox, textbox, group, or application. */
-    ariaActiveDescendant?: string;
-    /** Indicates whether assistive technologies will present all, or only parts of, the changed region based on the change notifications defined by the aria-relevant attribute. */
-    ariaAtomic?: boolean | "false" | "true";
-    /** Indicates whether inputting text could trigger display of one or more predictions of the user's intended value for an input and specifies how predictions would be presented if they were made. */
-    ariaAutoComplete?: "none" | "inline" | "list" | "both";
-    /** Indicates an element is being modified and that assistive technologies MAY want to wait until the modifications are complete before exposing them to the user. */
-    ariaBusy?: boolean | "false" | "true";
-    /** Indicates the current "checked" state of checkboxes, radio buttons, and other widgets. */
-    ariaChecked?: boolean | "false" | "mixed" | "true";
-    /** Defines the total number of columns in a table, grid, or treegrid. */
-    ariaColCount?: number;
-    /** Defines an element's column index or position with respect to the total number of columns within a table, grid, or treegrid. */
-    ariaColIndex?: number;
-    /** Defines the number of columns spanned by a cell or gridcell within a table, grid, or treegrid. */
-    ariaColSpan?: number;
-    /** Identifies the element (or elements) that controls the current element. */
-    ariaControls?: string;
-    /** Indicates the element that represents the current item within a container or set of related elements. */
-    ariaCurrent?: boolean | "false" | "true" | "page" | "step" | "location" | "date" | "time";
-    /** Identifies the element (or elements) that describes the object. */
-    ariaDescribedBy?: string;
-    /** Identifies the element that provides a detailed, extended description for the object. */
-    ariaDetails?: string;
-    /** Indicates that the element is perceivable but disabled, so it is not editable or otherwise operable. */
-    ariaDisabled?: boolean | "false" | "true";
-    /** Indicates what functions can be performed when a dragged object is released on the drop target. */
-    ariaDropEffect?: "none" | "copy" | "execute" | "link" | "move" | "popup";
-    /** Identifies the element that provides an error message for the object. */
-    ariaErrorMessage?: string;
-    /** Indicates whether the element, or another grouping element it controls, is currently expanded or collapsed. */
-    ariaExpanded?: boolean | "false" | "true";
-    /** Identifies the next element (or elements) in an alternate reading order of content which, at the user's discretion, allows assistive technology to override the general default of reading in document source order. */
-    ariaFlowTo?: string;
-    /** Indicates an element's "grabbed" state in a drag-and-drop operation. */
-    ariaGrabbed?: boolean | "false" | "true";
-    /** Indicates the availability and type of interactive popup element, such as menu or dialog, that can be triggered by an element. */
-    ariaHasPopup?: boolean | "false" | "true" | "menu" | "listbox" | "tree" | "grid" | "dialog";
-    /** Indicates whether the element is exposed to an accessibility API. */
-    ariaHidden?: boolean | "false" | "true";
-    /** Indicates the entered value does not conform to the format expected by the application. */
-    ariaInvalid?: boolean | "false" | "true" | "grammar" | "spelling";
-    /** Indicates keyboard shortcuts that an author has implemented to activate or give focus to an element. */
-    ariaKeyShortcuts?: string;
-    /** Defines a string value that labels the current element. */
-    ariaLabel?: string;
-    /** Identifies the element (or elements) that labels the current element. */
-    ariaLabelledBy?: string;
-    /** Defines the hierarchical level of an element within a structure. */
-    ariaLevel?: number;
-    /** Indicates that an element will be updated, and describes the types of updates the user agents, assistive technologies, and user can expect from the live region. */
-    ariaLive?: "off" | "assertive" | "polite";
-    /** Indicates whether an element is modal when displayed. */
-    ariaModal?: boolean | "false" | "true";
-    /** Indicates whether a text box accepts multiple lines of input or only a single line. */
-    ariaMultiLine?: boolean | "false" | "true";
-    /** Indicates that the user may select more than one item from the current selectable descendants. */
-    ariaMultiSelectable?: boolean | "false" | "true";
-    /** Indicates whether the element's orientation is horizontal, vertical, or unknown/ambiguous. */
-    ariaOrientation?: "horizontal" | "vertical";
-    /** Identifies an element (or elements) in order to define a visual, functional, or contextual parent/child relationship between DOM elements where the DOM hierarchy cannot be used to represent the relationship. */
-    ariaOwns?: string;
-    /** Defines a short hint (a word or short phrase) intended to aid the user with data entry when the control has no value. A hint could be a sample value or a brief description of the expected format. */
-    ariaPlaceholder?: string;
-    /** Defines an element's number or position in the current set of listitems or treeitems. Not required if all elements in the set are present in the DOM. */
-    ariaPosInSet?: number;
-    /** Indicates the current "pressed" state of toggle buttons. */
-    ariaPressed?: boolean | "false" | "mixed" | "true";
-    /** Indicates that the element is not editable, but is otherwise operable. */
-    ariaReadOnly?: boolean | "false" | "true";
-    /** Indicates what notifications the user agent will trigger when the accessibility tree within a live region is modified. */
-    ariaRelevant?: "additions" | "removals" | "text" | "all" | "additions text";
-    /** Indicates that user input is required on the element before a form may be submitted. */
-    ariaRequired?: boolean | "false" | "true";
-    /** Defines a human-readable, author-localized description for the role of an element. */
-    ariaRoleDescription?: string;
-    /** Defines the total number of rows in a table, grid, or treegrid. */
-    ariaRowCount?: number;
-    /** Defines an element's row index or position with respect to the total number of rows within a table, grid, or treegrid. */
-    ariaRowIndex?: number;
-    /** Defines the number of rows spanned by a cell or gridcell within a table, grid, or treegrid. */
-    ariaRowSpan?: number;
-    /** Indicates the current "selected" state of various widgets. */
-    ariaSelected?: boolean | "false" | "true";
-    /** Defines the number of items in the current set of listitems or treeitems. Not required if all elements in the set are present in the DOM. */
-    ariaSetSize?: number;
-    /** Indicates if items in a table or grid are sorted in ascending or descending order. */
-    ariaSort?: "none" | "ascending" | "descending" | "other";
-    /** Defines the maximum allowed value for a range widget. */
-    ariaValueMax?: number;
-    /** Defines the minimum allowed value for a range widget. */
-    ariaValueMin?: number;
-    /** Defines the current value for a range widget. */
-    ariaValueNow?: number;
-    /** Defines the human readable text alternative of aria-valuenow for a range widget. */
-    ariaValueText?: string;
+	// Tristate (true/false/mixed)
+	"aria-checked": AriaUndefineable<AriaTristate>;
+	"aria-pressed": AriaUndefineable<AriaTristate>;
+
+	// Boolean with undefined
+	"aria-expanded": AriaUndefineable<AriaBoolean>;
+	"aria-grabbed": AriaUndefineable<AriaBoolean> | "deprecated";
+	"aria-hidden": AriaUndefineable<AriaBoolean>;
+
+	// Enumerated
+	"aria-invalid": AriaBoolean | "grammar" | "spelling";
+	"aria-current": AriaBoolean | "page" | "step" | "location" | "date" | "time";
 }
 
-export type AriaState = "aria-busy" | "aria-checked" | "aria-disabled" | "aria-expanded" | "aria-grabbed" | "aria-hidden" | "aria-invalid" | "aria-pressed" | "aria-selected" | "aria-current";
+// Property to value type mapping
+interface AriaPropertyValueMap {
+	// ID References
+	"aria-activedescendant": AriaIdReference;
+	"aria-controls": AriaIdReferenceList;
+	"aria-describedby": AriaIdReferenceList;
+	"aria-details": AriaIdReference;
+	"aria-errormessage": AriaIdReference;
+	"aria-flowto": AriaIdReferenceList;
+	"aria-labelledby": AriaIdReferenceList;
+	"aria-owns": AriaIdReferenceList;
+
+	// Boolean
+	"aria-atomic": AriaBoolean;
+	"aria-modal": AriaBoolean;
+	"aria-multiline": AriaBoolean;
+	"aria-multiselectable": AriaBoolean;
+	"aria-readonly": AriaBoolean;
+	"aria-required": AriaBoolean;
+
+	// Tristate
+	"aria-expanded": AriaBoolean | "undefined";
+	"aria-hidden": AriaBoolean | "undefined";
+
+	// Enumerated
+	"aria-autocomplete": "none" | "inline" | "list" | "both";
+	"aria-dropEffect": "none" | "copy" | "execute" | "link" | "move" | "popup";
+	"aria-haspopup": AriaHasPopupValue;
+	"aria-live": "off" | "polite" | "assertive";
+	"aria-orientation": "horizontal" | "vertical" | "undefined";
+	"aria-relevant": "additions" | "removals" | "text" | "all" | "additions text";
+	"aria-sort": "none" | "ascending" | "descending" | "other";
+
+	// Numeric (integers)
+	"aria-colcount": number;
+	"aria-colindex": number;
+	"aria-colspan": number;
+	"aria-level": number;
+	"aria-posinset": number;
+	"aria-rowcount": number;
+	"aria-rowspan": number;
+	"aria-setsize": number;
+
+	// Numeric (float)
+	"aria-valuemax": number;
+	"aria-valuemin": number;
+	"aria-valuenow": number;
+
+	// String
+	"aria-label": string;
+	"aria-valuetext": string;
+	"aria-keyshortcuts": string;
+	"aria-roledescription": string;
+	"aria-placeholder": string;
+
+	// Custom/data attribute
+	"data-controls": string;
+}
+
+// Derive the union type from the map keys
+export type AriaProperty = keyof AriaPropertyValueMap;
+export type AriaPropertyValue<P extends AriaProperty> = AriaPropertyValueMap[P];
+
+// Derive the union type from the map keys
+export type AriaState = keyof AriaStateValueMap;
+
+// Type-safe getter for property values
+export type AriaValueFor<P extends AriaProperty> = AriaPropertyValueMap[P];
+
+// Type-safe getter for state values
+export type AriaStateValueFor<S extends AriaState> = AriaStateValueMap[S];
+export type AriaStateValue<S extends AriaState> = AriaStateValueMap[S];
+
+// Type-safe ARIA attributes object
+export type AriaAttributes = {
+	[P in AriaProperty]?: AriaValueFor<P>;
+};
+// Type-safe ARIA states object
+export type AriaStates = {
+	[S in AriaState]?: AriaStateValueFor<S>;
+};
+
+// Helper to build aria attributes
+export function buildAriaAttributes(attrs: AriaAttributes): Record<string, string> {
+	const result: Record<string, string> = {};
+	for (const [key, value] of Object.entries(attrs)) {
+		if (value !== undefined) {
+			result[key] = String(value);
+		}
+	}
+	return result;
+}
+
+export function buildAriaStates(states: AriaStates): Record<string, string> {
+	const result: Record<string, string> = {};
+	for (const [key, value] of Object.entries(states)) {
+		if (value !== undefined) {
+			result[key] = String(value);
+		}
+	}
+	return result;
+}
+
+// Abstract roles - not to be used directly in markup
+type AbstractRole = "command" | "composite" | "input" | "landmark" | "range" | "roletype" | "section" | "sectionhead" | "select" | "structure" | "widget" | "window";
+
+// Landmark roles
+type LandmarkRole = "banner" | "complementary" | "contentinfo" | "form" | "main" | "navigation" | "region" | "search";
+
+// Widget roles
+type WidgetRole =
+	| "button"
+	| "checkbox"
+	| "gridcell"
+	| "link"
+	| "menuitem"
+	| "menuitemcheckbox"
+	| "menuitemradio"
+	| "option"
+	| "progressbar"
+	| "radio"
+	| "scrollbar"
+	| "searchbox"
+	| "separator"
+	| "slider"
+	| "spinbutton"
+	| "switch"
+	| "tab"
+	| "tabpanel"
+	| "textbox"
+	| "treeitem";
+
+// Composite widget roles
+type CompositeWidgetRole = "combobox" | "grid" | "listbox" | "menu" | "menubar" | "radiogroup" | "tablist" | "tree" | "treegrid";
+
+// Document structure roles
+type DocumentStructureRole =
+	| "application"
+	| "article"
+	| "cell"
+	| "columnheader"
+	| "definition"
+	| "directory"
+	| "document"
+	| "feed"
+	| "figure"
+	| "group"
+	| "heading"
+	| "img"
+	| "list"
+	| "listitem"
+	| "math"
+	| "none"
+	| "note"
+	| "presentation"
+	| "row"
+	| "rowgroup"
+	| "rowheader"
+	| "table"
+	| "term"
+	| "text"
+	| "toolbar"
+	| "tooltip";
+
+// Live region roles
+type LiveRegionRole = "alert" | "log" | "marquee" | "status" | "timer";
+
+// Window roles
+type WindowRole = "alertdialog" | "dialog";
+
+// ============================================================
+// Concrete roles (usable in markup)
+// ============================================================
+
+export type ConcreteAriaRole = LandmarkRole | WidgetRole | CompositeWidgetRole | DocumentStructureRole | LiveRegionRole | WindowRole;
+
+// All roles including abstract (for type checking/validation)
+export type AriaRole = ConcreteAriaRole | AbstractRole;
+
+// ============================================================
+// Role to Required/Supported Attributes Mapping
+// ============================================================
+
+type AriaAttributeRequirement = "required" | "supported" | "prohibited";
+
+interface RoleAttributeConfig {
+	states?: Partial<Record<AriaState, AriaAttributeRequirement>>;
+	properties?: Partial<Record<AriaProperty, AriaAttributeRequirement>>;
+	requiredParent?: AriaRole[];
+	requiredChildren?: AriaRole[];
+	nameFrom?: ("author" | "contents")[];
+	nameRequired?: boolean;
+}
+
+// Partial mapping - expand as needed
+type AriaRoleAttributeMap = {
+	[R in AriaRole]?: RoleAttributeConfig;
+};
+
+const roleAttributeMap: AriaRoleAttributeMap = {
+	button: {
+		states: {
+			"aria-disabled": "supported",
+			"aria-expanded": "supported",
+			"aria-pressed": "supported"
+		},
+		properties: {
+			"aria-haspopup": "supported"
+		},
+		nameFrom: ["author", "contents"],
+		nameRequired: true
+	},
+
+	checkbox: {
+		states: {
+			"aria-checked": "required",
+			"aria-disabled": "supported",
+			"aria-invalid": "supported"
+		},
+		properties: {
+			"aria-readonly": "supported",
+			"aria-required": "supported"
+		},
+		nameFrom: ["author", "contents"],
+		nameRequired: true
+	},
+
+	combobox: {
+		states: {
+			"aria-expanded": "required",
+			"aria-disabled": "supported",
+			"aria-invalid": "supported"
+		},
+		properties: {
+			"aria-autocomplete": "supported",
+			"aria-controls": "required",
+			"aria-activedescendant": "supported"
+		},
+		nameFrom: ["author"],
+		nameRequired: true
+	},
+
+	dialog: {
+		properties: {
+			"aria-label": "supported",
+			"aria-labelledby": "supported",
+			"aria-describedby": "supported",
+			"aria-modal": "supported"
+		},
+		nameFrom: ["author"],
+		nameRequired: true
+	},
+
+	grid: {
+		states: {
+			"aria-disabled": "supported"
+		},
+		properties: {
+			"aria-activedescendant": "supported",
+			"aria-colcount": "supported",
+			"aria-multiselectable": "supported",
+			"aria-readonly": "supported",
+			"aria-rowcount": "supported"
+		},
+		requiredChildren: ["row", "rowgroup"],
+		nameFrom: ["author"],
+		nameRequired: true
+	},
+
+	listbox: {
+		states: {
+			"aria-disabled": "supported",
+			"aria-expanded": "supported",
+			"aria-invalid": "supported"
+		},
+		properties: {
+			"aria-activedescendant": "supported",
+			"aria-multiselectable": "supported",
+			"aria-orientation": "supported",
+			"aria-readonly": "supported",
+			"aria-required": "supported"
+		},
+		requiredChildren: ["option"],
+		nameFrom: ["author"],
+		nameRequired: true
+	},
+
+	option: {
+		states: {
+			"aria-checked": "supported",
+			"aria-disabled": "supported",
+			"aria-selected": "supported"
+		},
+		properties: {
+			"aria-posinset": "supported",
+			"aria-setsize": "supported"
+		},
+		requiredParent: ["listbox", "group"],
+		nameFrom: ["author", "contents"],
+		nameRequired: true
+	},
+
+	tab: {
+		states: {
+			"aria-disabled": "supported",
+			"aria-expanded": "supported",
+			"aria-selected": "supported"
+		},
+		properties: {
+			"aria-controls": "supported",
+			"aria-haspopup": "supported",
+			"aria-posinset": "supported",
+			"aria-setsize": "supported"
+		},
+		requiredParent: ["tablist"],
+		nameFrom: ["author", "contents"],
+		nameRequired: true
+	},
+
+	tablist: {
+		properties: {
+			"aria-activedescendant": "supported",
+			"aria-multiselectable": "supported",
+			"aria-orientation": "supported"
+		},
+		requiredChildren: ["tab"],
+		nameFrom: ["author"]
+	},
+
+	tabpanel: {
+		properties: {
+			"aria-labelledby": "supported"
+		},
+		nameFrom: ["author"],
+		nameRequired: true
+	},
+
+	tree: {
+		states: {
+			"aria-disabled": "supported"
+		},
+		properties: {
+			"aria-activedescendant": "supported",
+			"aria-multiselectable": "supported",
+			"aria-orientation": "supported",
+			"aria-required": "supported"
+		},
+		requiredChildren: ["treeitem", "group"],
+		nameFrom: ["author"],
+		nameRequired: true
+	},
+
+	treeitem: {
+		states: {
+			"aria-checked": "supported",
+			"aria-disabled": "supported",
+			"aria-expanded": "supported",
+			"aria-selected": "supported"
+		},
+		properties: {
+			"aria-haspopup": "supported",
+			"aria-level": "supported",
+			"aria-posinset": "supported",
+			"aria-setsize": "supported"
+		},
+		requiredParent: ["tree", "group"],
+		nameFrom: ["author", "contents"],
+		nameRequired: true
+	},
+
+	// Presentation/none - prohibits all aria
+	presentation: {
+		states: {},
+		properties: {}
+	},
+	none: {
+		states: {},
+		properties: {}
+	}
+};
+
+// ============================================================
+// Type-safe Role Utilities
+// ============================================================
+
+export function isAbstractRole(role: AriaRole): role is AbstractRole {
+	const abstractRoles: Set<string> = new Set(["command", "composite", "input", "landmark", "range", "roletype", "section", "sectionhead", "select", "structure", "widget", "window"]);
+	return abstractRoles.has(role);
+}
+
+export function isLandmarkRole(role: AriaRole): role is LandmarkRole {
+	const landmarks: Set<string> = new Set(["banner", "complementary", "contentinfo", "form", "main", "navigation", "region", "search"]);
+	return landmarks.has(role);
+}
+
+export function getRoleConfig(role: AriaRole): RoleAttributeConfig | undefined {
+	return roleAttributeMap[role];
+}
+
+export function getRequiredAttributes(role: AriaRole): {
+	states: AriaState[];
+	properties: AriaProperty[];
+} {
+	const config = roleAttributeMap[role];
+	if (!config) return { states: [], properties: [] };
+
+	const states = Object.entries(config.states ?? {})
+		.filter(([, req]) => req === "required")
+		.map(([state]) => state as AriaState);
+
+	const properties = Object.entries(config.properties ?? {})
+		.filter(([, req]) => req === "required")
+		.map(([prop]) => prop as AriaProperty);
+
+	return { states, properties };
+}
