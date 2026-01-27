@@ -8,11 +8,11 @@ export function mount(
     const el = typeof target === "string" ? document.querySelector(target) : target;
 
     if (!el) {
-        throw new Error(`[Flick] Mount target '${target}' not found.`);
+        throw new Error(`[Fia] Mount target '${target}' not found.`);
     }
 
     if (!(el instanceof HTMLElement)) {
-        throw new Error("[Flick] Mount target must be an HTMLElement.");
+        throw new Error("[Fia] Mount target must be an HTMLElement.");
     }
 
     // clear existing content

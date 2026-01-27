@@ -156,8 +156,8 @@ describe("Reactivity System", () => {
         });
 
         it("should track multiple dependencies", () => {
-            const first = $<"John" | "Jane">("John");
-            const last = $<"Doe" | "Smith">("Doe");
+            const first = $<string>("John");
+            const last = $<string>("Doe");
             let fullName = "";
 
             effect(() => {
@@ -174,7 +174,7 @@ describe("Reactivity System", () => {
 
         it("should cleanup stale dependencies on re-run", () => {
             const show = $<boolean>(true);
-            const msg = $<"Hello" | "World" | "Ignored">("Hello");
+            const msg = $<string>("Hello");
             let runs = 0;
 
             effect(() => {
@@ -338,7 +338,7 @@ describe("Reactivity System", () => {
         });
 
         it("should handle signals with object values", () => {
-            const obj = $<{ a: number }>({ a: 1 });
+            const obj = $({ a: 1 });
             let runs = 0;
 
             effect(() => {

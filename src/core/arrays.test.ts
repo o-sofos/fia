@@ -1,9 +1,9 @@
 import { describe, it, expect } from "bun:test";
-import { $, effect } from "./reactivity";
+import { $, effect } from "./reactivity/reactivity";
 
 describe("Array Reactivity", () => {
     it("should NOT update when mutating the array in place (push)", () => {
-        const list = $<("Apple" | "Banana")[]>(["Apple"]);
+        const list = $<string[]>(["Apple"]);
         let updateCount = 0;
 
         effect(() => {
@@ -22,7 +22,7 @@ describe("Array Reactivity", () => {
     });
 
     it("should update when replacing the array (immutable update)", () => {
-        const list = $<("Apple" | "Banana")[]>(["Apple"]);
+        const list = $<string[]>(["Apple"]);
         let updateCount = 0;
 
         effect(() => {

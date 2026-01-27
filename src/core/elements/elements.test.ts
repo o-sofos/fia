@@ -1,8 +1,8 @@
 import { GlobalRegistrator } from "@happy-dom/global-registrator";
 import { describe, it, expect, beforeEach } from "bun:test";
 import { div, button, input, h1, span, a, p, ul, li, label } from "./elements";
-import { $ } from "./reactivity";
-import { hasExecutionContext, popExecutionContext } from "./context";
+import { $ } from "../reactivity/reactivity";
+import { hasExecutionContext, popExecutionContext } from "../context/context";
 
 try {
     GlobalRegistrator.register();
@@ -42,7 +42,7 @@ describe("Element System - Unified API", () => {
         });
 
         it("should create element with signal content", () => {
-            const text = $<"Updated" | "Initial">("Initial");
+            const text = $<string>("Initial");
             const el = div(text);
             expect(el.textContent).toBe("Initial");
 
@@ -142,7 +142,7 @@ describe("Element System - Unified API", () => {
         });
 
         it("should work with signal content and props", () => {
-            const text = $<"Dynamic" | "Changed">("Dynamic");
+            const text = $<string>("Dynamic");
             const el = span(text, { id: "dynamic-span" });
             expect(el.textContent).toBe("Dynamic");
             expect(el.id).toBe("dynamic-span");
@@ -173,7 +173,7 @@ describe("Element System - Unified API", () => {
         });
 
         it("should work with all reactive features", () => {
-            const title = $<"Title" | "New Title">("Title");
+            const title = $<string>("Title");
             const isActive = $<boolean>(false);
 
             const el = div(title, { class: { active: isActive } }, (_el) => {
@@ -245,7 +245,7 @@ describe("Element System - Unified API", () => {
         });
 
         it("should apply reactive style properties", () => {
-            const color = $<"blue" | "red">("red");
+            const color = $<string>("red");
             const el = div({ style: { color } });
             expect((el as unknown as HTMLElement).style.color).toBe("red");
 
@@ -297,7 +297,7 @@ describe("Element System - Unified API", () => {
         it("should create a navigation link", () => {
             const el = a("Dashboard", {
                 href: "/dashboard",
-                onclick: (e: MouseEvent) => e.preventDefault(),
+                onclick: (e: Event) => e.preventDefault(),
             });
 
             expect(el.textContent).toBe("Dashboard");
@@ -305,7 +305,7 @@ describe("Element System - Unified API", () => {
         });
 
         it("should create a form input with label", () => {
-            const value = $("");
+            const value = $<string>("");
 
             const container = div((_el) => {
                 label("Email", { for: "email-input" });
@@ -322,7 +322,7 @@ describe("Element System - Unified API", () => {
         });
 
         it("should create a dynamic list", () => {
-            const items = $(["Apple", "Banana", "Cherry"]);
+            const items = $<string[]>(["Apple", "Banana", "Cherry"]);
 
             const list = ul((_el) => {
                 for (const item of items.value) {
@@ -335,7 +335,7 @@ describe("Element System - Unified API", () => {
         });
 
         it("should create a card component pattern", () => {
-            const title = $<"Card Title" | "New Title">("Card Title");
+            const title = $<string>("Card Title");
             const isExpanded = $<boolean>(false);
 
             const card = div({ class: { card: true, expanded: isExpanded } }, (_el) => {

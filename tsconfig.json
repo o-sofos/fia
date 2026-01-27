@@ -20,7 +20,10 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
-    "noEmitOnError": true
+    "noEmitOnError": true,
+    "incremental": true,
+    "tsBuildInfoFile": "./.tsbuildinfo",
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": ["node_modules", "dist", "benchmark_repo"]
 }

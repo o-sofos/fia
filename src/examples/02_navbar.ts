@@ -10,7 +10,7 @@
  * 3. Flexbox Layout: Aligning items
  */
 
-import { div, nav, a, h3, button } from "../core/elements";
+import { div, nav, a, h3, button } from "../core/elements/elements";
 
 // Reusable Component: NavLink
 // Just a plain function that returns an element!

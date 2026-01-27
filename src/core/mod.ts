@@ -1,18 +1,18 @@
 /**
- * @module @flick/core
+ * @module @fia/core
  *
- * Flick - A 2KB framework for building reactive UIs with signals and plain functions.
+ * Fia - A 2KB framework for building reactive UIs with signals and plain functions.
  *
  * @example
  * ```typescript
- * import { $, div, h1, button, p } from "@flick/core";
+ * import { $, div, h1, button, p } from "@fia/core";
  *
  * const count = $(0);
  *
  * div({ class: "app" }, () => {
  *   h1("Counter App");
  *   p("Count: ", count);
- *   button("Increment", () => count.value++);
+ *   button("Increment", { onclick: () => count.value++ });
  * });
  * ```
  */
@@ -21,14 +21,14 @@
 // REACTIVITY
 // =============================================================================
 
-export { $, signal, effect, batch } from "./reactivity";
-export type { Signal, WritableSignal } from "./reactivity";
+export { $, signal, effect, batch } from "./reactivity/reactivity";
+export type { Signal, WritableSignal } from "./reactivity/reactivity";
 
 // =============================================================================
 // HTML ELEMENTS
 // =============================================================================
 
-export * from "./elements";
+export * from "./elements/elements";
 export * from "./mount";
 
 // =============================================================================
@@ -36,8 +36,8 @@ export * from "./mount";
 // =============================================================================
 
 // SVG elements are in a separate namespace to avoid conflicts with HTML elements
-// Import as: import { svg } from "@flick/core/svg";
-// Or: import * as SVG from "@flick/core/svg";
+// Import as: import { svg } from "@fia/core/svg";
+// Or: import * as SVG from "@fia/core/svg";
 
 // Re-export commonly used SVG elements with svg prefix for convenience
 export {
@@ -79,7 +79,7 @@ export {
     desc as svgDesc,
     svgTitle,
     metadata as svgMetadata,
-} from "./svg";
+} from "./svg/svg";
 
 // =============================================================================
 // CONTEXT (Advanced)
@@ -91,10 +91,10 @@ export {
     getCurrentExecutionContext as getCurrentContext,
     hasExecutionContext as hasContext,
     type ExecutionContext as Context,
-} from "./context";
+} from "./context/context";
 
 // =============================================================================
 // TYPE UTILITIES
 // =============================================================================
 
-export type { MaybeSignal, Child, ElementProps, ElementFactory, VoidElementFactory } from "../types/index";
+export type { MaybeSignal, Child, ElementProps, ElementFactory, VoidElementFactory } from "./elements/elements";
