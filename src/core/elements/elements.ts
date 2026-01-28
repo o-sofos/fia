@@ -46,14 +46,15 @@ export type Child =
 // =============================================================================
 
 /**
- * Smart Element type that includes strict attribute autocomplete and event handlers.
- * It intersects the native element with our strictly typed props to ensure DX.
+ * Smart Element type that properly narrows properties from props.
+ * Uses Omit to remove overlapping properties from the base element,
+ * then merges with props to ensure narrower types (like literal strings) are preserved.
  */
-export type SmartElement<K extends keyof HTMLElementTagNameMap, P> = HTMLElementTagNameMap[K] & {
-  // We can attach custom properties or methods here if needed
-  // For now, it mainly serves to carry the Props type for inference
-  _props?: P;
-};
+export type SmartElement<K extends keyof HTMLElementTagNameMap, P> =
+  Omit<HTMLElementTagNameMap[K], keyof P> & P & {
+    // Internal marker for prop type preservation
+    _props?: P;
+  };
 
 // Shorthand for simple element type (no specific props inference needed for return usually)
 type E<K extends keyof HTMLElementTagNameMap> = HTMLElementTagNameMap[K];
