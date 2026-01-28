@@ -21,7 +21,7 @@
 // REACTIVITY
 // =============================================================================
 
-export { $, signal, effect, batch } from "./reactivity/reactivity";
+export { $, signal, $e, batch } from "./reactivity/reactivity";
 export type { Signal, WritableSignal } from "./reactivity/reactivity";
 
 // =============================================================================

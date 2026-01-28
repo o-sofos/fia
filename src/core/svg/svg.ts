@@ -6,7 +6,7 @@
  */
 
 import { getCurrentExecutionContext, pushExecutionContext, popExecutionContext, type ExecutionContext } from "../context/context";
-import { effect, type Signal, isSignal, type MaybeSignal } from "../reactivity/reactivity";
+import { $e, type Signal, isSignal, type MaybeSignal } from "../reactivity/reactivity";
 
 
 // =============================================================================
@@ -945,7 +945,7 @@ function applySVGProps(element: SVGElement, props: Record<string, unknown>): voi
             const eventName = key.slice(2).toLowerCase();
             element.addEventListener(eventName, value as EventListener);
         } else if (isSignal(value)) {
-            effect(() => {
+            $e(() => {
                 const attrName = CAMEL_TO_KEBAB[key] ?? key;
                 if (key.startsWith("xlink:")) {
                     element.setAttributeNS(XLINK_NS, key, String((value as Signal<unknown>).value));
@@ -1041,7 +1041,7 @@ function createSVGTextElement<K extends keyof SVGElementPropsMap>(
         if (typeof arg1 === "string" || typeof arg1 === "number") {
             element.textContent = String(arg1);
         } else if (isSignal(arg1)) {
-            effect(() => {
+            $e(() => {
                 element.textContent = String(arg1.value);
             });
         } else if (isSVGPropsObject(arg1)) {
@@ -1050,7 +1050,7 @@ function createSVGTextElement<K extends keyof SVGElementPropsMap>(
             if (typeof arg2 === "string" || typeof arg2 === "number") {
                 element.textContent = String(arg2);
             } else if (isSignal(arg2)) {
-                effect(() => {
+                $e(() => {
                     element.textContent = String(arg2.value);
                 });
             } else if (typeof arg2 === "function") {

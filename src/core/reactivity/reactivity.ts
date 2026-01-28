@@ -111,7 +111,7 @@ export function batch(fn: () => void): void {
  * 
  * Usage:
  * ```ts
- * effect(() => {
+ * $e(() => {
  *   console.log("Count is:", count.value);
  * });
  * ```
@@ -119,7 +119,7 @@ export function batch(fn: () => void): void {
  * @param fn - The effect function to run
  * @returns A dispose function to stop the effect
  */
-export function effect(fn: EffectFn): () => void {
+export function $e(fn: EffectFn): () => void {
   let active = true;
 
   const subscriber: Subscriber = {

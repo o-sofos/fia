@@ -1,5 +1,5 @@
 import { describe, it, expect } from "bun:test";
-import { $, effect, batch } from "./reactivity";
+import { $, $e, batch } from "./reactivity";
 
 describe("Reactivity System", () => {
     describe("Signals", () => {
@@ -23,7 +23,7 @@ describe("Reactivity System", () => {
             const count = $<number>(0);
             let runs = 0;
 
-            effect(() => {
+            $e(() => {
                 count.value;
                 runs++;
             });
@@ -40,7 +40,7 @@ describe("Reactivity System", () => {
             const val = $<number>(NaN);
             let runs = 0;
 
-            effect(() => {
+            $e(() => {
                 val.value;
                 runs++;
             });
@@ -54,7 +54,7 @@ describe("Reactivity System", () => {
             const count = $<number>(0);
             let observed = -1;
 
-            effect(() => {
+            $e(() => {
                 observed = count.value;
             });
             expect(observed).toBe(0);
@@ -67,7 +67,7 @@ describe("Reactivity System", () => {
             const count = $<number>(0);
             let runs = 0;
 
-            effect(() => {
+            $e(() => {
                 count.peek(); // Should NOT track
                 runs++;
             });
@@ -134,7 +134,7 @@ describe("Reactivity System", () => {
             const doubled = $(() => count.value * 2);
 
             let runs = 0;
-            effect(() => {
+            $e(() => {
                 doubled.peek(); // Peek at computed
                 runs++;
             });
@@ -149,7 +149,7 @@ describe("Reactivity System", () => {
     describe("Effects", () => {
         it("should run immediately on creation", () => {
             let ran = false;
-            effect(() => {
+            $e(() => {
                 ran = true;
             });
             expect(ran).toBe(true);
@@ -160,7 +160,7 @@ describe("Reactivity System", () => {
             const last = $<string>("Doe");
             let fullName = "";
 
-            effect(() => {
+            $e(() => {
                 fullName = `${first.value} ${last.value}`;
             });
             expect(fullName).toBe("John Doe");
@@ -177,7 +177,7 @@ describe("Reactivity System", () => {
             const msg = $<string>("Hello");
             let runs = 0;
 
-            effect(() => {
+            $e(() => {
                 runs++;
                 if (show.value) {
                     msg.value; // Only track msg when show is true
@@ -200,7 +200,7 @@ describe("Reactivity System", () => {
             const count = $<number>(0);
             let runs = 0;
 
-            const dispose = effect(() => {
+            const dispose = $e(() => {
                 count.value;
                 runs++;
             });
@@ -221,11 +221,11 @@ describe("Reactivity System", () => {
             let outerRuns = 0;
             let innerRuns = 0;
 
-            effect(() => {
+            $e(() => {
                 outer.value;
                 outerRuns++;
 
-                effect(() => {
+                $e(() => {
                     inner.value;
                     innerRuns++;
                 });
@@ -243,7 +243,7 @@ describe("Reactivity System", () => {
             const count = $<number>(0);
             let runs = 0;
 
-            effect(() => {
+            $e(() => {
                 count.value;
                 runs++;
             });
@@ -264,7 +264,7 @@ describe("Reactivity System", () => {
             const b = $<number>(0);
             let runs = 0;
 
-            effect(() => {
+            $e(() => {
                 a.value;
                 b.value;
                 runs++;
@@ -283,7 +283,7 @@ describe("Reactivity System", () => {
             const count = $<number>(0);
             let runs = 0;
 
-            effect(() => {
+            $e(() => {
                 count.value;
                 runs++;
             });
@@ -325,7 +325,7 @@ describe("Reactivity System", () => {
             const count = $<number>(0);
             let runs = 0;
 
-            effect(() => {
+            $e(() => {
                 runs++;
                 if (count.value < 3) {
                     count.value++; // Modifies its own dependency
@@ -341,7 +341,7 @@ describe("Reactivity System", () => {
             const obj = $({ a: 1 });
             let runs = 0;
 
-            effect(() => {
+            $e(() => {
                 obj.value;
                 runs++;
             });
@@ -362,7 +362,7 @@ describe("Reactivity System", () => {
             let dispose: (() => void) | undefined;
             let runs = 0;
 
-            dispose = effect(() => {
+            dispose = $e(() => {
                 runs++;
                 count.value;
                 if (runs === 2 && dispose) {

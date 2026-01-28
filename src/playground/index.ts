@@ -1,4 +1,17 @@
-import { $, button, h1, h2, h3, h4, h5, h6, input, p } from "../core/mod";
+import {
+  $,
+  button,
+  $e,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  input,
+  p,
+  span,
+} from "../core/mod";
 
 export default (() => {
   const count = $(0);
@@ -12,8 +25,21 @@ export default (() => {
 
   p($(() => "count: " + count.value));
 
-  const onclick = () => count.value++
+  const onclick = () => count.value++;
 
-  button("increment", { onclick });
+  button(
+    $(() => `count: ${count.value}`),
+    { id: "increment-button", onclick },
+    (btn) => {
+      if (btn.id === "increment-button") {
+        span("Click me to increment count");
+      }
+    },
+  );
 
+  input({ type: "tel", placeholder: $(() => `Count: ${count.value}`) });
+
+  $e(() => {
+    console.log(count.value);
+  });
 })();

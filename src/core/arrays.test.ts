@@ -1,12 +1,12 @@
 import { describe, it, expect } from "bun:test";
-import { $, effect } from "./reactivity/reactivity";
+import { $, $e } from "./reactivity/reactivity";
 
 describe("Array Reactivity", () => {
     it("should NOT update when mutating the array in place (push)", () => {
         const list = $<string[]>(["Apple"]);
         let updateCount = 0;
 
-        effect(() => {
+        $e(() => {
             // Read value to track dependency
             void list.value;
             updateCount++;
@@ -25,7 +25,7 @@ describe("Array Reactivity", () => {
         const list = $<string[]>(["Apple"]);
         let updateCount = 0;
 
-        effect(() => {
+        $e(() => {
             void list.value;
             updateCount++;
         });

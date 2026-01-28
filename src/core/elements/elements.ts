@@ -18,7 +18,7 @@
  */
 
 import { pushExecutionContext, popExecutionContext, getCurrentExecutionContext } from "../context/context";
-import { $, effect, type Signal, type MaybeSignal, isSignal } from "../reactivity/reactivity";
+import { $, $e, type Signal, type MaybeSignal, isSignal } from "../reactivity/reactivity";
 import type { ElementProps } from "../attributes/html-attributes";
 
 export { type MaybeSignal, isSignal };
@@ -215,7 +215,7 @@ function applyProps<K extends keyof HTMLElementTagNameMap>(
       const eventName = key.slice(2).toLowerCase();
       element.addEventListener(eventName, value as EventListener);
     } else if (isSignal(value)) {
-      effect(() => assignProp(element, key, value.value));
+      $e(() => assignProp(element, key, value.value));
     } else {
       assignProp(element, key, value);
     }
@@ -239,7 +239,7 @@ function applyClass(element: HTMLElement, value: unknown): void {
     };
 
     if (hasSignal) {
-      effect(updateClasses);
+      $e(updateClasses);
     } else {
       updateClasses();
     }
@@ -317,7 +317,7 @@ function applyStyle(element: HTMLElement, value: unknown): void {
   } else if (typeof value === "object" && value !== null) {
     for (const [prop, val] of Object.entries(value as Record<string, unknown>)) {
       if (isSignal(val)) {
-        effect(() => {
+        $e(() => {
           (element.style as any)[prop] = transformStyleValue(val.value);
         });
       } else {
@@ -337,7 +337,7 @@ function applyContent(
 ): void {
   if (isSignal(content)) {
     const textNode = document.createTextNode("");
-    effect(() => {
+    $e(() => {
       const v = content.value;
       textNode.textContent = v == null ? "" : String(v);
     });
