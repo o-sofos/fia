@@ -1,5 +1,5 @@
 /**
- * Entry point for Flick Examples
+ * Entry point for Fia Examples
  */
 import { ExamplesLauncher } from "./examples_launcher";
 

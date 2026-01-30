@@ -1,5 +1,5 @@
 /**
- * Flick Element Functions
+ * Fia Element Functions
  *
  * Factory functions for all HTML elements that auto-mount to parent context.
  * Full TypeScript autocomplete with strict attribute types.

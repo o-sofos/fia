@@ -1,7 +1,6 @@
 /**
- * Flick Reactivity System - Performance Optimized
- * 
- * Key optimizations:
+ * Fia Reactivity System
+ *
  * - Minimal allocations
  * - Inline hot paths
  * - Avoid Set/Map overhead where possible
@@ -77,7 +76,7 @@ function cleanupSubscriber(sub: Subscriber): void {
 
 /**
  * Batch multiple signal updates into a single effect run.
- * 
+ *
  * Usage:
  * ```ts
  * batch(() => {
@@ -86,7 +85,7 @@ function cleanupSubscriber(sub: Subscriber): void {
  * });
  * // Effects run only once here
  * ```
- * 
+ *
  * @param fn - The function containing state updates to batch
  */
 export function batch(fn: () => void): void {
@@ -108,14 +107,14 @@ export function batch(fn: () => void): void {
 
 /**
  * Create a reactive effect that runs whenever its dependencies change.
- * 
+ *
  * Usage:
  * ```ts
  * $e(() => {
  *   console.log("Count is:", count.value);
  * });
  * ```
- * 
+ *
  * @param fn - The effect function to run
  * @returns A dispose function to stop the effect
  */
@@ -298,22 +297,24 @@ function createComputed<T>(compute: () => T): Signal<T> {
 
 /**
  * Create a signal or computed value.
- * 
+ *
  * **Signal (State):**
  * ```ts
  * const count = $(0);
  * count.value++;
  * ```
- * 
+ *
  * **Computed (Derived State):**
  * ```ts
  * const double = $(() => count.value * 2);
  * ```
- * 
+ *
  * @param initial - The initial value or a computation function
  * @returns A writable Signal for values, or a readonly Signal for functions
  */
-export function $<const T>(initial: T): [T] extends [() => infer R] ? Signal<R> : WritableSignal<T>;
+export function $<const T>(
+  initial: T,
+): [T] extends [() => infer R] ? Signal<R> : WritableSignal<T>;
 export function $<T>(initial: T): Signal<T> | WritableSignal<T> {
   return typeof initial === "function"
     ? createComputed(initial as () => T)

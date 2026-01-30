@@ -1,5 +1,5 @@
 /**
- * Flick SVG Elements
+ * Fia SVG Elements
  *
  * Factory functions for SVG elements with full TypeScript support.
  * SVG elements require a different namespace than HTML elements.

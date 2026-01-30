@@ -1,9 +1,9 @@
 /**
- * Flick Context Execution System
+ * Fia Context Execution System
  *
  * Manages the parent element stack for automatic child mounting.
  * Elements created inside a parent's callback are automatically appended.
- * 
+ *
  * Stack based LIFO system
  */
 
@@ -40,7 +40,9 @@ export function popExecutionContext(): void {
  * @internal
  */
 export function getCurrentExecutionContext(): ExecutionContext {
-  return executionContextStack[executionContextStack.length - 1] ?? document.body;
+  return (
+    executionContextStack[executionContextStack.length - 1] ?? document.body
+  );
 }
 
 /**
