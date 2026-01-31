@@ -115,23 +115,83 @@ export type CSSNamedColor =
     | "white" | "whitesmoke" | "yellow" | "yellowgreen"
     | "currentColor";
 
+// =============================================================================
+// TEMPLATE LITERAL TYPES FOR CSS FUNCTIONS
+// =============================================================================
+
 /**
- * Strict CSS Color type.
+ * Template literal helper types for CSS values with compile-time validation
+ */
+type CSSNumber = number | `${number}`;
+type CSSPercentage = `${number}%`;
+type CSSAngle = `${number}deg` | `${number}rad` | `${number}grad` | `${number}turn`;
+
+/**
+ * RGB/RGBA color function types with proper syntax validation.
+ * Supports both comma-separated and space-separated modern syntax.
+ *
+ * @example
+ * "rgb(255, 0, 0)"              // Legacy comma syntax ✓
+ * "rgb(255 0 0)"                // Modern space syntax ✓
+ * "rgba(255, 0, 0, 0.5)"        // Legacy with alpha ✓
+ * "rgba(255 0 0 / 0.5)"         // Modern with alpha ✓
+ */
+export type CSSRgbFunction =
+  | `rgb(${CSSNumber}, ${CSSNumber}, ${CSSNumber})`
+  | `rgb(${CSSNumber} ${CSSNumber} ${CSSNumber})`
+  | `rgba(${CSSNumber}, ${CSSNumber}, ${CSSNumber}, ${CSSNumber})`
+  | `rgba(${CSSNumber} ${CSSNumber} ${CSSNumber} / ${CSSNumber})`;
+
+/**
+ * HSL/HSLA color function types.
+ * Supports both comma-separated and space-separated modern syntax.
+ *
+ * @example
+ * "hsl(120, 100%, 50%)"         // Legacy comma syntax ✓
+ * "hsl(120deg 100% 50%)"        // Modern space syntax ✓
+ * "hsla(120, 100%, 50%, 0.5)"   // Legacy with alpha ✓
+ * "hsla(120deg 100% 50% / 0.5)" // Modern with alpha ✓
+ */
+export type CSSHslFunction =
+  | `hsl(${CSSAngle}, ${CSSPercentage}, ${CSSPercentage})`
+  | `hsl(${CSSAngle} ${CSSPercentage} ${CSSPercentage})`
+  | `hsla(${CSSAngle}, ${CSSPercentage}, ${CSSPercentage}, ${CSSNumber})`
+  | `hsla(${CSSAngle} ${CSSPercentage} ${CSSPercentage} / ${CSSNumber})`;
+
+/**
+ * HWB color function type (modern CSS Colors Level 4).
+ *
+ * @example
+ * "hwb(120deg 0% 0%)"           // Without alpha ✓
+ * "hwb(120deg 0% 0% / 0.5)"     // With alpha ✓
+ */
+export type CSSHwbFunction =
+  | `hwb(${CSSAngle} ${CSSPercentage} ${CSSPercentage})`
+  | `hwb(${CSSAngle} ${CSSPercentage} ${CSSPercentage} / ${CSSNumber})`;
+
+/**
+ * Strict CSS Color type with template literal validation for function syntax.
+ * Provides IntelliSense hints for proper color format while maintaining flexibility.
  */
 export type CSSColor =
     | CSSNamedColor
-    | ColorRGB
-    | ColorHSL
-    | ColorHWB
-    | ColorOKLCH
-    | ColorLab
-    | ColorLCH
-    | ColorOKLab
-    | ColorHex
-    | ColorFunction
-    | ColorMix
+    | ColorRGB          // Object notation
+    | ColorHSL          // Object notation
+    | ColorHWB          // Object notation
+    | ColorOKLCH        // Object notation
+    | ColorLab          // Object notation
+    | ColorLCH          // Object notation
+    | ColorOKLab        // Object notation
+    | ColorHex          // Object notation
+    | ColorFunction     // Object notation
+    | ColorMix          // Object notation
+    | CSSRgbFunction    // Template literal validation
+    | CSSHslFunction    // Template literal validation
+    | CSSHwbFunction    // Template literal validation
+    | `#${string}`      // Hex colors
+    | `var(--${string})`// CSS variables
     | CSSGlobalValues
-    | (string & {});
+    | (string & {});    // Escape hatch for edge cases
 
 // =============================================================================
 // BACKGROUNDS & BORDERS & EFFECTS

@@ -17,8 +17,13 @@ export interface GlobalAttributes {
     id?: MaybeSignal<string>;
     /** CSS class(es) for the element. Can be a string or an object of { className: boolean }. */
     class?: MaybeSignal<string> | Record<string, MaybeSignal<boolean>>;
-    /** Inline CSS styles. Can be a string or an object of strict style properties. */
-    style?: MaybeSignal<string> | MaybeSignal<ReactiveCSSProperties>;
+    /**
+     * Inline CSS styles. Can be:
+     * - A CSS string: "color: red; font-size: 16px"
+     * - A reactive string: $(myStyleString)
+     * - A style object with mixed reactive/static: { color: $(c), fontSize: "16px" }
+     */
+    style?: MaybeSignal<string> | ReactiveCSSProperties;
     /** Advisory information for the element (tooltip). */
     title?: MaybeSignal<string>;
     /** Language of the element's content. */

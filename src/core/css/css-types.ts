@@ -1,4 +1,4 @@
-import type { MaybeSignal } from "../reactivity/reactivity.ts";
+import type { Signal } from "../reactivity/reactivity.ts";
 import type { BoxModelProperties } from "./properties/box-model.ts";
 import type { FlexGridProperties } from "./properties/flex-grid.ts";
 import type { InteractionProperties, TableProperties } from "./properties/interaction.ts";
@@ -143,9 +143,37 @@ export interface StrictCSSProperties extends
     color?: CSSColor;
 }
 
+// =============================================================================
+// REACTIVE CSS UTILITIES
+// =============================================================================
+
 /**
- * Reactive CSS properties allowing signals for any value
+ * Allows mixing of static and signal values in property objects.
+ * Each property can be either its original static type OR a Signal of that type.
+ *
+ * @example
+ * const color = $("red");
+ * div({
+ *   style: {
+ *     color: color,        // Signal<string> ✓
+ *     fontSize: "16px",    // string ✓
+ *     padding: $(padding), // Signal<string> ✓
+ *   }
+ * });
  */
-export type ReactiveCSSProperties = {
-    [K in keyof StrictCSSProperties]: MaybeSignal<StrictCSSProperties[K]>;
+export type MixedReactiveProperties<T> = {
+    [K in keyof T]: T[K] | Signal<NonNullable<T[K]>>;
 };
+
+/**
+ * Reactive CSS properties allowing signals OR static values for any property.
+ * This is the main type for style objects in Flick - it supports mixing reactive
+ * and static values in the same object.
+ *
+ * @example
+ * // All of these work:
+ * { color: "red" }                           // All static
+ * { color: $(myColor) }                      // All signals
+ * { color: $(myColor), fontSize: "16px" }    // Mixed! ✓
+ */
+export type ReactiveCSSProperties = MixedReactiveProperties<StrictCSSProperties>;

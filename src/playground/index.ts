@@ -1,3 +1,4 @@
+import { width } from "happy-dom/lib/PropertySymbol";
 import {
   $,
   button,
@@ -11,6 +12,8 @@ import {
   input,
   p,
   span,
+  col,
+  div,
 } from "../core/mod";
 
 export default (() => {
@@ -26,6 +29,13 @@ export default (() => {
   p($(() => "count: " + count.value));
 
   const onclick = () => count.value++;
+
+  const r = $(0);
+  const g = $(0);
+  const b = $(0);
+  const rgbString = $(() => `rgb(${r.value}, ${g.value}, ${b.value})`);
+
+  div({ width: "", height: "50px", backgroundColor: rgbString });
 
   button(
     $(() => `count: ${count.value}`),

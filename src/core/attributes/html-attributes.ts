@@ -310,10 +310,150 @@ export interface ElementPropsMap {
     wbr: GlobalAttributes;
 }
 
-// Event handlers - mapped type for all on* event properties
-type EventHandlers<E extends Element> = {
-    [K in keyof GlobalEventHandlersEventMap as `on${K}`]?: (event: GlobalEventHandlersEventMap[K]) => void;
+// =============================================================================
+// PRECISE EVENT HANDLER TYPES
+// =============================================================================
+
+/**
+ * Precise event handler types with exact event types for better IntelliSense.
+ * Instead of generic Event types, each handler receives its specific event type.
+ *
+ * Benefits:
+ * - onClick receives MouseEvent with clientX, clientY, etc.
+ * - onKeydown receives KeyboardEvent with key, code, etc.
+ * - onInput receives InputEvent with data, inputType, etc.
+ * - Much better autocomplete and type safety than generic Event
+ */
+type PreciseEventHandlers<E extends Element> = {
+  // Mouse events
+  onclick?: (event: MouseEvent) => void;
+  oncontextmenu?: (event: MouseEvent) => void;
+  ondblclick?: (event: MouseEvent) => void;
+  onmousedown?: (event: MouseEvent) => void;
+  onmouseenter?: (event: MouseEvent) => void;
+  onmouseleave?: (event: MouseEvent) => void;
+  onmousemove?: (event: MouseEvent) => void;
+  onmouseout?: (event: MouseEvent) => void;
+  onmouseover?: (event: MouseEvent) => void;
+  onmouseup?: (event: MouseEvent) => void;
+
+  // Keyboard events
+  onkeydown?: (event: KeyboardEvent) => void;
+  onkeypress?: (event: KeyboardEvent) => void;
+  onkeyup?: (event: KeyboardEvent) => void;
+
+  // Focus events
+  onblur?: (event: FocusEvent) => void;
+  onfocus?: (event: FocusEvent) => void;
+  onfocusin?: (event: FocusEvent) => void;
+  onfocusout?: (event: FocusEvent) => void;
+
+  // Form events
+  onchange?: (event: Event) => void;
+  oninput?: (event: InputEvent) => void;
+  oninvalid?: (event: Event) => void;
+  onreset?: (event: Event) => void;
+  onsubmit?: (event: SubmitEvent) => void;
+
+  // Drag events
+  ondrag?: (event: DragEvent) => void;
+  ondragend?: (event: DragEvent) => void;
+  ondragenter?: (event: DragEvent) => void;
+  ondragleave?: (event: DragEvent) => void;
+  ondragover?: (event: DragEvent) => void;
+  ondragstart?: (event: DragEvent) => void;
+  ondrop?: (event: DragEvent) => void;
+
+  // Touch events
+  ontouchcancel?: (event: TouchEvent) => void;
+  ontouchend?: (event: TouchEvent) => void;
+  ontouchmove?: (event: TouchEvent) => void;
+  ontouchstart?: (event: TouchEvent) => void;
+
+  // Pointer events
+  onpointercancel?: (event: PointerEvent) => void;
+  onpointerdown?: (event: PointerEvent) => void;
+  onpointerenter?: (event: PointerEvent) => void;
+  onpointerleave?: (event: PointerEvent) => void;
+  onpointermove?: (event: PointerEvent) => void;
+  onpointerout?: (event: PointerEvent) => void;
+  onpointerover?: (event: PointerEvent) => void;
+  onpointerup?: (event: PointerEvent) => void;
+
+  // Wheel events
+  onwheel?: (event: WheelEvent) => void;
+
+  // Clipboard events
+  oncopy?: (event: ClipboardEvent) => void;
+  oncut?: (event: ClipboardEvent) => void;
+  onpaste?: (event: ClipboardEvent) => void;
+
+  // Animation events
+  onanimationcancel?: (event: AnimationEvent) => void;
+  onanimationend?: (event: AnimationEvent) => void;
+  onanimationiteration?: (event: AnimationEvent) => void;
+  onanimationstart?: (event: AnimationEvent) => void;
+
+  // Transition events
+  ontransitioncancel?: (event: TransitionEvent) => void;
+  ontransitionend?: (event: TransitionEvent) => void;
+  ontransitionrun?: (event: TransitionEvent) => void;
+  ontransitionstart?: (event: TransitionEvent) => void;
+
+  // Selection events
+  onselect?: (event: Event) => void;
+  onselectionchange?: (event: Event) => void;
+  onselectstart?: (event: Event) => void;
+
+  // Composition events (IME)
+  oncompositionend?: (event: CompositionEvent) => void;
+  oncompositionstart?: (event: CompositionEvent) => void;
+  oncompositionupdate?: (event: CompositionEvent) => void;
+
+  // Media events
+  onabort?: (event: Event) => void;
+  oncanplay?: (event: Event) => void;
+  oncanplaythrough?: (event: Event) => void;
+  ondurationchange?: (event: Event) => void;
+  onemptied?: (event: Event) => void;
+  onended?: (event: Event) => void;
+  onerror?: (event: ErrorEvent) => void;
+  onloadeddata?: (event: Event) => void;
+  onloadedmetadata?: (event: Event) => void;
+  onloadstart?: (event: Event) => void;
+  onpause?: (event: Event) => void;
+  onplay?: (event: Event) => void;
+  onplaying?: (event: Event) => void;
+  onprogress?: (event: ProgressEvent) => void;
+  onratechange?: (event: Event) => void;
+  onseeked?: (event: Event) => void;
+  onseeking?: (event: Event) => void;
+  onstalled?: (event: Event) => void;
+  onsuspend?: (event: Event) => void;
+  ontimeupdate?: (event: Event) => void;
+  onvolumechange?: (event: Event) => void;
+  onwaiting?: (event: Event) => void;
+
+  // Loading events
+  onload?: (event: Event) => void;
+  onloadend?: (event: ProgressEvent) => void;
+
+  // Scroll events
+  onscroll?: (event: Event) => void;
+  onscrollend?: (event: Event) => void;
+
+  // Resize events
+  onresize?: (event: UIEvent) => void;
+
+  // Toggle events
+  ontoggle?: (event: Event) => void;
 };
+
+/**
+ * Alias for backward compatibility
+ * @deprecated Use PreciseEventHandlers for better type inference
+ */
+type EventHandlers<E extends Element> = PreciseEventHandlers<E>;
 
 /**
  * Union of all attributes and event handlers for a given element.
