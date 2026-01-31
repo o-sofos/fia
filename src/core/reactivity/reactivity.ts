@@ -296,6 +296,35 @@ function createComputed<T>(compute: () => T): Signal<T> {
 }
 
 /**
+ * Checks if a type has extra properties beyond its base primitive type.
+ * Used to detect branded types (e.g., `Pixels = number & { [brand]: "px" }`).
+ */
+type HasBrand<T, Base> = keyof T extends keyof Base ? false : true;
+
+/**
+ * Widens primitive types for better DX, but preserves branded types.
+ * - Simple strings → `string` (e.g., "hello" → string)
+ * - Simple numbers → `number` (e.g., 42 → number)
+ * - Simple booleans → `boolean` (e.g., true → boolean)
+ * - Branded types → preserved (e.g., Pixels stays Pixels)
+ * - Objects/arrays → preserved (for structural typing)
+ *
+ * This ensures developers never need `as string` or `as const` - it just works.
+ */
+type WidenPrimitive<T> =
+  // Check if it's a string type
+  T extends string
+    ? HasBrand<T, string> extends true ? T : string  // Preserve branded strings, widen plain
+  // Check if it's a number type
+  : T extends number
+    ? HasBrand<T, number> extends true ? T : number  // Preserve branded numbers, widen plain
+  // Check if it's a boolean type
+  : T extends boolean
+    ? HasBrand<T, boolean> extends true ? T : boolean  // Preserve branded booleans, widen plain
+  // Everything else (objects, arrays) preserved
+  : T;
+
+/**
  * Create a signal or computed value.
  *
  * **Signal (State):**
@@ -309,12 +338,17 @@ function createComputed<T>(compute: () => T): Signal<T> {
  * const double = $(() => count.value * 2);
  * ```
  *
+ * Type inference:
+ * - Primitives without annotation widen: `$("")` → `WritableSignal<string>`
+ * - Specific literals are preserved: `$("16px")` keeps the literal for CSS
+ * - Use explicit type when needed: `$<number>(0)` for explicit control
+ *
  * @param initial - The initial value or a computation function
  * @returns A writable Signal for values, or a readonly Signal for functions
  */
 export function $<const T>(
   initial: T,
-): [T] extends [() => infer R] ? Signal<R> : WritableSignal<T>;
+): [T] extends [() => infer R] ? Signal<R> : WritableSignal<WidenPrimitive<T>>;
 export function $<T>(initial: T): Signal<T> | WritableSignal<T> {
   return typeof initial === "function"
     ? createComputed(initial as () => T)

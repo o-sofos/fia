@@ -151,18 +151,28 @@ export interface StrictCSSProperties extends
  * Allows mixing of static and signal values in property objects.
  * Each property can be either its original static type OR a Signal of that type.
  *
+ * For best DX, signals with widened types (Signal<string>, Signal<number>) are also
+ * accepted for CSS properties, so developers never need type annotations.
+ *
  * @example
- * const color = $("red");
+ * const color = $("red");     // WritableSignal<string>
+ * const size = $("16px");     // WritableSignal<string>
  * div({
  *   style: {
- *     color: color,        // Signal<string> ✓
- *     fontSize: "16px",    // string ✓
- *     padding: $(padding), // Signal<string> ✓
+ *     color: color,           // Signal<string> ✓ (widened, still works!)
+ *     fontSize: size,         // Signal<string> ✓
+ *     padding: "1rem",        // Static value ✓
  *   }
  * });
  */
 export type MixedReactiveProperties<T> = {
-    [K in keyof T]: T[K] | Signal<NonNullable<T[K]>>;
+    [K in keyof T]:
+        | T[K]
+        | Signal<NonNullable<T[K]>>
+        // Accept Signal<string> for string-based properties (allows widened signals)
+        | (NonNullable<T[K]> extends string ? Signal<string> : never)
+        // Accept Signal<number> for number-based properties
+        | (NonNullable<T[K]> extends number ? Signal<number> : never);
 };
 
 /**

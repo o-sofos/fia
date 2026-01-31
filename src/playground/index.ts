@@ -12,7 +12,6 @@ import {
   input,
   p,
   span,
-  col,
   div,
 } from "../core/mod";
 
@@ -37,9 +36,24 @@ export default (() => {
 
   div({ width: "", height: "50px", backgroundColor: rgbString });
 
+  let banana = false;
+  let props;
+
+  if (banana) {
+    props = {
+      id: "banana-button",
+      onclick,
+    };
+  } else {
+    props = {
+      id: "increment-button",
+      onclick,
+    };
+  }
+
   button(
     $(() => `count: ${count.value}`),
-    { id: "increment-button", onclick },
+    props,
     (btn) => {
       if (btn.id === "increment-button") {
         span("Click me to increment count");
@@ -47,7 +61,10 @@ export default (() => {
     },
   );
 
-  input({ type: "tel", placeholder: $(() => `Count: ${count.value}`) });
+  input({
+    type: "tel",
+    placeholder: $(() => `Count: ${count.value}`),
+  });
 
   $e(() => {
     console.log(count.value);

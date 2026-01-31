@@ -315,138 +315,152 @@ export interface ElementPropsMap {
 // =============================================================================
 
 /**
- * Precise event handler types with exact event types for better IntelliSense.
- * Instead of generic Event types, each handler receives its specific event type.
+ * Event type with properly typed currentTarget.
+ * This ensures event handlers know exactly which element type they're on.
+ *
+ * @example
+ * button({
+ *   onclick: (e) => {
+ *     e.currentTarget.disabled = true;  // Works! currentTarget is HTMLButtonElement
+ *   }
+ * });
+ */
+type TypedEvent<E extends Element, Ev extends Event> = Ev & {
+  readonly currentTarget: E;
+};
+
+/**
+ * Precise event handler types with exact event types AND element-typed currentTarget.
  *
  * Benefits:
  * - onClick receives MouseEvent with clientX, clientY, etc.
  * - onKeydown receives KeyboardEvent with key, code, etc.
  * - onInput receives InputEvent with data, inputType, etc.
- * - Much better autocomplete and type safety than generic Event
+ * - e.currentTarget is typed to the specific element (no casting needed!)
  */
 type PreciseEventHandlers<E extends Element> = {
   // Mouse events
-  onclick?: (event: MouseEvent) => void;
-  oncontextmenu?: (event: MouseEvent) => void;
-  ondblclick?: (event: MouseEvent) => void;
-  onmousedown?: (event: MouseEvent) => void;
-  onmouseenter?: (event: MouseEvent) => void;
-  onmouseleave?: (event: MouseEvent) => void;
-  onmousemove?: (event: MouseEvent) => void;
-  onmouseout?: (event: MouseEvent) => void;
-  onmouseover?: (event: MouseEvent) => void;
-  onmouseup?: (event: MouseEvent) => void;
+  onclick?: (event: TypedEvent<E, MouseEvent>) => void;
+  oncontextmenu?: (event: TypedEvent<E, MouseEvent>) => void;
+  ondblclick?: (event: TypedEvent<E, MouseEvent>) => void;
+  onmousedown?: (event: TypedEvent<E, MouseEvent>) => void;
+  onmouseenter?: (event: TypedEvent<E, MouseEvent>) => void;
+  onmouseleave?: (event: TypedEvent<E, MouseEvent>) => void;
+  onmousemove?: (event: TypedEvent<E, MouseEvent>) => void;
+  onmouseout?: (event: TypedEvent<E, MouseEvent>) => void;
+  onmouseover?: (event: TypedEvent<E, MouseEvent>) => void;
+  onmouseup?: (event: TypedEvent<E, MouseEvent>) => void;
 
   // Keyboard events
-  onkeydown?: (event: KeyboardEvent) => void;
-  onkeypress?: (event: KeyboardEvent) => void;
-  onkeyup?: (event: KeyboardEvent) => void;
+  onkeydown?: (event: TypedEvent<E, KeyboardEvent>) => void;
+  onkeypress?: (event: TypedEvent<E, KeyboardEvent>) => void;
+  onkeyup?: (event: TypedEvent<E, KeyboardEvent>) => void;
 
   // Focus events
-  onblur?: (event: FocusEvent) => void;
-  onfocus?: (event: FocusEvent) => void;
-  onfocusin?: (event: FocusEvent) => void;
-  onfocusout?: (event: FocusEvent) => void;
+  onblur?: (event: TypedEvent<E, FocusEvent>) => void;
+  onfocus?: (event: TypedEvent<E, FocusEvent>) => void;
+  onfocusin?: (event: TypedEvent<E, FocusEvent>) => void;
+  onfocusout?: (event: TypedEvent<E, FocusEvent>) => void;
 
   // Form events
-  onchange?: (event: Event) => void;
-  oninput?: (event: InputEvent) => void;
-  oninvalid?: (event: Event) => void;
-  onreset?: (event: Event) => void;
-  onsubmit?: (event: SubmitEvent) => void;
+  onchange?: (event: TypedEvent<E, Event>) => void;
+  oninput?: (event: TypedEvent<E, InputEvent>) => void;
+  oninvalid?: (event: TypedEvent<E, Event>) => void;
+  onreset?: (event: TypedEvent<E, Event>) => void;
+  onsubmit?: (event: TypedEvent<E, SubmitEvent>) => void;
 
   // Drag events
-  ondrag?: (event: DragEvent) => void;
-  ondragend?: (event: DragEvent) => void;
-  ondragenter?: (event: DragEvent) => void;
-  ondragleave?: (event: DragEvent) => void;
-  ondragover?: (event: DragEvent) => void;
-  ondragstart?: (event: DragEvent) => void;
-  ondrop?: (event: DragEvent) => void;
+  ondrag?: (event: TypedEvent<E, DragEvent>) => void;
+  ondragend?: (event: TypedEvent<E, DragEvent>) => void;
+  ondragenter?: (event: TypedEvent<E, DragEvent>) => void;
+  ondragleave?: (event: TypedEvent<E, DragEvent>) => void;
+  ondragover?: (event: TypedEvent<E, DragEvent>) => void;
+  ondragstart?: (event: TypedEvent<E, DragEvent>) => void;
+  ondrop?: (event: TypedEvent<E, DragEvent>) => void;
 
   // Touch events
-  ontouchcancel?: (event: TouchEvent) => void;
-  ontouchend?: (event: TouchEvent) => void;
-  ontouchmove?: (event: TouchEvent) => void;
-  ontouchstart?: (event: TouchEvent) => void;
+  ontouchcancel?: (event: TypedEvent<E, TouchEvent>) => void;
+  ontouchend?: (event: TypedEvent<E, TouchEvent>) => void;
+  ontouchmove?: (event: TypedEvent<E, TouchEvent>) => void;
+  ontouchstart?: (event: TypedEvent<E, TouchEvent>) => void;
 
   // Pointer events
-  onpointercancel?: (event: PointerEvent) => void;
-  onpointerdown?: (event: PointerEvent) => void;
-  onpointerenter?: (event: PointerEvent) => void;
-  onpointerleave?: (event: PointerEvent) => void;
-  onpointermove?: (event: PointerEvent) => void;
-  onpointerout?: (event: PointerEvent) => void;
-  onpointerover?: (event: PointerEvent) => void;
-  onpointerup?: (event: PointerEvent) => void;
+  onpointercancel?: (event: TypedEvent<E, PointerEvent>) => void;
+  onpointerdown?: (event: TypedEvent<E, PointerEvent>) => void;
+  onpointerenter?: (event: TypedEvent<E, PointerEvent>) => void;
+  onpointerleave?: (event: TypedEvent<E, PointerEvent>) => void;
+  onpointermove?: (event: TypedEvent<E, PointerEvent>) => void;
+  onpointerout?: (event: TypedEvent<E, PointerEvent>) => void;
+  onpointerover?: (event: TypedEvent<E, PointerEvent>) => void;
+  onpointerup?: (event: TypedEvent<E, PointerEvent>) => void;
 
   // Wheel events
-  onwheel?: (event: WheelEvent) => void;
+  onwheel?: (event: TypedEvent<E, WheelEvent>) => void;
 
   // Clipboard events
-  oncopy?: (event: ClipboardEvent) => void;
-  oncut?: (event: ClipboardEvent) => void;
-  onpaste?: (event: ClipboardEvent) => void;
+  oncopy?: (event: TypedEvent<E, ClipboardEvent>) => void;
+  oncut?: (event: TypedEvent<E, ClipboardEvent>) => void;
+  onpaste?: (event: TypedEvent<E, ClipboardEvent>) => void;
 
   // Animation events
-  onanimationcancel?: (event: AnimationEvent) => void;
-  onanimationend?: (event: AnimationEvent) => void;
-  onanimationiteration?: (event: AnimationEvent) => void;
-  onanimationstart?: (event: AnimationEvent) => void;
+  onanimationcancel?: (event: TypedEvent<E, AnimationEvent>) => void;
+  onanimationend?: (event: TypedEvent<E, AnimationEvent>) => void;
+  onanimationiteration?: (event: TypedEvent<E, AnimationEvent>) => void;
+  onanimationstart?: (event: TypedEvent<E, AnimationEvent>) => void;
 
   // Transition events
-  ontransitioncancel?: (event: TransitionEvent) => void;
-  ontransitionend?: (event: TransitionEvent) => void;
-  ontransitionrun?: (event: TransitionEvent) => void;
-  ontransitionstart?: (event: TransitionEvent) => void;
+  ontransitioncancel?: (event: TypedEvent<E, TransitionEvent>) => void;
+  ontransitionend?: (event: TypedEvent<E, TransitionEvent>) => void;
+  ontransitionrun?: (event: TypedEvent<E, TransitionEvent>) => void;
+  ontransitionstart?: (event: TypedEvent<E, TransitionEvent>) => void;
 
   // Selection events
-  onselect?: (event: Event) => void;
-  onselectionchange?: (event: Event) => void;
-  onselectstart?: (event: Event) => void;
+  onselect?: (event: TypedEvent<E, Event>) => void;
+  onselectionchange?: (event: TypedEvent<E, Event>) => void;
+  onselectstart?: (event: TypedEvent<E, Event>) => void;
 
   // Composition events (IME)
-  oncompositionend?: (event: CompositionEvent) => void;
-  oncompositionstart?: (event: CompositionEvent) => void;
-  oncompositionupdate?: (event: CompositionEvent) => void;
+  oncompositionend?: (event: TypedEvent<E, CompositionEvent>) => void;
+  oncompositionstart?: (event: TypedEvent<E, CompositionEvent>) => void;
+  oncompositionupdate?: (event: TypedEvent<E, CompositionEvent>) => void;
 
   // Media events
-  onabort?: (event: Event) => void;
-  oncanplay?: (event: Event) => void;
-  oncanplaythrough?: (event: Event) => void;
-  ondurationchange?: (event: Event) => void;
-  onemptied?: (event: Event) => void;
-  onended?: (event: Event) => void;
-  onerror?: (event: ErrorEvent) => void;
-  onloadeddata?: (event: Event) => void;
-  onloadedmetadata?: (event: Event) => void;
-  onloadstart?: (event: Event) => void;
-  onpause?: (event: Event) => void;
-  onplay?: (event: Event) => void;
-  onplaying?: (event: Event) => void;
-  onprogress?: (event: ProgressEvent) => void;
-  onratechange?: (event: Event) => void;
-  onseeked?: (event: Event) => void;
-  onseeking?: (event: Event) => void;
-  onstalled?: (event: Event) => void;
-  onsuspend?: (event: Event) => void;
-  ontimeupdate?: (event: Event) => void;
-  onvolumechange?: (event: Event) => void;
-  onwaiting?: (event: Event) => void;
+  onabort?: (event: TypedEvent<E, Event>) => void;
+  oncanplay?: (event: TypedEvent<E, Event>) => void;
+  oncanplaythrough?: (event: TypedEvent<E, Event>) => void;
+  ondurationchange?: (event: TypedEvent<E, Event>) => void;
+  onemptied?: (event: TypedEvent<E, Event>) => void;
+  onended?: (event: TypedEvent<E, Event>) => void;
+  onerror?: (event: TypedEvent<E, ErrorEvent>) => void;
+  onloadeddata?: (event: TypedEvent<E, Event>) => void;
+  onloadedmetadata?: (event: TypedEvent<E, Event>) => void;
+  onloadstart?: (event: TypedEvent<E, Event>) => void;
+  onpause?: (event: TypedEvent<E, Event>) => void;
+  onplay?: (event: TypedEvent<E, Event>) => void;
+  onplaying?: (event: TypedEvent<E, Event>) => void;
+  onprogress?: (event: TypedEvent<E, ProgressEvent>) => void;
+  onratechange?: (event: TypedEvent<E, Event>) => void;
+  onseeked?: (event: TypedEvent<E, Event>) => void;
+  onseeking?: (event: TypedEvent<E, Event>) => void;
+  onstalled?: (event: TypedEvent<E, Event>) => void;
+  onsuspend?: (event: TypedEvent<E, Event>) => void;
+  ontimeupdate?: (event: TypedEvent<E, Event>) => void;
+  onvolumechange?: (event: TypedEvent<E, Event>) => void;
+  onwaiting?: (event: TypedEvent<E, Event>) => void;
 
   // Loading events
-  onload?: (event: Event) => void;
-  onloadend?: (event: ProgressEvent) => void;
+  onload?: (event: TypedEvent<E, Event>) => void;
+  onloadend?: (event: TypedEvent<E, ProgressEvent>) => void;
 
   // Scroll events
-  onscroll?: (event: Event) => void;
-  onscrollend?: (event: Event) => void;
+  onscroll?: (event: TypedEvent<E, Event>) => void;
+  onscrollend?: (event: TypedEvent<E, Event>) => void;
 
   // Resize events
-  onresize?: (event: UIEvent) => void;
+  onresize?: (event: TypedEvent<E, UIEvent>) => void;
 
   // Toggle events
-  ontoggle?: (event: Event) => void;
+  ontoggle?: (event: TypedEvent<E, Event>) => void;
 };
 
 /**

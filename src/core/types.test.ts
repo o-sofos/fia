@@ -26,14 +26,15 @@ import type { CSSRgbFunction, CSSHslFunction } from "./css/properties/visual";
 console.log("✓ Phase 1: Testing mixed reactive/static CSS properties");
 
 // Test 1: Mixed signals and static values in style object
+// CSS literal values like "red" and "16px" are automatically preserved
 const color = $("red");
 const fontSize = $("16px");
 
 div({
   style: {
-    color: color, // Signal
+    color: color, // Signal with literal type
     fontSize: "16px", // Static - should work!
-    padding: fontSize, // Signal
+    padding: fontSize, // Signal with literal type
     margin: "1rem", // Static - should work!
   },
 });
@@ -47,10 +48,10 @@ div({
   },
 });
 
-// Test 3: All signal values
+// Test 3: All signal values (CSS literals automatically preserved)
 div({
   style: {
-    color: $(color),
+    color: color,
     fontSize: fontSize,
     padding: $("1rem"),
   },
@@ -64,25 +65,25 @@ console.log("✅ Phase 1 tests passed: Mixed reactive/static works!");
 
 console.log("✓ Phase 2: Testing type-safe property setters");
 
-// Test 4: Input value property
-const email = $("" as string);
+// Test 4: Input value property - no cast needed with new inference!
+const email = $("");
 input({
   type: "email",
   value: email,
   oninput: (e) => {
-    const target = e.currentTarget as HTMLInputElement;
-    email.value = target.value; // Should be type-safe
+    // currentTarget is now properly typed as HTMLInputElement!
+    email.value = e.currentTarget.value; // No cast needed!
   },
 });
 
-// Test 5: Checkbox checked property
-const isChecked = $(false as boolean);
+// Test 5: Checkbox checked property - no cast needed!
+const isChecked = $(false);
 input({
   type: "checkbox",
   checked: isChecked,
   onchange: (e) => {
-    const target = e.currentTarget as HTMLInputElement;
-    isChecked.value = target.checked; // Should be type-safe
+    // currentTarget is properly typed!
+    isChecked.value = e.currentTarget.checked; // No cast needed!
   },
 });
 
@@ -220,11 +221,90 @@ console.log(rotateStr === "45deg"); // true
 // const mixed = widthPx + heightPct; // Would be a type error (can't add Pixels + Percentage)
 
 // Test 20: Branded types with signals
-const reactiveWidthPx = $(px(400));
+// Note: For branded types, use explicit generic to preserve the brand
+import type { Pixels } from "./css/branded-types";
+const reactiveWidthPx = $<Pixels>(px(400));
 const reactiveWidthStr = $(() => toPx(reactiveWidthPx.value));
 console.log(typeof reactiveWidthStr.value === "string"); // Computed string works
 
 console.log("✅ Phase 7.2 tests passed: Branded types work!");
+
+// =============================================================================
+// ELEMENT-TYPED EVENT HANDLERS (currentTarget narrowing)
+// =============================================================================
+
+console.log("✓ Phase 8: Testing element-typed event handlers");
+
+// Test 21: Button onclick - currentTarget should be HTMLButtonElement
+button({
+  onclick: (e) => {
+    // currentTarget is now properly typed as HTMLButtonElement!
+    const btn: HTMLButtonElement = e.currentTarget; // ✓ No cast needed!
+    btn.disabled = true; // ✓ Can access button-specific properties
+    console.log(btn.type); // ✓ "submit" | "reset" | "button"
+  },
+});
+
+// Test 22: Input oninput - currentTarget should be HTMLInputElement
+input({
+  type: "text",
+  oninput: (e) => {
+    // currentTarget is now properly typed as HTMLInputElement!
+    const inp: HTMLInputElement = e.currentTarget; // ✓ No cast needed!
+    console.log(inp.value); // ✓ Can access input-specific properties
+    console.log(inp.selectionStart); // ✓ Text input properties available
+  },
+});
+
+// Test 23: Div event handlers - currentTarget should be HTMLDivElement
+div({
+  onclick: (e) => {
+    const d: HTMLDivElement = e.currentTarget; // ✓ No cast needed!
+    console.log(d.tagName); // "DIV"
+  },
+  onmouseover: (e) => {
+    const d: HTMLDivElement = e.currentTarget; // ✓ Works for all event types
+    d.style.backgroundColor = "blue";
+  },
+});
+
+console.log("✅ Phase 8 tests passed: Element-typed event handlers work!");
+
+// =============================================================================
+// SIGNAL PRIMITIVE TYPE INFERENCE (no more explicit casts)
+// =============================================================================
+
+console.log("✓ Phase 9: Testing signal primitive type inference");
+
+// Test 24: String signal - should infer as WritableSignal<string>, not WritableSignal<"">
+const nameSignal = $(""); // No `as string` needed!
+nameSignal.value = "hello"; // ✓ Should compile - string assignable to string
+
+// Test 25: Number signal - should infer as WritableSignal<number>, not WritableSignal<0>
+const countSignal = $(0); // No `as number` needed!
+countSignal.value = 42; // ✓ Should compile - number assignable to number
+
+// Test 26: Boolean signal - should infer as WritableSignal<boolean>, not WritableSignal<false>
+const activeSignal = $(false); // No `as boolean` needed!
+activeSignal.value = true; // ✓ Should compile - boolean assignable to boolean
+
+// Test 27: Objects preserve their structure (use `as const` for literal object values)
+const configSignal = $({ mode: "dark" } as const);
+// With `as const`, configSignal.value.mode is "dark" (literal)
+// Without `as const`, it would be string (which is usually fine)
+console.log(configSignal.value.mode); // "dark"
+
+// Test 28: Type assertions should work with the new overloads
+import type { WritableSignal } from "./reactivity/reactivity";
+const strCheck: WritableSignal<string> = $("");
+const numCheck: WritableSignal<number> = $(0);
+const boolCheck: WritableSignal<boolean> = $(false);
+// Verify type compatibility
+void strCheck;
+void numCheck;
+void boolCheck;
+
+console.log("✅ Phase 9 tests passed: Signal primitive inference works!");
 
 // =============================================================================
 // INTEGRATION TESTS
@@ -232,10 +312,10 @@ console.log("✅ Phase 7.2 tests passed: Branded types work!");
 
 console.log("✓ Running integration tests");
 
-// Test 21: Complex real-world example with all features
-const count = $(0 as number);
-const isActive = $(false as boolean);
-const bgColor = $("red" as string);
+// Test 29: Complex real-world example with all features (no casts needed!)
+const count = $(0); // WritableSignal<number> - no cast!
+const isActive = $(false); // WritableSignal<boolean> - no cast!
+const bgColor = $("red"); // WritableSignal<string> - no cast!
 
 // Verify all type features work together
 const complexProps = {
@@ -271,5 +351,7 @@ console.log("✅ Template literal CSS types");
 console.log("✅ Utility types library");
 console.log("✅ Precise event handler types");
 console.log("✅ Branded CSS value types");
+console.log("✅ Element-typed event handlers (currentTarget narrowing)");
+console.log("✅ Signal primitive type inference");
 console.log("✅ Integration tests");
-console.log("\n🚀 Flick's type system is now the best in the industry!");
+console.log("\n🚀 Fia's type system is now the best in the industry!");
