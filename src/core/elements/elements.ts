@@ -3,9 +3,9 @@
  *
  * Factory functions for all HTML elements that auto-mount to parent context.
  * Full TypeScript autocomplete with strict attribute types.
- * 
+ *
  * Unified API - all elements follow the same pattern.
- * 
+ *
  * Overloads:
  * 1. element()
  * 2. element(content)
@@ -17,9 +17,20 @@
  * 8. element(content, props, children)
  */
 
-import { pushExecutionContext, popExecutionContext, getCurrentExecutionContext } from "../context/context";
-import { $, $e, type Signal, type MaybeSignal, isSignal } from "../reactivity/reactivity";
+import {
+  pushExecutionContext,
+  popExecutionContext,
+  getCurrentExecutionContext,
+} from "../context/context";
+import {
+  $,
+  $e,
+  type Signal,
+  type MaybeSignal,
+  isSignal,
+} from "../reactivity/reactivity";
 import type { ElementProps } from "../attributes/html-attributes";
+import type { ReactiveCSSProperties } from "../css/css-types";
 
 export { type MaybeSignal, isSignal };
 export type { ElementProps };
@@ -40,25 +51,53 @@ export type Child =
   | null
   | undefined;
 
-
 // =============================================================================
 // ELEMENT FACTORY TYPE
 // =============================================================================
 
 /**
+ * Merges user-defined style properties with full ReactiveCSSProperties.
+ * For defined properties: union of literal AND full type (allows narrowed reads + full writes).
+ * For undefined properties: uses the full ReactiveCSSProperties type.
+ * -readonly ensures properties remain writable.
+ */
+type MergedStyle<S> = S extends object
+  ? {
+      -readonly [K in keyof ReactiveCSSProperties | keyof S]: K extends keyof S
+        ? S[K] | (K extends keyof ReactiveCSSProperties ? ReactiveCSSProperties[K] : never)
+        : K extends keyof ReactiveCSSProperties
+          ? ReactiveCSSProperties[K]
+          : never;
+    }
+  : ReactiveCSSProperties;
+
+/**
+ * Processes props to merge style property with full CSS types.
+ * If props contain a style object, it's merged with ReactiveCSSProperties.
+ */
+type ProcessedProps<P> = P extends { style: infer S }
+  ? Omit<P, "style"> & { style: MergedStyle<S> }
+  : P;
+
+/**
  * Smart Element type that properly narrows properties from props.
  * Uses Omit to remove overlapping properties from the base element,
  * then merges with props to ensure narrower types (like literal strings) are preserved.
+ *
+ * Special handling for `style`: merges with ReactiveCSSProperties so all CSS
+ * properties are available, while keeping defined properties narrowed.
  */
-export type SmartElement<K extends keyof HTMLElementTagNameMap, P> =
-  Omit<HTMLElementTagNameMap[K], keyof P> & P & {
+export type SmartElement<K extends keyof HTMLElementTagNameMap, P> = Omit<
+  HTMLElementTagNameMap[K],
+  keyof P
+> &
+  ProcessedProps<P> & {
     // Internal marker for prop type preservation
     _props?: P;
   };
 
 // Shorthand for simple element type (no specific props inference needed for return usually)
 type E<K extends keyof HTMLElementTagNameMap> = HTMLElementTagNameMap[K];
-
 
 /**
  * Factory function for creating HTML elements with auto-mounting to parent context.
@@ -157,7 +196,7 @@ export interface ElementFactory<K extends keyof HTMLElementTagNameMap> {
    */
   <const P extends ElementProps<K>>(
     props: P,
-    children: (element: SmartElement<K, P>) => void
+    children: (element: SmartElement<K, P>) => void,
   ): SmartElement<K, P>;
 
   /**
@@ -168,7 +207,7 @@ export interface ElementFactory<K extends keyof HTMLElementTagNameMap> {
    */
   <const P extends ElementProps<K>>(
     content: MaybeSignal<string | number>,
-    props: P
+    props: P,
   ): SmartElement<K, P>;
 
   /**
@@ -179,7 +218,7 @@ export interface ElementFactory<K extends keyof HTMLElementTagNameMap> {
    */
   (
     content: MaybeSignal<string | number>,
-    children: ChildrenCallback<E<K>>
+    children: ChildrenCallback<E<K>>,
   ): E<K>;
 
   /**
@@ -192,7 +231,7 @@ export interface ElementFactory<K extends keyof HTMLElementTagNameMap> {
   <const P extends ElementProps<K>>(
     content: MaybeSignal<string | number>,
     props: P,
-    children: (element: SmartElement<K, P>) => void
+    children: (element: SmartElement<K, P>) => void,
   ): SmartElement<K, P>;
 }
 
@@ -320,13 +359,14 @@ function isDOMPropertyKey(key: string): key is DOMPropertyKey {
 function setElementProperty(
   element: HTMLElement,
   key: DOMPropertyKey,
-  value: unknown
+  value: unknown,
 ): void {
   switch (key) {
     case "value":
       if ("value" in element) {
-        (element as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement).value =
-          String(value ?? "");
+        (
+          element as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+        ).value = String(value ?? "");
       }
       break;
     case "checked":
@@ -399,7 +439,7 @@ function assignProp(element: HTMLElement, key: string, value: unknown): void {
 
 function applyProps<K extends keyof HTMLElementTagNameMap>(
   element: HTMLElementTagNameMap[K],
-  props: ElementProps<K>
+  props: ElementProps<K>,
 ): void {
   for (const [key, value] of Object.entries(props)) {
     if (value === null || value === undefined) continue;
@@ -574,7 +614,7 @@ function transformStyleValue(value: unknown): string {
 function setStyleProperty(
   style: CSSStyleDeclaration,
   property: string,
-  value: string
+  value: string,
 ): void {
   // CSS variables (custom properties) must use setProperty
   if (property.startsWith("--")) {
@@ -621,7 +661,11 @@ function applyStyle(element: HTMLElement, value: unknown): void {
       $e(() => {
         for (const [prop, val] of entries) {
           const resolvedValue = isSignal(val) ? val.value : val;
-          setStyleProperty(element.style, prop, transformStyleValue(resolvedValue));
+          setStyleProperty(
+            element.style,
+            prop,
+            transformStyleValue(resolvedValue),
+          );
         }
       });
     } else {
@@ -639,7 +683,7 @@ function applyStyle(element: HTMLElement, value: unknown): void {
 
 function applyContent(
   element: HTMLElement,
-  content: MaybeSignal<string | number>
+  content: MaybeSignal<string | number>,
 ): void {
   if (isSignal(content)) {
     const textNode = document.createTextNode("");
@@ -659,7 +703,7 @@ function applyContent(
 
 function executeChildren<E extends HTMLElement>(
   element: E,
-  children: ChildrenCallback<E>
+  children: ChildrenCallback<E>,
 ): void {
   pushExecutionContext(element);
   try {
@@ -675,17 +719,20 @@ function executeChildren<E extends HTMLElement>(
 
 /**
  * Creates an element factory for a specific HTML tag.
- * 
+ *
  * @param tag - The HTML tag name (e.g., "div", "span")
  * @returns An `ElementFactory` function for creating elements of that type
  */
 function createElement<K extends keyof HTMLElementTagNameMap>(
-  tag: K
+  tag: K,
 ): ElementFactory<K> {
   return (
-    arg1?: MaybeSignal<string | number> | ElementProps<K> | ChildrenCallback<E<K>>,
+    arg1?:
+      | MaybeSignal<string | number>
+      | ElementProps<K>
+      | ChildrenCallback<E<K>>,
     arg2?: ElementProps<K> | ChildrenCallback<E<K>>,
-    arg3?: ChildrenCallback<E<K>>
+    arg3?: ChildrenCallback<E<K>>,
   ): E<K> => {
     const element = document.createElement(tag);
 
@@ -751,12 +798,12 @@ function createElement<K extends keyof HTMLElementTagNameMap>(
 
 /**
  * Creates a void element factory (no children allowed).
- * 
+ *
  * @param tag - The HTML tag name (e.g., "input", "br")
  * @returns A `VoidElementFactory` function
  */
 function createVoidElement<K extends keyof HTMLElementTagNameMap>(
-  tag: K
+  tag: K,
 ): VoidElementFactory<K> {
   return (props?: ElementProps<K>): E<K> => {
     const element = document.createElement(tag);
@@ -771,7 +818,7 @@ function createVoidElement<K extends keyof HTMLElementTagNameMap>(
 // =============================================================================
 
 function isProps<K extends keyof HTMLElementTagNameMap>(
-  value: unknown
+  value: unknown,
 ): value is ElementProps<K> {
   return (
     typeof value === "object" &&
@@ -782,7 +829,7 @@ function isProps<K extends keyof HTMLElementTagNameMap>(
 }
 
 function isChildrenCallback<E extends HTMLElement>(
-  value: unknown
+  value: unknown,
 ): value is ChildrenCallback<E> {
   return typeof value === "function" && !isSignal(value);
 }

@@ -39,7 +39,7 @@ const buttonBase = {
 function Button(
   text: string,
   variant: "primary" | "secondary" = "primary",
-  onclick?: () => void
+  onclick?: () => void,
 ) {
   const style =
     variant === "primary"
@@ -89,7 +89,15 @@ function FeatureCard(icon: string, title: string, desc: string) {
         el.style.boxShadow = "0 4px 20px rgba(0,0,0,0.08)";
       },
     },
-    () => {
+    (divParent) => {
+      let isLoggedIn = false;
+
+      if (isLoggedIn) {
+        divParent.style.borderRadius = "0";
+      }
+
+      divParent.style.borderRadius;
+
       div(icon, {
         style: { fontSize: "2rem", marginBottom: "1rem" },
       });
@@ -107,7 +115,7 @@ function FeatureCard(icon: string, title: string, desc: string) {
           margin: "0",
         },
       });
-    }
+    },
   );
 }
 
@@ -127,7 +135,7 @@ function CodeBlock(codeText: string) {
     },
     () => {
       code(codeText);
-    }
+    },
   );
 }
 
@@ -165,35 +173,62 @@ function HeroSection() {
         },
       });
 
-      div({ style: { display: "flex", gap: "1rem", justifyContent: "center" } }, () => {
-        Button("Get Started", "primary", () => {
-          console.log("Get Started clicked!");
-        });
-        button("View on GitHub", {
-          style: {
-            padding: "0.75rem 1.5rem",
-            background: "rgba(255,255,255,0.15)",
-            color: "#fff",
-            border: "2px solid rgba(255,255,255,0.3)",
-            borderRadius: "8px",
-            fontWeight: "600",
-            fontSize: "1rem",
-            cursor: "pointer",
-          },
-        });
-      });
-    }
+      div(
+        { style: { display: "flex", gap: "1rem", justifyContent: "center" } },
+        () => {
+          Button("Get Started", "primary", () => {
+            console.log("Get Started clicked!");
+          });
+          button("View on GitHub", {
+            style: {
+              padding: "0.75rem 1.5rem",
+              background: "rgba(255,255,255,0.15)",
+              color: "#fff",
+              border: "2px solid rgba(255,255,255,0.3)",
+              borderRadius: "8px",
+              fontWeight: "600",
+              fontSize: "1rem",
+              cursor: "pointer",
+            },
+          });
+        },
+      );
+    },
   );
 }
 
 function FeaturesSection() {
   const features = [
-    { icon: "📦", title: "Zero Dependencies", desc: "No bloat. Just the code you need. Pure JavaScript all the way down." },
-    { icon: "🪶", title: "2KB Gzipped", desc: "Tiny footprint means faster load times and happier users." },
-    { icon: "🔒", title: "Type-Safe", desc: "Built with TypeScript for excellent DX and autocomplete." },
-    { icon: "⚡", title: "Reactive Signals", desc: "Fine-grained reactivity with automatic dependency tracking." },
-    { icon: "🚀", title: "No Build Step", desc: "Works directly in browsers. Just import and go." },
-    { icon: "🏎️", title: "Native Speed", desc: "Direct DOM manipulation. No virtual DOM overhead." },
+    {
+      icon: "📦",
+      title: "Zero Dependencies",
+      desc: "No bloat. Just the code you need. Pure JavaScript all the way down.",
+    },
+    {
+      icon: "🪶",
+      title: "2KB Gzipped",
+      desc: "Tiny footprint means faster load times and happier users.",
+    },
+    {
+      icon: "🔒",
+      title: "Type-Safe",
+      desc: "Built with TypeScript for excellent DX and autocomplete.",
+    },
+    {
+      icon: "⚡",
+      title: "Reactive Signals",
+      desc: "Fine-grained reactivity with automatic dependency tracking.",
+    },
+    {
+      icon: "🚀",
+      title: "No Build Step",
+      desc: "Works directly in browsers. Just import and go.",
+    },
+    {
+      icon: "🏎️",
+      title: "Native Speed",
+      desc: "Direct DOM manipulation. No virtual DOM overhead.",
+    },
   ];
 
   section(
@@ -227,9 +262,9 @@ function FeaturesSection() {
           features.forEach((f) => {
             FeatureCard(f.icon, f.title, f.desc);
           });
-        }
+        },
       );
-    }
+    },
   );
 }
 
@@ -268,14 +303,17 @@ function InteractiveDemoSection() {
         },
       });
 
-      p("These demos are powered by reactive signals - change a value and watch everything update.", {
-        style: {
-          textAlign: "center",
-          color: "#666",
-          marginBottom: "3rem",
-          fontSize: "1.1rem",
+      p(
+        "These demos are powered by reactive signals - change a value and watch everything update.",
+        {
+          style: {
+            textAlign: "center",
+            color: "#666",
+            marginBottom: "3rem",
+            fontSize: "1.1rem",
+          },
         },
-      });
+      );
 
       div(
         {
@@ -327,14 +365,17 @@ function InteractiveDemoSection() {
                     onclick: () => count.value--,
                   });
 
-                  span($(() => String(count.value)), {
-                    style: {
-                      fontSize: "3rem",
-                      fontWeight: "bold",
-                      minWidth: "80px",
-                      color: "#667eea",
+                  span(
+                    $(() => String(count.value)),
+                    {
+                      style: {
+                        fontSize: "3rem",
+                        fontWeight: "bold",
+                        minWidth: "80px",
+                        color: "#667eea",
+                      },
                     },
-                  });
+                  );
 
                   button("+", {
                     style: {
@@ -349,13 +390,16 @@ function InteractiveDemoSection() {
                     },
                     onclick: () => count.value++,
                   });
-                }
+                },
               );
 
-              p($(() => `Doubled: ${doubled.value}`), {
-                style: { color: "#666", margin: "0" },
-              });
-            }
+              p(
+                $(() => `Doubled: ${doubled.value}`),
+                {
+                  style: { color: "#666", margin: "0" },
+                },
+              );
+            },
           );
 
           // Color Picker Demo
@@ -369,7 +413,11 @@ function InteractiveDemoSection() {
             },
             () => {
               h3("Reactive Styles", {
-                style: { marginBottom: "1.5rem", color: "#333", textAlign: "center" },
+                style: {
+                  marginBottom: "1.5rem",
+                  color: "#333",
+                  textAlign: "center",
+                },
               });
 
               // Color preview box with reactive background
@@ -385,7 +433,11 @@ function InteractiveDemoSection() {
               });
 
               // RGB sliders
-              const SliderRow = (label: string, value: typeof r, color: string) => {
+              const SliderRow = (
+                label: string,
+                value: typeof r,
+                color: string,
+              ) => {
                 div(
                   {
                     style: {
@@ -406,24 +458,33 @@ function InteractiveDemoSection() {
                       value: String(value.value),
                       style: { flex: "1" },
                       oninput: (e) => {
-                        value.value = parseInt((e.target as HTMLInputElement).value);
+                        value.value = parseInt(
+                          (e.target as HTMLInputElement).value,
+                        );
                       },
                     });
-                    span($(() => String(value.value)), {
-                      style: { width: "35px", textAlign: "right", fontSize: "0.9rem" },
-                    });
-                  }
+                    span(
+                      $(() => String(value.value)),
+                      {
+                        style: {
+                          width: "35px",
+                          textAlign: "right",
+                          fontSize: "0.9rem",
+                        },
+                      },
+                    );
+                  },
                 );
               };
 
               SliderRow("R", r, "#e53935");
               SliderRow("G", g, "#43a047");
               SliderRow("B", b, "#1e88e5");
-            }
+            },
           );
-        }
+        },
       );
-    }
+    },
   );
 }
 
@@ -466,19 +527,22 @@ p($(() => \`Doubled: \${doubled.value}\`));`;
             },
           });
 
-          p("No JSX. No templates. No magic. Just JavaScript functions that create real DOM elements.", {
-            style: {
-              textAlign: "center",
-              opacity: "0.8",
-              marginBottom: "2.5rem",
-              fontSize: "1.1rem",
+          p(
+            "No JSX. No templates. No magic. Just JavaScript functions that create real DOM elements.",
+            {
+              style: {
+                textAlign: "center",
+                opacity: "0.8",
+                marginBottom: "2.5rem",
+                fontSize: "1.1rem",
+              },
             },
-          });
+          );
 
           CodeBlock(exampleCode);
-        }
+        },
       );
-    }
+    },
   );
 }
 
@@ -499,7 +563,7 @@ function FooterSection() {
       p("No dependencies. No compromises.", {
         style: { fontSize: "0.9rem", opacity: "0.7", margin: "0" },
       });
-    }
+    },
   );
 }
 
@@ -525,7 +589,7 @@ export default function LandingPage() {
       InteractiveDemoSection();
       CodeExampleSection();
       FooterSection();
-    }
+    },
   );
 }
 
