@@ -12,6 +12,7 @@ export type CSSLength =
     | "fit-content"
     | "max-content"
     | "min-content"
-    | CSSGlobalValues;
+    | CSSGlobalValues
+    | (string & {}); // Allows widened strings while preserving autocomplete
 
 export type CSSZIndex = "auto" | CSSGlobalValues | number | (string & {});
