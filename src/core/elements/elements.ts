@@ -30,10 +30,20 @@ import {
   isSignal,
 } from "../reactivity/reactivity";
 import type { ElementProps } from "../attributes/html-attributes";
-import type { ReactiveCSSProperties } from "../css/css-types";
+import type { StrictCSSProperties } from "../css/css-types";
 
 export { type MaybeSignal, isSignal };
 export type { ElementProps };
+
+/**
+ * Loose props type that doesn't constrain style to a specific CSS type.
+ * This allows `const P` to preserve literal types in style objects.
+ *
+ * Without this, the constraint `P extends ElementProps<K>` would widen
+ * `{ borderRadius: "1rem" }` to `ReactiveCSSProperties`, losing the literal.
+ */
+type LooseElementProps<K extends keyof HTMLElementTagNameMap> =
+  Omit<ElementProps<K>, "style"> & { style?: string | object | Signal<string> };
 
 export type Renderable = string | number | boolean | null | undefined;
 
@@ -56,28 +66,38 @@ export type Child =
 // =============================================================================
 
 /**
- * Merges user-defined style properties with full ReactiveCSSProperties.
- * For defined properties: union of literal AND full type (allows narrowed reads + full writes).
- * For undefined properties: uses the full ReactiveCSSProperties type.
- * -readonly ensures properties remain writable.
+ * Branded string type that prevents union simplification.
+ * This allows `"1rem" | AssignableString` to remain as-is instead of
+ * being simplified to just `string` or `CSSLength`.
+ */
+type AssignableString = string & { readonly __assignable?: unique symbol };
+
+/**
+ * Style type preserving literal types for defined properties.
+ * Shows the exact literal value AND allows assignment of other strings.
+ * The branded string type prevents TypeScript from simplifying the union.
+ */
+type NarrowedStyle<S> = {
+  -readonly [K in keyof S]: S[K] | AssignableString;
+};
+
+/**
+ * Combined style type: narrowed defined props + full CSS for others.
  */
 type MergedStyle<S> = S extends object
-  ? {
-      -readonly [K in keyof ReactiveCSSProperties | keyof S]: K extends keyof S
-        ? S[K] | (K extends keyof ReactiveCSSProperties ? ReactiveCSSProperties[K] : never)
-        : K extends keyof ReactiveCSSProperties
-          ? ReactiveCSSProperties[K]
-          : never;
-    }
-  : ReactiveCSSProperties;
+  ? NarrowedStyle<S> & Omit<StrictCSSProperties, keyof S>
+  : StrictCSSProperties;
 
 /**
  * Processes props to merge style property with full CSS types.
- * If props contain a style object, it's merged with ReactiveCSSProperties.
+ * Directly accesses P["style"] to preserve literal types from the input.
  */
 type ProcessedProps<P> = P extends { style: infer S }
-  ? Omit<P, "style"> & { style: MergedStyle<S> }
+  ? S extends object
+    ? Omit<P, "style"> & { style: MergedStyle<S> }
+    : P
   : P;
+
 
 /**
  * Smart Element type that properly narrows properties from props.
@@ -179,7 +199,7 @@ export interface ElementFactory<K extends keyof HTMLElementTagNameMap> {
    * @example div({ style: { color: "red" } })
    * @example input({ type: "email", placeholder: "Enter email" })
    */
-  <const P extends ElementProps<K>>(props: P): SmartElement<K, P>;
+  <const P extends LooseElementProps<K>>(props: P): SmartElement<K, P>;
 
   /**
    * Create element with children callback only.
@@ -194,7 +214,7 @@ export interface ElementFactory<K extends keyof HTMLElementTagNameMap> {
    * @param children - Function that creates child elements
    * @example div({ class: "card" }, () => { h3("Title"); p("Body"); })
    */
-  <const P extends ElementProps<K>>(
+  <const P extends LooseElementProps<K>>(
     props: P,
     children: (element: SmartElement<K, P>) => void,
   ): SmartElement<K, P>;
@@ -205,7 +225,7 @@ export interface ElementFactory<K extends keyof HTMLElementTagNameMap> {
    * @param props - Element attributes, styles, and event handlers
    * @example button("Click me", { onclick: () => alert("Hi!") })
    */
-  <const P extends ElementProps<K>>(
+  <const P extends LooseElementProps<K>>(
     content: MaybeSignal<string | number>,
     props: P,
   ): SmartElement<K, P>;
@@ -228,7 +248,7 @@ export interface ElementFactory<K extends keyof HTMLElementTagNameMap> {
    * @param children - Function that creates child elements
    * @example article("Title", { class: "post" }, () => { p("Body"); })
    */
-  <const P extends ElementProps<K>>(
+  <const P extends LooseElementProps<K>>(
     content: MaybeSignal<string | number>,
     props: P,
     children: (element: SmartElement<K, P>) => void,
