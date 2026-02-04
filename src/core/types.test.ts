@@ -294,15 +294,23 @@ const configSignal = $({ mode: "dark" } as const);
 // Without `as const`, it would be string (which is usually fine)
 console.log(configSignal.value.mode); // "dark"
 
-// Test 28: Type assertions should work with the new overloads
+// Test 28: Signals now preserve literal types (getter narrow, setter wide)
 import type { WritableSignal } from "./reactivity/reactivity";
-const strCheck: WritableSignal<string> = $("");
-const numCheck: WritableSignal<number> = $(0);
-const boolCheck: WritableSignal<boolean> = $(false);
+// Literal types are preserved - use explicit type param to widen if needed
+const strLiteral = $(""); // WritableSignal<"">
+const numLiteral = $(0); // WritableSignal<0>
+const boolLiteral = $(false); // WritableSignal<false>
+// Explicit widening when needed
+const strWide = $<string>(""); // WritableSignal<string>
+const numWide = $<number>(0); // WritableSignal<number>
+const boolWide = $<boolean>(false); // WritableSignal<boolean>
 // Verify type compatibility
-void strCheck;
-void numCheck;
-void boolCheck;
+void strLiteral;
+void numLiteral;
+void boolLiteral;
+void strWide;
+void numWide;
+void boolWide;
 
 console.log("✅ Phase 9 tests passed: Signal primitive inference works!");
 

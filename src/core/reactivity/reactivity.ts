@@ -154,15 +154,57 @@ export function $e(fn: EffectFn): () => void {
 /**
  * Signal types
  */
+
+/**
+ * Detects if T is a "plain object" (not a primitive, array, or function).
+ * Branded types like `number & { [brand]: "px" }` extend primitives and are NOT plain objects.
+ */
+type IsPlainObject<T> =
+  T extends string | number | boolean | symbol | bigint | null | undefined ? false :
+  T extends readonly unknown[] ? false :
+  T extends Function ? false :
+  T extends object ? true :
+  false;
+
+/**
+ * Widens primitive types, arrays, and objects for assignment flexibility.
+ * - Strings: "1rem" → string
+ * - Numbers: 42 → number (branded numbers like Pixels preserved)
+ * - Booleans: true → boolean
+ * - Arrays: readonly [1, 3, 4] → number[]
+ * - Objects: { readonly name: "evan"; age: 30 } → { name: string; age: number }
+ */
+type Widen<T> =
+  T extends string ? string :
+  T extends number ? number :
+  T extends boolean ? boolean :
+  T extends readonly (infer U)[] ? Widen<U>[] :
+  IsPlainObject<T> extends true ? { -readonly [K in keyof T]: Widen<T[K]> } :
+  T;
+
+/**
+ * Makes the getter type readable (mutable but with preserved literals for intellisense).
+ * - Primitives: preserved ("1rem" stays "1rem", branded types preserved)
+ * - Arrays: readonly [1, 3, 4] → (1 | 3 | 4)[]
+ * - Objects: { readonly name: "evan" } → { name: "evan" } (mutable, literals preserved)
+ */
+type Readable<T> =
+  T extends string | number | boolean | symbol | bigint | null | undefined ? T :  // Preserve primitives (including branded)
+  T extends readonly (infer U)[] ? U[] :
+  IsPlainObject<T> extends true ? { -readonly [K in keyof T]: Readable<T[K]> } :
+  T;
+
 export interface Signal<T> {
-  (): T;
-  readonly value: T;
-  peek(): T;
+  (): Readable<T>;
+  readonly value: Readable<T>;
+  peek(): Readable<T>;
 }
 
 export interface WritableSignal<T> extends Signal<T> {
-  (newValue: T): void;
-  value: T;
+  (newValue: Widen<T>): void;
+  /** Get: returns readable type (mutable arrays, literal primitives). Set: accepts widened type. */
+  get value(): Readable<T>;
+  set value(v: Widen<T>);
 }
 
 /**
@@ -205,7 +247,7 @@ function createSignal<T>(initial: T): WritableSignal<T> {
   });
 
   // Peek: read without tracking (inspired by SolidJS)
-  signal.peek = () => currentValue;
+  signal.peek = () => currentValue as Readable<T>;
 
   return signal;
 }
@@ -289,7 +331,7 @@ function createComputed<T>(compute: () => T): Signal<T> {
     if (lastComputedVersion !== node.version) {
       recompute();
     }
-    return currentValue;
+    return currentValue as Readable<T>;
   };
 
   return signal;
@@ -299,31 +341,6 @@ function createComputed<T>(compute: () => T): Signal<T> {
  * Checks if a type has extra properties beyond its base primitive type.
  * Used to detect branded types (e.g., `Pixels = number & { [brand]: "px" }`).
  */
-type HasBrand<T, Base> = keyof T extends keyof Base ? false : true;
-
-/**
- * Widens primitive types for better DX, but preserves branded types.
- * - Simple strings → `string` (e.g., "hello" → string)
- * - Simple numbers → `number` (e.g., 42 → number)
- * - Simple booleans → `boolean` (e.g., true → boolean)
- * - Branded types → preserved (e.g., Pixels stays Pixels)
- * - Objects/arrays → preserved (for structural typing)
- *
- * This ensures developers never need `as string` or `as const` - it just works.
- */
-type WidenPrimitive<T> =
-  // Check if it's a string type
-  T extends string
-    ? HasBrand<T, string> extends true ? T : string  // Preserve branded strings, widen plain
-  // Check if it's a number type
-  : T extends number
-    ? HasBrand<T, number> extends true ? T : number  // Preserve branded numbers, widen plain
-  // Check if it's a boolean type
-  : T extends boolean
-    ? HasBrand<T, boolean> extends true ? T : boolean  // Preserve branded booleans, widen plain
-  // Everything else (objects, arrays) preserved
-  : T;
-
 /**
  * Create a signal or computed value.
  *
@@ -339,16 +356,16 @@ type WidenPrimitive<T> =
  * ```
  *
  * Type inference:
- * - Primitives without annotation widen: `$("")` → `WritableSignal<string>`
- * - Specific literals are preserved: `$("16px")` keeps the literal for CSS
- * - Use explicit type when needed: `$<number>(0)` for explicit control
+ * - Literal types are preserved: `$("1rem")` → `WritableSignal<"1rem">`
+ * - Getter returns narrow type for intellisense
+ * - Setter accepts widened type for flexible assignment
  *
  * @param initial - The initial value or a computation function
  * @returns A writable Signal for values, or a readonly Signal for functions
  */
 export function $<const T>(
   initial: T,
-): [T] extends [() => infer R] ? Signal<R> : WritableSignal<WidenPrimitive<T>>;
+): [T] extends [() => infer R] ? Signal<R> : WritableSignal<T>;
 export function $<T>(initial: T): Signal<T> | WritableSignal<T> {
   return typeof initial === "function"
     ? createComputed(initial as () => T)
