@@ -52,3 +52,20 @@ export function getCurrentExecutionContext(): ExecutionContext {
 export function hasExecutionContext(): boolean {
   return executionContextStack.length > 0;
 }
+
+/**
+ * Debug the current execution context stack
+ * Logs the current stack state to the console
+ */
+export function debugContext(): void {
+  console.group("Fia Execution Context");
+  console.log("Stack Depth:", executionContextStack.length);
+  console.log("Current Context:", getCurrentExecutionContext());
+  console.table(executionContextStack.map((ctx, i) => ({
+    depth: i,
+    element: ctx instanceof HTMLElement ? ctx.tagName : "Unknown Context",
+    id: ctx instanceof HTMLElement ? ctx.id : undefined,
+    class: ctx instanceof HTMLElement ? ctx.className : undefined
+  })));
+  console.groupEnd();
+}

@@ -90,6 +90,7 @@ export {
     popExecutionContext as popContext,
     getCurrentExecutionContext as getCurrentContext,
     hasExecutionContext as hasContext,
+    debugContext,
     type ExecutionContext as Context,
 } from "./context/context";
 
