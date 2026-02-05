@@ -30,7 +30,7 @@ import {
   isSignal,
 } from "../reactivity/reactivity";
 import type { ElementProps } from "../attributes/html-attributes";
-import type { StrictCSSProperties } from "../css/css-types";
+import type { ReactiveCSSProperties } from "../css/css-types";
 
 export { type MaybeSignal, isSignal };
 export type { ElementProps };
@@ -42,8 +42,27 @@ export type { ElementProps };
  * Without this, the constraint `P extends ElementProps<K>` would widen
  * `{ borderRadius: "1rem" }` to `ReactiveCSSProperties`, losing the literal.
  */
+/**
+ * Helper to make Omit distributive over unions.
+ * This ensures that keys unique to specific union members (like 'capture' on file input)
+ * are preserved, and discriminated unions stay discriminated.
+ */
+type DistributiveOmit<T, K extends keyof any> = T extends any ? Omit<T, K> : never;
+
 type LooseElementProps<K extends keyof HTMLElementTagNameMap> =
-  Omit<ElementProps<K>, "style"> & { style?: string | object | Signal<string> };
+  DistributiveOmit<ElementProps<K>, "style"> & { style?: string | ReactiveCSSProperties | Signal<string> };
+
+/**
+ * Validates that all properties in P are present in Target or match allowable patterns (data-*).
+ * This prevents excess properties from being allowed by generic constraints.
+ */
+type ValidateProps<P, Target> = {
+  [K in keyof P]: K extends keyof Target
+  ? P[K]
+  : K extends `data-${string}`
+  ? P[K]
+  : never;
+};
 
 export type Renderable = string | number | boolean | null | undefined;
 
@@ -85,8 +104,8 @@ type NarrowedStyle<S> = {
  * Combined style type: narrowed defined props + full CSS for others.
  */
 type MergedStyle<S> = S extends object
-  ? NarrowedStyle<S> & Omit<StrictCSSProperties, keyof S>
-  : StrictCSSProperties;
+  ? NarrowedStyle<S> & Omit<ReactiveCSSProperties, keyof S>
+  : ReactiveCSSProperties;
 
 /**
  * Processes props to merge style property with full CSS types.
@@ -94,8 +113,8 @@ type MergedStyle<S> = S extends object
  */
 type ProcessedProps<P> = P extends { style: infer S }
   ? S extends object
-    ? Omit<P, "style"> & { style: MergedStyle<S> }
-    : P
+  ? Omit<P, "style"> & { style: MergedStyle<S> }
+  : P
   : P;
 
 
@@ -199,7 +218,7 @@ export interface ElementFactory<K extends keyof HTMLElementTagNameMap> {
    * @example div({ style: { color: "red" } })
    * @example input({ type: "email", placeholder: "Enter email" })
    */
-  <const P extends LooseElementProps<K>>(props: P): SmartElement<K, P>;
+  <const P extends LooseElementProps<K>>(props: P & ValidateProps<P, LooseElementProps<K>>): SmartElement<K, P>;
 
   /**
    * Create element with children callback only.
@@ -215,7 +234,7 @@ export interface ElementFactory<K extends keyof HTMLElementTagNameMap> {
    * @example div({ class: "card" }, () => { h3("Title"); p("Body"); })
    */
   <const P extends LooseElementProps<K>>(
-    props: P,
+    props: P & ValidateProps<P, LooseElementProps<K>>,
     children: (element: SmartElement<K, P>) => void,
   ): SmartElement<K, P>;
 
@@ -227,7 +246,7 @@ export interface ElementFactory<K extends keyof HTMLElementTagNameMap> {
    */
   <const P extends LooseElementProps<K>>(
     content: MaybeSignal<string | number>,
-    props: P,
+    props: P & ValidateProps<P, LooseElementProps<K>>,
   ): SmartElement<K, P>;
 
   /**
@@ -250,7 +269,7 @@ export interface ElementFactory<K extends keyof HTMLElementTagNameMap> {
    */
   <const P extends LooseElementProps<K>>(
     content: MaybeSignal<string | number>,
-    props: P,
+    props: P & ValidateProps<P, LooseElementProps<K>>,
     children: (element: SmartElement<K, P>) => void,
   ): SmartElement<K, P>;
 }

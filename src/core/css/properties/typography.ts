@@ -35,7 +35,7 @@ export type CSSLetterSpacing = "normal" | CSSGlobalValues | (string & {});
 export interface TypographyProperties {
     // We treat color as a string here to avoid circular dep with visual.ts which handles Color types fully
     // Detailed Color type is exported from visual.ts
-    color?: string | CSSGlobalValues | any; // 'any' or 'string' mainly to allow imports in css-types.ts to bind strict Color later
+    color?: string | object | CSSGlobalValues; // 'any' or 'string' mainly to allow imports in css-types.ts to bind strict Color later
 
     fontFamily?: string;
     fontSize?: CSSLength;

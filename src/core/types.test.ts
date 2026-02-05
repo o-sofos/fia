@@ -117,6 +117,15 @@ div({
   },
 });
 
+void rgbColor1;
+void rgbColor2;
+void rgbColor3;
+void rgbColor4;
+void hslColor1;
+void hslColor2;
+void hslColor3;
+void hslColor4;
+
 console.log("✅ Phase 3 tests passed: Template literal CSS types work!");
 
 // =============================================================================
@@ -129,18 +138,23 @@ console.log("✓ Phase 4: Testing utility types library");
 const testSignal = $("hello" as string);
 type UnwrappedType = UnwrapSignal<typeof testSignal>; // Should be string
 const unwrappedValue: UnwrappedType = "test"; // Should work
+void unwrappedValue;
 
 // Test 10: Signalize
 type User = { name: string; age: number };
 type ReactiveUser = Signalize<User>;
+// @ts-expect-error - Unused type
+type _ReactiveUser = ReactiveUser;
 // ReactiveUser should be { name: Signal<string>; age: Signal<number> }
 
 // Test 11: SignalizeKeys
 type PartialReactive = SignalizeKeys<User, "name">;
 // PartialReactive should be { name: Signal<string>; age: number }
+// @ts-expect-error - Unused type alias
+type _PartialReactive = PartialReactive;
 
 // Test 12: StyleProp helper
-const acceptsStyleProp = (style: StyleProp) => {
+const acceptsStyleProp = (_style: StyleProp) => {
   // Should accept both string and object
 };
 acceptsStyleProp("color: red");
@@ -148,7 +162,7 @@ acceptsStyleProp({ color: "red" });
 acceptsStyleProp({ color: $(color), fontSize: "16px" });
 
 // Test 13: ClassProp helper
-const acceptsClassProp = (className: ClassProp) => {
+const acceptsClassProp = (_className: ClassProp) => {
   // Should accept string or object
 };
 acceptsClassProp("active");
@@ -295,7 +309,6 @@ const configSignal = $({ mode: "dark" } as const);
 console.log(configSignal.value.mode); // "dark"
 
 // Test 28: Signals now preserve literal types (getter narrow, setter wide)
-import type { WritableSignal } from "./reactivity/reactivity";
 // Literal types are preserved - use explicit type param to widen if needed
 const strLiteral = $(""); // WritableSignal<"">
 const numLiteral = $(0); // WritableSignal<0>

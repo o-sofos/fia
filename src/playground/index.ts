@@ -1,4 +1,4 @@
-import { $, button, form, input } from "../core/mod";
+import { $, button, form, input, div } from "../core/mod";
 
 // Best Practice: Group related signals in a state factory or class
 // This keeps signals fine-grained (performance) but organized (maintainability).
@@ -66,7 +66,8 @@ export default () => {
       style: {
         opacity: $(() => formState.isValid.value ? "1" : "0.5"),
         cursor: $(() => formState.isValid.value ? "pointer" : "not-allowed"),
-        marginTop: "1rem"
+        marginTop: "1rem",
+        display: "contents"
       },
 
       onclick: (e) => {

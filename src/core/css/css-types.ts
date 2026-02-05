@@ -1,3 +1,4 @@
+
 import type { Signal } from "../reactivity/reactivity.ts";
 import type { BoxModelProperties } from "./properties/box-model.ts";
 import type { FlexGridProperties } from "./properties/flex-grid.ts";
@@ -153,37 +154,21 @@ export interface StrictCSSProperties extends
  *
  * For best DX, signals with widened types (Signal<string>, Signal<number>) are also
  * accepted for CSS properties, so developers never need type annotations.
- *
- * @example
- * const color = $("red");     // WritableSignal<string>
- * const size = $("16px");     // WritableSignal<string>
- * div({
- *   style: {
- *     color: color,           // Signal<string> ✓ (widened, still works!)
- *     fontSize: size,         // Signal<string> ✓
- *     padding: "1rem",        // Static value ✓
- *   }
- * });
  */
 export type MixedReactiveProperties<T> = {
     [K in keyof T]:
-        | T[K]
-        | Signal<NonNullable<T[K]>>
-        // Accept Signal<string> for string-based properties (allows widened signals)
-        | (NonNullable<T[K]> extends string ? Signal<string> : never)
-        // Accept Signal<number> for number-based properties
-        | (NonNullable<T[K]> extends number ? Signal<number> : never);
+    | T[K]
+    | Signal<NonNullable<T[K]>>
+    // Accept Signal<string> for string-based properties (allows widened signals)
+    | (NonNullable<T[K]> extends string ? Signal<string> : never)
+    // Accept Signal<number> for number-based properties
+    | (NonNullable<T[K]> extends number ? Signal<number> : never);
 };
 
 /**
  * Reactive CSS properties allowing signals OR static values for any property.
  * This is the main type for style objects in Flick - it supports mixing reactive
  * and static values in the same object.
- *
- * @example
- * // All of these work:
- * { color: "red" }                           // All static
- * { color: $(myColor) }                      // All signals
- * { color: $(myColor), fontSize: "16px" }    // Mixed! ✓
  */
 export type ReactiveCSSProperties = MixedReactiveProperties<StrictCSSProperties>;
+// export type ReactiveCSSProperties = Partial<StrictCSSProperties>;

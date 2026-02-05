@@ -23,7 +23,8 @@
     "noEmitOnError": true,
     "incremental": true,
     "tsBuildInfoFile": "./.tsbuildinfo",
+    "downlevelIteration": true
   },
   "include": ["src"],
-  "exclude": ["node_modules", "dist", "benchmark_repo"]
+  "exclude": ["node_modules", "dist", "benchmark_repo", "**/*.test.ts"]
 }

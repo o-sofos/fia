@@ -271,8 +271,8 @@ describe("Element System - Unified API", () => {
             let blurred = false;
 
             const el = input({
-                onFocus: () => { focused = true; },
-                onBlur: () => { blurred = true; },
+                onfocus: () => { focused = true; },
+                onblur: () => { blurred = true; },
             });
 
             el.dispatchEvent(new FocusEvent("focus"));

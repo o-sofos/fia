@@ -1,5 +1,5 @@
 
-import { type Signal, effect } from "./reactivity";
+import { type Signal, $e as effect } from "./reactivity/reactivity";
 
 /**
  * optimized keyed list reconciliation.

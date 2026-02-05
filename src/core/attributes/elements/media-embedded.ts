@@ -1,4 +1,4 @@
-import { controlsList } from "happy-dom/lib/PropertySymbol";
+
 import type { MaybeSignal } from "../../reactivity/reactivity.ts";
 import type { GlobalAttributes } from "./common.ts";
 import type {
