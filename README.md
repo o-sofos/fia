@@ -21,6 +21,7 @@ Most frameworks add layers of abstraction between you and the DOM. Fia gives you
 - 🔒 **Zero dependencies** - No supply chain risks, no version conflicts
 - 📘 **Fully typed** - Complete TypeScript support with autocomplete
 - 🚀 **No build required** - Import from JSR and start building
+- ⚡ **Automatic batching** - Children are batched into single DOM insertions
 
 ## 🧠 Philosophy
 
@@ -166,6 +167,23 @@ ul(() => {
   li("Item 2");
 });
 ```
+
+---
+
+## ⚡ Performance
+
+### Automatic Fragment Batching
+
+Fia automatically batches all children into a `DocumentFragment` before inserting into the DOM. This means:
+
+```typescript
+ul(() => {
+  // All 1000 items = 1 DOM insertion, not 1000
+  items.forEach(item => li(item.name));
+});
+```
+
+**No manual optimization needed** - every children callback is automatically batched, eliminating layout thrashing.
 
 ---
 
