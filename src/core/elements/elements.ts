@@ -23,7 +23,6 @@ import {
   getCurrentExecutionContext,
 } from "../context/context";
 import {
-  $,
   $e,
   type Signal,
   type MaybeSignal,
@@ -716,41 +715,6 @@ function applyStyle(element: HTMLElement, value: unknown): void {
   }
 }
 
-// =============================================================================
-// CONTENT APPLICATION
-// =============================================================================
-
-function applyContent(
-  element: HTMLElement,
-  content: MaybeSignal<string | number>,
-): void {
-  if (isSignal(content)) {
-    const textNode = document.createTextNode("");
-    $e(() => {
-      const v = content.value;
-      textNode.textContent = v == null ? "" : String(v);
-    });
-    element.appendChild(textNode);
-  } else {
-    element.appendChild(document.createTextNode(String(content)));
-  }
-}
-
-// =============================================================================
-// CHILDREN EXECUTION
-// =============================================================================
-
-function executeChildren<E extends HTMLElement>(
-  element: E,
-  children: ChildrenCallback<E>,
-): void {
-  pushExecutionContext(element);
-  try {
-    children(element);
-  } finally {
-    popExecutionContext();
-  }
-}
 
 // =============================================================================
 // ELEMENT FACTORY
@@ -758,75 +722,51 @@ function executeChildren<E extends HTMLElement>(
 
 /**
  * Creates an element factory for a specific HTML tag.
+ * 
+ * Simplified API with 4 overloads:
+ * 1. el() - empty element
+ * 2. el({ props }) - props only
+ * 3. el(() => {}) - children only  
+ * 4. el({ props }, () => {}) - props + children
  *
  * @param tag - The HTML tag name (e.g., "div", "span")
  * @returns An `ElementFactory` function for creating elements of that type
  */
 function createElement<K extends keyof HTMLElementTagNameMap>(
   tag: K,
-): ElementFactory<K> {
+): (
+  propsOrChildren?: ElementProps<K> | ChildrenCallback<E<K>>,
+  children?: ChildrenCallback<E<K>>,
+) => E<K> {
   return (
-    arg1?:
-      | MaybeSignal<string | number>
-      | ElementProps<K>
-      | ChildrenCallback<E<K>>,
-    arg2?: ElementProps<K> | ChildrenCallback<E<K>>,
-    arg3?: ChildrenCallback<E<K>>,
+    arg1?: ElementProps<K> | ChildrenCallback<E<K>>,
+    arg2?: ChildrenCallback<E<K>>,
   ): E<K> => {
     const element = document.createElement(tag);
 
-    // Parse arguments based on types
-    let content: MaybeSignal<string | number> | undefined;
+    // Parse arguments - simplified to 4 patterns
     let props: ElementProps<K> | undefined;
     let children: ChildrenCallback<E<K>> | undefined;
 
     if (arg1 === undefined) {
       // 1. element()
-    } else if (isContent(arg1)) {
-      content = arg1;
-      if (arg2 === undefined) {
-        // 2. element(content)
-      } else if (isProps<K>(arg2)) {
-        props = arg2;
-        if (arg3 !== undefined) {
-          // 8. element(content, props, children)
-          children = arg3;
-        }
-        // else 6. element(content, props)
-      } else if (isChildrenCallback<E<K>>(arg2)) {
-        // 7. element(content, children)
-        children = arg2;
-      }
-    } else if (isProps<K>(arg1)) {
-      props = arg1;
-      if (isChildrenCallback<E<K>>(arg2)) {
-        // 5. element(props, children)
-        children = arg2;
-      }
-      // else 3. element(props)
     } else if (isChildrenCallback<E<K>>(arg1)) {
-      // 4. element(children)
+      // 3. element(children)
       children = arg1;
+    } else if (isProps<K>(arg1)) {
+      // 2. element(props) or 4. element(props, children)
+      props = arg1;
+      if (arg2 !== undefined) {
+        children = arg2;
+      }
     }
 
-    // Apply in order: props, content, children
+    // Apply props
     if (props) {
       applyProps(element, props);
     }
 
-    if (content !== undefined) {
-      // Auto-wrap zero-arity functions in signals for reactivity
-      if (typeof content === "function" && !isSignal(content)) {
-        // It's a thunk, wrap it in a computed
-        applyContent(element, $(content as () => string));
-      } else {
-        applyContent(element, content);
-      }
-    }
-
     // Execute children with implicit fragment batching
-    // All child elements are collected in a fragment first,
-    // then appended to the element in a single DOM operation
     if (children) {
       const frag = document.createDocumentFragment();
       pushExecutionContext(frag);
@@ -838,7 +778,7 @@ function createElement<K extends keyof HTMLElementTagNameMap>(
       element.appendChild(frag);
     }
 
-    // Mount to current context (after children are ready)
+    // Mount to current context
     getCurrentExecutionContext().appendChild(element);
 
     return element;
@@ -883,22 +823,6 @@ function isChildrenCallback<E extends HTMLElement>(
   return typeof value === "function" && !isSignal(value);
 }
 
-// Helper to check for zero-arity functions (thunks) that returns primitives
-// NOTE: We can't reliably detect if a function returns a primitive vs executes side effects
-// at runtime without executing it. So we rely on the argument position instead.
-// Content thunks should ONLY be detected when explicitly in content position.
-function isContentThunk(value: unknown): value is () => string | number {
-  return false; // Disabled - use children callback detection instead
-}
-
-function isContent(value: unknown): value is MaybeSignal<string | number> {
-  return (
-    typeof value === "string" ||
-    typeof value === "number" ||
-    isSignal(value) ||
-    isContentThunk(value)
-  );
-}
 
 // =============================================================================
 // ELEMENT EXPORTS

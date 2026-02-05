@@ -41,9 +41,10 @@ export function Contact() {
           boxShadow: "0 4px 6px rgba(0,0,0,0.1)"
         }
       }, () => {
-        h2("Message Sent! 🚀", { style: { margin: "0 0 1rem 0" } });
-        p("Thanks so much. We'll be in touch soon.");
-        button("Send another", {
+        h2({ textContent: "Message Sent! 🚀", style: { margin: "0 0 1rem 0" } });
+        p({ textContent: "Thanks so much. We'll be in touch soon." });
+        button({
+          textContent: "Send another",
           onclick: () => sent.value = false,
           style: {
             marginTop: "1rem",
@@ -75,10 +76,10 @@ export function Contact() {
         message.value = "";
       }
     }, () => {
-      h2("Contact Us", { style: { textAlign: "center", marginBottom: "1rem" } });
+      h2({ textContent: "Contact Us", style: { textAlign: "center", marginBottom: "1rem" } });
 
       div({ style: { display: "flex", flexDirection: "column", gap: "0.5rem" } }, () => {
-        p("Email", { style: { margin: "0", fontSize: "0.9rem", fontWeight: "bold" } });
+        p({ textContent: "Email", style: { margin: "0", fontSize: "0.9rem", fontWeight: "bold" } });
         input({
           type: "email",
           placeholder: "hello@example.com",
@@ -89,7 +90,7 @@ export function Contact() {
       });
 
       div({ style: { display: "flex", flexDirection: "column", gap: "0.5rem" } }, () => {
-        p("Message", { style: { margin: "0", fontSize: "0.9rem", fontWeight: "bold" } });
+        p({ textContent: "Message", style: { margin: "0", fontSize: "0.9rem", fontWeight: "bold" } });
         textarea({
           placeholder: "How can we help?",
           value: message.value,
@@ -98,7 +99,8 @@ export function Contact() {
         });
       });
 
-      button("Send Message", {
+      button({
+        textContent: "Send Message",
         type: "submit",
         style: {
           padding: "1rem",

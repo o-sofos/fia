@@ -11,18 +11,20 @@ export default () => {
   const isAdult = $(() => state.age >= 18);
 
   div(() => {
-    h1($(() => state.name));
-    h1($(() => `Age: ${state.age}`));
+    h1({ textContent: $(() => state.name) });
+    h1({ textContent: $(() => `Age: ${state.age}`) });
 
-    button('+', {
-      onclick: () => state.age++,  // Direct mutation!
+    button({
+      textContent: "+ 1",
+      onclick: () => state.age++,
     });
 
-    button('-', {
+    button({
+      textContent: "- 1",
       onclick: () => state.age--,
     });
 
     // Computed updates automatically when state.age changes
-    p($(() => isAdult.value ? "Adult" : "Minor"));
+    p({ textContent: $(() => isAdult() ? "Adult" : "Minor") });
   });
 };

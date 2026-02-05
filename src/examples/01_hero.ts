@@ -23,7 +23,8 @@ export function Hero() {
       },
     },
     () => {
-      h1("Build Faster with Fia", {
+      h1({
+        textContent: "Build Faster with Fia",
         style: {
           fontSize: "3.5rem",
           marginBottom: "1rem",
@@ -31,18 +32,16 @@ export function Hero() {
         },
       });
 
-      p(
-        "The 2KB framework for modern web apps. No JSX. No VDOM. Just JavaScript.",
-        {
-          style: {
-            fontSize: "1.25rem",
-            color: "#666",
-            marginBottom: "2rem",
-            maxWidth: "600px",
-            margin: "0 auto 2rem auto",
-          },
+      p({
+        textContent: "The 2KB framework for modern web apps. No JSX. No VDOM. Just JavaScript.",
+        style: {
+          fontSize: "1.25rem",
+          color: "#666",
+          marginBottom: "2rem",
+          maxWidth: "600px",
+          margin: "0 auto 2rem auto",
         },
-      );
+      });
 
       div(
         {
@@ -53,7 +52,8 @@ export function Hero() {
           },
         },
         () => {
-          button("Get Started", {
+          button({
+            textContent: "Get Started",
             style: {
               padding: "0.8rem 1.5rem",
               background: "#222",
@@ -65,7 +65,8 @@ export function Hero() {
             },
           });
 
-          button("Documentation", {
+          button({
+            textContent: "Documentation",
             style: {
               padding: "0.8rem 1.5rem",
               background: "white",

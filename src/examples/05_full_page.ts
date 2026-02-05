@@ -40,7 +40,8 @@ export function LandingPage() {
       });
 
       // Footer
-      div("© 2026 Fia Framework. Built with 0 dependencies.", {
+      div({
+        textContent: "© 2026 Fia Framework. Built with 0 dependencies.",
         style: {
           padding: "2rem",
           background: "#222",

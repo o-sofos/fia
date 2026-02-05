@@ -61,24 +61,35 @@ That's it. No build step, no configuration, no boilerplate.
 
 ## 📐 Element Signatures
 
-Fia elements follow a **Unified API** with 8 consistent overloads. Every element function accepts consistent combinations of `Content`, `Props`, and `Children`.
+Fia elements follow a **Simplified API** with 4 overloads:
 
-### The 8 Overloads
+```typescript
+el()                      // Empty element
+el({ props })             // Props only
+el(() => { ... })         // Children only
+el({ props }, () => { })  // Props + children
+```
 
-1. **Empty**: `div()`
-2. **Content**: `div("Hello")` or `div(count)`
-3. **Props**: `div({ class: "box" })`
-4. **Children**: `div(() => { ... })`
-5. **Props + Children**: `div({ class: "box" }, () => { ... })`
-6. **Content + Props**: `button("Save", { class: "primary" })`
-7. **Content + Children**: `div("Header", () => { ... })`
-8. **All Three**: `div("Title", { id: "main" }, () => { ... })`
+### Text Content
 
-**Note**: "Content" can be a string, number, or Signal. "Children" is always a callback function `(el) => void`.
+Use the native `textContent` prop for element text:
+
+```typescript
+// Static text
+h1({ textContent: "Hello World" });
+button({ textContent: "Click me", onclick: () => alert("Hi!") });
+
+// Reactive text
+const name = $("Evan");
+p({ textContent: name });
+
+// Computed text
+p({ textContent: $(() => `Hello, ${name.value}!`) });
+```
 
 ### Void Elements
 
-Elements like `input`, `img`, `br`, `hr` cannot have children. They only accept optional properties:
+Elements like `input`, `img`, `br`, `hr` only accept optional properties:
 
 ```typescript
 input({ type: "text", placeholder: "Name" });
@@ -92,12 +103,12 @@ br();
 ```typescript
 // ✅ CORRECT - Function establishes parent context
 div({ class: "parent" }, () => {
-  h1("Title");
-  p("Paragraph");
+  h1({ textContent: "Title" });
+  p({ textContent: "Paragraph" });
 });
 
 // ❌ WRONG - Elements mount BEFORE div processes them
-div({ class: "parent" }, h1("Title"), p("Paragraph"));
+div({ class: "parent" }, h1({ textContent: "Title" }), p({ textContent: "Paragraph" }));
 ```
 
 ### Signature Examples
@@ -316,6 +327,16 @@ const nested = $({
 });
 nested.user.profile.name = "Bob";  // Triggers updates
 ```
+
+> [!WARNING]
+> **Destructuring breaks reactivity.** When you destructure a store, the values become static copies:
+> ```typescript
+> const state = $({ age: 17 });
+> const { age } = state;  // age is now just 17 (static!)
+> state.age = 21;
+> console.log(age);       // Still 17 - NOT reactive!
+> ```
+> Always access properties directly from the store for reactivity.
 
 ### Computed Values
 
