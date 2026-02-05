@@ -69,3 +69,38 @@ export function debugContext(): void {
   })));
   console.groupEnd();
 }
+
+/**
+ * Execute a callback with a DocumentFragment as the context.
+ * All elements created inside the callback are batched into the fragment,
+ * then appended to the current parent context in a single DOM operation.
+ * 
+ * This avoids layout thrashing when creating many sibling elements.
+ * 
+ * @example
+ * ```typescript
+ * ul(() => {
+ *   fragment(() => {
+ *     // These 100 items are batched into one DOM insertion
+ *     items.forEach(item => li(item.name));
+ *   });
+ * });
+ * ```
+ */
+export function fragment(children: () => void): DocumentFragment {
+  const frag = document.createDocumentFragment();
+
+  // Push fragment as execution context
+  pushExecutionContext(frag);
+  try {
+    children();
+  } finally {
+    popExecutionContext();
+  }
+
+  // Append the populated fragment to the current parent
+  const parent = getCurrentExecutionContext();
+  parent.appendChild(frag);
+
+  return frag;
+}

@@ -824,11 +824,21 @@ function createElement<K extends keyof HTMLElementTagNameMap>(
       }
     }
 
+    // Execute children with implicit fragment batching
+    // All child elements are collected in a fragment first,
+    // then appended to the element in a single DOM operation
     if (children) {
-      executeChildren(element, children);
+      const frag = document.createDocumentFragment();
+      pushExecutionContext(frag);
+      try {
+        children(element);
+      } finally {
+        popExecutionContext();
+      }
+      element.appendChild(frag);
     }
 
-    // Mount to current context
+    // Mount to current context (after children are ready)
     getCurrentExecutionContext().appendChild(element);
 
     return element;

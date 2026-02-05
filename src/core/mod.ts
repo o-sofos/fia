@@ -91,6 +91,7 @@ export {
     getCurrentExecutionContext as getCurrentContext,
     hasExecutionContext as hasContext,
     debugContext,
+    fragment,
     type ExecutionContext as Context,
 } from "./context/context";
 
