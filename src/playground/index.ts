@@ -1,19 +1,28 @@
-import { debugContext, ul, li, div, h2 } from "../core/mod";
+import { div, h1, button, $, p } from "../core/mod";
 
 export default () => {
-  h2("Fragment Batching Demo");
-
-  debugContext();
-
-  div(() => {
-    ul(() => {
-      // All 10 items are batched into one DOM insertion
-      for (let i = 0; i < 10; i++) {
-        li(`Item ${i + 1}`);
-      }
-    });
+  // Object state → ReactiveStore (direct property access, no .value needed!)
+  const state = $({
+    name: "Evan",
+    age: 17,
   });
 
-  console.log("After fragment:");
-  debugContext();
+  // Computed/derived value from store
+  const isAdult = $(() => state.age >= 18);
+
+  div(() => {
+    h1($(() => state.name));
+    h1($(() => `Age: ${state.age}`));
+
+    button('+', {
+      onclick: () => state.age++,  // Direct mutation!
+    });
+
+    button('-', {
+      onclick: () => state.age--,
+    });
+
+    // Computed updates automatically when state.age changes
+    p($(() => isAdult.value ? "Adult" : "Minor"));
+  });
 };

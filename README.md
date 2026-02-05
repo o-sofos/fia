@@ -15,7 +15,7 @@
 
 Most frameworks add layers of abstraction between you and the DOM. Fia gives you just enough to be productive:
 
-- ✨ **Reactive values** - `$()` creates values that automatically update the UI
+- ✨ **Reactive values** - `$()` creates signals for primitives, reactive stores for objects
 - 🎯 **Direct DOM** - No virtual DOM, no diffing, just native browser APIs
 - 📦 **2KB total** - Smaller than the frameworks claiming to be minimal
 - 🔒 **Zero dependencies** - No supply chain risks, no version conflicts
@@ -131,6 +131,19 @@ Pass a signal directly as content:
 const count = $(0);
 p(count); // Updates text automatically
 h1("Count: ", count); // "Count: 0"
+```
+
+#### 4. Computed Reactive Text
+For dynamic text expressions, wrap in `$()`:
+
+```typescript
+const name = $("World");
+
+// ✅ Correct - wrap computed expression in $()
+h1($(() => `Hello, ${name.value}!`));
+
+// ❌ Wrong - bare arrow function is treated as children callback
+h1(() => `Hello, ${name.value}!`);  // Creates no text!
 ```
 
 ### Complete Pattern Reference
@@ -260,14 +273,14 @@ button({
 
 ## 💡 Core Concepts
 
-### Reactive Values
+### Reactive Values (Primitives)
 
-Use `$()` to create values that automatically update the UI when they change.
+Use `$()` with primitives to create signals that automatically update the UI when they change.
 
 ```typescript
 import { $ } from "jsr:@fia/core";
 
-// Create reactive values
+// Create reactive signals for primitives
 const name = $("World");
 const count = $(0);
 const isActive = $(false);
@@ -281,17 +294,44 @@ count.value++;
 isActive.value = !isActive.value;
 ```
 
+### Reactive Stores (Objects)
+
+Pass an object to `$()` to create a **reactive store** with direct property access:
+
+```typescript
+// Object → ReactiveStore (auto-detected!)
+const state = $({
+  name: "Evan",
+  age: 17,
+});
+
+// Direct property access - no .value needed!
+console.log(state.name);  // "Evan"
+state.age++;              // Reactive update!
+state.name = "John";      // Triggers subscribers
+
+// Deep reactivity works automatically
+const nested = $({
+  user: { profile: { name: "Alice" } }
+});
+nested.user.profile.name = "Bob";  // Triggers updates
+```
+
 ### Computed Values
 
-Reactive values can derive from other reactive values:
+Computed values derive from other reactive values:
 
 ```typescript
 const count = $(0);
 const doubled = $(() => count.value * 2);
 
-console.log(doubled.value); // 0
-count.value = 5;
-console.log(doubled.value); // 10
+// Works with stores too!
+const state = $({ age: 17 });
+const isAdult = $(() => state.age >= 18);
+
+console.log(isAdult.value); // false
+state.age = 21;
+console.log(isAdult.value); // true
 ```
 
 ### Context-Based Mounting

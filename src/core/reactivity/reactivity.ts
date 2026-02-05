@@ -337,39 +337,198 @@ function createComputed<T>(compute: () => T): Signal<T> {
   return signal;
 }
 
+// =============================================================================
+// REACTIVE STORE (Proxy-based object reactivity)
+// =============================================================================
+
+/** Symbol to mark an object as a reactive proxy */
+const REACTIVE_PROXY = Symbol("reactive-proxy");
+
+/** Symbol to access the raw (unwrapped) object */
+const RAW = Symbol("raw");
+
+/**
+ * Reactive store type - provides direct property access with reactivity.
+ * Properties can be read/written directly without .value
+ * Uses -readonly to allow mutation even when created with const assertion.
+ */
+export type ReactiveStore<T extends object> = {
+  -readonly [K in keyof T]: T[K] extends object
+  ? T[K] extends Function
+  ? T[K]  // Functions are not deeply wrapped
+  : ReactiveStore<T[K]>  // Nested objects are reactive
+  : T[K];
+} & {
+  /** Access the raw unwrapped object (escape hatch) */
+  readonly $raw: T;
+};
+
+/**
+ * Check if a value is already a reactive proxy
+ */
+function isReactiveProxy(value: unknown): boolean {
+  return value !== null && typeof value === "object" && REACTIVE_PROXY in value;
+}
+
+/**
+ * Create a reactive store from an object.
+ * Uses Proxy for fine-grained per-property reactivity.
+ */
+function createStore<T extends object>(initial: T): ReactiveStore<T> {
+  // Per-property reactive nodes for fine-grained tracking
+  const nodes = new Map<PropertyKey, ReactiveNode>();
+
+  // Cache for nested proxy wrappers
+  const proxyCache = new WeakMap<object, ReactiveStore<any>>();
+
+  function getOrCreateNode(key: PropertyKey): ReactiveNode {
+    let node = nodes.get(key);
+    if (!node) {
+      node = { version: 0, subs: new Set() };
+      nodes.set(key, node);
+    }
+    return node;
+  }
+
+  const proxy = new Proxy(initial, {
+    get(target, key, receiver) {
+      // Special accessor for raw object
+      if (key === RAW || key === "$raw") return target;
+
+      // Mark as reactive proxy
+      if (key === REACTIVE_PROXY) return true;
+
+      const node = getOrCreateNode(key);
+      track(node);  // Track this property access
+
+      const value = Reflect.get(target, key, receiver);
+
+      // Deep reactivity: wrap nested objects in proxies
+      if (value !== null && typeof value === "object" && !isReactiveProxy(value)) {
+        // Check cache first
+        let cachedProxy = proxyCache.get(value);
+        if (!cachedProxy) {
+          cachedProxy = createStore(value);
+          proxyCache.set(value, cachedProxy);
+        }
+        return cachedProxy;
+      }
+
+      return value;
+    },
+
+    set(target, key, value, receiver) {
+      const oldValue = Reflect.get(target, key, receiver);
+
+      // Unwrap reactive proxies when setting
+      const rawValue = value !== null && typeof value === "object" && RAW in value
+        ? value[RAW]
+        : value;
+
+      if (Object.is(oldValue, rawValue)) return true;  // No change
+
+      Reflect.set(target, key, rawValue, receiver);
+
+      // Clear cached proxy for this key if it was an object
+      if (oldValue !== null && typeof oldValue === "object") {
+        proxyCache.delete(oldValue);
+      }
+
+      const node = nodes.get(key);
+      if (node) {
+        trigger(node);  // Trigger updates for this property
+      }
+
+      return true;
+    },
+
+    // Handle 'in' operator
+    has(target, key) {
+      if (key === REACTIVE_PROXY || key === RAW || key === "$raw") return true;
+      return Reflect.has(target, key);
+    },
+
+    // Handle Object.keys, for...in, etc.
+    ownKeys(target) {
+      return Reflect.ownKeys(target);
+    },
+
+    getOwnPropertyDescriptor(target, key) {
+      return Reflect.getOwnPropertyDescriptor(target, key);
+    },
+
+    // Handle delete
+    deleteProperty(target, key) {
+      const hadKey = Reflect.has(target, key);
+      const result = Reflect.deleteProperty(target, key);
+
+      if (hadKey && result) {
+        const node = nodes.get(key);
+        if (node) trigger(node);
+      }
+
+      return result;
+    }
+  }) as ReactiveStore<T>;
+
+  return proxy;
+}
+
 /**
  * Checks if a type has extra properties beyond its base primitive type.
  * Used to detect branded types (e.g., `Pixels = number & { [brand]: "px" }`).
  */
 /**
- * Create a signal or computed value.
+ * Create a signal, computed value, or reactive store.
  *
- * **Signal (State):**
+ * **Signal (Primitives):**
  * ```ts
  * const count = $(0);
  * count.value++;
  * ```
  *
+ * **Reactive Store (Objects):**
+ * ```ts
+ * const state = $({ name: "Evan", age: 17 });
+ * state.age++;  // Direct mutation is reactive!
+ * ```
+ *
  * **Computed (Derived State):**
  * ```ts
  * const double = $(() => count.value * 2);
+ * const isAdult = $(() => state.age >= 18);
  * ```
  *
  * Type inference:
- * - Literal types are preserved: `$("1rem")` → `WritableSignal<"1rem">`
- * - Getter returns narrow type for intellisense
- * - Setter accepts widened type for flexible assignment
+ * - Primitives: `$(0)` → `WritableSignal<number>`
+ * - Objects: `$({a: 1})` → `ReactiveStore<{a: number}>`
+ * - Functions: `$(() => x)` → `Signal<typeof x>`
  *
- * @param initial - The initial value or a computation function
- * @returns A writable Signal for values, or a readonly Signal for functions
+ * @param initial - The initial value, object, or computation function
+ * @returns Signal for primitives, ReactiveStore for objects, or computed Signal for functions
  */
-export function $<const T>(
-  initial: T,
-): [T] extends [() => infer R] ? Signal<R> : WritableSignal<T>;
-export function $<T>(initial: T): Signal<T> | WritableSignal<T> {
-  return typeof initial === "function"
-    ? createComputed(initial as () => T)
-    : createSignal(initial);
+// Overload 1: Computed (function)
+export function $<T>(compute: () => T): Signal<T>;
+// Overload 2: Object → ReactiveStore (exclude arrays initially - they're edge case)
+export function $<const T extends Record<string, unknown>>(initial: T): ReactiveStore<T>;
+// Overload 3: Primitives → WritableSignal
+export function $<const T extends string | number | boolean | null | undefined>(initial: T): WritableSignal<T>;
+// Overload 4: Arrays → ReactiveStore (treated as objects)
+export function $<const T extends readonly unknown[]>(initial: T): ReactiveStore<T extends readonly (infer U)[] ? U[] : T>;
+// Implementation
+export function $<T>(initial: T): Signal<T> | WritableSignal<T> | ReactiveStore<T & object> {
+  // Computed: function → create computed signal
+  if (typeof initial === "function") {
+    return createComputed(initial as () => T) as Signal<T>;
+  }
+
+  // Object (but not null): create reactive store
+  if (initial !== null && typeof initial === "object") {
+    return createStore(initial as T & object);
+  }
+
+  // Primitive: create writable signal
+  return createSignal(initial) as WritableSignal<T>;
 }
 
 // Named export for API compatibility
