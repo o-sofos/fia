@@ -86,7 +86,7 @@ export function ExamplesLauncher() {
           else if (currentExample.value === "03") Features();
           else if (currentExample.value === "04") Contact();
           else if (currentExample.value === "05") LandingPage();
-          else if (currentExample.value === "playground") Playground;
+          else if (currentExample.value === "playground") Playground();
         },
       );
     },

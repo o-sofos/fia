@@ -4,4 +4,4 @@
 import { ExamplesLauncher } from "./examples_launcher";
 
 // Run the launcher
-// ExamplesLauncher();
+ExamplesLauncher();
