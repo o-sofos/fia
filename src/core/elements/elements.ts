@@ -884,8 +884,11 @@ function isChildrenCallback<E extends HTMLElement>(
 }
 
 // Helper to check for zero-arity functions (thunks) that returns primitives
+// NOTE: We can't reliably detect if a function returns a primitive vs executes side effects
+// at runtime without executing it. So we rely on the argument position instead.
+// Content thunks should ONLY be detected when explicitly in content position.
 function isContentThunk(value: unknown): value is () => string | number {
-  return typeof value === "function" && value.length === 0 && !isSignal(value);
+  return false; // Disabled - use children callback detection instead
 }
 
 function isContent(value: unknown): value is MaybeSignal<string | number> {
