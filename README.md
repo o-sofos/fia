@@ -177,6 +177,62 @@ const state = $({ age: 17 });
 const isAdult = $(() => state.age >= 18);
 ```
 
+### Effects
+
+Use `$e()` to run side effects when dependencies change:
+
+```typescript
+import { $e } from "@fia/core";
+
+const count = $(0);
+
+// Runs whenever count changes
+$e(() => {
+  console.log("Count changed to:", count.value);
+  document.title = `Count: ${count.value}`;
+});
+```
+
+---
+
+## 🔀 Control Flow
+
+Fia provides reactive control flow components for conditional rendering and lists.
+
+### Show
+
+Conditionally render content that updates when the condition changes:
+
+```typescript
+import { Show } from "@fia/core";
+
+// Simple usage
+Show(() => isVisible.value, () => div({ textContent: "Hello!" }));
+
+// With else branch
+Show(() => data.loading, {
+  then: () => p({ textContent: "Loading..." }),
+  else: () => ul(() => items.forEach(i => li({ textContent: i }))),
+});
+```
+
+### Each
+
+Reactive list rendering that re-renders when the source array changes:
+
+```typescript
+import { Each } from "@fia/core";
+
+const todos = $({ items: ["Task 1", "Task 2"] });
+
+Each(() => todos.items, (item, index) => {
+  li({ textContent: `${index + 1}. ${item}` });
+});
+```
+
+> [!TIP]
+> Use `Show` and `Each` instead of plain `if`/`forEach` when you need the content to **react to state changes**.
+
 ---
 
 ## ⚡ Performance
@@ -275,14 +331,19 @@ input({ type: "text", oninput: (e) => name.value = e.currentTarget.value });
 p({ textContent: $(() => `Hello, ${name.value || "stranger"}!`) });
 ```
 
-#### 5. List Rendering
-No special syntax needed—just use `forEach` to render lists. Plain JavaScript works everywhere.
+#### 5. List Rendering (Static)
+For static lists, plain `forEach` works fine:
 
 ```typescript
 const items = ["Apple", "Banana", "Cherry"];
-ul(() => {
-  items.forEach(item => li({ textContent: item }));
-});
+ul(() => items.forEach(item => li({ textContent: item })));
+```
+
+For **reactive lists** that update when data changes, use `Each`:
+
+```typescript
+const items = $({ list: ["Apple", "Banana"] });
+ul(() => Each(() => items.list, item => li({ textContent: item })));
 ```
 
 ---
@@ -367,7 +428,7 @@ div({
 ### 🔴 Advanced
 
 #### 11. Todo App
-A complete todo app with add/remove functionality. Demonstrates reactive arrays and list manipulation.
+A complete todo app using `Each` for reactive list rendering.
 
 ```typescript
 const todos = $({ items: [] as string[], input: "" });
@@ -388,7 +449,7 @@ div(() => {
     },
   });
   ul(() => {
-    todos.items.forEach((item, i) => {
+    Each(() => todos.items, (item, i) => {
       li(() => {
         span({ textContent: item });
         button({
@@ -425,29 +486,28 @@ div(() => {
 ```
 
 #### 13. Async Data Fetching
-Handle async operations by updating store properties when data arrives. Use conditional rendering for loading states.
+Use `Show` for reactive loading states that update when data arrives.
 
 ```typescript
-const data = $({ loading: true, users: [] as string[] });
+const data = $({ loading: true as boolean, users: [] as string[] });
 
 fetch("/api/users")
   .then(r => r.json())
   .then(users => { data.users = users; data.loading = false; });
 
 div(() => {
-  if (data.loading) {
-    p({ textContent: "Loading..." });
-  } else {
-    ul(() => data.users.forEach(u => li({ textContent: u })));
-  }
+  Show(() => data.loading, {
+    then: () => p({ textContent: "Loading..." }),
+    else: () => ul(() => Each(() => data.users, u => li({ textContent: u }))),
+  });
 });
 ```
 
 #### 14. Modal Dialog
-Modal patterns with backdrop click-to-close. Use `stopPropagation()` to prevent closing when clicking inside.
+Modal patterns with backdrop click-to-close. Use explicit types to avoid literal type inference.
 
 ```typescript
-const modal = $({ open: false, title: "" });
+const modal = $<{ open: boolean; title: string }>({ open: false, title: "" });
 
 function openModal(title: string) {
   modal.title = title;
