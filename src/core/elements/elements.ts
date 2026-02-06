@@ -28,6 +28,7 @@ import {
   type MaybeSignal,
   isSignal,
 } from "../reactivity/reactivity";
+import { registerEventHandler } from "../events/events";
 import type { ElementProps } from "../attributes/html-attributes";
 import type { ReactiveCSSProperties } from "../css/css-types";
 
@@ -484,7 +485,8 @@ function applyProps<K extends keyof HTMLElementTagNameMap>(
 
     if (key.startsWith("on") && typeof value === "function") {
       const eventName = key.slice(2).toLowerCase();
-      element.addEventListener(eventName, value as EventListener);
+      // Use event delegation for better performance
+      registerEventHandler(element, eventName, value as EventListener);
     } else if (isSignal(value)) {
       $e(() => assignProp(element, key, value.value));
     } else {
