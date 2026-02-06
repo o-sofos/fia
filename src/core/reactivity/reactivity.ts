@@ -285,6 +285,9 @@ function createSignal<T>(initial: T): WritableSignal<T> {
     },
   });
 
+  // Mark as signal for fast detection
+  (signal as unknown as InternalSignal)[SIGNAL] = true;
+
   // Peek: read without tracking (inspired by SolidJS)
   signal.peek = () => currentValue as Readable<T>;
 
@@ -364,6 +367,9 @@ function createComputed<T>(compute: () => T): Signal<T> {
       return signal();
     },
   });
+
+  // Mark as signal for fast detection
+  (signal as unknown as InternalSignal)[SIGNAL] = true;
 
   // Peek without tracking
   signal.peek = () => {
@@ -579,14 +585,23 @@ export { $ as signal };
  */
 export type MaybeSignal<T> = T | Signal<T>;
 
+// =============================================================================
+// INTERNAL: FAST SIGNAL DETECTION
+// =============================================================================
+
+const SIGNAL = Symbol("signal");
+
+interface InternalSignal {
+  [SIGNAL]: true;
+}
+
 /**
  * Checks if a value is a Signal.
  * @param value - The value to check
  * @returns True if the value is a Signal
  */
 export function isSignal(value: unknown): value is Signal<unknown> {
-  if (value === null || value === undefined) return false;
-  if (typeof value !== "function") return false;
-  const descriptor = Object.getOwnPropertyDescriptor(value, "value");
-  return descriptor !== undefined && descriptor.get !== undefined;
+  return (
+    typeof value === "function" && (value as unknown as InternalSignal)[SIGNAL] === true
+  );
 }

@@ -95,7 +95,7 @@ export type OnMountCallback = (cb: () => void) => void;
  * });
  * ```
  */
-export type ChildrenCallback<E extends HTMLElement> = (el: E, onMount: OnMountCallback) => void;
+export type ChildrenCallback<E> = (el: E, onMount: OnMountCallback) => void;
 
 /**
  * Valid child types for element content.
@@ -267,7 +267,7 @@ export interface ElementFactory<K extends keyof HTMLElementTagNameMap> {
    */
   <const P extends LooseElementProps<K>>(
     props: P & ValidateProps<P, LooseElementProps<K>>,
-    children: (element: SmartElement<K, P>) => void,
+    children: ChildrenCallback<SmartElement<K, P>>,
   ): SmartElement<K, P>;
 
   /**
@@ -302,7 +302,7 @@ export interface ElementFactory<K extends keyof HTMLElementTagNameMap> {
   <const P extends LooseElementProps<K>>(
     content: MaybeSignal<string | number>,
     props: P & ValidateProps<P, LooseElementProps<K>>,
-    children: (element: SmartElement<K, P>) => void,
+    children: ChildrenCallback<SmartElement<K, P>>,
   ): SmartElement<K, P>;
 }
 
@@ -512,7 +512,8 @@ function applyProps<K extends keyof HTMLElementTagNameMap>(
   element: HTMLElementTagNameMap[K],
   props: ElementProps<K>,
 ): void {
-  for (const [key, value] of Object.entries(props)) {
+  for (const key in props) {
+    const value = (props as Record<string, unknown>)[key];
     if (value === null || value === undefined) continue;
 
     if (key.startsWith("on") && typeof value === "function") {
@@ -531,12 +532,20 @@ function applyClass(element: HTMLElement, value: unknown): void {
   if (typeof value === "string") {
     element.className = value;
   } else if (typeof value === "object" && value !== null) {
-    const entries = Object.entries(value as Record<string, unknown>);
-    const hasSignal = entries.some(([_, v]) => isSignal(v));
+    // Check if any value is a signal to determine reactivity strategy
+    // We can't use .some() on an object, so we iterate
+    let hasSignal = false;
+    for (const key in value) {
+      if (isSignal((value as Record<string, unknown>)[key])) {
+        hasSignal = true;
+        break;
+      }
+    }
 
     const updateClasses = () => {
       const classes: string[] = [];
-      for (const [className, condition] of entries) {
+      for (const className in value) {
+        const condition = (value as Record<string, unknown>)[className];
         const isActive = isSignal(condition) ? condition.value : condition;
         if (isActive) classes.push(className);
       }
@@ -723,15 +732,20 @@ function applyStyle(element: HTMLElement, value: unknown): void {
   if (typeof value === "string") {
     element.setAttribute("style", value);
   } else if (typeof value === "object" && value !== null) {
-    const entries = Object.entries(value as Record<string, unknown>);
-
     // Check if any value is a signal to determine reactivity strategy
-    const hasAnySignal = entries.some(([_, val]) => isSignal(val));
+    let hasAnySignal = false;
+    for (const key in value) {
+      if (isSignal((value as Record<string, unknown>)[key])) {
+        hasAnySignal = true;
+        break;
+      }
+    }
 
     if (hasAnySignal) {
       // Create a reactive effect that updates all properties
       $e(() => {
-        for (const [prop, val] of entries) {
+        for (const prop in value) {
+          const val = (value as Record<string, unknown>)[prop];
           const resolvedValue = isSignal(val) ? val.value : val;
           setStyleProperty(
             element.style,
@@ -742,7 +756,8 @@ function applyStyle(element: HTMLElement, value: unknown): void {
       });
     } else {
       // Static values - apply once without effect
-      for (const [prop, val] of entries) {
+      for (const prop in value) {
+        const val = (value as Record<string, unknown>)[prop];
         setStyleProperty(element.style, prop, transformStyleValue(val));
       }
     }

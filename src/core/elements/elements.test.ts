@@ -365,7 +365,7 @@ describe("Element System - Unified API", () => {
         });
 
         it("should handle null/undefined prop values", () => {
-            const el = div({ id: undefined as any, title: null as any });
+            const el = div({ id: undefined, title: null });
             expect(el.hasAttribute("id")).toBe(false);
             expect(el.hasAttribute("title")).toBe(false);
         });
