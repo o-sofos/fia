@@ -334,7 +334,42 @@ div(() => {
 });
 ```
 
-> **Note:** Since elements attach to the `currentExecutionContext`, simply calling `children()` automatically renders them into the correct parent!
+### Best Practice: Return the Element
+
+Always return the root element from your component functions. This allows consumers to capture references if needed.
+
+```typescript
+function InputField(props: { label: string }) {
+  // Return the wrapper div
+  return div({ class: "field" }, () => {
+    label({ textContent: props.label });
+    input({});
+  });
+}
+
+const el = InputField({ label: "Name" }); // HTMLDivElement
+```
+
+### Advanced: Factories & Currying
+
+Since components are just functions, you can use standard functional patterns like partial application to create specialized components.
+
+```typescript
+// A factory function that returns a component
+const createButton = (className: string) => (text: string) => {
+  return button({ class: className, textContent: text });
+};
+
+// Curried components
+const PrimaryBtn = createButton("btn-primary");
+const DangerBtn = createButton("btn-danger");
+
+// Usage
+div(() => {
+  PrimaryBtn("Save");   // <button class="btn-primary">Save</button>
+  DangerBtn("Delete");  // <button class="btn-danger">Delete</button>
+});
+```
 
 ---
 
