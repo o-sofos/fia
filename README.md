@@ -285,6 +285,59 @@ p({
 
 ---
 
+## 🧩 Component Composition
+
+In Fia, **components are just functions**. There is no special "Component" class or type.
+
+### Basic Component
+
+A component is a function that returns or creates elements.
+
+```typescript
+function Button(props: { text: string; onClick: () => void }) {
+  // Return the element (optional, but good for testing)
+  return button({
+    textContent: props.text,
+    onclick: props.onClick,
+    class: "btn-primary"
+  });
+}
+
+// Usage
+div(() => {
+  Button({ text: "Click Me", onClick: () => alert("Hi") });
+});
+```
+
+### Children & Layouts
+
+To create wrapper components (like layouts or cards), pass a callback function as a child prop (usually the last argument or a named prop).
+
+```typescript
+// 1. Define the component
+function Card(props: { title: string }, children: () => void) {
+  return div({ class: "card" }, () => {
+    div({ class: "card-header", textContent: props.title });
+    div({ class: "card-body" }, () => {
+      // 2. Render children where you want them
+      children();
+    });
+  });
+}
+
+// 3. Use it with nesting
+div(() => {
+  Card({ title: "My Profile" }, () => {
+    p({ textContent: "User details go here..." });
+    button({ textContent: "Edit" });
+  });
+});
+```
+
+> **Note:** Since elements attach to the `currentExecutionContext`, simply calling `children()` automatically renders them into the correct parent!
+
+---
+
 ## ⚡ Performance
 
 ### Event Delegation
@@ -598,28 +651,7 @@ div({
 });
 ```
 
-#### 15. Reusable Component Pattern
-Components are just functions that return elements. Pass props as arguments for reusability.
 
-```typescript
-function Card(title: string, content: string) {
-  return div({ class: "card" }, () => {
-    h3({ textContent: title });
-    p({ textContent: content });
-  });
-}
-
-function Button(text: string, onClick: () => void) {
-  return button({ textContent: text, onclick: onClick, class: "btn" });
-}
-
-// Usage
-div(() => {
-  Card("Feature 1", "Description of feature 1");
-  Card("Feature 2", "Description of feature 2");
-  Button("Click Me", () => alert("Clicked!"));
-});
-```
 
 ---
 
