@@ -116,9 +116,10 @@ export function Contact() {
       });
 
       // Reactive preview
-      p({ style: { fontSize: "0.8rem", color: "#888", textAlign: "center", minHeight: "1.2em" } },
-        () => email.value ? `Replying to: ${email.value}` : ""
-      );
+      p({
+        style: { fontSize: "0.8rem", color: "#888", textAlign: "center", minHeight: "1.2em" },
+        textContent: $(() => email.value ? `Replying to: ${email.value}` : "")
+      });
     });
   });
 }

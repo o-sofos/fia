@@ -219,24 +219,24 @@ type E<K extends keyof HTMLElementTagNameMap> = HTMLElementTagNameMap[K];
  *   p("Card content");
  * });
  *
- * @example
- * // 6. Content + props
- * button("Click me", {
+ * // 6. Content + props - Use textContent prop
+ * button({
+ *   textContent: "Click me",
  *   onclick: () => alert("Clicked!"),
  *   class: "btn-primary"
  * });
  *
  * @example
- * // 7. Content + children
- * section("Header", () => {
- *   p("Additional content");
+ * // 7. Content + children - Use textContent prop
+ * section({ textContent: "Header" }, () => {
+ *   p({ textContent: "Additional content" });
  * });
  *
  * @example
- * // 8. All three: content + props + children
- * article("Title", { class: "post" }, () => {
- *   p("Post body");
- *   span("Footer");
+ * // 8. All three: content + props + children - Use textContent prop
+ * article({ textContent: "Title", class: "post" }, () => {
+ *   p({ textContent: "Post body" });
+ *   span({ textContent: "Footer" });
  * });
  */
 export interface ElementFactory<K extends keyof HTMLElementTagNameMap> {
