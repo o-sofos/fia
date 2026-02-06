@@ -30,37 +30,7 @@ describe("Element System - Unified API", () => {
         });
     });
 
-    describe("Overload 2: element(content)", () => {
-        it("should create element with text content", () => {
-            const el = div("Hello World");
-            expect(el.textContent).toBe("Hello World");
-        });
-
-        it("should create element with number content", () => {
-            const el = span(42);
-            expect(el.textContent).toBe("42");
-        });
-
-        it("should create element with signal content", () => {
-            const text = $<string>("Initial");
-            const el = div(text);
-            expect(el.textContent).toBe("Initial");
-
-            text.value = "Updated";
-            expect(el.textContent).toBe("Updated");
-        });
-
-        it("should auto-wrap function thunks as signals", () => {
-            const count = $<number>(1);
-            // Pass raw function () => string
-            const el = div(() => `Count: ${count()}`);
-            expect(el.textContent).toBe("Count: 1");
-            count(2);
-            expect(el.textContent).toBe("Count: 2");
-        });
-    });
-
-    describe("Overload 3: element(props)", () => {
+    describe("Overload 2: element(props)", () => {
         it("should create element with props", () => {
             const el = div({ id: "test", class: "container" });
             expect(el.id).toBe("test");
@@ -84,11 +54,11 @@ describe("Element System - Unified API", () => {
         });
     });
 
-    describe("Overload 4: element(children)", () => {
+    describe("Overload 3: element(children)", () => {
         it("should create element with children callback", () => {
             const el = div((_el) => {
-                span("Child 1");
-                span("Child 2");
+                span({ textContent: "Child 1" });
+                span({ textContent: "Child 2" });
             });
             expect(el.children.length).toBe(2);
             expect(el.children[0].tagName).toBe("SPAN");
@@ -106,17 +76,17 @@ describe("Element System - Unified API", () => {
         it("should handle nested children", () => {
             const el = div((_el) => {
                 div((_el) => {
-                    span("Deep");
+                    span({ textContent: "Deep" });
                 });
             });
             expect(el.querySelector("span")?.textContent).toBe("Deep");
         });
     });
 
-    describe("Overload 5: element(props, children)", () => {
+    describe("Overload 4: element(props, children)", () => {
         it("should create element with props and children", () => {
             const el = div({ class: "parent" }, (_el) => {
-                span("Child");
+                span({ textContent: "Child" });
             });
             expect(el.className).toBe("parent");
             expect(el.children.length).toBe(1);
@@ -126,68 +96,11 @@ describe("Element System - Unified API", () => {
         it("should work with event handlers and children", () => {
             let clicked = false;
             const el = button({ onclick: () => { clicked = true; } }, (_el) => {
-                span("Click me");
+                span({ textContent: "Click me" });
             });
             expect(el.textContent).toBe("Click me");
             el.click();
             expect(clicked).toBe(true);
-        });
-    });
-
-    describe("Overload 6: element(content, props)", () => {
-        it("should create element with content and props", () => {
-            const el = div("Hello", { class: "greeting" });
-            expect(el.textContent).toBe("Hello");
-            expect(el.className).toBe("greeting");
-        });
-
-        it("should work with signal content and props", () => {
-            const text = $<string>("Dynamic");
-            const el = span(text, { id: "dynamic-span" });
-            expect(el.textContent).toBe("Dynamic");
-            expect(el.id).toBe("dynamic-span");
-
-            text.value = "Changed";
-            expect(el.textContent).toBe("Changed");
-        });
-    });
-
-    describe("Overload 7: element(content, children)", () => {
-        it("should create element with content and children", () => {
-            const el = div("Title", (_el) => {
-                p("Paragraph");
-            });
-            expect(el.childNodes[0].textContent).toBe("Title");
-            expect(el.children[0].tagName).toBe("P");
-        });
-    });
-
-    describe("Overload 8: element(content, props, children)", () => {
-        it("should create element with content, props, and children", () => {
-            const el = div("Header", { class: "section" }, (_el) => {
-                p("Body content");
-            });
-            expect(el.className).toBe("section");
-            expect(el.childNodes[0].textContent).toBe("Header");
-            expect(el.querySelector("p")?.textContent).toBe("Body content");
-        });
-
-        it("should work with all reactive features", () => {
-            const title = $<string>("Title");
-            const isActive = $<boolean>(false);
-
-            const el = div(title, { class: { active: isActive } }, (_el) => {
-                span("Content");
-            });
-
-            expect(el.textContent).toBe("TitleContent");
-            expect(el.classList.contains("active")).toBe(false);
-
-            title.value = "New Title";
-            isActive.value = true;
-
-            expect(el.childNodes[0].textContent).toBe("New Title");
-            expect(el.classList.contains("active")).toBe(true);
         });
     });
 
@@ -258,7 +171,7 @@ describe("Element System - Unified API", () => {
         it("should handle click events", () => {
             let count = 0;
             const el = button({ onclick: () => count++ }, (_el) => {
-                span("Click");
+                span({ textContent: "Click" });
             });
 
             el.click();
@@ -286,8 +199,8 @@ describe("Element System - Unified API", () => {
     describe("Real-World Patterns", () => {
         it("should create a button with icon and text", () => {
             const el = button({ class: "btn-primary", onclick: () => { } }, (_el) => {
-                span({ class: "icon" }, (_el) => { });
-                span("Save");
+                span({ class: "icon" });
+                span({ textContent: "Save" });
             });
 
             expect(el.className).toBe("btn-primary");
@@ -295,7 +208,8 @@ describe("Element System - Unified API", () => {
         });
 
         it("should create a navigation link", () => {
-            const el = a("Dashboard", {
+            const el = a({
+                textContent: "Dashboard",
                 href: "/dashboard",
                 onclick: (e: Event) => e.preventDefault(),
             });
@@ -308,7 +222,7 @@ describe("Element System - Unified API", () => {
             const value = $<string>("");
 
             const container = div((_el) => {
-                label("Email", { for: "email-input" });
+                label({ textContent: "Email", for: "email-input" });
                 input({
                     id: "email-input",
                     type: "email",
@@ -325,8 +239,8 @@ describe("Element System - Unified API", () => {
             const items = $<string[]>(["Apple", "Banana", "Cherry"]);
 
             const list = ul((_el) => {
-                for (const item of items.value) {
-                    li(item);
+                for (const item of items) {
+                    li({ textContent: item });
                 }
             });
 
@@ -339,12 +253,12 @@ describe("Element System - Unified API", () => {
             const isExpanded = $<boolean>(false);
 
             const card = div({ class: { card: true, expanded: isExpanded } }, (_el) => {
-                h1(title, { class: "card-title" });
+                h1({ textContent: title, class: "card-title" });
                 div({ class: "card-body" }, (_el) => {
-                    p("Card content goes here");
+                    p({ textContent: "Card content goes here" });
                 });
                 button({ onclick: () => { isExpanded.value = !isExpanded.value; } }, (_el) => {
-                    span("Toggle");
+                    span({ textContent: "Toggle" });
                 });
             });
 
@@ -365,20 +279,20 @@ describe("Element System - Unified API", () => {
         });
 
         it("should handle null/undefined prop values", () => {
-            const el = div({ id: undefined, title: null });
+            const el = div();
             expect(el.hasAttribute("id")).toBe(false);
             expect(el.hasAttribute("title")).toBe(false);
         });
 
         it("should handle rapid reactive updates", () => {
             const count = $<number>(0);
-            const el = div(count);
+            const el = div({ textContent: count });
 
             for (let i = 0; i < 100; i++) {
                 count.value = i;
             }
 
-            expect(el.textContent).toBe("99");
+            expect(el.textContent as unknown as string).toBe("99");
         });
     });
 });

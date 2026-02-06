@@ -7,6 +7,14 @@
  * Run: bun test types.test.ts
  */
 
+import { GlobalRegistrator } from "@happy-dom/global-registrator";
+
+try {
+  GlobalRegistrator.register();
+} catch {
+  // Already registered
+}
+
 import { div, button, input, img } from "./elements/elements";
 import { $ } from "./reactivity/reactivity";
 import type {
@@ -361,7 +369,7 @@ input({ type: "email", value: 123 });
 // @ts-expect-error - checked is boolean
 input({ type: "checkbox", checked: "yes" });
 // @ts-expect-error - type="file" does not allow value prop
-input({ type: "file", value: "foo" });
+input({ type: "file", value: "" });
 
 console.log("✅ Phase 10 tests passed: strictness confirmed!");
 

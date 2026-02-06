@@ -28,7 +28,7 @@ export type { Signal, WritableSignal } from "./reactivity/reactivity";
 // CONTROL FLOW
 // =============================================================================
 
-export { Show, Each } from "./control/control";
+export { Show, Each, Match } from "./control/control";
 
 // =============================================================================
 // HTML ELEMENTS

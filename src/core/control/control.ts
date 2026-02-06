@@ -111,3 +111,52 @@ export function Each<T>(
         anchor.parentNode?.insertBefore(frag, anchor.nextSibling);
     });
 }
+
+/**
+ * Reactive pattern matching.
+ * Switches rendering based on a derived key from a signal.
+ * 
+ * @example
+ * Match(() => status.value, {
+ *   loading: () => p("Loading..."),
+ *   success: () => p("Success!"),
+ *   error: () => p("Error!"),
+ *   _: () => p("Idle"), // Default case
+ * });
+ */
+export function Match<T extends PropertyKey>(
+    when: () => T,
+    cases: Partial<Record<T, () => void>> & { _?: () => void },
+): void {
+    const anchor = document.createComment("Match");
+    getCurrentExecutionContext().appendChild(anchor);
+
+    let currentNodes: Node[] = [];
+
+    $e(() => {
+        // Clear previous nodes
+        for (const node of currentNodes) {
+            node.parentNode?.removeChild(node);
+        }
+        currentNodes = [];
+
+        const key = when();
+        const handler = cases[key] || cases._;
+
+        if (handler) {
+            const frag = document.createDocumentFragment();
+            pushExecutionContext(frag);
+            try {
+                handler();
+            } finally {
+                popExecutionContext();
+            }
+
+            // Track nodes we're about to insert
+            currentNodes = Array.from(frag.childNodes);
+
+            // Insert after anchor
+            anchor.parentNode?.insertBefore(frag, anchor.nextSibling);
+        }
+    });
+}

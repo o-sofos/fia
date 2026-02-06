@@ -150,6 +150,16 @@ type ProcessedProps<P> = P extends { style: infer S }
   : P;
 
 
+
+/**
+ * Unwraps Signal types in properties to their inner values.
+ * This ensures that if a prop is passed as a Signal (e.g. textContent: Signal<string>),
+ * the resulting element property is typed as the value (string), not the Signal.
+ */
+type UnwrapSignalsInProps<P> = {
+  [K in keyof P]: P[K] extends Signal<infer U> ? U : P[K];
+};
+
 /**
  * Smart Element type that properly narrows properties from props.
  * Uses Omit to remove overlapping properties from the base element,
@@ -162,7 +172,7 @@ export type SmartElement<K extends keyof HTMLElementTagNameMap, P> = Omit<
   HTMLElementTagNameMap[K],
   keyof P
 > &
-  ProcessedProps<P> & {
+  UnwrapSignalsInProps<ProcessedProps<P>> & {
     // Internal marker for prop type preservation
     _props?: P;
   };
@@ -237,14 +247,6 @@ export interface ElementFactory<K extends keyof HTMLElementTagNameMap> {
   (): E<K>;
 
   /**
-   * Create element with text content (static or reactive).
-   * @param content - Text or number content, or a signal containing content
-   * @example h1("Hello World")
-   * @example h1($(() => `Count: ${count.value}`))
-   */
-  (content: MaybeSignal<string | number>): E<K>;
-
-  /**
    * Create element with props only.
    * @param props - Element attributes, styles, and event handlers
    * @example div({ style: { color: "red" } })
@@ -270,40 +272,6 @@ export interface ElementFactory<K extends keyof HTMLElementTagNameMap> {
     children: ChildrenCallback<SmartElement<K, P>>,
   ): SmartElement<K, P>;
 
-  /**
-   * Create element with content and props.
-   * @param content - Text or number content, or a signal
-   * @param props - Element attributes, styles, and event handlers
-   * @example button("Click me", { onclick: () => alert("Hi!") })
-   */
-  <const P extends LooseElementProps<K>>(
-    content: MaybeSignal<string | number>,
-    props: P & ValidateProps<P, LooseElementProps<K>>,
-  ): SmartElement<K, P>;
-
-  /**
-   * Create element with content and children.
-   * @param content - Text or number content, or a signal
-   * @param children - Function that creates child elements
-   * @example section("Header", () => { p("Subtext"); })
-   */
-  (
-    content: MaybeSignal<string | number>,
-    children: ChildrenCallback<E<K>>,
-  ): E<K>;
-
-  /**
-   * Create element with content, props, and children (all three).
-   * @param content - Text or number content, or a signal
-   * @param props - Element attributes, styles, and event handlers
-   * @param children - Function that creates child elements
-   * @example article("Title", { class: "post" }, () => { p("Body"); })
-   */
-  <const P extends LooseElementProps<K>>(
-    content: MaybeSignal<string | number>,
-    props: P & ValidateProps<P, LooseElementProps<K>>,
-    children: ChildrenCallback<SmartElement<K, P>>,
-  ): SmartElement<K, P>;
 }
 
 /**
@@ -793,7 +761,7 @@ function createElement<K extends keyof HTMLElementTagNameMap>(
   ): E<K> => {
     const element = document.createElement(tag);
 
-    // Parse arguments - simplified to 4 patterns
+    // Parse arguments - strict 4 patterns
     let props: ElementProps<K> | undefined;
     let children: ChildrenCallback<E<K>> | undefined;
 
