@@ -33,9 +33,9 @@ export interface GlobalAttributes {
 
     // Content
     /** The text content of the element and its descendants. */
-    textContent?: MaybeSignal<string | number>;
+    textContent?: MaybeSignal<string | number | null | undefined>;
     /** The rendered text content of the element. */
-    innerText?: MaybeSignal<string | number>;
+    innerText?: MaybeSignal<string | number | null | undefined>;
 
     // Accessibility (Strict Types)
     /** ARIA role indicating the semantic purpose of the element. */

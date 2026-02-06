@@ -26,6 +26,7 @@ import {
   $e,
   type Signal,
   type MaybeSignal,
+  type Widen,
   isSignal,
 } from "../reactivity/reactivity";
 import { registerEventHandler } from "../events/events";
@@ -157,7 +158,7 @@ type ProcessedProps<P> = P extends { style: infer S }
  * the resulting element property is typed as the value (string), not the Signal.
  */
 type UnwrapSignalsInProps<P> = {
-  [K in keyof P]: P[K] extends Signal<infer U> ? U : P[K];
+  [K in keyof P]: P[K] extends Signal<infer U> ? Widen<U> : Widen<P[K]>;
 };
 
 /**
@@ -172,10 +173,7 @@ export type SmartElement<K extends keyof HTMLElementTagNameMap, P> = Omit<
   HTMLElementTagNameMap[K],
   keyof P
 > &
-  UnwrapSignalsInProps<ProcessedProps<P>> & {
-    // Internal marker for prop type preservation
-    _props?: P;
-  };
+  UnwrapSignalsInProps<ProcessedProps<P>>;
 
 // Shorthand for simple element type (no specific props inference needed for return usually)
 type E<K extends keyof HTMLElementTagNameMap> = HTMLElementTagNameMap[K];

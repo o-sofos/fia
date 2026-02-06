@@ -1,23 +1,27 @@
-import { $, div, Match } from "../core/mod";
+import { $, button, div, Match, p } from "../core/mod";
 
 export default () => {
-    const status = $<"loading" | "success" | "error">("loading");
+    const tabs = ["Home", "About", "Contact"];
+    const active = $<number>(0);
 
-    // Cycle status every second
-    setInterval(() => {
-        const s = status.value;
-        if (s === "loading") status.value = "success";
-        else if (s === "success") status.value = "error";
-        else status.value = "loading";
-    }, 1000);
-
-    div({ style: "padding: 20px; font-family: sans-serif;" }, () => {
-        div({ style: "margin-bottom: 20px;" }, () => {
-            Match(() => status.value, {
-                loading: () => div({ textContent: "Loading..." }),
-                success: () => div({ textContent: "Success!" }),
-                error: () => div({ textContent: "Error!" }),
-                _: () => div({ textContent: "Unknown state" })
+    div(() => {
+        div({ class: "tabs" }, () => {
+            tabs.forEach((tab, i) => {
+                button({
+                    textContent: tab,
+                    class: $(() => active.value === i ? "active" : ""),
+                    onclick: () => active.value = i,
+                });
+            });
+        });
+        div({ class: "content" }, () => {
+            p({
+                textContent: Match(() => active.value, {
+                    0: () => "Welcome to the Home page!",
+                    1: () => "About Fia Framework...",
+                    2: () => "Contact us at hello@fia.dev",
+                    _: () => "Unknown",
+                })
             });
         });
     });

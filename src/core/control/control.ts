@@ -4,7 +4,7 @@
  * Reactive conditional rendering using effects.
  */
 
-import { $e } from "../reactivity/reactivity";
+import { $, $e, type Signal, type WritableSignal, type Widen } from "../reactivity/reactivity";
 import {
     pushExecutionContext,
     popExecutionContext,
@@ -115,6 +115,7 @@ export function Each<T>(
 /**
  * Reactive pattern matching.
  * Switches rendering based on a derived key from a signal.
+ * Returns a Computed Signal of the result of the evaluated arm.
  * 
  * @example
  * Match(() => status.value, {
@@ -123,13 +124,24 @@ export function Each<T>(
  *   error: () => p("Error!"),
  *   _: () => p("Idle"), // Default case
  * });
+ * 
+ * const message = Match(() => status.value, {
+ *   loading: () => "Wait...",
+ *   success: () => "Done!",
+ *   _: () => "Unknown",
+ * });
  */
-export function Match<T extends PropertyKey>(
+export function Match<T extends PropertyKey, R = void>(
     when: () => T,
-    cases: Partial<Record<T, () => void>> & { _?: () => void },
-): void {
+    cases: Partial<Record<T, () => R>> & { _?: () => R },
+): Signal<R | undefined> {
     const anchor = document.createComment("Match");
     getCurrentExecutionContext().appendChild(anchor);
+
+    // Signal to hold the result of the executed arm
+    // Initialized as undefined until first run
+    // Cast to WritableSignal to allow internal updates while returning Readable
+    const output = $(undefined) as WritableSignal<R | undefined>;
 
     let currentNodes: Node[] = [];
 
@@ -146,17 +158,27 @@ export function Match<T extends PropertyKey>(
         if (handler) {
             const frag = document.createDocumentFragment();
             pushExecutionContext(frag);
+
+            let result: R;
             try {
-                handler();
+                result = handler();
             } finally {
                 popExecutionContext();
             }
+
+            // Update output signal
+            output.value = result as Widen<R>;
 
             // Track nodes we're about to insert
             currentNodes = Array.from(frag.childNodes);
 
             // Insert after anchor
             anchor.parentNode?.insertBefore(frag, anchor.nextSibling);
+        } else {
+            // No handler matched
+            output.value = undefined;
         }
     });
+
+    return output;
 }

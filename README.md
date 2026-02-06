@@ -27,7 +27,7 @@ Most frameworks add layers of abstraction between you and the DOM. Fia gives you
 
 - **Minimal abstraction** - `$()` for reactivity and functions for elements. That's it.
 - **Zero dependencies** - No supply chain risk, no version conflicts, no surprises.
-- **Vanilla JavaScript** - Use `if`, `forEach`, `map`, `filter`. No custom helpers.
+- **Vanilla JavaScript** - Use `if`, `forEach` for static logic. Use `Show`/`Each` only for reactive DOM updates.
 
 ## 🚀 Getting Started
 
@@ -247,8 +247,41 @@ Each(() => todos.items, (item, index) => {
 });
 ```
 
-> [!TIP]
 > Use `Show` and `Each` instead of plain `if`/`forEach` when you need the content to **react to state changes**.
+
+### Match
+
+Reactive pattern matching for strict switch/case logic or simple routing:
+
+```typescript
+import { Match } from "@fia/core";
+
+const status = $("loading");
+
+Match(() => status.value, {
+  loading: () => p({ textContent: "Loading..." }),
+  success: () => div({ textContent: "Data loaded!" }),
+  error: () => p({ textContent: "Error loading data" }),
+  _: () => p({ textContent: "Unknown state" }), // Default case
+});
+```
+
+### Derived Values with Match
+
+`Match` returns a signal, so you can use it directly in properties:
+
+```typescript
+const status = $(10);
+
+p({
+  // Returns Signal<string | undefined>
+  textContent: Match(() => status.value, {
+    10: () => "Perfect Score!",
+    0: () => "Maybe next time...",
+    _: () => `Score: ${status.value}`
+  })
+});
+```
 
 ---
 
@@ -497,8 +530,17 @@ div(() => {
     });
   });
   div({ class: "content" }, () => {
-    p({ textContent: $(() => `Content for ${tabs[active.value]}`) });
+  div({ class: "content" }, () => {
+    // Match returns a signal, so we can use it directly in textContent!
+    p({
+      textContent: Match(() => active.value, {
+        0: () => "Welcome to the Home page!",
+        1: () => "About Fia Framework...",
+        2: () => "Contact us at hello@fia.dev",
+      })
+    });
   });
+});
 });
 ```
 
@@ -506,16 +548,24 @@ div(() => {
 Use `Show` for reactive loading states that update when data arrives.
 
 ```typescript
-const data = $({ loading: true as boolean, users: [] as string[] });
+const state = $<{ status: "loading" | "success" | "error"; users: string[] }>({
+  status: "loading",
+  users: []
+});
 
 fetch("/api/users")
   .then(r => r.json())
-  .then(users => { data.users = users; data.loading = false; });
+  .then(users => {
+    state.users = users;
+    state.status = "success";
+  })
+  .catch(() => state.status = "error");
 
 div(() => {
-  Show(() => data.loading, {
-    then: () => p({ textContent: "Loading..." }),
-    else: () => ul(() => Each(() => data.users, u => li({ textContent: u }))),
+  Match(() => state.status, {
+    loading: () => p({ textContent: "Loading..." }),
+    error: () => p({ textContent: "Failed to load users" }),
+    success: () => ul(() => Each(() => state.users, u => li({ textContent: u }))),
   });
 });
 ```

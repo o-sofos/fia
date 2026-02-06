@@ -159,7 +159,7 @@ export function $e(fn: EffectFn): () => void {
  * Detects if T is a "plain object" (not a primitive, array, or function).
  * Branded types like `number & { [brand]: "px" }` extend primitives and are NOT plain objects.
  */
-type IsPlainObject<T> =
+export type IsPlainObject<T> =
   T extends string | number | boolean | symbol | bigint | null | undefined ? false :
   T extends readonly unknown[] ? false :
   T extends Function ? false :
@@ -174,7 +174,7 @@ type IsPlainObject<T> =
  * - Arrays: readonly [1, 3, 4] → number[]
  * - Objects: { readonly name: "evan"; age: 30 } → { name: string; age: number }
  */
-type Widen<T> =
+export type Widen<T> =
   T extends string ? string :
   T extends number ? number :
   T extends boolean ? boolean :
@@ -188,7 +188,7 @@ type Widen<T> =
  * - Arrays: readonly [1, 3, 4] → (1 | 3 | 4)[]
  * - Objects: { readonly name: "evan" } → { name: "evan" } (mutable, literals preserved)
  */
-type Readable<T> =
+export type Readable<T> =
   T extends string | number | boolean | symbol | bigint | null | undefined ? T :  // Preserve primitives (including branded)
   T extends readonly (infer U)[] ? U[] :
   IsPlainObject<T> extends true ? { -readonly [K in keyof T]: Readable<T[K]> } :
