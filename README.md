@@ -371,6 +371,24 @@ div(() => {
 });
 ```
 
+### Signals as Monads
+
+If you're coming from functional programming: **Signals are Monads**.
+
+- **Unit**: `$(value)` wraps a value.
+- **Bind/Map**: `$(() => ...)` transforms values relationally.
+
+You don't need explicit `flatMap`. Just access the signal value!
+
+```typescript
+const userId = $(1);
+const user = $(() => fetchUser(userId.value)); // Signal<User>
+const name = $(() => user.value?.name);        // Signal<string | undefined>
+
+// If userId changes -> user updates -> name updates.
+// Automatic dependency flattening!
+```
+
 ---
 
 ## ⚡ Performance
