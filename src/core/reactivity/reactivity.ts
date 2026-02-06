@@ -194,13 +194,52 @@ type Readable<T> =
   IsPlainObject<T> extends true ? { -readonly [K in keyof T]: Readable<T[K]> } :
   T;
 
+/**
+ * A read-only reactive signal.
+ * 
+ * Signals track their dependencies automatically and update when dependencies change.
+ * Read the value by calling the signal or accessing `.value`.
+ * 
+ * @example
+ * ```ts
+ * const count = $(0);
+ * const double = $(() => count.value * 2); // Signal<number>
+ * 
+ * console.log(double.value); // 0
+ * count.value = 5;
+ * console.log(double.value); // 10
+ * ```
+ * 
+ * @template T - The type of the signal's value
+ */
 export interface Signal<T> {
+  /** Call the signal as a function to read its value (tracks dependencies). */
   (): Readable<T>;
+  /** Read the current value (tracks dependencies). */
   readonly value: Readable<T>;
+  /** Read the current value without tracking dependencies. */
   peek(): Readable<T>;
 }
 
+/**
+ * A writable reactive signal for primitives.
+ * 
+ * Create with `$(initialValue)` where initialValue is a primitive (string, number, boolean, etc.).
+ * Write by setting `.value` or calling with a new value.
+ * 
+ * @example
+ * ```ts
+ * const name = $("Evan");
+ * name.value = "John";  // Update via .value
+ * name("Jane");         // Or call as function
+ * 
+ * console.log(name.value); // "Jane"
+ * ```
+ * 
+ * @template T - The type of the signal's value
+ */
 export interface WritableSignal<T> extends Signal<T> {
+  /** Call with a value to update the signal. */
   (newValue: Widen<T>): void;
   /** Get: returns readable type (mutable arrays, literal primitives). Set: accepts widened type. */
   get value(): Readable<T>;
