@@ -7,7 +7,7 @@
  * Run: bun test types.test.ts
  */
 
-import { div, button, input } from "./elements/elements";
+import { div, button, input, img } from "./elements/elements";
 import { $ } from "./reactivity/reactivity";
 import type {
   UnwrapSignal,
@@ -143,15 +143,13 @@ void unwrappedValue;
 // Test 10: Signalize
 type User = { name: string; age: number };
 type ReactiveUser = Signalize<User>;
-// @ts-expect-error - Unused type
-type _ReactiveUser = ReactiveUser;
+// type _ReactiveUser = ReactiveUser;
 // ReactiveUser should be { name: Signal<string>; age: Signal<number> }
 
 // Test 11: SignalizeKeys
 type PartialReactive = SignalizeKeys<User, "name">;
 // PartialReactive should be { name: Signal<string>; age: number }
-// @ts-expect-error - Unused type alias
-type _PartialReactive = PartialReactive;
+// type _PartialReactive = PartialReactive;
 
 // Test 12: StyleProp helper
 const acceptsStyleProp = (_style: StyleProp) => {
@@ -304,9 +302,10 @@ activeSignal.value = true; // ✓ Should compile - boolean assignable to boolean
 
 // Test 27: Objects preserve their structure (use `as const` for literal object values)
 const configSignal = $({ mode: "dark" } as const);
-// With `as const`, configSignal.value.mode is "dark" (literal)
+// With `as const`, configSignal.mode is "dark" (literal)
 // Without `as const`, it would be string (which is usually fine)
-console.log(configSignal.value.mode); // "dark"
+// Note: $({ object }) returns a ReactiveStore (proxy), so accessing .mode directly
+console.log(configSignal.mode); // "dark"
 
 // Test 28: Signals now preserve literal types (getter narrow, setter wide)
 // Literal types are preserved - use explicit type param to widen if needed
@@ -326,6 +325,45 @@ void numWide;
 void boolWide;
 
 console.log("✅ Phase 9 tests passed: Signal primitive inference works!");
+
+// =============================================================================
+// PHASE 10: STRICTNESS VERIFICATION (Negative Tests)
+// =============================================================================
+
+console.log("✓ Phase 10: Testing strictness (compilation should fail without @ts-expect-error)");
+
+// 1. Check className (should error - use class instead)
+// @ts-expect-error - className is not a valid prop
+div({ className: "foo" });
+
+// 2. Check strict CSS (should error)
+// @ts-expect-error - invalid-display is not a valid CSSDisplay
+div({ style: { display: "invalid-display" } });
+
+// 3. Void element children (should error)
+// @ts-expect-error - img cannot have children
+img(() => { });
+// @ts-expect-error - img cannot have children
+img({ src: "foo.png" }, () => { });
+
+// 4. Signal type safety
+const numSig = $(123);
+// @ts-expect-error - id expects string signal
+div({ id: numSig });
+
+// 5. Unknown prop
+// @ts-expect-error - unknownProp is not in global attributes
+div({ unknownProp: "foo" });
+
+// 6. Input discrimination
+// @ts-expect-error - type="email" implies value is string
+input({ type: "email", value: 123 });
+// @ts-expect-error - checked is boolean
+input({ type: "checkbox", checked: "yes" });
+// @ts-expect-error - type="file" does not allow value prop
+input({ type: "file", value: "foo" });
+
+console.log("✅ Phase 10 tests passed: strictness confirmed!");
 
 // =============================================================================
 // INTEGRATION TESTS
@@ -374,5 +412,6 @@ console.log("✅ Precise event handler types");
 console.log("✅ Branded CSS value types");
 console.log("✅ Element-typed event handlers (currentTarget narrowing)");
 console.log("✅ Signal primitive type inference");
+console.log("✅ Strictness verification (negative tests)");
 console.log("✅ Integration tests");
-console.log("\n🚀 Fia's type system is now the best in the industry!");
+console.log("\n🚀 Fia's type system is safe and sound!");
