@@ -40,7 +40,9 @@ export function Show(
 
     $e(() => {
         // Clear previous nodes
-        currentNodes.forEach(node => node.parentNode?.removeChild(node));
+        for (const node of currentNodes) {
+            node.parentNode?.removeChild(node);
+        }
         currentNodes = [];
 
         // Create new content
@@ -85,7 +87,9 @@ export function Each<T>(
 
     $e(() => {
         // Clear previous nodes
-        currentNodes.forEach(node => node.parentNode?.removeChild(node));
+        for (const node of currentNodes) {
+            node.parentNode?.removeChild(node);
+        }
         currentNodes = [];
 
         const list = items();
@@ -93,7 +97,9 @@ export function Each<T>(
         pushExecutionContext(frag);
 
         try {
-            list.forEach((item, index) => render(item, index));
+            for (let i = 0; i < list.length; i++) {
+                render(list[i], i);
+            }
         } finally {
             popExecutionContext();
         }

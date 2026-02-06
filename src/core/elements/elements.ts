@@ -836,7 +836,9 @@ function createElement<K extends keyof HTMLElementTagNameMap>(
     // Execute onMount callbacks after element is in DOM
     if (mountCallbacks.length > 0) {
       requestAnimationFrame(() => {
-        mountCallbacks.forEach(cb => cb());
+        for (const cb of mountCallbacks) {
+          cb();
+        }
       });
     }
 
