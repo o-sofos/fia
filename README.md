@@ -127,6 +127,23 @@ img({ src: "/photo.jpg", alt: "Photo" });
 br();
 ```
 
+### onMount Callback
+
+Access layout properties after the element is in the DOM:
+
+```typescript
+div((el, onMount) => {
+  el.style.height = "100vh";
+  
+  onMount(() => {
+    // Runs after mount - layout is computed
+    console.log(el.offsetHeight);
+  });
+  
+  p({ textContent: "Child" });  // Still batched
+});
+```
+
 ---
 
 ## 💡 Reactivity

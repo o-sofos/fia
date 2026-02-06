@@ -66,8 +66,11 @@ type ValidateProps<P, Target> = {
 
 export type Renderable = string | number | boolean | null | undefined;
 
-/** Children callback - receives element reference, creates children inside */
-type ChildrenCallback<E extends HTMLElement> = (el: E) => void;
+/** onMount callback - runs after element is in DOM */
+type OnMountCallback = (cb: () => void) => void;
+
+/** Children callback - receives element reference and onMount helper */
+type ChildrenCallback<E extends HTMLElement> = (el: E, onMount: OnMountCallback) => void;
 
 export type Child =
   | string
@@ -769,11 +772,14 @@ function createElement<K extends keyof HTMLElementTagNameMap>(
     }
 
     // Execute children with implicit fragment batching
+    let mountCallbacks: (() => void)[] = [];
+    const onMount: OnMountCallback = (cb) => mountCallbacks.push(cb);
+
     if (children) {
       const frag = document.createDocumentFragment();
       pushExecutionContext(frag);
       try {
-        children(element);
+        children(element, onMount);
       } finally {
         popExecutionContext();
       }
@@ -782,6 +788,13 @@ function createElement<K extends keyof HTMLElementTagNameMap>(
 
     // Mount to current context
     getCurrentExecutionContext().appendChild(element);
+
+    // Execute onMount callbacks after element is in DOM
+    if (mountCallbacks.length > 0) {
+      requestAnimationFrame(() => {
+        mountCallbacks.forEach(cb => cb());
+      });
+    }
 
     return element;
   };
