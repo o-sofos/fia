@@ -2,21 +2,36 @@
  * 05_full_page.ts
  *
  * Difficulty: Expert
- * Concept: Composition
+ * Concept: Composition & Routing
  *
  * Concepts:
  * 1. Composition: Assembling complex pages from smaller components
- * 2. Layout: Managing global layout structure
+ * 2. Routing: Using Match for hash-based navigation
+ * 3. Global State: Connecting URL hash to application state
  */
 
-import { div } from "../core/elements/elements";
+import { $, div, Match } from "../core/mod";
 import { Navbar } from "./02_navbar";
 import { Hero } from "./01_hero";
 import { Features } from "./03_features";
 import { Contact } from "./04_contact";
 
+// Simple routing state
+function useRouter() {
+  const hash = $(window.location.hash || "#");
+
+  // Listen for hash changes
+  window.addEventListener("hashchange", () => {
+    hash.value = window.location.hash || "#";
+  });
+
+  return hash;
+}
+
 // Our main App component
 export function LandingPage() {
+  const route = useRouter();
+
   div(
     {
       style: {
@@ -32,11 +47,25 @@ export function LandingPage() {
       // Header
       Navbar();
 
-      // Main Content
+      // Main Content Area with Routing
       div({ style: { flex: "1" } }, () => {
-        Hero();
-        Features();
-        Contact();
+        Match(() => route.value, {
+          "#features": () => Features(),
+          "#docs": () => div({
+            style: { padding: "4rem", textAlign: "center" },
+            textContent: "Documentation coming soon!"
+          }),
+          "#blog": () => div({
+            style: { padding: "4rem", textAlign: "center" },
+            textContent: "Blog coming soon!"
+          }),
+          // Default route (Home)
+          _: () => {
+            Hero();
+            // Show contact on home page too for demo
+            Contact();
+          }
+        });
       });
 
       // Footer
