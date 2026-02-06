@@ -1,7 +1,8 @@
 {
   "name": "@fia/core",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "license": "MIT",
+  "description": "A tiny reactive UI framework with signals, fine-grained reactivity, and zero dependencies. No JSX, no VDOM, no build step required.",
   "exports": {
     ".": "./src/core/mod.ts"
   },

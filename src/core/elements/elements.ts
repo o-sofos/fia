@@ -64,14 +64,43 @@ type ValidateProps<P, Target> = {
   : never;
 };
 
+/**
+ * Types that can be rendered as text content in an element.
+ * Includes primitives that will be converted to strings.
+ */
 export type Renderable = string | number | boolean | null | undefined;
 
-/** onMount callback - runs after element is in DOM */
-type OnMountCallback = (cb: () => void) => void;
+/**
+ * Callback that executes after an element is mounted to the DOM.
+ * Use this to access layout properties like `offsetHeight`.
+ * 
+ * @example
+ * ```ts
+ * div((el, onMount) => {
+ *   onMount(() => console.log(el.offsetHeight));
+ * });
+ * ```
+ */
+export type OnMountCallback = (cb: () => void) => void;
 
-/** Children callback - receives element reference and onMount helper */
-type ChildrenCallback<E extends HTMLElement> = (el: E, onMount: OnMountCallback) => void;
+/**
+ * Callback for creating child elements within a parent.
+ * Receives the parent element reference and an onMount helper.
+ * 
+ * @example
+ * ```ts
+ * div((el, onMount) => {
+ *   p({ textContent: "Child element" });
+ *   onMount(() => console.log("Mounted!"));
+ * });
+ * ```
+ */
+export type ChildrenCallback<E extends HTMLElement> = (el: E, onMount: OnMountCallback) => void;
 
+/**
+ * Valid child types for element content.
+ * Can be text, numbers, booleans, reactive signals, elements, or render callbacks.
+ */
 export type Child =
   | string
   | number
