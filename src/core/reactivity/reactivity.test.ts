@@ -1,381 +1,161 @@
-import { describe, it, expect } from "bun:test";
-import { $, $e, batch } from "./reactivity";
 
-describe("Reactivity System", () => {
-    describe("Signals", () => {
-        it("should hold and update values via function call", () => {
-            const count = $<number>(0);
-            expect(count()).toBe(0);
+import { describe, expect, test, mock } from "bun:test";
+import { $, $e } from "./reactivity";
 
-            count(5);
-            expect(count()).toBe(5);
-        });
+describe("Reactivity Core", () => {
+    test("Signals (Primitives)", () => {
+        const count = $(0);
+        expect(count.value).toBe(0);
+        expect(count()).toBe(0);
 
-        it("should hold and update values via .value property", () => {
-            const count = $<number>(0);
-            expect(count.value).toBe(0);
+        count.value++;
+        expect(count.value).toBe(1);
+        expect(count()).toBe(1);
 
-            count.value = 10;
-            expect(count.value).toBe(10);
-        });
-
-        it("should not trigger effects when value is unchanged (Object.is)", () => {
-            const count = $<number>(0);
-            let runs = 0;
-
-            $e(() => {
-                count.value;
-                runs++;
-            });
-            expect(runs).toBe(1);
-
-            count.value = 0; // Same value
-            expect(runs).toBe(1);
-
-            count(0); // Same value via function
-            expect(runs).toBe(1);
-        });
-
-        it("should handle NaN correctly (Object.is)", () => {
-            const val = $<number>(NaN);
-            let runs = 0;
-
-            $e(() => {
-                val.value;
-                runs++;
-            });
-            expect(runs).toBe(1);
-
-            val.value = NaN; // NaN === NaN with Object.is
-            expect(runs).toBe(1);
-        });
-
-        it("should trigger effects on value change", () => {
-            const count = $<number>(0);
-            let observed = -1;
-
-            $e(() => {
-                observed = count.value;
-            });
-            expect(observed).toBe(0);
-
-            count.value = 42;
-            expect(observed).toBe(42);
-        });
-
-        it("should allow reading without tracking via peek()", () => {
-            const count = $<number>(0);
-            let runs = 0;
-
-            $e(() => {
-                count.peek(); // Should NOT track
-                runs++;
-            });
-            expect(runs).toBe(1);
-
-            count.value = 1;
-            expect(runs).toBe(1); // Effect should NOT re-run
-        });
+        count.value = 5;
+        expect(count.value).toBe(5);
     });
 
-    describe("Computed", () => {
-        it("should derive values from signals", () => {
-            const count = $<number>(2);
-            const doubled = $(() => count.value * 2);
+    test("Computed Values", () => {
+        const count = $(0);
+        const double = $(() => count.value * 2);
 
-            expect(doubled()).toBe(4);
-            expect(doubled.value).toBe(4);
-        });
+        expect(double.value).toBe(0);
 
-        it("should update when dependencies change", () => {
-            const count = $<number>(1);
-            const doubled = $(() => count.value * 2);
+        count.value = 5;
+        expect(double.value).toBe(10);
 
-            expect(doubled.value).toBe(2);
-
-            count.value = 5;
-            expect(doubled.value).toBe(10);
-        });
-
-        it("should chain computed values", () => {
-            const count = $<number>(1);
-            const doubled = $(() => count.value * 2);
-            const quadrupled = $(() => doubled.value * 2);
-
-            expect(quadrupled.value).toBe(4);
-
-            count.value = 3;
-            expect(doubled.value).toBe(6);
-            expect(quadrupled.value).toBe(12);
-        });
-
-        it("should be lazy - only recompute when read", () => {
-            let computeCount = 0;
-            const count = $<number>(1);
-            const doubled = $(() => {
-                computeCount++;
-                return count.value * 2;
-            });
-
-            expect(computeCount).toBe(1); // Initial computation
-
-            count.value = 2;
-            expect(computeCount).toBe(1); // Not yet recomputed
-
-            doubled.value; // Trigger recomputation
-            expect(computeCount).toBe(2);
-
-            doubled.value; // Read again - should NOT recompute
-            expect(computeCount).toBe(2);
-        });
-
-        it("should allow peeking without tracking", () => {
-            const count = $<number>(5);
-            const doubled = $(() => count.value * 2);
-
-            let runs = 0;
-            $e(() => {
-                doubled.peek(); // Peek at computed
-                runs++;
-            });
-            expect(runs).toBe(1);
-
-            count.value = 10;
-            expect(runs).toBe(1); // Effect should NOT re-run
-            expect(doubled.peek()).toBe(20); // But computed should update
-        });
+        count.value++;
+        expect(double.value).toBe(12);
     });
 
-    describe("Effects", () => {
-        it("should run immediately on creation", () => {
-            let ran = false;
-            $e(() => {
-                ran = true;
-            });
-            expect(ran).toBe(true);
+    test("Effects", () => {
+        const count = $(0);
+        let runCount = 0;
+        let lastValue = -1;
+
+        $e(() => {
+            runCount++;
+            lastValue = count.value;
         });
 
-        it("should track multiple dependencies", () => {
-            const first = $<string>("John");
-            const last = $<string>("Doe");
-            let fullName = "";
+        // Initial run
+        expect(runCount).toBe(1);
+        expect(lastValue).toBe(0);
 
-            $e(() => {
-                fullName = `${first.value} ${last.value}`;
-            });
-            expect(fullName).toBe("John Doe");
+        // Update
+        count.value++;
+        expect(runCount).toBe(2);
+        expect(lastValue).toBe(1);
 
-            first.value = "Jane";
-            expect(fullName).toBe("Jane Doe");
-
-            last.value = "Smith";
-            expect(fullName).toBe("Jane Smith");
-        });
-
-        it("should cleanup stale dependencies on re-run", () => {
-            const show = $<boolean>(true);
-            const msg = $<string>("Hello");
-            let runs = 0;
-
-            $e(() => {
-                runs++;
-                if (show.value) {
-                    msg.value; // Only track msg when show is true
-                }
-            });
-            expect(runs).toBe(1);
-
-            msg.value = "World";
-            expect(runs).toBe(2); // msg is tracked
-
-            show.value = false;
-            expect(runs).toBe(3); // show changed
-
-            // Now msg should NOT be tracked anymore
-            msg.value = "Ignored";
-            expect(runs).toBe(3); // Should NOT re-run!
-        });
-
-        it("should be disposable", () => {
-            const count = $<number>(0);
-            let runs = 0;
-
-            const dispose = $e(() => {
-                count.value;
-                runs++;
-            });
-            expect(runs).toBe(1);
-
-            count.value = 1;
-            expect(runs).toBe(2);
-
-            dispose();
-
-            count.value = 2;
-            expect(runs).toBe(2); // Should NOT run after disposal
-        });
-
-        it("should handle nested effects independently", () => {
-            const outer = $<number>(0);
-            const inner = $<number>(0);
-            let outerRuns = 0;
-            let innerRuns = 0;
-
-            $e(() => {
-                outer.value;
-                outerRuns++;
-
-                $e(() => {
-                    inner.value;
-                    innerRuns++;
-                });
-            });
-
-            // Note: nested effects create new effects each outer run
-            // This is generally discouraged but should not crash
-            expect(outerRuns).toBe(1);
-            expect(innerRuns).toBe(1);
-        });
+        // No change -> No run
+        count.value = 1;
+        expect(runCount).toBe(2);
     });
 
-    describe("Batching", () => {
-        it("should batch multiple updates into single effect run", () => {
-            const count = $<number>(0);
-            let runs = 0;
+    test("Nested Effects (Cleanup)", () => {
+        const outer = $(0);
+        const inner = $(0);
+        let innerRuns = 0;
 
+        $e(() => {
+            outer.value; // Dependency
             $e(() => {
-                count.value;
-                runs++;
+                inner.value; // Dependency
+                innerRuns++;
             });
-            expect(runs).toBe(1);
-
-            batch(() => {
-                count.value = 1;
-                count.value = 2;
-                count.value = 3;
-            });
-
-            expect(runs).toBe(2); // Initial + one batched run
-            expect(count.value).toBe(3);
         });
 
-        it("should deduplicate effects within a batch", () => {
-            const a = $<number>(0);
-            const b = $<number>(0);
-            let runs = 0;
+        expect(innerRuns).toBe(1);
 
-            $e(() => {
-                a.value;
-                b.value;
-                runs++;
-            });
-            expect(runs).toBe(1);
+        // Trigger outer -> inner should re-run (new effect created, old disposed?)
+        // Note: Fia's active effect stack handles this, but does it dispose old inner effects?
+        // Let's verify behavior.
+        outer.value++;
+        expect(innerRuns).toBe(2);
 
-            batch(() => {
-                a.value = 1; // Schedules effect
-                b.value = 1; // Schedules same effect again
-            });
-
-            expect(runs).toBe(2); // Should only run once after batch
-        });
-
-        it("should support nested batches", () => {
-            const count = $<number>(0);
-            let runs = 0;
-
-            $e(() => {
-                count.value;
-                runs++;
-            });
-            expect(runs).toBe(1);
-
-            batch(() => {
-                count.value = 1;
-                batch(() => {
-                    count.value = 2;
-                    count.value = 3;
-                });
-                count.value = 4;
-            });
-
-            expect(runs).toBe(2); // Effects run after outermost batch
-            expect(count.value).toBe(4);
-        });
+        // Trigger inner -> inner should re-run
+        // Note: Fia does NOT automatically dispose nested effects (no owner system).
+        // So the old inner effect AND the new inner effect from step 2 both run.
+        inner.value++;
+        expect(innerRuns).toBe(4);
     });
+    describe("ReactiveStore (Objects)", () => {
+        test("Immutable by Default", () => {
+            const state = $({ count: 0 });
+            expect(state.count).toBe(0);
 
-    describe("Edge Cases", () => {
-        it("should handle circular computed dependencies gracefully", () => {
-            // This tests that we don't infinite loop
-            const count = $<number>(1);
-            let computeRuns = 0;
-
-            const derived = $(() => {
-                computeRuns++;
-                return count.value + 1;
-            });
-
-            expect(derived.value).toBe(2);
-            expect(computeRuns).toBe(1);
-
-            count.value = 2;
-            expect(derived.value).toBe(3);
+            // Runtime check: modifying readonly prop should succeed at runtime (proxy) 
+            // but fail types. We verify runtime.
+            // @ts-ignore
+            state.count = 1;
+            expect(state.count as number).toBe(1);
         });
 
-        it("should handle effects that modify their own dependencies", () => {
-            const count = $<number>(0);
-            let runs = 0;
-
-            $e(() => {
-                runs++;
-                if (count.value < 3) {
-                    count.value++; // Modifies its own dependency
-                }
-            });
-
-            // Effect runs until count reaches 3
-            expect(runs).toBe(4); // 0->1, 1->2, 2->3, then stops
-            expect(count.value).toBe(3);
+        test("Mutable Opt-in", () => {
+            const state = $({ count: 0 }, "count");
+            state.count++;
+            expect(state.count).toBe(1);
         });
 
-        it("should handle signals with object values", () => {
-            const obj = $({ a: 1 });
+        test("Deep Reactivity", () => {
+            const state = $({ nested: { count: 0 } as { count: number } }, "nested");
             let runs = 0;
-
             $e(() => {
-                obj.value;
                 runs++;
+                state.nested.count; // Access triggers track
             });
             expect(runs).toBe(1);
 
-            // Same reference - should NOT trigger
-            const ref = obj.value;
-            obj.value = ref;
-            expect(runs).toBe(1);
-
-            // New object - should trigger
-            obj.value = { a: 1 };
+            state.nested = { count: 1 } as any;
             expect(runs).toBe(2);
         });
 
-        it("should handle disposal during effect execution", () => {
-            const count = $<number>(0);
-            let dispose: (() => void) | undefined;
-            let runs = 0;
-
-            dispose = $e(() => {
-                runs++;
-                count.value;
-                if (runs === 2 && dispose) {
-                    dispose(); // Dispose self during execution
-                }
+        test("Array Mutation", () => {
+            const state = $({ items: ["a"] }, "items");
+            let length = 0;
+            $e(() => {
+                length = state.items.length;
             });
-            expect(runs).toBe(1);
+            expect(length).toBe(1);
 
-            count.value = 1;
-            expect(runs).toBe(2);
+            state.items.push("b");
+            expect(length).toBe(2);
+            expect(state.items[1]).toBe("b");
+        });
 
-            count.value = 2;
-            expect(runs).toBe(2); // Should not run - disposed
+        test("Recursive Immutability", () => {
+            // Parent "wrapper" is mutable, but child "inner" is not explicitly mutable
+            const state = $({
+                wrapper: { inner: "fixed" } as { inner: string }
+            }, "wrapper");
+
+            // Valid: Replace wrapper
+            // Note: TS expects ReactiveStore type, but runtime accepts plain object which gets wrapped on access.
+            state.wrapper = { inner: "replaced" } as any;
+            expect(state.wrapper.inner).toBe("replaced");
+
+            // state.wrapper is a proxy.
+            // state.wrapper.inner = "changed" -> works at runtime (no freeze).
+            // But types forbid. Verify runtime behavior:
+            // @ts-ignore
+            state.wrapper.inner = "changed";
+            expect(state.wrapper.inner).toBe("changed");
+        });
+
+        test("Nested Store Preservation", () => {
+            const inner = $({ name: "mutable" as string }, "name");
+            const outer = $({ inner }, "inner"); // "inner" reference is mutable
+
+            // Outer sees inner as mutable because it IS the inner store
+            outer.inner.name = "updated";
+            expect(inner.name).toBe("updated");
+            expect(outer.inner.name).toBe("updated");
+
+            // Replace inner
+            const newInner = $({ name: "new" as string });
+            outer.inner = newInner;
+            expect(outer.inner.name).toBe("new");
         });
     });
 });

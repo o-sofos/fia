@@ -111,7 +111,7 @@ export function batch(fn: () => void): void {
  * Usage:
  * ```ts
  * $e(() => {
- *   console.log("Count is:", count.value);
+ *   // console.log("Count is:", count.value);
  * });
  * ```
  *
@@ -206,9 +206,9 @@ export type Readable<T> =
  * const count = $(0);
  * const double = $(() => count.value * 2); // Signal<number>
  * 
- * console.log(double.value); // 0
+ * // console.log(double.value); // 0
  * count.value = 5;
- * console.log(double.value); // 10
+ * // console.log(double.value); // 10
  * ```
  * 
  * @template T - The type of the signal's value
@@ -234,7 +234,7 @@ export interface Signal<T> {
  * name.value = "John";  // Update via .value
  * name("Jane");         // Or call as function
  * 
- * console.log(name.value); // "Jane"
+ * // console.log(name.value); // "Jane"
  * ```
  * 
  * @template T - The type of the signal's value
@@ -491,12 +491,18 @@ function createStore<T extends object>(initial: T): ReactiveStore<T> {
     set(target, key, value, receiver) {
       const oldValue = Reflect.get(target, key, receiver);
 
-      // Unwrap reactive proxies when setting
       const rawValue = value !== null && typeof value === "object" && RAW in value
         ? value[RAW]
         : value;
 
-      if (Object.is(oldValue, rawValue)) return true;  // No change
+      // Special handling for Array loop: 
+      // array[index] = val -> updates length silently.
+      // array.push -> sets index then sets length.
+      // When setting length, it might already be updated on target, so Object.is returns true.
+      // We must force trigger for length changes on arrays.
+      const isArrayLength = Array.isArray(target) && key === "length";
+
+      if (Object.is(oldValue, rawValue) && !isArrayLength) return true;  // No change
 
       Reflect.set(target, key, rawValue, receiver);
 
@@ -583,9 +589,9 @@ export function $<T>(compute: () => T): Signal<T>;
 // Overload 2: Object Default (All Immutable)
 export function $<const T extends Record<string, unknown>>(initial: T): ReactiveStore<T>;
 // Overload 3: Object with Mutable Keys
-export function $<const T extends Record<string, unknown>, const M extends keyof T>(initial: T, ...mutable: M[]): ReactiveStore<T, M>;
+export function $<const T extends Record<string, unknown>, M extends keyof T>(initial: T, ...mutable: M[]): ReactiveStore<T, M>;
 // Overload 4: Primitives
-export function $<const T extends string | number | boolean | null | undefined>(initial: T): WritableSignal<T>;
+export function $<const T extends string | number | boolean | null | undefined>(initial: T): WritableSignal<Widen<T>>;
 // Overload 5: Arrays
 export function $<const T extends readonly unknown[]>(initial: T): ReactiveStore<T extends readonly (infer U)[] ? U[] : T>;
 
