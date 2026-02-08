@@ -1,4 +1,4 @@
-import { $, button, div, Each, input, li, span, ul } from "../core/mod";
+import { div, input, button, ul, Each, li, span, $ } from "../core/mod";
 
 export default () => {
     const todos = $<{ items: string[]; input: string }>({
