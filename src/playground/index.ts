@@ -1,28 +1,38 @@
-import { $, button, div, Match, p } from "../core/mod";
+import { $, button, div, Each, input, li, span, ul } from "../core/mod";
 
 export default () => {
-    const tabs = ["Home", "About", "Contact"];
-    const active = $<number>(0);
+    const todos = $<{ items: string[]; input: string }>({
+        items: [],
+        input: ""
+    });
 
     div(() => {
-        div({ class: "tabs" }, () => {
-            tabs.forEach((tab, i) => {
-                button({
-                    textContent: tab,
-                    class: $(() => active.value === i ? "active" : ""),
-                    onclick: () => active.value = i,
+        input({
+            type: "text",
+            value: $(() => todos.input),
+            oninput: (e) => todos.input = e.currentTarget.value,
+        });
+        button({
+            textContent: "Add",
+            onclick: () => {
+                if (todos.input?.trim()) {
+                    todos.items = [...todos.items, todos.input];
+                    todos.input = "";
+                }
+            },
+        });
+        ul(() => {
+            Each(() => todos.items, (item, i) => {
+                li(() => {
+                    span({ textContent: item });
+                    button({
+                        textContent: "×",
+                        onclick: () => todos.items = todos.items.filter((_, j) => j !== i),
+                    });
                 });
             });
         });
-        div({ class: "content" }, () => {
-            p({
-                textContent: Match(() => active.value, {
-                    0: () => "Welcome to the Home page!",
-                    1: () => "About Fia Framework...",
-                    2: () => "Contact us at hello@fia.dev",
-                    _: () => "Unknown",
-                })
-            });
-        });
     });
+
+
 };

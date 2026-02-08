@@ -401,6 +401,8 @@ export type ReactiveStore<T extends object> = {
   -readonly [K in keyof T]: T[K] extends object
   ? T[K] extends Function
   ? T[K]  // Functions are not deeply wrapped
+  : T[K] extends Array<any>
+  ? T[K]  // Arrays are typed as arrays (for assignment compatibility) but proxied at runtime
   : ReactiveStore<T[K]>  // Nested objects are reactive
   : T[K];
 } & {

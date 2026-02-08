@@ -46,6 +46,13 @@ function globalListener(event: Event) {
     while (target) {
         const handlers = handlerMap.get(target);
         if (handlers && handlers[eventType]) {
+            // Mock currentTarget for the handler
+            // We use defineProperty because currentTarget is read-only
+            Object.defineProperty(event, "currentTarget", {
+                configurable: true,
+                value: target,
+            });
+
             // Invoke handler
             handlers[eventType](event);
 
