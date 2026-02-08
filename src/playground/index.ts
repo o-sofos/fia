@@ -1,16 +1,19 @@
 import { div, input, button, ul, Each, li, span, $ } from "../core/mod";
 
 export default () => {
-    const todos = $<{ items: string[]; input: string }>({
+
+    const todos = $({
         items: [],
-        input: ""
-    });
+        input: "",
+    }, "items", "input");
 
     div(() => {
         input({
             type: "text",
             value: $(() => todos.input),
-            oninput: (e) => todos.input = e.currentTarget.value,
+            oninput: (e) => {
+                todos.input = e.currentTarget.value;
+            },
         });
         button({
             textContent: "Add",
@@ -33,6 +36,5 @@ export default () => {
             });
         });
     });
-
 
 };

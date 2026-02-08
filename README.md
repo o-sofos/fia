@@ -44,7 +44,7 @@ import { $, div, h1, button, p } from "jsr:@fia/core";
 import { $, div, h1, button, p } from "jsr:@fia/core";
 
 // Reactive store for state
-const state = $({ count: 0 });
+const state = $({ count: 0 }, "count");
 
 div({ class: "app" }, () => {
   h1({ textContent: "Counter App" });
@@ -162,19 +162,37 @@ name.value = "Fia";
 
 ### Objects → Reactive Stores
 
+Fia stores are **immutable by default**. You must explicitly opt-in to mutability for specific keys. This encourages predictable state updates.
+
 ```typescript
+// 🔒 Immutable Store (Read-only)
+const config = $({ theme: "dark", version: "1.0" });
+// config.theme = "light"; // Error: Cannot assign to read-only property
+
+// 🔓 Mutable Store (Opt-in)
 const state = $({
-  name: "Evan",
-  age: 17,
-});
+  count: 0,
+  name: "Evan"
+}, "count", "name"); // Pass keys you want to be mutable
 
-// Direct property access - no .value needed!
-state.age++;
-state.name = "John";
+state.count++;      // ✅ Works
+state.name = "John"; // ✅ Works
+```
 
-// Deep reactivity
-const nested = $({ user: { name: "Alice" } });
-nested.user.name = "Bob";  // Triggers updates
+### Deep Reactivity
+
+Objects directly nested in a store are deeply reactive, but also follow immutability rules. To update deep state, **replace the object** or use a mutable key for the nested store.
+
+```typescript
+const app = $({
+  user: { name: "Alice", active: true }
+}, "user");
+
+// ❌ Error: user.name is read-only
+// app.user.name = "Bob";
+
+// ✅ Correct: Replace the nested object
+app.user = { ...app.user, name: "Bob" };
 ```
 
 > [!WARNING]
@@ -208,6 +226,43 @@ $e(() => {
   console.log("Count changed to:", count.value);
   document.title = `Count: ${count.value}`;
 });
+```
+
+---
+
+## 🔒 Immutability
+
+Fia embraces an **Immutable-by-Default** philosophy for state management. This differs from many other signals-based frameworks but aligns with functional programming principles to reduce bugs.
+
+### Why Immutability?
+
+1.  **Predictability**: State changes are explicit. You know exactly where and when state is modified.
+2.  **Type Safety**: TypeScript prevents accidental mutations of read-only properties.
+3.  **Deep Reactivity**: Replacing nested objects triggers updates reliably without expensive deep proxy trapping for every property access.
+
+### Working with Immutable State
+
+When a store is immutable, you update state by **replacing** objects, not mutating properties. This is similar to React's `useState` or Redux.
+
+```typescript
+const state = $({ 
+  user: { name: "Evan", score: 10 } 
+}, "user"); // 'user' key is mutable (can be replaced), but user.score is readonly
+
+// ❌ Error: user.score is read-only
+// state.user.score++;
+
+// ✅ Correct: Replace the object
+state.user = { ...state.user, score: state.user.score + 1 };
+```
+
+### Opt-in Mutability
+
+For scenarios where granular mutation is preferred (e.g., forms, high-performance counters), you can opt-in to mutability for specific keys.
+
+```typescript
+const state = $({ count: 0 }, "count");
+state.count++; // Mutable because "count" was explicitly allowed
 ```
 
 ---
@@ -510,7 +565,7 @@ ul(() => Each(() => items.list, item => li({ textContent: item })));
 Objects passed to `$()` become reactive stores. Access properties directly without `.value`.
 
 ```typescript
-const state = $({ count: 0 });
+const state = $({ count: 0 }, "count");
 
 div(() => {
   h1({ textContent: $(() => `Count: ${state.count}`) });
@@ -536,7 +591,7 @@ button({
 Reactive stores are perfect for forms. Each field maps to a store property with live updates.
 
 ```typescript
-const formData = $({ email: "", password: "" });
+const formData = $({ email: "", password: "" }, "email", "password");
 
 form({ onsubmit: (e) => { e.preventDefault(); console.log(formData); } }, () => {
   input({ type: "email", oninput: (e) => formData.email = e.currentTarget.value });
@@ -549,7 +604,7 @@ form({ onsubmit: (e) => { e.preventDefault(); console.log(formData); } }, () => 
 Computed signals automatically track dependencies. When `state.price` or `state.quantity` changes, `total` updates.
 
 ```typescript
-const state = $({ price: 100, quantity: 2 });
+const state = $({ price: 100, quantity: 2 }, "quantity");
 const total = $(() => state.price * state.quantity);
 
 div(() => {
@@ -587,7 +642,7 @@ div({
 A complete todo app using `Each` for reactive list rendering.
 
 ```typescript
-const todos = $({ items: [] as string[], input: "" });
+const todos = $({ items: [] as string[], input: "" }, "items", "input");
 
 div(() => {
   input({
@@ -654,10 +709,10 @@ div(() => {
 Use `Show` for reactive loading states that update when data arrives.
 
 ```typescript
-const state = $<{ status: "loading" | "success" | "error"; users: string[] }>({
-  status: "loading",
-  users: []
-});
+const state = $({
+  status: "loading" as "loading" | "success" | "error",
+  users: [] as string[]
+}, "status", "users");
 
 fetch("/api/users")
   .then(r => r.json())
@@ -680,7 +735,7 @@ div(() => {
 Modal patterns with backdrop click-to-close. Use explicit types to avoid literal type inference.
 
 ```typescript
-const modal = $<{ open: boolean; title: string }>({ open: false, title: "" });
+const modal = $<{ open: boolean; title: string }, "open" | "title">({ open: false, title: "" }, "open", "title");
 
 function openModal(title: string) {
   modal.title = title;
