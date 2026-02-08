@@ -178,6 +178,7 @@ export type Widen<T> =
   T extends string ? string :
   T extends number ? number :
   T extends boolean ? boolean :
+  T extends readonly [] ? any[] :
   T extends readonly (infer U)[] ? Widen<U>[] :
   IsPlainObject<T> extends true ? { -readonly [K in keyof T]: Widen<T[K]> } :
   T;
@@ -393,22 +394,43 @@ const REACTIVE_PROXY = Symbol("reactive-proxy");
 const RAW = Symbol("raw");
 
 /**
- * Reactive store type - provides direct property access with reactivity.
- * Properties can be read/written directly without .value
- * Uses -readonly to allow mutation even when created with const assertion.
+ * Reactive store type - immutable by default.
+ * - By default, all properties are readonly and strictly typed (literals preserved).
+ * - Properties specified in `M` (Mutable Keys) become -readonly and Widened (mutable primitives).
  */
-export type ReactiveStore<T extends object> = {
-  -readonly [K in keyof T]: T[K] extends object
-  ? T[K] extends Function
-  ? T[K]  // Functions are not deeply wrapped
-  : T[K] extends Array<any>
-  ? T[K]  // Arrays are typed as arrays (for assignment compatibility) but proxied at runtime
-  : ReactiveStore<T[K]>  // Nested objects are reactive
+export type ReactiveStore<T extends object, M extends keyof T = never> = {
+  // Mutable Keys: Remove readonly, Widen type, Recursive Wrap
+  -readonly [K in M]: T[K] extends object
+  ? T[K] extends Function ? T[K]
+  : T[K] extends readonly any[] ? Widen<T[K]>
+  : ReactiveStore<T[K], keyof T[K]> // Mutable children are fully mutable for simplicity
+  : Widen<T[K]>;
+} & {
+  // Immutable Keys: Keep readonly, Keep literal type, Recursive Wrap
+  readonly [K in Exclude<keyof T, M>]: T[K] extends object
+  ? T[K] extends Function ? T[K]
+  : T[K] extends readonly any[] ? T[K]
+  : ReactiveStore<T[K]> // Children inherit immutability by default
   : T[K];
 } & {
   /** Access the raw unwrapped object (escape hatch) */
   readonly $raw: T;
 };
+
+/**
+ * Utility type to mark specific keys as mutable in a ReactiveStore.
+ * Useful when working with readonly source types.
+ */
+export type Mut<T, K extends keyof T> = {
+  -readonly [P in K]: T[P];
+} & Omit<T, K>;
+
+/**
+ * Utility type to mark specific keys as immutable in a ReactiveStore.
+ */
+export type Imut<T, K extends keyof T> = {
+  readonly [P in K]: T[P];
+} & Omit<T, K>;
 
 /**
  * Check if a value is already a reactive proxy
@@ -556,25 +578,28 @@ function createStore<T extends object>(initial: T): ReactiveStore<T> {
  */
 // Overload 1: Computed (function)
 export function $<T>(compute: () => T): Signal<T>;
-// Overload 2: Object → ReactiveStore (exclude arrays initially - they're edge case)
+// Overload 2: Object Default (All Immutable)
 export function $<const T extends Record<string, unknown>>(initial: T): ReactiveStore<T>;
-// Overload 3: Primitives → WritableSignal
+// Overload 3: Object with Mutable Keys
+export function $<const T extends Record<string, unknown>, const M extends keyof T>(initial: T, ...mutable: M[]): ReactiveStore<T, M>;
+// Overload 4: Primitives
 export function $<const T extends string | number | boolean | null | undefined>(initial: T): WritableSignal<T>;
-// Overload 4: Arrays → ReactiveStore (treated as objects)
+// Overload 5: Arrays
 export function $<const T extends readonly unknown[]>(initial: T): ReactiveStore<T extends readonly (infer U)[] ? U[] : T>;
+
 // Implementation
-export function $<T>(initial: T): Signal<T> | WritableSignal<T> | ReactiveStore<T & object> {
-  // Computed: function → create computed signal
+export function $<T>(initial: T, ..._mutable: (keyof T)[]): Signal<T> | WritableSignal<T> | ReactiveStore<T & object> {
+  // Computed
   if (typeof initial === "function") {
     return createComputed(initial as () => T) as Signal<T>;
   }
 
-  // Object (but not null): create reactive store
+  // Object
   if (initial !== null && typeof initial === "object") {
     return createStore(initial as T & object);
   }
 
-  // Primitive: create writable signal
+  // Primitive
   return createSignal(initial) as WritableSignal<T>;
 }
 

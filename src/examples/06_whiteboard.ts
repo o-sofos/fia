@@ -1,3 +1,4 @@
+import { env } from "bun";
 import { $, div, canvas, input, button, label, h2 } from "../core/mod";
 
 /**
@@ -8,11 +9,12 @@ import { $, div, canvas, input, button, label, h2 } from "../core/mod";
  */
 export default function Whiteboard() {
     // Reactive tool state
-    const tools = $<{ color: string; lineWidth: number; isDrawing: boolean }>({
+    const tools = $({
+        allowedToBeUsed: env.FIA_WHITEBOARD_ALLOWED_TO_BE_USED === "true",
         color: "#000000",
         lineWidth: 5,
         isDrawing: false
-    });
+    }, "color", "lineWidth", "isDrawing");
 
     // Mutable drawing state
     let lastX = 0;
