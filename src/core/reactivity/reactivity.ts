@@ -403,13 +403,15 @@ export type ReactiveStore<T extends object, M extends keyof T = never> = {
   -readonly [K in M]: T[K] extends object
   ? T[K] extends Function ? T[K]
   : T[K] extends readonly any[] ? Widen<T[K]>
-  : ReactiveStore<T[K], keyof T[K]> // Mutable children are fully mutable for simplicity
+  : T[K] extends { $raw: any } ? T[K]
+  : ReactiveStore<T[K]> // Children inherit immutability by default
   : Widen<T[K]>;
 } & {
   // Immutable Keys: Keep readonly, Keep literal type, Recursive Wrap
   readonly [K in Exclude<keyof T, M>]: T[K] extends object
   ? T[K] extends Function ? T[K]
   : T[K] extends readonly any[] ? T[K]
+  : T[K] extends { $raw: any } ? T[K]
   : ReactiveStore<T[K]> // Children inherit immutability by default
   : T[K];
 } & {
