@@ -265,6 +265,14 @@ const state = $({ count: 0 }, "count");
 state.count++; // Mutable because "count" was explicitly allowed
 ```
 
+### Internal Proxies
+
+Fia uses `Proxy` internally to make state reactive. When you access a property on a `ReactiveStore`, you are interacting with a proxy that tracks dependencies.
+
+-   **Lazy Wrapping**: Deeply nested objects are only wrapped in proxies when you access them. This ensures initiailiztion is fast and memory efficient.
+-   **Identity Stability**: Accessing the same object multiple times returns the same proxy instance (via a `WeakMap` cache), ensuring strict equality `===` works as expected.
+-   **Unwrapping**: You can always get the raw object back using the special read-only property `state.$raw`, which is useful for debugging or passing data to 3rd party libraries.
+
 ---
 
 ## 🔀 Control Flow
