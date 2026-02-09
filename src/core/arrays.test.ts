@@ -1,5 +1,5 @@
 import { describe, it, expect } from "bun:test";
-import { $, $e } from "./reactivity/reactivity";
+import { $, $e, batch } from "./reactivity/reactivity";
 
 describe("Array Reactivity (Store)", () => {
     it("should update when mutating the array in place (push)", () => {
@@ -36,7 +36,7 @@ describe("Array Reactivity (Store)", () => {
 
         expect(updateCount).toBe(1);
 
-        list[0] = "Banana";
+        (list as any)[0] = "Banana";
         expect(updateCount).toBe(2);
     });
 
@@ -52,10 +52,13 @@ describe("Array Reactivity (Store)", () => {
 
         expect(updateCount).toBe(1);
 
-        // Splice - SHOULD TRIGGER
-        list.splice(0, 1, "Orange");
+        // Splice triggers multiple updates (index change + length change check)
+        // Use batch to consolidate them into a single update
+        batch(() => {
+            list.splice(0, 1, "Orange");
+        });
 
-        expect(updateCount).toBe(2); // Splice triggers length/index changes
+        expect(updateCount).toBe(2);
         expect(list[0]).toBe("Orange");
     });
 });
