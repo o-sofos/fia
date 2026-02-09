@@ -29,6 +29,24 @@ Most frameworks add layers of abstraction between you and the DOM. Fia gives you
 - **Zero dependencies** - No supply chain risk, no version conflicts, no surprises.
 - **Vanilla JavaScript** - Use `if`, `forEach` for static logic. Use `Show`/`Each` only for reactive DOM updates.
 
+## 📚 Table of Contents
+
+- [Getting Started](#-getting-started)
+  - [Installation](#installation)
+  - [Quick Start](#quick-start)
+  - [Mounting](#mounting)
+- [Element API](#-element-api)
+- [Reactivity](#-reactivity)
+  - [Signals](#primitives--signals)
+  - [Stores](#objects--reactive-stores)
+  - [Immutability](#-immutability)
+- [Control Flow](#-control-flow)
+- [Component Composition](#-component-composition)
+- [SVG](#-svg)
+- [Performance](#-performance)
+- [Type System](#-type-system)
+- [Examples](#-examples)
+
 ## 🚀 Getting Started
 
 ### Installation
@@ -52,6 +70,20 @@ div({ class: "app" }, () => {
   button({ textContent: "+", onclick: () => state.count++ });
   button({ textContent: "-", onclick: () => state.count-- });
 });
+```
+
+### Mounting
+
+By default, Fia elements append to `document.body` if no parent context exists. For Single Page Apps (SPAs), use the `mount` helper to attach to a root element:
+
+```typescript
+import { mount, div } from "@fia/core";
+
+const App = () => div(() => {
+  // Your app structure
+});
+
+mount(App, "#app"); // Clears #app and mounts App
 ```
 
 That's it. No build step, no configuration, no boilerplate.
@@ -451,6 +483,33 @@ const name = $(() => user.value?.name);        // Signal<string | undefined>
 // If userId changes -> user updates -> name updates.
 // Automatic dependency flattening!
 ```
+
+---
+
+## 🖼️ SVG
+
+Fia supports SVG elements with full type safety. Import them from the main package (prefixed, e.g., `svgCircle`) or the sub-module.
+
+```typescript
+// Option 1: Main export (Prefixed)
+import { svg, svgCircle, svgRect } from "@fia/core";
+
+// Option 2: Namespace import
+import * as SVG from "@fia/core/svg";
+
+svg({ width: 100, height: 100, viewBox: "0 0 100 100" }, () => {
+  svgCircle({
+    cx: 50,
+    cy: 50,
+    r: 40,
+    stroke: "black",
+    "stroke-width": 3,
+    fill: "red"
+  });
+});
+```
+
+> **Note**: SVG elements are in a separate namespace (`http://www.w3.org/2000/svg`) and are created correctly by these factories.
 
 ---
 
