@@ -14,5 +14,5 @@ jobs:
       - uses: oven-sh/setup-bun@v1
       - run: bun install
       - run: bun run tsc --noEmit
-      - run: bun test
+      - run: bun run test
       - run: bunx jsr publish

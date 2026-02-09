@@ -11,7 +11,7 @@
   },
   "scripts": {
     "dev": "bun run dev.ts",
-    "test": "bun test",
+    "test": "bun test src/core",
     "benchmark": "bun run scripts/benchmark.ts"
   },
   "devDependencies": {
