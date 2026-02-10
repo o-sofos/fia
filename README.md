@@ -34,6 +34,7 @@ Most frameworks add layers of abstraction between you and the DOM. Fia gives you
 - [Getting Started](#-getting-started)
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
+  - [Updating](#updating)
   - [Quick Start](#quick-start)
   - [Mounting](#mounting)
 - [Element API](#-element-api)
@@ -69,12 +70,35 @@ deno add jsr:@fia/core
 #### Bun
 
 ```bash
-bunx jsr add @fia/core
+bun add jsr:@fia/core
 ```
 
 #### Node.js (npm, yarn, pnpm)
 
 ```bash
+npx jsr add @fia/core
+```
+
+> **Note:** The examples in this documentation use `fia` as the import package name. To use this shorter alias, modify your `package.json` (or `deno.json`) dependency:
+>
+> ```json
+> "dependencies": {
+>   "fia": "npm:@jsr/fia__core"
+> }
+> ```
+
+### Updating
+
+To update to the latest version, running the installation command again will fetch the latest version from JSR.
+
+```bash
+# Deno
+deno add jsr:@fia/core
+
+# Bun
+bun add jsr:@fia/core
+
+# Node.js
 npx jsr add @fia/core
 ```
 

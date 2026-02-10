@@ -192,13 +192,20 @@ export const Docs = () =>
 
         div({ style: { marginBottom: "1rem" } }, () => {
           h4({ style: { color: "var(--mongo-white)", marginBottom: "0.5rem" }, textContent: "Bun" });
-          CodeBlock("bunx jsr add @fia/core");
+          CodeBlock("bun add jsr:@fia/core");
         });
 
         div({ style: { marginBottom: "1rem" } }, () => {
           h4({ style: { color: "var(--mongo-white)", marginBottom: "0.5rem" }, textContent: "Node.js (npm/yarn/pnpm)" });
           CodeBlock("npx jsr add @fia/core");
         });
+
+        Note("The examples below use \"fia\" as the package name. To enable this shorten import, modify your package.json dependency to alias the package:\n\n\"dependencies\": {\n  \"fia\": \"npm:@jsr/fia__core\"\n}", "info");
+      });
+
+      SubSection("Updating", () => {
+        Paragraph("To update to the latest version, run the installation command again (or use your package manager's update command).");
+        CodeBlock(`# Deno\ndeno add jsr:@fia/core\n\n# Bun\nbun add jsr:@fia/core\n\n# Node.js\nnpx jsr add @fia/core`);
       });
 
       SubSection("Quick Start", () => {
