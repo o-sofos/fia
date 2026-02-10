@@ -8,8 +8,8 @@ export const Hero = () =>
         });
 
         p({
-            style: { fontSize: "1.25rem", color: "var(--text-secondary)", marginBottom: "var(--spacing-lg)", maxWidth: "600px", margin: "0 auto var(--spacing-lg)", lineHeight: "1.6" },
-            textContent: "Fia is a generic, type-safe reactive library. It uses fine-grained signals to update the DOM directly, delivering 0ms overhead and maximum battery life."
+            style: { fontSize: "1.25rem", color: "var(--text-secondary)", marginBottom: "var(--spacing-lg)", maxWidth: "800px", margin: "0 auto var(--spacing-lg)", lineHeight: "1.6" },
+            textContent: "Fia is a lightweight, framework-agnostic library designed for high-performance UI development. By leveraging fine-grained signals, Fia bypasses the overhead of a Virtual DOM to update the DOM directly and precisely."
         });
 
         div({ style: { display: "flex", gap: "1rem", justifyContent: "center", marginTop: "var(--spacing-lg)" } }, () => {
