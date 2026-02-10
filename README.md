@@ -69,9 +69,15 @@ deno add jsr:@fia/core
 
 #### Bun
 
-```bash
-bun add jsr:@fia/core
-```
+1. Create/Update `.npmrc` with JSR registry:
+   ```bash
+   echo "@jsr:registry=https://npm.jsr.io" > .npmrc
+   ```
+
+2. Install (aliased as `fia`):
+   ```bash
+   bun add fia@npm:@jsr/fia__core
+   ```
 
 #### Node.js (npm, yarn, pnpm)
 
@@ -79,13 +85,7 @@ bun add jsr:@fia/core
 npx jsr add @fia/core
 ```
 
-> **Note:** The examples in this documentation use `fia` as the import package name. To use this shorter alias, modify your `package.json` (or `deno.json`) dependency:
->
-> ```json
-> "dependencies": {
->   "fia": "npm:@jsr/fia__core"
-> }
-> ```
+> **Note:** The `bun` command above automatically aliases the package to `fia`. For Node.js/Deno, mapping to `fia` in `package.json`/`deno.json` is recommended for cleaner imports.
 
 ### Updating
 

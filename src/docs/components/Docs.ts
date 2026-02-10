@@ -192,7 +192,9 @@ export const Docs = () =>
 
         div({ style: { marginBottom: "1rem" } }, () => {
           h4({ style: { color: "var(--mongo-white)", marginBottom: "0.5rem" }, textContent: "Bun" });
-          CodeBlock("bun add jsr:@fia/core");
+          Paragraph("1. Create .npmrc file: echo \"@jsr:registry=https://npm.jsr.io\" > .npmrc");
+          Paragraph("2. Install (aliased as 'fia'):");
+          CodeBlock("bun add fia@npm:@jsr/fia__core");
         });
 
         div({ style: { marginBottom: "1rem" } }, () => {
@@ -200,12 +202,12 @@ export const Docs = () =>
           CodeBlock("npx jsr add @fia/core");
         });
 
-        Note("The examples below use \"fia\" as the package name. To enable this shorten import, modify your package.json dependency to alias the package:\n\n\"dependencies\": {\n  \"fia\": \"npm:@jsr/fia__core\"\n}", "info");
+        Note("The 'bun' command above automatically aliases the package to 'fia'. For Node.js/Deno, mapping to 'fia' in package.json/deno.json is recommended for cleaner imports.", "info");
       });
 
       SubSection("Updating", () => {
         Paragraph("To update to the latest version, run the installation command again (or use your package manager's update command).");
-        CodeBlock(`# Deno\ndeno add jsr:@fia/core\n\n# Bun\nbun add jsr:@fia/core\n\n# Node.js\nnpx jsr add @fia/core`);
+        CodeBlock(`# Deno\ndeno add jsr:@fia/core\n\n# Bun\nbun add fia@npm:@jsr/fia__core\n\n# Node.js\nnpx jsr add @fia/core`);
       });
 
       SubSection("Quick Start", () => {
