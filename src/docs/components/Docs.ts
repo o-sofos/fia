@@ -1,4 +1,4 @@
-import { section, div, h2, h3, h4, p, pre, code, ul, li, span, getCurrentContext, a, img } from "../../core/mod";
+import { section, div, h2, h3, h4, p, pre, ul, li, span, getCurrentContext, a, img } from "../../core/mod";
 
 // Helper to append text nodes
 const t = (text: string) => {
@@ -323,20 +323,219 @@ svg({ width: 100, height: 100 }, () => {
         });
 
         Section("Examples", "examples", () => {
-            SubSection("1. Hello World", () => {
-                CodeBlock(`h1({ textContent: "Hello, World!" });`);
-            });
-            SubSection("2. Counter", () => {
-                CodeBlock(`const count = $(0);
+
+            SubSection("🟢 Beginner", () => {
+                SubSubSection("1. Hello World", () => {
+                    Paragraph("The simplest possible Fia code.");
+                    CodeBlock(`h1({ textContent: "Hello, World!" });`);
+                });
+
+                SubSubSection("2. Counter", () => {
+                    Paragraph("Signals hold reactive state.");
+                    CodeBlock(`const count = $(0);
 button({ textContent: "+", onclick: () => count.value++ });
 p({ textContent: count });`);
+                });
+
+                SubSubSection("3. Toggle", () => {
+                    Paragraph("Computed signals derive values from other signals.");
+                    CodeBlock(`const visible = $(true);
+button({ textContent: "Toggle", onclick: () => visible.value = !visible.value });
+div({ style: { display: $(() => visible.value ? "block" : "none") } }, () => {
+  p({ textContent: "Now you see me!" });
+});`);
+                });
+
+                SubSubSection("4. Input Binding", () => {
+                    Paragraph("Two-way binding is manual but explicit.");
+                    CodeBlock(`const name = $("");
+input({ type: "text", oninput: (e) => name.value = e.currentTarget.value });
+p({ textContent: $(() => \`Hello, \${name.value || "stranger"}!\`) });`);
+                });
+
+                SubSubSection("5. List Rendering (Static)", () => {
+                    Paragraph("For simple static lists, forEach works fine.");
+                    CodeBlock(`const items = ["Apple", "Banana", "Cherry"];
+ul(() => items.forEach(item => li({ textContent: item })));`);
+                });
             });
-            SubSection("3. Conditional Styling", () => {
-                CodeBlock(`const active = $(false);
+
+            SubSection("🟡 Intermediate", () => {
+                SubSubSection("6. Reactive Store Counter", () => {
+                    Paragraph("Objects passed to $() become reactive stores.");
+                    CodeBlock(`const state = $({ count: 0 }, "count");
+
+div(() => {
+  h1({ textContent: $(() => \`Count: \${state.count}\`) });
+  button({ textContent: "+", onclick: () => state.count++ });
+  button({ textContent: "-", onclick: () => state.count-- });
+});`);
+                });
+
+                SubSubSection("7. Conditional Classes", () => {
+                    Paragraph("Computed signals work in class props too.");
+                    CodeBlock(`const active = $(false);
+
 button({
+  textContent: "Toggle Active",
   class: $(() => active.value ? "btn active" : "btn"),
   onclick: () => active.value = !active.value,
 });`);
+                });
+
+                SubSubSection("8. Form Handling", () => {
+                    Paragraph("Reactive stores are perfect for forms.");
+                    CodeBlock(`const formData = $({ email: "", password: "" }, "email", "password");
+
+form({ onsubmit: (e) => { e.preventDefault(); console.log(formData); } }, () => {
+  input({ type: "email", oninput: (e) => formData.email = e.currentTarget.value });
+  input({ type: "password", oninput: (e) => formData.password = e.currentTarget.value });
+  button({ textContent: "Submit", type: "submit" });
+});`);
+                });
+
+                SubSubSection("9. Computed Values", () => {
+                    Paragraph("Track dependencies automatically.");
+                    CodeBlock(`const state = $({ price: 100, quantity: 2 }, "quantity");
+const total = $(() => state.price * state.quantity);
+
+div(() => {
+  p({ textContent: $(() => \`Price: $\${state.price}\`) });
+  p({ textContent: $(() => \`Qty: \${state.quantity}\`) });
+  p({ textContent: $(() => \`Total: $\${total.value}\`) });
+  button({ textContent: "Add", onclick: () => state.quantity++ });
+});`);
+                });
+
+                SubSubSection("10. Dynamic Styling", () => {
+                    Paragraph("Reactive styles allow theming.");
+                    CodeBlock(`const theme = $("light");
+
+div({
+  style: {
+    background: $(() => theme.value === "dark" ? "#222" : "#fff"),
+    color: $(() => theme.value === "dark" ? "#fff" : "#222"),
+    padding: "2rem",
+  }
+}, () => {
+  button({ textContent: "Toggle Theme", onclick: () => {
+    theme.value = theme.value === "dark" ? "light" : "dark";
+  }});
+});`);
+                });
+            });
+
+            SubSection("🔴 Advanced", () => {
+                SubSubSection("11. Todo App", () => {
+                    Paragraph("A complete todo app using Each.");
+                    CodeBlock(`const todos = $({ items: [] as string[], input: "" }, "items", "input");
+
+div(() => {
+  input({
+    type: "text",
+    value: $(() => todos.input),
+    oninput: (e) => todos.input = e.currentTarget.value,
+  });
+  button({
+    textContent: "Add",
+    onclick: () => {
+      if (todos.input.trim()) {
+        todos.items = [...todos.items, todos.input];
+        todos.input = "";
+      }
+    },
+  });
+  ul(() => {
+    Each(() => todos.items, (item, i) => {
+      li(() => {
+        span({ textContent: item });
+        button({
+          textContent: "×",
+          onclick: () => todos.items = todos.items.filter((_, j) => j !== i),
+        });
+      });
+    });
+  });
+});`);
+                });
+
+                SubSubSection("12. Tabs Component", () => {
+                    Paragraph("Track active index and conditionally render.");
+                    CodeBlock(`const tabs = ["Home", "About", "Contact"];
+const active = $(0);
+
+div(() => {
+  div({ class: "tabs" }, () => {
+    tabs.forEach((tab, i) => {
+      button({
+        textContent: tab,
+        class: $(() => active.value === i ? "active" : ""),
+        onclick: () => active.value = i,
+      });
+    });
+  });
+  div({ class: "content" }, () => {
+    // Match returns a signal!
+    p({
+      textContent: Match(() => active.value, {
+        0: () => "Welcome to the Home page!",
+        1: () => "About Fia Framework...",
+        2: () => "Contact us at hello@fia.dev",
+      })
+    });
+  });
+});`);
+                });
+
+                SubSubSection("13. Async Data Fetching", () => {
+                    Paragraph("Use Match for loading states.");
+                    CodeBlock(`const state = $({
+  status: "loading" as "loading" | "success" | "error",
+  users: [] as string[]
+}, "status", "users");
+
+fetch("/api/users")
+  .then(r => r.json())
+  .then(users => {
+    state.users = users;
+    state.status = "success";
+  })
+  .catch(() => state.status = "error");
+
+div(() => {
+  Match(() => state.status, {
+    loading: () => p({ textContent: "Loading..." }),
+    error: () => p({ textContent: "Failed to load users" }),
+    success: () => ul(() => Each(() => state.users, u => li({ textContent: u }))),
+  });
+});`);
+                });
+
+                SubSubSection("14. Modal Dialog", () => {
+                    Paragraph("Modal patterns with explicit types.");
+                    CodeBlock(`const modal = $<{ open: boolean; title: string }, "open" | "title">({ open: false, title: "" }, "open", "title");
+
+function openModal(title: string) {
+  modal.title = title;
+  modal.open = true;
+}
+
+button({ textContent: "Open Modal", onclick: () => openModal("Hello!") });
+
+div({
+  class: "modal-backdrop",
+  style: { display: $(() => modal.open ? "flex" : "none") },
+  onclick: () => modal.open = false,
+}, () => {
+  div({
+    class: "modal",
+    onclick: (e) => e.stopPropagation(),
+  }, () => {
+    h2({ textContent: $(() => modal.title) });
+    button({ textContent: "Close", onclick: () => modal.open = false });
+  });
+});`);
+                });
             });
         });
 
