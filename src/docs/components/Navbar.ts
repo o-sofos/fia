@@ -1,11 +1,10 @@
 import { nav, div, a, span } from "../../core/mod";
 
 export const Navbar = () =>
-    nav({ class: "container", style: { display: "flex", justifyContent: "space-between", alignItems: "center", height: "100px" } }, () => {
+    nav({ class: "container animate-fade-up delay-100", style: { display: "flex", justifyContent: "space-between", alignItems: "center", height: "100px" } }, () => {
         // Logo
         div({ style: { fontSize: "1.5rem", fontWeight: "700", display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer" } }, () => {
             span({ style: { color: "var(--mongo-green)" }, textContent: "fia" });
-            span({ textContent: "framework" });
         });
 
         // Links

@@ -6,7 +6,7 @@ const t = (text: string) => {
 };
 
 export const CodeDemo = () =>
-    div({ class: "container", style: { margin: "var(--spacing-xl) auto", maxWidth: "800px" } }, () => {
+    div({ class: "container animate-fade-up delay-200", style: { margin: "var(--spacing-xl) auto", maxWidth: "800px" } }, () => {
         div({
             style: {
                 background: "var(--mongo-forest)",
