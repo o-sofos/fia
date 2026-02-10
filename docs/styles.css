@@ -1,0 +1,99 @@
+:root {
+    /* MongoDB Brand Colors */
+    --mongo-green: #00ed64;
+    --mongo-dark: #001e2b;
+    --mongo-slate: #00684a;
+    --mongo-forest: #023430;
+    --mongo-white: #ffffff;
+    --mongo-gray: #e8edeb;
+    --text-primary: #ffffff;
+    --text-secondary: #c1c7c6;
+    
+    /* Syntax Highlighting */
+    --syntax-comment: #727e7c;
+    --syntax-keyword: #ff7dc3;
+    --syntax-string: #35de7b;
+    --syntax-function: #57b3ff;
+    
+    /* Spacing */
+    --spacing-xs: 0.5rem;
+    --spacing-sm: 1rem;
+    --spacing-md: 2rem;
+    --spacing-lg: 4rem;
+    --spacing-xl: 8rem;
+    
+    /* Transitions */
+    --transition-fast: 0.2s ease;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--mongo-dark);
+    color: var(--text-primary);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+}
+
+code, pre {
+    font-family: 'JetBrains Mono', monospace;
+}
+
+button {
+    cursor: pointer;
+    border: none;
+    font-family: inherit;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+/* Utilities */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--spacing-md);
+}
+
+.text-gradient {
+    background: linear-gradient(to right, var(--mongo-green), #01c956);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.5rem;
+    border-radius: 9999px;
+    font-weight: 600;
+    transition: all var(--transition-fast);
+}
+
+.btn-primary {
+    background-color: var(--mongo-green);
+    color: var(--mongo-dark);
+}
+
+.btn-primary:hover {
+    background-color: #00c051;
+    transform: translateY(-1px);
+}
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid var(--text-primary);
+    color: var(--text-primary);
+}
+
+.btn-outline:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
