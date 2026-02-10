@@ -37,8 +37,18 @@ const server = Bun.serve({
     // INTERCEPT index.html to inject HMR script
     if (path === "/index.html") {
       let html = await Bun.file("index.html").text();
+      const importMap = `
+        <script type="importmap">
+          {
+            "imports": {
+              "fia": "/src/core/mod.ts",
+              "fia/svg": "/src/core/svg/svg.ts"
+            }
+          }
+        </script>
+       `;
       const hmrScript = `
-       <script>
+        <script>
          (function() {
            let ws = new WebSocket("ws://" + location.host + "/_hmr");
            ws.onmessage = (msg) => { 
@@ -52,7 +62,7 @@ const server = Bun.serve({
          })();
        </script>
        `;
-      html = html.replace("</body>", `${hmrScript}</body>`);
+      html = html.replace("</body>", `${importMap}${hmrScript}</body>`);
       return new Response(html, { headers: { "Content-Type": "text/html" } });
     }
 
@@ -88,8 +98,19 @@ const server = Bun.serve({
         // Not a directory or stat failed, fall through to extension check
       }
 
+      // Handle aliases manually for dev server
+      if (path === "/fia") {
+        filePath = "./src/core/mod.ts";
+        file = Bun.file(filePath);
+        path = "/src/core/mod.ts";
+      } else if (path === "/fia/svg") {
+        filePath = "./src/core/svg/svg.ts";
+        file = Bun.file(filePath);
+        path = "/src/core/svg/svg.ts";
+      }
+
       // If still not found, try with .ts extension (for extensionless imports)
-      if (!(await file.exists())) {
+      else if (!(await file.exists())) {
         const tsPath = `${filePath}.ts`;
         const tsFile = Bun.file(tsPath);
         if (await tsFile.exists()) {

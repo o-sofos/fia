@@ -22,7 +22,7 @@
  */
 export function mount(
     component: () => HTMLElement,
-    target: HTMLElement | string
+    target: HTMLElement | string = document.body
 ): void {
     const el = typeof target === "string" ? document.querySelector(target) : target;
 
