@@ -1,4 +1,4 @@
-import { div, input, button, ul, Each, li, span, $ } from "../core/mod";
+import { div, input, button, ul, Each, li, span, $ } from "fia";
 
 export default () => {
 

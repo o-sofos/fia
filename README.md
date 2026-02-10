@@ -53,13 +53,13 @@ Most frameworks add layers of abstraction between you and the DOM. Fia gives you
 
 ```typescript
 // Import from JSR (Deno, Bun, Node with JSR support)
-import { $, div, h1, button, p } from "jsr:@fia/core";
+import { $, div, h1, button, p } from "fia";
 ```
 
 ### Quick Start
 
 ```typescript
-import { $, div, h1, button, p } from "jsr:@fia/core";
+import { $, div, h1, button, p } from "fia";
 
 // Reactive store for state
 const state = $({ count: 0 }, "count");
@@ -77,7 +77,7 @@ div({ class: "app" }, () => {
 By default, Fia elements append to `document.body` if no parent context exists. For Single Page Apps (SPAs), use the `mount` helper to attach to a root element:
 
 ```typescript
-import { mount, div } from "@fia/core";
+import { mount, div } from "fia";
 
 const App = () => div(() => {
   // Your app structure
@@ -249,7 +249,7 @@ const isAdult = $(() => state.age >= 18);
 Use `$e()` to run side effects when dependencies change:
 
 ```typescript
-import { $e } from "@fia/core";
+import { $e } from "fia";
 
 const count = $(0);
 
@@ -316,7 +316,7 @@ Fia provides reactive control flow components for conditional rendering and list
 Conditionally render content that updates when the condition changes:
 
 ```typescript
-import { Show } from "@fia/core";
+import { Show } from "fia";
 
 // Simple usage
 Show(() => isVisible.value, () => div({ textContent: "Hello!" }));
@@ -333,7 +333,7 @@ Show(() => data.loading, {
 Reactive list rendering that re-renders when the source array changes:
 
 ```typescript
-import { Each } from "@fia/core";
+import { Each } from "fia";
 
 const todos = $({ items: ["Task 1", "Task 2"] });
 
@@ -349,7 +349,7 @@ Each(() => todos.items, (item, index) => {
 Reactive pattern matching for strict switch/case logic or simple routing:
 
 ```typescript
-import { Match } from "@fia/core";
+import { Match } from "fia";
 
 const status = $("loading");
 
@@ -492,10 +492,10 @@ Fia supports SVG elements with full type safety. Import them from the main packa
 
 ```typescript
 // Option 1: Main export (Prefixed)
-import { svg, svgCircle, svgRect } from "@fia/core";
+import { svg, svgCircle, svgRect } from "fia";
 
 // Option 2: Namespace import
-import * as SVG from "@fia/core/svg";
+import * as SVG from "fia/svg";
 
 svg({ width: 100, height: 100, viewBox: "0 0 100 100" }, () => {
   svgCircle({

@@ -23,7 +23,11 @@
     "noEmitOnError": true,
     "incremental": true,
     "tsBuildInfoFile": "./.tsbuildinfo",
-    "downlevelIteration": true
+    "downlevelIteration": true,
+    "paths": {
+      "fia": ["./src/core/mod.ts"],
+      "fia/svg": ["./src/core/svg/svg.ts"]
+    }
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist", "benchmark_repo", "**/*.test.ts"]

@@ -1,4 +1,4 @@
-import { section, div, h2, h3, h4, p, pre, ul, li, span, getCurrentContext, a, img, button, $ } from "../../core/mod";
+import { section, div, h2, h3, h4, p, pre, ul, li, span, getCurrentContext, a, img, button, $ } from "fia";
 
 // Helper to append text nodes
 const t = (text: string) => {
@@ -175,11 +175,11 @@ export const Docs = () =>
     Section("Getting Started", "getting-started", () => {
       SubSection("Installation", () => {
         Paragraph("Import directly from JSR. No build step required.");
-        CodeBlock('import { $, div, h1, button, p } from "jsr:@fia/core";');
+        CodeBlock('import { $, div, h1, button, p } from "fia";');
       });
       SubSection("Quick Start", () => {
         Paragraph("Create your first reactive app in seconds.");
-        CodeBlock(`import { $, div, h1, button, p } from "jsr:@fia/core";
+        CodeBlock(`import { $, div, h1, button, p } from "fia";
 
 // Reactive store for state
 const state = $({ count: 0 }, "count");
@@ -193,7 +193,7 @@ div({ class: "app" }, () => {
       });
       SubSection("Mounting", () => {
         Paragraph("For Single Page Apps (SPAs), use the mount helper to attach to a root element.");
-        CodeBlock(`import { mount, div } from "@fia/core";
+        CodeBlock(`import { mount, div } from "fia";
 
 const App = () => div(() => {
   // Your app structure
@@ -350,7 +350,7 @@ Each(() => items.list, item => li({ textContent: item }));`);
 
     Section("SVG", "svg", () => {
       Paragraph("Fia supports SVG elements with full type safety.");
-      CodeBlock(`import { svg, svgCircle } from "@fia/core";
+      CodeBlock(`import { svg, svgCircle } from "fia";
 
 svg({ width: 100, height: 100 }, () => {
   svgCircle({ cx: 50, cy: 50, r: 40, fill: "red" });

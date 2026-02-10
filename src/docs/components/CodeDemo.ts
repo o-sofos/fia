@@ -1,4 +1,4 @@
-import { div, pre, span, getCurrentContext } from "../../core/mod";
+import { div, pre, span, getCurrentContext } from "fia";
 
 // Helper to append text nodes
 const t = (text: string) => {

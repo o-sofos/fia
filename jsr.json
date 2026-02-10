@@ -1,10 +1,11 @@
 {
   "name": "@fia/core",
-  "version": "0.3.6",
+  "version": "0.3.7",
   "license": "MIT",
   "description": "Fia is a zero-dependency, type-safe reactive UI library. It uses fine-grained signals and direct DOM manipulation (no VDOM) for maximum performance. Features include deep reactivity, SVG support, and a tiny footprint.",
   "exports": {
-    ".": "./src/core/mod.ts"
+    ".": "./src/core/mod.ts",
+    "./svg": "./src/core/svg/svg.ts"
   },
   "publish": {
     "exclude": ["benchmark_repo", "src/examples", "src/playground", "test_*.ts"]

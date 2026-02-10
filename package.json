@@ -4,6 +4,10 @@
   "version": "0.2.6",
   "description": "Fia is a zero-dependency, type-safe reactive UI library. It uses fine-grained signals and direct DOM manipulation (no VDOM) for maximum performance.",
   "type": "module",
+  "exports": {
+    ".": "./src/core/mod.ts",
+    "./svg": "./src/core/svg/svg.ts"
+  },
   "sideEffects": false,
   "engines": {
     "node": ">=18.0.0",
