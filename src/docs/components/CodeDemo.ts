@@ -1,4 +1,5 @@
 import { div, pre, span, getCurrentContext } from "fia";
+import { applyTilt } from "../utils/tilt";
 
 // Helper to append text nodes
 const t = (text: string) => {
@@ -17,11 +18,14 @@ export const CodeDemo = () =>
                 fontFamily: "'JetBrains Mono', monospace",
                 fontSize: "0.95rem",
                 overflow: "hidden",
-                lineHeight: "1.6"
+                lineHeight: "1.6",
+                transformStyle: "preserve-3d",
             }
-        }, () => {
+        }, (el) => {
+            applyTilt(el as unknown as HTMLElement, 5);
+
             // Window controls
-            div({ style: { display: "flex", gap: "0.5rem", marginBottom: "1.5rem", opacity: "0.7" } }, () => {
+            div({ style: { display: "flex", gap: "0.5rem", marginBottom: "1.5rem", opacity: "0.7", transform: "translateZ(20px)" } }, () => {
                 div({ style: { width: "12px", height: "12px", borderRadius: "50%", background: "#ff5f56" } });
                 div({ style: { width: "12px", height: "12px", borderRadius: "50%", background: "#ffbd2e" } });
                 div({ style: { width: "12px", height: "12px", borderRadius: "50%", background: "#27c93f" } });
@@ -33,7 +37,7 @@ export const CodeDemo = () =>
             const s = (text: string) => span({ style: { color: "var(--syntax-string)" }, textContent: text });
             const c = (text: string) => span({ style: { color: "var(--syntax-comment)" }, textContent: text });
 
-            pre(() => {
+            pre({ style: { transform: "translateZ(40px)" } }, () => {
                 div(() => { k("import"); t(" { $, div, button } "); k("from"); s(' "fia"'); t(";"); });
                 t(" "); // newline
                 div(() => { k("const"); t(" count = "); f("$"); t("(0);"); });
@@ -43,7 +47,7 @@ export const CodeDemo = () =>
                     f("button"); t("({ ");
                 });
                 div({ style: { paddingLeft: "3rem" } }, () => {
-                    t("onclick: () => count.value++,");
+                    div({ textContent: "onclick: () => count.value++," });
                 });
                 div({ style: { paddingLeft: "3rem" } }, () => {
                     t("textContent: "); s('"Increment"');

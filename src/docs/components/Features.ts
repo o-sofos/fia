@@ -1,4 +1,5 @@
 import { section, div, h3, p } from "../../core/mod";
+import { applyTilt } from "../utils/tilt";
 
 const FeatureCard = (title: string, desc: string, icon: string) =>
     div({
@@ -7,22 +8,16 @@ const FeatureCard = (title: string, desc: string, icon: string) =>
             background: "rgba(255,255,255,0.03)",
             borderRadius: "1rem",
             border: "1px solid rgba(255,255,255,0.05)",
-            transition: "transform 0.2s ease, background 0.2s ease"
+            transition: "transform 0.1s ease-out", // managed by tilt
+            transformStyle: "preserve-3d",
         }
     }, (el) => {
-        // Add hover effect manually since we're in JS
-        el.onmouseenter = () => {
-            el.style.transform = "translateY(-5px)";
-            el.style.background = "rgba(255,255,255,0.05)";
-        };
-        el.onmouseleave = () => {
-            el.style.transform = "translateY(0)";
-            el.style.background = "rgba(255,255,255,0.03)";
-        };
+        applyTilt(el as unknown as HTMLElement, 15);
 
-        div({ style: { fontSize: "2.5rem", marginBottom: "1rem" }, textContent: icon });
-        h3({ style: { fontSize: "1.25rem", marginBottom: "0.75rem", color: "var(--mongo-green)", fontWeight: "600" }, textContent: title });
-        p({ style: { color: "var(--text-secondary)", lineHeight: "1.6" }, textContent: desc });
+        // Content with depth
+        div({ style: { fontSize: "2.5rem", marginBottom: "1rem", transform: "translateZ(20px)" }, textContent: icon });
+        h3({ style: { fontSize: "1.25rem", marginBottom: "0.75rem", color: "var(--mongo-green)", fontWeight: "600", transform: "translateZ(10px)" }, textContent: title });
+        p({ style: { color: "var(--text-secondary)", lineHeight: "1.6", transform: "translateZ(5px)" }, textContent: desc });
     });
 
 export const Features = () =>
