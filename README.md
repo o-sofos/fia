@@ -32,6 +32,7 @@ Most frameworks add layers of abstraction between you and the DOM. Fia gives you
 ## 📚 Table of Contents
 
 - [Getting Started](#-getting-started)
+  - [Prerequisites](#prerequisites)
   - [Installation](#installation)
   - [Quick Start](#quick-start)
   - [Mounting](#mounting)
@@ -49,11 +50,32 @@ Most frameworks add layers of abstraction between you and the DOM. Fia gives you
 
 ## 🚀 Getting Started
 
+### Prerequisites
+
+- Node.js (v18.0.0+)
+- Bun (v1.0.0+)
+- Deno (v1.30.0+)
+
 ### Installation
 
-```typescript
-// Import from JSR (Deno, Bun, Node with JSR support)
-import { $, div, h1, button, p } from "fia";
+Fia is published on JSR. Install it using your preferred package manager:
+
+#### Deno
+
+```bash
+deno add jsr:@fia/core
+```
+
+#### Bun
+
+```bash
+bunx jsr add @fia/core
+```
+
+#### Node.js (npm, yarn, pnpm)
+
+```bash
+npx jsr add @fia/core
 ```
 
 ### Quick Start

@@ -173,10 +173,34 @@ export const Docs = () =>
     });
 
     Section("Getting Started", "getting-started", () => {
-      SubSection("Installation", () => {
-        Paragraph("Import directly from JSR. No build step required.");
-        CodeBlock('import { $, div, h1, button, p } from "fia";');
+      SubSection("Prerequisites", () => {
+        Paragraph("Fia is compatible with any modern JavaScript runtime.");
+        List([
+          "Node.js (v18.0.0+)",
+          "Bun (v1.0.0+)",
+          "Deno (v1.30.0+)"
+        ]);
       });
+
+      SubSection("Installation", () => {
+        Paragraph("Fia is published on JSR. Install it using your preferred package manager:");
+
+        div({ style: { marginBottom: "1rem" } }, () => {
+          h4({ style: { color: "var(--mongo-white)", marginBottom: "0.5rem" }, textContent: "Deno" });
+          CodeBlock("deno add jsr:@fia/core");
+        });
+
+        div({ style: { marginBottom: "1rem" } }, () => {
+          h4({ style: { color: "var(--mongo-white)", marginBottom: "0.5rem" }, textContent: "Bun" });
+          CodeBlock("bunx jsr add @fia/core");
+        });
+
+        div({ style: { marginBottom: "1rem" } }, () => {
+          h4({ style: { color: "var(--mongo-white)", marginBottom: "0.5rem" }, textContent: "Node.js (npm/yarn/pnpm)" });
+          CodeBlock("npx jsr add @fia/core");
+        });
+      });
+
       SubSection("Quick Start", () => {
         Paragraph("Create your first reactive app in seconds.");
         CodeBlock(`import { $, div, h1, button, p } from "fia";
@@ -191,6 +215,7 @@ div({ class: "app" }, () => {
   button({ textContent: "-", onclick: () => state.count-- });
 });`);
       });
+
       SubSection("Mounting", () => {
         Paragraph("For Single Page Apps (SPAs), use the mount helper to attach to a root element.");
         CodeBlock(`import { mount, div } from "fia";
