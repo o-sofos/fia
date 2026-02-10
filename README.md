@@ -537,11 +537,7 @@ const name = $(() => user.value?.name);        // Signal<string | undefined>
 Fia supports SVG elements with full type safety. Import them from the main package (prefixed, e.g., `svgCircle`) or the sub-module.
 
 ```typescript
-// Option 1: Main export (Prefixed)
-import { svg, svgCircle, svgRect } from "fia";
-
-// Option 2: Namespace import
-import * as SVG from "fia/svg";
+import { svg, svgCircle } from "fia";
 
 svg({ width: 100, height: 100, viewBox: "0 0 100 100" }, () => {
   svgCircle({
