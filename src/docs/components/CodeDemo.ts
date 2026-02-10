@@ -56,7 +56,7 @@ export const CodeDemo = () =>
                     c("// Updates are surgical - no VDOM diffing");
                 });
                 div({ style: { paddingLeft: "1.5rem" } }, () => {
-                    f("div"); t("(() => "); s('`Count: ${count.value}`'); t(");");
+                    f("div"); t("({ "); t("textContent"); t(": "); f("$"); t("(() => "); s('`Count: ${count.value}`'); t(") });");
                 });
                 div({ textContent: "});" });
             });
