@@ -146,6 +146,32 @@ export const Docs = () =>
       });
     });
 
+    Section("Introduction", "intro", () => {
+      Paragraph("Fia is a lightweight, framework-agnostic library designed for high-performance UI development. By leveraging fine-grained signals, Fia bypasses the overhead of a Virtual DOM to update the DOM directly and precisely.");
+    });
+
+    Section("Why Fia?", "why-fia", () => {
+      Paragraph("While modern web development is often bogged down by complex reconciliation processes, Fia focuses on surgical precision.");
+      ul({ style: { marginLeft: "1.5rem", marginBottom: "1.5rem", color: "var(--text-secondary)" } }, () => {
+        li({ style: { marginBottom: "0.5rem" } }, () => {
+          span({ style: { color: "var(--mongo-white)", fontWeight: "600" }, textContent: "True Fine-Grained Reactivity: " });
+          t("Only the parts of the DOM that actually change are updated. No component re-renders, no VDOM diffing—just targeted updates.");
+        });
+        li({ style: { marginBottom: "0.5rem" } }, () => {
+          span({ style: { color: "var(--mongo-white)", fontWeight: "600" }, textContent: "End-to-End Type Safety: " });
+          t("Built from the ground up with TypeScript, Fia ensures your signals and effects are predictable and catch errors at compile time, not runtime.");
+        });
+        li({ style: { marginBottom: "0.5rem" } }, () => {
+          span({ style: { color: "var(--mongo-white)", fontWeight: "600" }, textContent: "Zero-Abstraction Feel: " });
+          t("Fia stays out of your way. It provides the reactive primitives you need to build powerful interfaces without forcing a heavy framework architecture on you.");
+        });
+        li({ style: { marginBottom: "0.5rem" } }, () => {
+          span({ style: { color: "var(--mongo-white)", fontWeight: "600" }, textContent: "Minimal Footprint: " });
+          t("Designed for developers who value bundle size and execution speed, Fia provides a lean reactive core that scales from small widgets to full-scale applications.");
+        });
+      });
+    });
+
     Section("Getting Started", "getting-started", () => {
       SubSection("Installation", () => {
         Paragraph("Import directly from JSR. No build step required.");
@@ -177,15 +203,7 @@ mount(App, "#app"); // Clears #app and mounts App`);
       });
     });
 
-    Section("Philosophy", "philosophy", () => {
-      Paragraph("Most frameworks add layers of abstraction between you and the DOM. Fia gives you just enough to be productive:");
-      ul({ style: { marginLeft: "1.5rem", marginBottom: "1.5rem", color: "var(--text-secondary)" } }, () => {
-        li({ style: { marginBottom: "0.5rem" } }, () => { span({ style: { color: "var(--mongo-white)", fontWeight: "600" }, textContent: "Reactive values" }); t(" - $() creates signals for primitives, reactive stores for objects"); });
-        li({ style: { marginBottom: "0.5rem" } }, () => { span({ style: { color: "var(--mongo-white)", fontWeight: "600" }, textContent: "Direct DOM" }); t(" - No virtual DOM, no diffing, just native browser APIs"); });
-        li({ style: { marginBottom: "0.5rem" } }, () => { span({ style: { color: "var(--mongo-white)", fontWeight: "600" }, textContent: "~6KB gzipped" }); t(" - Lightweight with zero dependencies"); });
-        li({ style: { marginBottom: "0.5rem" } }, () => { span({ style: { color: "var(--mongo-white)", fontWeight: "600" }, textContent: "Fully typed" }); t(" - Complete TypeScript support with autocomplete"); });
-      });
-    });
+
 
     Section("Element API", "element-api", () => {
       Paragraph("Fia elements have a simple, consistent API. Functions match HTML tag names.");
