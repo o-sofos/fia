@@ -325,7 +325,7 @@ export interface ElementPropsMap {
  *   }
  * });
  */
-type TypedEvent<E extends Element, Ev extends Event> = Ev & {
+export type TypedEvent<E, Ev extends Event> = Ev & {
     readonly currentTarget: E;
 };
 

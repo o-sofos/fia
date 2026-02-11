@@ -1,39 +1,39 @@
-import { div, input, button, ul, Each, li, span, $ } from "../core/mod";
+import { $, button, dialog, div, h2 } from "fia";
 
 export default () => {
+    const modal = $({ open: false, title: "" }, "open", "title");
 
-    const todos = $({
-        items: [],
-        input: "",
-    }, "items", "input");
+    function openModal(title: string) {
+        modal.title = title;
+        modal.open = true;
+    }
 
-    div(() => {
-        input({
-            type: "text",
-            value: $(() => todos.input),
-            oninput: (e) => {
-                todos.input = e.currentTarget.value;
-            },
-        });
-        button({
-            textContent: "Add",
-            onclick: () => {
-                if (todos.input?.trim()) {
-                    todos.items = [...todos.items, todos.input];
-                    todos.input = "";
-                }
-            },
-        });
-        ul(() => {
-            Each(() => todos.items, (item, i) => {
-                li(() => {
-                    span({ textContent: item });
-                    button({
-                        textContent: "×",
-                        onclick: () => todos.items = todos.items.filter((_, j) => j !== i),
-                    });
-                });
-            });
+    button({
+        class: "button a b c",
+        className: "someccsclass as",
+        classList: ["a", "b", "c"],
+        textContent: "Open Modal",
+        onclick: (e) => {
+            const target = e.currentTarget;
+            if (target.textContent) {
+                console.log(target.textContent);
+                console.log(target.className);
+                console.log(target.classList);
+            }
+        }
+    });
+
+    dialog({
+        class: "modal-backdrop",
+        style: { display: $(() => modal.open ? "flex" : "none") },
+        onclick: () => modal.open = false,
+    }, () => {
+        div({
+            class: "modal",
+            onclick: (e) => e.stopPropagation(),
+        }, () => {
+            h2({ textContent: $(() => modal.title) });
+            button({ textContent: "Close", onclick: () => modal.open = false });
         });
     });
 

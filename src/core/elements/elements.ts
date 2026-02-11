@@ -26,11 +26,10 @@ import {
   $e,
   type Signal,
   type MaybeSignal,
-  type Widen,
   isSignal,
 } from "../reactivity/reactivity";
 import { registerEventHandler } from "../events/events";
-import type { ElementProps } from "../attributes/html-attributes";
+import type { ElementProps, TypedEvent } from "../attributes/html-attributes";
 import type { ReactiveCSSProperties } from "../css/css-types";
 
 export { type MaybeSignal, isSignal };
@@ -57,11 +56,21 @@ type LooseElementProps<K extends keyof HTMLElementTagNameMap> =
  * Validates that all properties in P are present in Target or match allowable patterns (data-*).
  * This prevents excess properties from being allowed by generic constraints.
  */
-type ValidateProps<P, Target> = {
-  [K in keyof P]: K extends keyof Target
-  ? P[K]
-  : K extends `data-${string}`
-  ? P[K]
+/**
+ * Validates that all properties in P are present in Target or match allowable patterns (data-*).
+ * Also maps event handlers to be contextually typed with the current element and props.
+ */
+type ContextualValidateProps<P, Target, K extends keyof HTMLElementTagNameMap> = {
+  [Key in keyof P]: Key extends keyof Target
+  ? Key extends `on${string}`
+  ? Target[Key] extends ((e: infer BaseEv) => void) | undefined
+  ? BaseEv extends TypedEvent<any, infer NativeEv>
+  ? (e: TypedEvent<SmartElement<K, P>, NativeEv>) => void
+  : Target[Key]
+  : Target[Key]
+  : Target[Key]
+  : Key extends `data-${string}`
+  ? P[Key]
   : never;
 };
 
@@ -158,7 +167,7 @@ type ProcessedProps<P> = P extends { style: infer S }
  * the resulting element property is typed as the value (string), not the Signal.
  */
 type UnwrapSignalsInProps<P> = {
-  [K in keyof P]: P[K] extends Signal<infer U> ? Widen<U> : Widen<P[K]>;
+  [K in keyof P]: P[K] extends Signal<infer U> ? U : P[K];
 };
 
 /**
@@ -250,7 +259,7 @@ export interface ElementFactory<K extends keyof HTMLElementTagNameMap> {
    * @example div({ style: { color: "red" } })
    * @example input({ type: "email", placeholder: "Enter email" })
    */
-  <const P extends LooseElementProps<K>>(props: P & ValidateProps<P, LooseElementProps<K>>): SmartElement<K, P>;
+  <const P extends Record<string, unknown>>(props: P & ContextualValidateProps<P, LooseElementProps<K>, K>): SmartElement<K, P>;
 
   /**
    * Create element with children callback only.
@@ -265,8 +274,8 @@ export interface ElementFactory<K extends keyof HTMLElementTagNameMap> {
    * @param children - Function that creates child elements
    * @example div({ class: "card" }, () => { h3("Title"); p("Body"); })
    */
-  <const P extends LooseElementProps<K>>(
-    props: P & ValidateProps<P, LooseElementProps<K>>,
+  <const P extends Record<string, unknown>>(
+    props: P & ContextualValidateProps<P, LooseElementProps<K>, K>,
     children: ChildrenCallback<SmartElement<K, P>>,
   ): SmartElement<K, P>;
 
@@ -457,7 +466,7 @@ function setElementProperty(
 }
 
 function assignProp(element: HTMLElement, key: string, value: unknown): void {
-  if (key === "class") {
+  if (key === "class" || key === "className" || key === "classList") {
     applyClass(element, value);
   } else if (key === "style") {
     applyStyle(element, value);
@@ -497,6 +506,8 @@ function applyProps<K extends keyof HTMLElementTagNameMap>(
 function applyClass(element: HTMLElement, value: unknown): void {
   if (typeof value === "string") {
     element.className = value;
+  } else if (Array.isArray(value)) {
+    element.className = value.filter(Boolean).join(" ");
   } else if (typeof value === "object" && value !== null) {
     // Check if any value is a signal to determine reactivity strategy
     // We can't use .some() on an object, so we iterate

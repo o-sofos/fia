@@ -15,8 +15,12 @@ export interface GlobalAttributes {
     // Core
     /** Unique identifier for the element. */
     id?: MaybeSignal<string>;
-    /** CSS class(es) for the element. Can be a string or an object of { className: boolean }. */
-    class?: MaybeSignal<string> | Record<string, MaybeSignal<boolean>>;
+    /** CSS class(es) for the element. Can be a string, an array of strings, or an object of { className: boolean }. */
+    class?: MaybeSignal<string> | MaybeSignal<string[]> | Record<string, MaybeSignal<boolean>>;
+    /** Alias for class to support React-style className. */
+    className?: MaybeSignal<string> | MaybeSignal<string[]> | Record<string, MaybeSignal<boolean>>;
+    /** Array of class names to apply. */
+    classList?: MaybeSignal<string[]>;
     /**
      * Inline CSS styles. Can be:
      * - A CSS string: "color: red; font-size: 16px"
