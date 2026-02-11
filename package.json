@@ -17,6 +17,7 @@
   "scripts": {
     "dev": "bun run dev.ts",
     "test": "bun test src/core",
+    "test:types": "bun tsc --noEmit src/core/elements/elements.types.test.ts --target es2015 --downlevelIteration --skipLibCheck",
     "benchmark": "bun run scripts/benchmark.ts",
     "build:docs": "bun build ./src/docs/main.ts --outdir ./docs --minify"
   },
