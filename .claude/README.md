@@ -157,7 +157,38 @@ Claude, can you refactor this React component to use Fia?
 Claude, this component is running slow. Can you analyze the performance?
 ```
 
-### 6. Documentation Curator (`documentation-curator`)
+### 6. Accessibility Specialist (`accessibility-specialist`)
+
+**Description:** Web accessibility (a11y) expert ensuring WCAG compliance and inclusive UIs.
+
+**When to use:**
+- Implementing accessible components
+- Reviewing ARIA usage
+- Ensuring keyboard navigation
+- Adding screen reader support
+- Validating color contrast
+- Focus management
+
+**Capabilities:**
+- WCAG 2.1 AAA compliance expertise
+- Semantic HTML best practices
+- ARIA attributes and roles
+- Keyboard navigation patterns
+- Screen reader announcements
+- Focus trap and management
+- Accessible form patterns
+- Color contrast validation
+
+**Model:** Sonnet (balanced for a11y work)
+
+**Example:**
+```
+Claude, make this component fully accessible
+Claude, review the ARIA usage in this modal
+Claude, ensure keyboard navigation works properly
+```
+
+### 7. Documentation Curator (`documentation-curator`)
 
 **Description:** Documentation expert responsible for JSDoc, README, and website content.
 
@@ -185,7 +216,7 @@ Claude, update the README to reflect the new features
 Claude, add this new API to the website documentation
 ```
 
-### 7. Pattern Validator (`pattern-validator`)
+### 8. Pattern Validator (`pattern-validator`)
 
 **Description:** Expert at validating Fia code against best practices.
 
