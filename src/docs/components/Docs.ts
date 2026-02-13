@@ -1,4 +1,20 @@
-import { section, div, h2, h3, h4, p, pre, ul, li, span, getCurrentContext, a, img, button, $ } from "fia";
+import {
+  section,
+  div,
+  h2,
+  h3,
+  h4,
+  p,
+  pre,
+  ul,
+  li,
+  span,
+  getCurrentContext,
+  a,
+  img,
+  button,
+  $,
+} from "fia";
 
 // Helper to append text nodes
 const t = (text: string) => {
@@ -9,16 +25,52 @@ const t = (text: string) => {
 
 const SyntaxHighlight = (codeStr: string) => {
   // Very basic syntax highlighting for demo purposes
-  const parts = codeStr.split(/(\/\/.*|\".*?\"|\bconst\b|\bimport\b|\bfrom\b|\bfunction\b|\breturn\b|\bdiv\b|\bbutton\b|\bh1\b|\bp\b|\bul\b|\bli\b|\binput\b|\bspan\b|\bmap\b|\bfilter\b|\bconsole\b|\blog\b|\btrue\b|\bfalse\b|\bif\b|\belse\b|\bShow\b|\bEach\b|\bMatch\b)/g);
+  const parts = codeStr.split(
+    /(\/\/.*|\".*?\"|\bconst\b|\bimport\b|\bfrom\b|\bfunction\b|\breturn\b|\bdiv\b|\bbutton\b|\bh1\b|\bp\b|\bul\b|\bli\b|\binput\b|\bspan\b|\bmap\b|\bfilter\b|\bconsole\b|\blog\b|\btrue\b|\bfalse\b|\bif\b|\belse\b|\bShow\b|\bEach\b|\bMatch\b)/g,
+  );
 
-  parts.forEach(part => {
+  parts.forEach((part) => {
     if (part.startsWith("//")) {
       span({ style: { color: "var(--syntax-comment)" }, textContent: part });
-    } else if (part.startsWith('"') || part.startsWith("'") || part.startsWith("`")) {
+    } else if (
+      part.startsWith('"') ||
+      part.startsWith("'") ||
+      part.startsWith("`")
+    ) {
       span({ style: { color: "var(--syntax-string)" }, textContent: part });
-    } else if (["const", "import", "from", "function", "return", "if", "else", "true", "false"].includes(part)) {
+    } else if (
+      [
+        "const",
+        "import",
+        "from",
+        "function",
+        "return",
+        "if",
+        "else",
+        "true",
+        "false",
+      ].includes(part)
+    ) {
       span({ style: { color: "var(--syntax-keyword)" }, textContent: part });
-    } else if (["div", "button", "h1", "p", "ul", "li", "input", "span", "console", "log", "map", "filter", "Show", "Each", "Match"].includes(part)) {
+    } else if (
+      [
+        "div",
+        "button",
+        "h1",
+        "p",
+        "ul",
+        "li",
+        "input",
+        "span",
+        "console",
+        "log",
+        "map",
+        "filter",
+        "Show",
+        "Each",
+        "Match",
+      ].includes(part)
+    ) {
       span({ style: { color: "var(--syntax-function)" }, textContent: part });
     } else {
       t(part);
@@ -27,192 +79,529 @@ const SyntaxHighlight = (codeStr: string) => {
 };
 
 const CodeBlock = (content: string) =>
-  div({
-    class: "code-block animate-fade-up",
-    style: {
-      background: "var(--mongo-forest)",
-      borderRadius: "0.75rem",
-      padding: "1.5rem",
-      margin: "1.5rem 0",
-      border: "1px solid var(--mongo-slate)",
-      boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
-      fontFamily: "'JetBrains Mono', monospace",
-      fontSize: "0.9rem",
-      lineHeight: "1.6",
-      overflow: "hidden"
-    }
-  }, () => {
-    // Window Controls + Copy Button
-    div({ style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" } }, () => {
-      // Controls
-      div({ style: { display: "flex", gap: "0.5rem", opacity: "0.6" } }, () => {
-        div({ style: { width: "10px", height: "10px", borderRadius: "50%", background: "#ff5f56" } });
-        div({ style: { width: "10px", height: "10px", borderRadius: "50%", background: "#ffbd2e" } });
-        div({ style: { width: "10px", height: "10px", borderRadius: "50%", background: "#27c93f" } });
-      });
-
-      // Copy Button
-      const copied = $(false);
-      button({
-        textContent: $(() => copied.value ? "Copied!" : "Copy"),
-        style: {
-          background: "transparent",
-          border: "1px solid var(--mongo-slate)",
-          color: $(() => copied.value ? "var(--mongo-green)" : "var(--text-secondary)"),
-          borderRadius: "4px",
-          padding: "2px 8px",
-          fontSize: "0.75rem",
-          cursor: "pointer",
-          transition: "all 0.2s",
-          opacity: "0.8"
+  div(
+    {
+      class: "code-block animate-fade-up",
+      style: {
+        background: "var(--mongo-forest)",
+        borderRadius: "0.75rem",
+        padding: "1.5rem",
+        margin: "1.5rem 0",
+        border: "1px solid var(--mongo-slate)",
+        boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
+        fontFamily: "'JetBrains Mono', monospace",
+        fontSize: "0.9rem",
+        lineHeight: "1.6",
+        overflow: "hidden",
+      },
+    },
+    () => {
+      // Window Controls + Copy Button
+      div(
+        {
+          style: {
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "1rem",
+          },
         },
-        onclick: () => {
-          navigator.clipboard.writeText(content);
-          copied.value = true;
-          setTimeout(() => copied.value = false, 2000);
-        }
-      });
-    });
+        () => {
+          // Controls
+          div(
+            { style: { display: "flex", gap: "0.5rem", opacity: "0.6" } },
+            () => {
+              div({
+                style: {
+                  width: "10px",
+                  height: "10px",
+                  borderRadius: "50%",
+                  background: "#ff5f56",
+                },
+              });
+              div({
+                style: {
+                  width: "10px",
+                  height: "10px",
+                  borderRadius: "50%",
+                  background: "#ffbd2e",
+                },
+              });
+              div({
+                style: {
+                  width: "10px",
+                  height: "10px",
+                  borderRadius: "50%",
+                  background: "#27c93f",
+                },
+              });
+            },
+          );
 
-    // Code Content
-    pre({ style: { margin: "0", overflowX: "auto" } }, () => {
-      SyntaxHighlight(content);
-    });
-  });
+          // Copy Button
+          const copied = $(false);
+          button({
+            textContent: $(() => (copied.value ? "Copied!" : "Copy")),
+            style: {
+              background: "transparent",
+              border: "1px solid var(--mongo-slate)",
+              color: $(() =>
+                copied.value ? "var(--mongo-green)" : "var(--text-secondary)",
+              ),
+              borderRadius: "4px",
+              padding: "2px 8px",
+              fontSize: "0.75rem",
+              cursor: "pointer",
+              transition: "all 0.2s",
+              opacity: "0.8",
+            },
+            onclick: () => {
+              navigator.clipboard.writeText(content);
+              copied.value = true;
+              setTimeout(() => (copied.value = false), 2000);
+            },
+          });
+        },
+      );
+
+      // Code Content
+      pre({ style: { margin: "0", overflowX: "auto" } }, () => {
+        SyntaxHighlight(content);
+      });
+    },
+  );
 
 const Section = (title: string, id: string, children: () => void) => {
-  section({ id, class: "animate-fade-up", style: { marginBottom: "var(--spacing-xl)", scrollMarginTop: "120px" } }, () => {
-    div({ style: { display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "1.5rem" } }, () => {
-      // Simple geometric icon
-      div({ style: { width: "4px", height: "32px", background: "var(--mongo-green)", borderRadius: "2px" } });
-      h2({
-        style: {
-          fontSize: "2rem",
-          color: "var(--mongo-white)",
-          letterSpacing: "-0.5px"
-        }, textContent: title
-      });
-    });
-    children();
-  });
+  section(
+    {
+      id,
+      class: "animate-fade-up",
+      style: { marginBottom: "var(--spacing-xl)", scrollMarginTop: "120px" },
+    },
+    () => {
+      div(
+        {
+          style: {
+            display: "flex",
+            alignItems: "center",
+            gap: "0.75rem",
+            marginBottom: "1.5rem",
+          },
+        },
+        () => {
+          // Simple geometric icon
+          div({
+            style: {
+              width: "4px",
+              height: "32px",
+              background: "var(--mongo-green)",
+              borderRadius: "2px",
+            },
+          });
+          h2({
+            style: {
+              fontSize: "2rem",
+              color: "var(--mongo-white)",
+              letterSpacing: "-0.5px",
+            },
+            textContent: title,
+          });
+        },
+      );
+      children();
+    },
+  );
 };
 
 const SubSection = (title: string, children: () => void) => {
   div({ style: { marginBottom: "2.5rem" } }, () => {
-    h3({ style: { fontSize: "1.5rem", marginBottom: "1rem", color: "var(--mongo-green)" }, textContent: title });
+    h3({
+      style: {
+        fontSize: "1.5rem",
+        marginBottom: "1rem",
+        color: "var(--mongo-green)",
+      },
+      textContent: title,
+    });
     children();
   });
 };
 
 const SubSubSection = (title: string, children: () => void) => {
   div({ style: { marginBottom: "1.5rem" } }, () => {
-    h4({ style: { fontSize: "1.2rem", marginBottom: "0.75rem", color: "var(--mongo-white)", fontWeight: "600" }, textContent: title });
+    h4({
+      style: {
+        fontSize: "1.2rem",
+        marginBottom: "0.75rem",
+        color: "var(--mongo-white)",
+        fontWeight: "600",
+      },
+      textContent: title,
+    });
     children();
   });
 };
 
 const Paragraph = (text: string) =>
-  p({ style: { marginBottom: "1rem", lineHeight: "1.8", color: "var(--text-secondary)", fontSize: "1.05rem" } }, () => t(text));
+  p(
+    {
+      style: {
+        marginBottom: "1rem",
+        lineHeight: "1.8",
+        color: "var(--text-secondary)",
+        fontSize: "1.05rem",
+      },
+    },
+    () => t(text),
+  );
 
 const List = (items: string[]) =>
-  ul({ style: { marginLeft: "1.5rem", marginBottom: "1.5rem", color: "var(--text-secondary)", lineHeight: "1.8" } }, () => {
-    items.forEach(item => li({ textContent: item }));
-  });
+  ul(
+    {
+      style: {
+        marginLeft: "1.5rem",
+        marginBottom: "1.5rem",
+        color: "var(--text-secondary)",
+        lineHeight: "1.8",
+      },
+    },
+    () => {
+      items.forEach((item) => li({ textContent: item }));
+    },
+  );
 
 const Note = (text: string, type: "info" | "warning" = "info") =>
-  div({
-    style: {
-      background: type === "warning" ? "rgba(255, 189, 46, 0.1)" : "rgba(0, 237, 100, 0.05)",
-      borderLeft: `4px solid ${type === "warning" ? "#ffbd2e" : "var(--mongo-green)"}`,
-      padding: "1rem",
-      borderRadius: "0 0.5rem 0.5rem 0",
-      marginBottom: "1.5rem",
-      color: type === "warning" ? "#ffbd2e" : "var(--mongo-green)"
+  div(
+    {
+      style: {
+        background:
+          type === "warning"
+            ? "rgba(255, 189, 46, 0.1)"
+            : "rgba(0, 237, 100, 0.05)",
+        borderLeft: `4px solid ${type === "warning" ? "#ffbd2e" : "var(--mongo-green)"}`,
+        padding: "1rem",
+        borderRadius: "0 0.5rem 0.5rem 0",
+        marginBottom: "1.5rem",
+        color: type === "warning" ? "#ffbd2e" : "var(--mongo-green)",
+      },
+    },
+    () => t(text),
+  );
+
+// --- Navigation Data ---
+
+const sections = [
+  { id: "intro", title: "Introduction" },
+  { id: "why-fia", title: "Why Fia?" },
+  { id: "getting-started", title: "Getting Started" },
+  { id: "element-api", title: "Element API" },
+  { id: "element-factory-types", title: "Element Factory Types" },
+  { id: "reactivity", title: "Reactivity" },
+  { id: "immutability", title: "Immutability" },
+  { id: "control-flow", title: "Control Flow" },
+  { id: "components", title: "Components" },
+  { id: "svg", title: "SVG" },
+  { id: "performance", title: "Performance" },
+  { id: "examples", title: "Examples" },
+];
+
+const TableOfContents = () => {
+  const activeSection = $("intro");
+
+  // Track scroll position to highlight active section
+  const handleScroll = () => {
+    const scrollPosition = window.scrollY + 150; // Offset for navbar
+
+    for (let i = sections.length - 1; i >= 0; i--) {
+      const section = document.getElementById(sections[i].id);
+      if (section && section.offsetTop <= scrollPosition) {
+        activeSection.value = sections[i].id;
+        break;
+      }
     }
-  }, () => t(text));
+  };
+
+  // Setup scroll listener on mount
+  if (typeof window !== "undefined") {
+    // Initialize on next tick to ensure DOM is ready
+    setTimeout(() => {
+      window.addEventListener("scroll", handleScroll);
+      handleScroll(); // Set initial active section
+    }, 0);
+  }
+
+  return div(
+    {
+      class: "toc-container",
+      style: {
+        position: "sticky",
+        top: "120px",
+        height: "fit-content",
+        maxHeight: "calc(100vh - 140px)",
+        overflowY: "auto",
+        paddingRight: "1rem",
+        width: "220px",
+        flexShrink: "0",
+      },
+    },
+    () => {
+      div(
+        {
+          style: {
+            borderLeft: "2px solid var(--mongo-slate)",
+            paddingLeft: "1rem",
+          },
+        },
+        () => {
+          h3({
+            style: {
+              fontSize: "0.875rem",
+              color: "var(--text-secondary)",
+              marginBottom: "1rem",
+              textTransform: "uppercase",
+              letterSpacing: "0.05em",
+              fontWeight: "600",
+            },
+          });
+
+          ul(
+            { style: { listStyle: "none", padding: "0", margin: "0" } },
+            () => {
+              sections.forEach((section) => {
+                li({ style: { marginBottom: "0.5rem" } }, () => {
+                  a({
+                    href: `#${section.id}`,
+                    style: {
+                      color: $(() =>
+                        activeSection.value === section.id
+                          ? "var(--mongo-green)"
+                          : "var(--text-secondary)",
+                      ),
+                      textDecoration: "none",
+                      fontSize: "0.875rem",
+                      display: "block",
+                      padding: "0.25rem 0",
+                      transition: "color 0.2s",
+                      fontWeight: $(() =>
+                        activeSection.value === section.id ? "600" : "400",
+                      ),
+                      borderLeft: $(() =>
+                        activeSection.value === section.id
+                          ? "2px solid var(--mongo-green)"
+                          : "2px solid transparent",
+                      ),
+                      paddingLeft: "0.5rem",
+                      marginLeft: "-0.5rem",
+                    },
+                    textContent: section.title,
+                    onclick: (e) => {
+                      e.preventDefault();
+                      const target = document.getElementById(section.id);
+                      if (target) {
+                        const offset = 100;
+                        const targetPosition = target.offsetTop - offset;
+                        window.scrollTo({
+                          top: targetPosition,
+                          behavior: "smooth",
+                        });
+                        activeSection.value = section.id;
+                      }
+                    },
+                  });
+                });
+              });
+            },
+          );
+        },
+      );
+    },
+  );
+};
 
 // --- Main Component ---
 
 export const Docs = () =>
-  div({ id: "docs", class: "container", style: { maxWidth: "800px", margin: "0 auto", paddingBottom: "var(--spacing-xl)" } }, () => {
+  div(
+    {
+      id: "docs",
+      class: "container",
+      style: {
+        display: "flex",
+        gap: "3rem",
+        maxWidth: "1400px",
+        margin: "0 auto",
+        paddingBottom: "var(--spacing-xl)",
+        paddingLeft: "2rem",
+        paddingRight: "2rem",
+      },
+    },
+    () => {
+      // Table of Contents - Sticky Sidebar
+      TableOfContents();
 
-    // Overview Badges
-    div({ style: { display: "flex", gap: "0.5rem", marginBottom: "2rem", marginTop: "1rem" } }, () => {
-      a({ href: "https://jsr.io/@fia/core", target: "_blank" }, () => {
-        img({ src: "https://jsr.io/badges/@fia/core", alt: "jsr-badge" });
-      });
-      a({ href: "https://jsr.io/@fia/core", target: "_blank" }, () => {
-        img({ src: "https://jsr.io/badges/@fia/core/score", alt: "score-badge" });
-      });
-    });
+      // Main Content
+      div(
+        {
+          style: {
+            flex: "1",
+            minWidth: "0", // Prevent flex item from overflowing
+            maxWidth: "800px",
+          },
+        },
+        () => {
+          // Overview Badges
+          div(
+            {
+              style: {
+                display: "flex",
+                gap: "0.5rem",
+                marginBottom: "2rem",
+                marginTop: "1rem",
+              },
+            },
+            () => {
+              a({ href: "https://jsr.io/@fia/core", target: "_blank" }, () => {
+                img({
+                  src: "https://jsr.io/badges/@fia/core",
+                  alt: "jsr-badge",
+                });
+              });
+              a({ href: "https://jsr.io/@fia/core", target: "_blank" }, () => {
+                img({
+                  src: "https://jsr.io/badges/@fia/core/score",
+                  alt: "score-badge",
+                });
+              });
+            },
+          );
 
-    Section("Introduction", "intro", () => {
-      Paragraph("Fia is a lightweight, framework-agnostic library designed for high-performance UI development. By leveraging fine-grained signals, Fia bypasses the overhead of a Virtual DOM to update the DOM directly and precisely.");
-    });
+          Section("Introduction", "intro", () => {
+            Paragraph(
+              "Fia is a lightweight, framework-agnostic library designed for high-performance UI development. By leveraging fine-grained signals, Fia bypasses the overhead of a Virtual DOM to update the DOM directly and precisely.",
+            );
+          });
 
-    Section("Why Fia?", "why-fia", () => {
-      Paragraph("While modern web development is often bogged down by complex reconciliation processes, Fia focuses on surgical precision.");
-      ul({ style: { marginLeft: "1.5rem", marginBottom: "1.5rem", color: "var(--text-secondary)" } }, () => {
-        li({ style: { marginBottom: "0.5rem" } }, () => {
-          span({ style: { color: "var(--mongo-white)", fontWeight: "600" }, textContent: "True Fine-Grained Reactivity: " });
-          t("Only the parts of the DOM that actually change are updated. No component re-renders, no VDOM diffing—just targeted updates.");
-        });
-        li({ style: { marginBottom: "0.5rem" } }, () => {
-          span({ style: { color: "var(--mongo-white)", fontWeight: "600" }, textContent: "End-to-End Type Safety: " });
-          t("Built from the ground up with TypeScript, Fia ensures your signals and effects are predictable and catch errors at compile time, not runtime.");
-        });
-        li({ style: { marginBottom: "0.5rem" } }, () => {
-          span({ style: { color: "var(--mongo-white)", fontWeight: "600" }, textContent: "Zero-Abstraction Feel: " });
-          t("Fia stays out of your way. It provides the reactive primitives you need to build powerful interfaces without forcing a heavy framework architecture on you.");
-        });
-        li({ style: { marginBottom: "0.5rem" } }, () => {
-          span({ style: { color: "var(--mongo-white)", fontWeight: "600" }, textContent: "Minimal Footprint: " });
-          t("Designed for developers who value bundle size and execution speed, Fia provides a lean reactive core that scales from small widgets to full-scale applications.");
-        });
-      });
-    });
+          Section("Why Fia?", "why-fia", () => {
+            Paragraph(
+              "While modern web development is often bogged down by complex reconciliation processes, Fia focuses on surgical precision.",
+            );
+            ul(
+              {
+                style: {
+                  marginLeft: "1.5rem",
+                  marginBottom: "1.5rem",
+                  color: "var(--text-secondary)",
+                },
+              },
+              () => {
+                li({ style: { marginBottom: "0.5rem" } }, () => {
+                  span({
+                    style: { color: "var(--mongo-white)", fontWeight: "600" },
+                    textContent: "True Fine-Grained Reactivity: ",
+                  });
+                  t(
+                    "Only the parts of the DOM that actually change are updated. No component re-renders, no VDOM diffing—just targeted updates.",
+                  );
+                });
+                li({ style: { marginBottom: "0.5rem" } }, () => {
+                  span({
+                    style: { color: "var(--mongo-white)", fontWeight: "600" },
+                    textContent: "End-to-End Type Safety: ",
+                  });
+                  t(
+                    "Built from the ground up with TypeScript, Fia ensures your signals and effects are predictable and catch errors at compile time, not runtime.",
+                  );
+                });
+                li({ style: { marginBottom: "0.5rem" } }, () => {
+                  span({
+                    style: { color: "var(--mongo-white)", fontWeight: "600" },
+                    textContent: "Zero-Abstraction Feel: ",
+                  });
+                  t(
+                    "Fia stays out of your way. It provides the reactive primitives you need to build powerful interfaces without forcing a heavy framework architecture on you.",
+                  );
+                });
+                li({ style: { marginBottom: "0.5rem" } }, () => {
+                  span({
+                    style: { color: "var(--mongo-white)", fontWeight: "600" },
+                    textContent: "Minimal Footprint: ",
+                  });
+                  t(
+                    "Designed for developers who value bundle size and execution speed, Fia provides a lean reactive core that scales from small widgets to full-scale applications.",
+                  );
+                });
+              },
+            );
+          });
 
-    Section("Getting Started", "getting-started", () => {
-      SubSection("Prerequisites", () => {
-        Paragraph("Fia is compatible with any modern JavaScript runtime.");
-        List([
-          "Node.js (v18.0.0+)",
-          "Bun (v1.0.0+)",
-          "Deno (v1.30.0+)"
-        ]);
-      });
+          Section("Getting Started", "getting-started", () => {
+            SubSection("Prerequisites", () => {
+              Paragraph(
+                "Fia is compatible with any modern JavaScript runtime.",
+              );
+              List(["Node.js (v18.0.0+)", "Bun (v1.0.0+)", "Deno (v1.30.0+)"]);
+            });
 
-      SubSection("Installation", () => {
-        Paragraph("Fia is published on JSR. Install it using your preferred package manager:");
+            SubSection("Installation", () => {
+              Paragraph(
+                "Fia is published on JSR. Install it using your preferred package manager:",
+              );
 
-        div({ style: { marginBottom: "1rem" } }, () => {
-          h4({ style: { color: "var(--mongo-white)", marginBottom: "0.5rem" }, textContent: "Deno" });
-          CodeBlock("deno add jsr:@fia/core");
-        });
+              div({ style: { marginBottom: "1rem" } }, () => {
+                h4({
+                  style: {
+                    color: "var(--mongo-white)",
+                    marginBottom: "0.5rem",
+                  },
+                  textContent: "Deno",
+                });
+                CodeBlock("deno add jsr:@fia/core");
+              });
 
-        div({ style: { marginBottom: "1rem" } }, () => {
-          h4({ style: { color: "var(--mongo-white)", marginBottom: "0.5rem" }, textContent: "Bun" });
-          Paragraph("1. Create .npmrc file: echo \"@jsr:registry=https://npm.jsr.io\" > .npmrc");
-          Paragraph("2. Install (aliased as 'fia'):");
-          CodeBlock("bun add fia@npm:@jsr/fia__core");
-        });
+              div({ style: { marginBottom: "1rem" } }, () => {
+                h4({
+                  style: {
+                    color: "var(--mongo-white)",
+                    marginBottom: "0.5rem",
+                  },
+                  textContent: "Bun",
+                });
+                Paragraph(
+                  '1. Create .npmrc file: echo "@jsr:registry=https://npm.jsr.io" > .npmrc',
+                );
+                Paragraph("2. Install (aliased as 'fia'):");
+                CodeBlock("bun add fia@npm:@jsr/fia__core");
+              });
 
-        div({ style: { marginBottom: "1rem" } }, () => {
-          h4({ style: { color: "var(--mongo-white)", marginBottom: "0.5rem" }, textContent: "Node.js (npm/yarn/pnpm)" });
-          CodeBlock("npx jsr add @fia/core");
-        });
+              div({ style: { marginBottom: "1rem" } }, () => {
+                h4({
+                  style: {
+                    color: "var(--mongo-white)",
+                    marginBottom: "0.5rem",
+                  },
+                  textContent: "Node.js (npm/yarn/pnpm)",
+                });
+                CodeBlock("npx jsr add @fia/core");
+              });
 
-        Note("The 'bun' command above automatically aliases the package to 'fia'. For Node.js/Deno, mapping to 'fia' in package.json/deno.json is recommended for cleaner imports.", "info");
-      });
+              Note(
+                "The 'bun' command above automatically aliases the package to 'fia'. For Node.js/Deno, mapping to 'fia' in package.json/deno.json is recommended for cleaner imports.",
+                "info",
+              );
+            });
 
-      SubSection("Updating", () => {
-        Paragraph("To update to the latest version, run the installation command again (or use your package manager's update command).");
-        CodeBlock(`# Deno\ndeno add jsr:@fia/core\n\n# Bun\nbun add fia@npm:@jsr/fia__core\n\n# Node.js\nnpx jsr add @fia/core`);
-      });
+            SubSection("Updating", () => {
+              Paragraph(
+                "To update to the latest version, run the installation command again (or use your package manager's update command).",
+              );
+              CodeBlock(
+                `# Deno\ndeno add jsr:@fia/core\n\n# Bun\nbun add fia@npm:@jsr/fia__core\n\n# Node.js\nnpx jsr add @fia/core`,
+              );
+            });
 
-      SubSection("Quick Start", () => {
-        Paragraph("Create your first reactive app in seconds.");
-        CodeBlock(`import { $, div, h1, button, p } from "fia";
+            SubSection("Quick Start", () => {
+              Paragraph("Create your first reactive app in seconds.");
+              CodeBlock(`import { $, div, h1, button, p } from "fia";
 
 // Reactive store for state
 const state = $({ count: 0 }, "count");
@@ -223,32 +612,36 @@ div({ class: "app" }, () => {
   button({ textContent: "+", onclick: () => state.count++ });
   button({ textContent: "-", onclick: () => state.count-- });
 });`);
-      });
+            });
 
-      SubSection("Mounting", () => {
-        Paragraph("For Single Page Apps (SPAs), use the mount helper to attach to a root element.");
-        CodeBlock(`import { mount, div } from "fia";
+            SubSection("Mounting", () => {
+              Paragraph(
+                "For Single Page Apps (SPAs), use the mount helper to attach to a root element.",
+              );
+              CodeBlock(`import { mount, div } from "fia";
 
 const App = () => div(() => {
   // Your app structure
 });
 
 mount(App, "#app"); // Clears #app and mounts App`);
-      });
-    });
+            });
+          });
 
-
-
-    Section("Element API", "element-api", () => {
-      Paragraph("Fia elements have a simple, consistent API. Functions match HTML tag names.");
-      CodeBlock(`el()                      // Empty element
+          Section("Element API", "element-api", () => {
+            Paragraph(
+              "Fia elements have a simple, consistent API. Functions match HTML tag names.",
+            );
+            CodeBlock(`el()                      // Empty element
 el({ props })             // Props only
 el(() => { ... })         // Children only
 el({ props }, () => { })  // Props + children`);
 
-      SubSubSection("Text Content", () => {
-        Paragraph("Use the native textContent prop for static or reactive text.");
-        CodeBlock(`// Static text
+            SubSubSection("Text Content", () => {
+              Paragraph(
+                "Use the native textContent prop for static or reactive text.",
+              );
+              CodeBlock(`// Static text
 h1({ textContent: "Hello World" });
 
 // Reactive text
@@ -257,11 +650,13 @@ p({ textContent: name });
 
 // Computed text
 p({ textContent: $(() => \`Hello, \${name.value}!\`) });`);
-      });
+            });
 
-      SubSubSection("Event Handlers", () => {
-        Paragraph("Event handlers are delegated automatically for performance.");
-        CodeBlock(`button({
+            SubSubSection("Event Handlers", () => {
+              Paragraph(
+                "Event handlers are delegated automatically foon this pager performance.",
+              );
+              CodeBlock(`button({
   textContent: "Click me",
   onclick: () => console.log("clicked!"),
 });
@@ -270,40 +665,46 @@ input({
   type: "text",
   oninput: (e) => console.log(e.currentTarget.value),
 });`);
-      });
+            });
 
-      SubSubSection("Nesting Elements", () => {
-        Paragraph("Use a callback function to nest elements.");
-        CodeBlock(`div({ class: "card" }, () => {
+            SubSubSection("Nesting Elements", () => {
+              Paragraph("Use a callback function to nest elements.");
+              CodeBlock(`div({ class: "card" }, () => {
   h1({ textContent: "Title" });
   p({ textContent: "Description" });
 });`);
-      });
+            });
 
-      SubSubSection("Void Elements", () => {
-        Paragraph("Elements like input, img, br only accept props.");
-        CodeBlock(`input({ type: "email", placeholder: "you@example.com" });
+            SubSubSection("Void Elements", () => {
+              Paragraph("Elements like input, img, br only accept props.");
+              CodeBlock(`input({ type: "email", placeholder: "you@example.com" });
 img({ src: "/photo.jpg", alt: "Photo" });
 br();`);
-      });
+            });
 
-      SubSubSection("onMount Callback", () => {
-        Paragraph("Access layout properties after the element is in the DOM.");
-        CodeBlock(`div((el, onMount) => {
+            SubSubSection("onMount Callback", () => {
+              Paragraph(
+                "Access layout properties after the element is in the DOM.",
+              );
+              CodeBlock(`div((el, onMount) => {
   el.style.height = "100vh";
   onMount(() => {
     console.log(el.offsetHeight);
   });
 });`);
-      });
-    });
+            });
+          });
 
-    Section("Element Factory Types", "element-factory-types", () => {
-      Paragraph("Fia provides different element factory types optimized for specific use cases. Each factory type has its own set of overloads tailored to common usage patterns.");
+          Section("Element Factory Types", "element-factory-types", () => {
+            Paragraph(
+              "Fia provides different element factory types optimized for specific use cases. Each factory type has its own set of overloads tailored to common usage patterns.",
+            );
 
-      SubSection("Standard Elements (4 overloads)", () => {
-        Paragraph("Used for semantic structure elements. These factories support the base patterns:");
-        CodeBlock(`// 1. Empty element
+            SubSection("Standard Elements (4 overloads)", () => {
+              Paragraph(
+                "Used for semantic structure elements. These factories support the base patterns:",
+              );
+              CodeBlock(`// 1. Empty element
 article();
 
 // 2. Props only
@@ -320,12 +721,16 @@ article({ class: "post" }, () => {
   h2({ textContent: "Article Title" });
   p({ textContent: "Article body..." });
 });`);
-        Note("Elements: article, section, nav, form, ul, ol, table, canvas, video, and more.");
-      });
+              Note(
+                "Elements: article, section, nav, form, ul, ol, table, canvas, video, and more.",
+              );
+            });
 
-      SubSection("Text Elements (11 overloads)", () => {
-        Paragraph("Optimized for elements that commonly hold text content with convenient text-first syntax.");
-        CodeBlock(`// All standard overloads plus text shortcuts:
+            SubSection("Text Elements (11 overloads)", () => {
+              Paragraph(
+                "Optimized for elements that commonly hold text content with convenient text-first syntax.",
+              );
+              CodeBlock(`// All standard overloads plus text shortcuts:
 
 // 5. Text content (static or reactive)
 h1("Hello World");
@@ -343,12 +748,16 @@ h1("Header", () => {
 h1("Main Title", { class: "hero" }, () => {
   span({ textContent: " subtitle", class: "sub" });
 });`);
-        Note("Elements: h1-h6, p, div, span, label, li, td, th, strong, em, code, and more.");
-      });
+              Note(
+                "Elements: h1-h6, p, div, span, label, li, td, th, strong, em, code, and more.",
+              );
+            });
 
-      SubSection("Interactive Elements (10 overloads)", () => {
-        Paragraph("Special factories for interactive elements with text + click handler shorthand.");
-        CodeBlock(`// All text element overloads plus click shorthand:
+            SubSection("Interactive Elements (10 overloads)", () => {
+              Paragraph(
+                "Special factories for interactive elements with text + click handler shorthand.",
+              );
+              CodeBlock(`// All text element overloads plus click shorthand:
 
 // 9. Text + click handler shorthand (special!)
 button("Delete", () => {
@@ -361,23 +770,27 @@ button({
   onclick: () => console.log("Delete clicked!"),
   class: "btn-danger"
 });`);
-        Note("Elements: button, summary, option, optgroup.");
-      });
+              Note("Elements: button, summary, option, optgroup.");
+            });
 
-      SubSection("Void Elements (1 overload)", () => {
-        Paragraph("Self-closing elements that cannot have children.");
-        CodeBlock(`// Props only (or empty)
+            SubSection("Void Elements (1 overload)", () => {
+              Paragraph("Self-closing elements that cannot have children.");
+              CodeBlock(`// Props only (or empty)
 input();
 input({ type: "email", placeholder: "you@example.com" });
 br();
 hr({ style: { margin: "2rem 0" } });
 img({ src: "/photo.jpg", alt: "Description" });`);
-        Note("Elements: input, br, hr, img, area, base, col, link, meta, and more.");
-      });
+              Note(
+                "Elements: input, br, hr, img, area, base, col, link, meta, and more.",
+              );
+            });
 
-      SubSection("Type Safety Benefits", () => {
-        Paragraph("All factories provide full TypeScript support with autocomplete, event type inference, and ARIA attribute validation.");
-        CodeBlock(`// TypeScript knows this is an HTMLInputElement
+            SubSection("Type Safety Benefits", () => {
+              Paragraph(
+                "All factories provide full TypeScript support with autocomplete, event type inference, and ARIA attribute validation.",
+              );
+              CodeBlock(`// TypeScript knows this is an HTMLInputElement
 input({
   type: "email",
   oninput: (e) => {
@@ -393,185 +806,205 @@ button({
   ariaHasPopup: "menu",         // Autocomplete shows valid values!
   onclick: () => console.log("Toggle menu")
 });`);
-      });
-    });
+            });
+          });
 
-    Section("Reactivity", "reactivity", () => {
-      SubSection("Signals", () => {
-        Paragraph("Signals are the primitive units of reactivity.");
-        CodeBlock(`const count = $(0);
+          Section("Reactivity", "reactivity", () => {
+            SubSection("Signals", () => {
+              Paragraph("Signals are the primitive units of reactivity.");
+              CodeBlock(`const count = $(0);
 console.log(count.value); // 0
 count.value++;`);
-      });
-      SubSection("Reactive Stores", () => {
-        Paragraph("Fia stores are immutable by default for predictability.");
-        CodeBlock(`// Immutable Store
+            });
+            SubSection("Reactive Stores", () => {
+              Paragraph(
+                "Fia stores are immutable by default for predictability.",
+              );
+              CodeBlock(`// Immutable Store
 const config = $({ theme: "dark" });
 // config.theme = "light"; // Error!
 
 // Mutable Store (Opt-in)
 const state = $({ count: 0 }, "count");
 state.count++; // Works!`);
-        Note("Destructuring breaks reactivity. Always access properties directly: state.count", "warning");
-      });
-      SubSection("Computed Values", () => {
-        Paragraph("Computed signals automatically track dependencies and update when they change.");
-        CodeBlock(`const count = $(0);
+              Note(
+                "Destructuring breaks reactivity. Always access properties directly: state.count",
+                "warning",
+              );
+            });
+            SubSection("Computed Values", () => {
+              Paragraph(
+                "Computed signals automatically track dependencies and update when they change.",
+              );
+              CodeBlock(`const count = $(0);
 const doubled = $(() => count.value * 2);`);
-      });
-      SubSection("Effects", () => {
-        Paragraph("Use $e() to run side effects when dependencies change.");
-        CodeBlock(`$e(() => {
+            });
+            SubSection("Effects", () => {
+              Paragraph(
+                "Use $e() to run side effects when dependencies change.",
+              );
+              CodeBlock(`$e(() => {
   console.log("Count changed to:", count.value);
 });`);
-      });
-    });
+            });
+          });
 
-    Section("Immutability", "immutability", () => {
-      Paragraph("Fia embraces an Immutable-by-Default philosophy for state management. This differs from many other signals-based frameworks but aligns with functional programming principles.");
-      SubSection("Working with Immutable State", () => {
-        Paragraph("When a store is immutable, you update state by replacing objects, not mutating properties.");
-        CodeBlock(`const state = $({ 
+          Section("Immutability", "immutability", () => {
+            Paragraph(
+              "Fia embraces an Immutable-by-Default philosophy for state management. This differs from many other signals-based frameworks but aligns with functional programming principles.",
+            );
+            SubSection("Working with Immutable State", () => {
+              Paragraph(
+                "When a store is immutable, you update state by replacing objects, not mutating properties.",
+              );
+              CodeBlock(`const state = $({ 
   user: { name: "Evan", score: 10 } 
 }, "user"); // 'user' key is mutable
 
 // Correct: Replace the object
 state.user = { ...state.user, score: state.user.score + 1 };`);
-      });
-    });
+            });
+          });
 
-    Section("Control Flow", "control-flow", () => {
-      SubSection("Show", () => {
-        Paragraph("Conditionally render content that updates when the condition changes.");
-        CodeBlock(`Show(() => isVisible.value, () => div({ textContent: "Hello!" }));`);
-      });
-      SubSection("Each", () => {
-        Paragraph("Reactive list rendering that re-renders efficiently.");
-        CodeBlock(`const items = $({ list: ["Apple", "Banana"] });
+          Section("Control Flow", "control-flow", () => {
+            SubSection("Show", () => {
+              Paragraph(
+                "Conditionally render content that updates when the condition changes.",
+              );
+              CodeBlock(
+                `Show(() => isVisible.value, () => div({ textContent: "Hello!" }));`,
+              );
+            });
+            SubSection("Each", () => {
+              Paragraph("Reactive list rendering that re-renders efficiently.");
+              CodeBlock(`const items = $({ list: ["Apple", "Banana"] });
 Each(() => items.list, item => li({ textContent: item }));`);
-      });
-      SubSection("Match", () => {
-        Paragraph("Reactive pattern matching for switch/case logic.");
-        CodeBlock(`Match(() => status.value, {
+            });
+            SubSection("Match", () => {
+              Paragraph("Reactive pattern matching for switch/case logic.");
+              CodeBlock(`Match(() => status.value, {
   loading: () => p({ textContent: "Loading..." }),
   success: () => div({ textContent: "Data loaded!" }),
   _: () => p({ textContent: "Unknown state" }),
 });`);
-      });
-    });
+            });
+          });
 
-    Section("Component Composition", "components", () => {
-      Paragraph("In Fia, components are just functions. There is no special class or type.");
-      SubSection("Basic Component", () => {
-        CodeBlock(`function Button(props: { text: string }) {
+          Section("Component Composition", "components", () => {
+            Paragraph(
+              "In Fia, components are just functions. There is no special class or type.",
+            );
+            SubSection("Basic Component", () => {
+              CodeBlock(`function Button(props: { text: string }) {
   return button({
     textContent: props.text,
     class: "btn-primary"
   });
 }`);
-      });
-      SubSection("Children & Layouts", () => {
-        Paragraph("To create wrapper components, pass a callback function as a child prop.");
-        CodeBlock(`function Card(props, children) {
+            });
+            SubSection("Children & Layouts", () => {
+              Paragraph(
+                "To create wrapper components, pass a callback function as a child prop.",
+              );
+              CodeBlock(`function Card(props, children) {
   return div({ class: "card" }, () => {
     children();
   });
 }`);
-      });
-    });
+            });
+          });
 
-    Section("SVG", "svg", () => {
-      Paragraph("Fia supports SVG elements with full type safety.");
-      CodeBlock(`import { svg, svgCircle } from "fia";
+          Section("SVG", "svg", () => {
+            Paragraph("Fia supports SVG elements with full type safety.");
+            CodeBlock(`import { svg, svgCircle } from "fia";
 
 svg({ width: 100, height: 100 }, () => {
   svgCircle({ cx: 50, cy: 50, r: 40, fill: "red" });
 });`);
-    });
+          });
 
-    Section("Performance", "performance", () => {
-      List([
-        "Event Delegation: Single listener per event type.",
-        "Automatic Batching: DOM updates are batched via standard event loop microtasks.",
-        "Fragment Insertion: Children are collected in DocumentFragments before insertion."
-      ]);
-    });
+          Section("Performance", "performance", () => {
+            List([
+              "Event Delegation: Single listener per event type.",
+              "Automatic Batching: DOM updates are batched via standard event loop microtasks.",
+              "Fragment Insertion: Children are collected in DocumentFragments before insertion.",
+            ]);
+          });
 
-    Section("Examples", "examples", () => {
+          Section("Examples", "examples", () => {
+            SubSection("🟢 Beginner", () => {
+              SubSubSection("1. Hello World", () => {
+                Paragraph("The simplest possible Fia code.");
+                CodeBlock(`h1({ textContent: "Hello, World!" });`);
+              });
 
-      SubSection("🟢 Beginner", () => {
-        SubSubSection("1. Hello World", () => {
-          Paragraph("The simplest possible Fia code.");
-          CodeBlock(`h1({ textContent: "Hello, World!" });`);
-        });
-
-        SubSubSection("2. Counter", () => {
-          Paragraph("Signals hold reactive state.");
-          CodeBlock(`const count = $(0);
+              SubSubSection("2. Counter", () => {
+                Paragraph("Signals hold reactive state.");
+                CodeBlock(`const count = $(0);
 button({ textContent: "+", onclick: () => count.value++ });
 p({ textContent: count });`);
-        });
+              });
 
-        SubSubSection("3. Toggle", () => {
-          Paragraph("Computed signals derive values from other signals.");
-          CodeBlock(`const visible = $(true);
+              SubSubSection("3. Toggle", () => {
+                Paragraph("Computed signals derive values from other signals.");
+                CodeBlock(`const visible = $(true);
 button({ textContent: "Toggle", onclick: () => visible.value = !visible.value });
 div({ style: { display: $(() => visible.value ? "block" : "none") } }, () => {
   p({ textContent: "Now you see me!" });
 });`);
-        });
+              });
 
-        SubSubSection("4. Input Binding", () => {
-          Paragraph("Two-way binding is manual but explicit.");
-          CodeBlock(`const name = $("");
+              SubSubSection("4. Input Binding", () => {
+                Paragraph("Two-way binding is manual but explicit.");
+                CodeBlock(`const name = $("");
 input({ type: "text", oninput: (e) => name.value = e.currentTarget.value });
 p({ textContent: $(() => \`Hello, \${name.value || "stranger"}!\`) });`);
-        });
+              });
 
-        SubSubSection("5. List Rendering (Static)", () => {
-          Paragraph("For simple static lists, forEach works fine.");
-          CodeBlock(`const items = ["Apple", "Banana", "Cherry"];
+              SubSubSection("5. List Rendering (Static)", () => {
+                Paragraph("For simple static lists, forEach works fine.");
+                CodeBlock(`const items = ["Apple", "Banana", "Cherry"];
 ul(() => items.forEach(item => li({ textContent: item })));`);
-        });
-      });
+              });
+            });
 
-      SubSection("🟡 Intermediate", () => {
-        SubSubSection("6. Reactive Store Counter", () => {
-          Paragraph("Objects passed to $() become reactive stores.");
-          CodeBlock(`const state = $({ count: 0 }, "count");
+            SubSection("🟡 Intermediate", () => {
+              SubSubSection("6. Reactive Store Counter", () => {
+                Paragraph("Objects passed to $() become reactive stores.");
+                CodeBlock(`const state = $({ count: 0 }, "count");
 
 div(() => {
   h1({ textContent: $(() => \`Count: \${state.count}\`) });
   button({ textContent: "+", onclick: () => state.count++ });
   button({ textContent: "-", onclick: () => state.count-- });
 });`);
-        });
+              });
 
-        SubSubSection("7. Conditional Classes", () => {
-          Paragraph("Computed signals work in class props too.");
-          CodeBlock(`const active = $(false);
+              SubSubSection("7. Conditional Classes", () => {
+                Paragraph("Computed signals work in class props too.");
+                CodeBlock(`const active = $(false);
 
 button({
   textContent: "Toggle Active",
   class: $(() => active.value ? "btn active" : "btn"),
   onclick: () => active.value = !active.value,
 });`);
-        });
+              });
 
-        SubSubSection("8. Form Handling", () => {
-          Paragraph("Reactive stores are perfect for forms.");
-          CodeBlock(`const formData = $({ email: "", password: "" }, "email", "password");
+              SubSubSection("8. Form Handling", () => {
+                Paragraph("Reactive stores are perfect for forms.");
+                CodeBlock(`const formData = $({ email: "", password: "" }, "email", "password");
 
 form({ onsubmit: (e) => { e.preventDefault(); console.log(formData); } }, () => {
   input({ type: "email", oninput: (e) => formData.email = e.currentTarget.value });
   input({ type: "password", oninput: (e) => formData.password = e.currentTarget.value });
   button({ textContent: "Submit", type: "submit" });
 });`);
-        });
+              });
 
-        SubSubSection("9. Computed Values", () => {
-          Paragraph("Track dependencies automatically.");
-          CodeBlock(`const state = $({ price: 100, quantity: 2 }, "quantity");
+              SubSubSection("9. Computed Values", () => {
+                Paragraph("Track dependencies automatically.");
+                CodeBlock(`const state = $({ price: 100, quantity: 2 }, "quantity");
 const total = $(() => state.price * state.quantity);
 
 div(() => {
@@ -580,11 +1013,11 @@ div(() => {
   p({ textContent: $(() => \`Total: $\${total.value}\`) });
   button({ textContent: "Add", onclick: () => state.quantity++ });
 });`);
-        });
+              });
 
-        SubSubSection("10. Dynamic Styling", () => {
-          Paragraph("Reactive styles allow theming.");
-          CodeBlock(`const theme = $("light");
+              SubSubSection("10. Dynamic Styling", () => {
+                Paragraph("Reactive styles allow theming.");
+                CodeBlock(`const theme = $("light");
 
 div({
   style: {
@@ -597,13 +1030,13 @@ div({
     theme.value = theme.value === "dark" ? "light" : "dark";
   }});
 });`);
-        });
-      });
+              });
+            });
 
-      SubSection("🔴 Advanced", () => {
-        SubSubSection("11. Todo App", () => {
-          Paragraph("A complete todo app using Each.");
-          CodeBlock(`const todos = $({ items: [] as string[], input: "" }, "items", "input");
+            SubSection("🔴 Advanced", () => {
+              SubSubSection("11. Todo App", () => {
+                Paragraph("A complete todo app using Each.");
+                CodeBlock(`const todos = $({ items: [] as string[], input: "" }, "items", "input");
 
 div(() => {
   input({
@@ -632,11 +1065,11 @@ div(() => {
     });
   });
 });`);
-        });
+              });
 
-        SubSubSection("12. Tabs Component", () => {
-          Paragraph("Track active index and conditionally render.");
-          CodeBlock(`const tabs = ["Home", "About", "Contact"];
+              SubSubSection("12. Tabs Component", () => {
+                Paragraph("Track active index and conditionally render.");
+                CodeBlock(`const tabs = ["Home", "About", "Contact"];
 const active = $(0);
 
 div(() => {
@@ -660,11 +1093,11 @@ div(() => {
     });
   });
 });`);
-        });
+              });
 
-        SubSubSection("13. Async Data Fetching", () => {
-          Paragraph("Use Match for loading states.");
-          CodeBlock(`const state = $({
+              SubSubSection("13. Async Data Fetching", () => {
+                Paragraph("Use Match for loading states.");
+                CodeBlock(`const state = $({
   status: "loading" as "loading" | "success" | "error",
   users: [] as string[]
 }, "status", "users");
@@ -684,11 +1117,11 @@ div(() => {
     success: () => ul(() => Each(() => state.users, u => li({ textContent: u }))),
   });
 });`);
-        });
+              });
 
-        SubSubSection("14. Modal Dialog", () => {
-          Paragraph("Modal patterns with explicit types.");
-          CodeBlock(`const modal = $<{ open: boolean; title: string }, "open" | "title">({ open: false, title: "" }, "open", "title");
+              SubSubSection("14. Modal Dialog", () => {
+                Paragraph("Modal patterns with explicit types.");
+                CodeBlock(`const modal = $<{ open: boolean; title: string }, "open" | "title">({ open: false, title: "" }, "open", "title");
 
 function openModal(title: string) {
   modal.title = title;
@@ -710,8 +1143,10 @@ div({
     button({ textContent: "Close", onclick: () => modal.open = false });
   });
 });`);
-        });
-      });
-    });
-
-  });
+              });
+            });
+          });
+        },
+      ); // Close main content div
+    },
+  ); // Close docs container

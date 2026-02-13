@@ -203,3 +203,96 @@ a {
 .btn-outline:hover {
     background: rgba(255, 255, 255, 0.1);
 }
+/* Table of Contents Styles */
+.toc-container {
+    scrollbar-width: thin;
+    scrollbar-color: var(--mongo-slate) transparent;
+}
+
+.toc-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.toc-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.toc-container::-webkit-scrollbar-thumb {
+    background: var(--mongo-slate);
+    border-radius: 3px;
+}
+
+.toc-container::-webkit-scrollbar-thumb:hover {
+    background: var(--mongo-green);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    #docs {
+        gap: 2rem !important;
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+
+    .toc-container {
+        width: 180px !important;
+    }
+}
+
+@media (max-width: 968px) {
+    #docs {
+        flex-direction: column !important;
+        gap: 1rem !important;
+    }
+
+    .toc-container {
+        position: relative !important;
+        top: 0 !important;
+        width: 100% !important;
+        max-height: none !important;
+        padding-right: 0 !important;
+        margin-bottom: 2rem;
+    }
+
+    .toc-container > div {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        border-left: none !important;
+        padding-left: 0 !important;
+    }
+
+    .toc-container h3 {
+        width: 100%;
+        margin-bottom: 0.5rem !important;
+    }
+
+    .toc-container ul {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .toc-container li {
+        margin-bottom: 0 !important;
+    }
+
+    .toc-container a {
+        background: var(--mongo-forest);
+        padding: 0.5rem 1rem !important;
+        border-radius: 0.25rem;
+        border: 1px solid var(--mongo-slate) !important;
+        border-left: 1px solid var(--mongo-slate) !important;
+        margin-left: 0 !important;
+    }
+}
+
+/* Smooth scrolling for anchor links */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Add padding to sections for anchor links */
+section[id] {
+    scroll-margin-top: 120px;
+}
