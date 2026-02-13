@@ -1,5 +1,22 @@
-import { div, button, input, h1, p, span, a, img, ul, table, li, strong, summary, option, code, td } from "./elements";
-import type { SmartElement } from "./elements";
+import {
+  div,
+  button,
+  input,
+  h1,
+  p,
+  span,
+  a,
+  img,
+  ul,
+  table,
+  li,
+  strong,
+  summary,
+  option,
+  code,
+  td,
+} from "./elements";
+import type { SmartElement } from "./SmartElement";
 
 // =============================================================================
 // VALID USAGE (Should compile)
@@ -7,55 +24,55 @@ import type { SmartElement } from "./elements";
 
 // 1. Basic Props
 div({
-    id: "my-div",
-    class: "container",
-    style: "color: red",
+  id: "my-div",
+  class: "container",
+  style: "color: red",
 });
 
 // 2. ClassList (Array Support)
 div({
-    classList: ["a", "b", "c"],
+  classList: ["a", "b", "c"],
 });
 
 // 3. Class (Array Support)
 div({
-    class: ["a", "b"],
+  class: ["a", "b"],
 });
 
 // 4. ClassName (React compat)
 div({
-    className: "my-class",
+  className: "my-class",
 });
 
 // 5. Event Handler Context (The main feature)
 button({
-    textContent: "Click Me",
-    onclick: (e) => {
-        // e.currentTarget should be HTMLButtonElement & { textContent: string }
+  textContent: "Click Me",
+  onclick: (e) => {
+    // e.currentTarget should be HTMLButtonElement & { textContent: string }
 
-        // Valid DOM property
-        e.currentTarget.disabled = true;
+    // Valid DOM property
+    e.currentTarget.disabled = true;
 
-        // Valid inferred prop
-        const text = e.currentTarget.textContent;
+    // Valid inferred prop
+    const text = e.currentTarget.textContent;
 
-        // Valid classList access
-        e.currentTarget.classList.add("clicked");
-        e.currentTarget.classList
-    }
+    // Valid classList access
+    e.currentTarget.classList.add("clicked");
+    e.currentTarget.classList;
+  },
 });
 
 // 6. Reactive Props (Signal unwrap)
 // Mocking signal for type test
 type Signal<T> = (() => T) & { value: T } & { peek(): T };
-const sig = (null as any) as Signal<string>;
+const sig = null as any as Signal<string>;
 
 input({
-    value: sig, // Should be accepted
-    oninput: (e) => {
-        // e.currentTarget.value should be string, not Signal
-        const val = e.currentTarget.value;
-    }
+  value: sig, // Should be accepted
+  oninput: (e) => {
+    // e.currentTarget.value should be string, not Signal
+    const val = e.currentTarget.value;
+  },
 });
 
 // =============================================================================
@@ -72,10 +89,10 @@ button({ onclick: "not-a-function" });
 
 // 3. Accessing non-existent prop on currentTarget
 button({
-    onclick: (e) => {
-        // @ts-expect-error - nonExistentProp doesn't exist on HTMLButtonElement
-        e.currentTarget.nonExistentProp;
-    }
+  onclick: (e) => {
+    // @ts-expect-error - nonExistentProp doesn't exist on HTMLButtonElement
+    e.currentTarget.nonExistentProp;
+  },
 });
 
 // 4. Invalid classList type
@@ -102,16 +119,16 @@ div("Content", { style: { color: "red" } });
 
 // Text + children
 div("Prefix: ", () => {
-    strong("bold");
+  strong("bold");
 });
 
 // Text + props + children
 p("Note: ", { class: "note" }, () => {
-    strong("important");
+  strong("important");
 });
 
 // Reactive text
-const textSig = (null as any) as Signal<string>;
+const textSig = null as any as Signal<string>;
 span(textSig);
 h1(textSig, { class: "reactive" });
 
@@ -130,7 +147,9 @@ option("Option 1");
 
 // Text + onclick handler
 button("Submit", () => {});
-button("Click", (e) => { console.log(e); });
+button("Click", (e) => {
+  console.log(e);
+});
 
 // Text + props
 button("Save", { disabled: true, class: "btn" });
@@ -187,12 +206,12 @@ a({ href: "/", textContent: "Home" });
 
 // Children only (existing)
 a(() => {
-    span("Link content");
+  span("Link content");
 });
 
 // Props + children (existing)
 a({ href: "/page" }, () => {
-    span("Complex link");
+  span("Complex link");
 });
 
 // =============================================================================
@@ -201,8 +220,12 @@ a({ href: "/page" }, () => {
 
 // These should only accept props/children patterns, not text shorthand
 ul({ class: "list" });
-ul(() => { li("item"); });
-ul({ class: "list" }, () => { li("item"); });
+ul(() => {
+  li("item");
+});
+ul({ class: "list" }, () => {
+  li("item");
+});
 
 table({ class: "data" });
 table(() => {});
@@ -215,13 +238,21 @@ table({ class: "data" }, () => {});
 // All existing patterns still work
 div();
 div({ class: "container" });
-div(() => { span("child"); });
-div({ class: "wrapper" }, () => { p("content"); });
+div(() => {
+  span("child");
+});
+div({ class: "wrapper" }, () => {
+  p("content");
+});
 
 button();
 button({ onclick: () => {} });
-button(() => { span("icon"); });
-button({ class: "btn" }, () => { span("text"); });
+button(() => {
+  span("icon");
+});
+button({ class: "btn" }, () => {
+  span("text");
+});
 
 // =============================================================================
 // INVALID SHORTHAND USAGE (Should fail compilation)
