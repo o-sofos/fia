@@ -1,4 +1,4 @@
-import { footer, div, a } from "../../core/mod";
+import { footer, div } from "../../core/mod";
 
 export const Footer = () =>
     footer({

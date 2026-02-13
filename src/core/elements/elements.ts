@@ -481,6 +481,14 @@ import {
 import { createImgElement } from "./ImgElementFactory";
 import { createAnchorElement } from "./AnchorElementFactory";
 
+// Re-export types for external use
+export type {
+  ElementFactory,
+  VoidElementFactory,
+  TextElementFactory,
+  InteractiveElementFactory,
+};
+
 /**
  * Union of all color object types for type narrowing
  */
