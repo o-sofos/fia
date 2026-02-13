@@ -1,23 +1,24 @@
-import { $, button, h1, p, Show } from "fia";
+import { $, $e, button, p } from "fia";
 
 export default () => {
   const count = $(0);
+  const threshold = $(10);
 
-  Show(
-    () => count.value > 0,
-    () => {
-      p({
-        textContent: $(() => `The count is ${count.value}`),
-        style: {
-          color: $(() =>
-            count.value > 0 ? "green" : count.value < 0 ? "red" : "black",
-          ),
-        },
-      });
-    },
-  );
+  $e(() => {
+    // Only subscribes to count, not threshold
+    if (count.value > threshold.peek()) {
+      console.log("Threshold exceeded!");
+    }
+  });
 
-  h1($(() => `Count: ${count.value}`));
-  button("+", () => count.value++);
-  button("-", () => count.value--);
+  p($(() => `Count: ${count.value}`));
+  p($(() => `Threshold: ${threshold.value}`));
+
+  button("Increment Count", () => {
+    count.value += 1;
+  });
+
+  button("Increment Threshold", () => {
+    threshold.value += 1;
+  });
 };
