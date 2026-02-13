@@ -698,9 +698,20 @@ svg({ width: 100, height: 100, viewBox: "0 0 100 100" }, () => {
 
 ## ⚡ Performance
 
+Fia achieves exceptional performance through three core optimizations: event delegation, automatic batching, and fine-grained reactivity. These optimizations are built into the framework and require no configuration.
+
 ### Event Delegation
 
-Fia uses a single delegated listener per event type instead of per-element listeners:
+**The Problem:** Traditional frameworks attach individual event listeners to each interactive element, leading to memory overhead and slower event handling.
+
+```typescript
+// Traditional approach (100 listeners!)
+for (let i = 0; i < 100; i++) {
+  button.addEventListener('click', handler); // 100 separate listeners
+}
+```
+
+**Fia's Solution:** A single delegated listener per event type for the entire document.
 
 ```
 document.body
@@ -708,19 +719,150 @@ document.body
       └── WeakMap<Element, Handler>
 ```
 
-This means 100 buttons = 1 click listener, not 100.
+**How it works:**
+1. Fia registers **one global listener** per event type (click, input, etc.) on `document.body`
+2. Event handlers are stored in a `WeakMap<Element, Handler>`
+3. When an event fires, Fia looks up the handler for the target element
+4. Handlers are **automatically cleaned up** when elements are removed (WeakMap)
+
+**Performance Benefits:**
+- ✅ **Memory efficient**: 100 buttons = 1 listener (not 100)
+- ✅ **Faster event dispatch**: Single lookup vs. multiple listener checks
+- ✅ **Automatic cleanup**: No memory leaks from forgotten listeners
+- ✅ **Dynamic elements**: New elements automatically work without rebinding
+
+**Example:**
+```typescript
+// Create 1,000 buttons - still only 1 click listener!
+ul(() => {
+  for (let i = 0; i < 1000; i++) {
+    li(() => {
+      button(`Button ${i}`, () => console.log(`Clicked ${i}`));
+    });
+  }
+});
+// Memory usage: O(1) for event listeners
+// Traditional: O(n) - 1,000 separate listeners
+```
 
 ### Automatic Fragment Batching
 
-Children are collected in a `DocumentFragment` before DOM insertion:
+**The Problem:** Each DOM insertion triggers browser reflow and repaint, causing performance bottlenecks.
 
 ```typescript
+// Traditional approach (3 reflows!)
+container.appendChild(h1); // Reflow #1
+container.appendChild(p1); // Reflow #2
+container.appendChild(p2); // Reflow #3
+```
+
+**Fia's Solution:** Automatic batching using `DocumentFragment`.
+
+**How it works:**
+1. When a children callback executes, Fia creates a `DocumentFragment`
+2. All child elements are appended to the fragment (in-memory, no reflow)
+3. The complete fragment is inserted in **one atomic operation**
+4. Browser performs **one reflow** instead of multiple
+
+**Performance Benefits:**
+- ✅ **Single reflow**: N insertions = 1 reflow (not N)
+- ✅ **Faster rendering**: Especially noticeable with 10+ children
+- ✅ **Automatic**: No manual batching or optimization needed
+- ✅ **Composable**: Works with nested structures
+
+**Example:**
+```typescript
+// Fia automatically batches these 100 elements
 div(() => {
-  // All 3 elements batch into one DOM operation
+  // All created in-memory first (DocumentFragment)
   h1({ textContent: "Title" });
-  p({ textContent: "Paragraph 1" });
-  p({ textContent: "Paragraph 2" });
+
+  ul(() => {
+    for (let i = 0; i < 100; i++) {
+      li({ textContent: `Item ${i}` });
+    }
+  });
+
+  p({ textContent: "Footer" });
 });
+// Result: 2 reflows total (outer div + inner ul)
+// Traditional: 102 reflows (1 for each element)
+```
+
+**Execution Context Stack:**
+
+Fia maintains an execution context stack to track parent elements:
+
+```typescript
+// Simplified internal flow:
+pushExecutionContext(fragment);    // Push fragment as context
+  h1({ textContent: "Title" });     // Appends to fragment
+  p({ textContent: "Para 1" });     // Appends to fragment
+  p({ textContent: "Para 2" });     // Appends to fragment
+popExecutionContext();               // Pop fragment
+parent.appendChild(fragment);        // Single DOM operation
+```
+
+### Fine-Grained Reactivity
+
+**The Problem:** Virtual DOM frameworks re-render entire component trees when state changes.
+
+**Fia's Solution:** Surgical updates to only changed elements.
+
+```typescript
+const count = $(0);
+
+// Only the <p> text updates when count changes
+// The <div> and <button> are never touched
+div(() => {
+  p({ textContent: $(() => `Count: ${count.value}`) }); // ← Only this updates
+  button("+", () => count.value++); // ← Never re-renders
+});
+```
+
+**Performance comparison:**
+| Framework | Update Strategy | Affected Elements |
+|-----------|----------------|-------------------|
+| React/Vue | Virtual DOM diff | Entire component tree |
+| Svelte | Compile-time | Block scope |
+| **Fia** | **Direct signal subscription** | **Single element** |
+
+### Best Practices
+
+While Fia optimizes automatically, you can maximize performance with these patterns:
+
+**1. Use `batch()` for multiple updates:**
+```typescript
+import { batch } from "fia";
+
+// Triggers one effect run instead of three
+batch(() => {
+  state.name = "Alice";
+  state.age = 30;
+  state.active = true;
+});
+```
+
+**2. Use `peek()` for non-reactive reads:**
+```typescript
+const count = $(0);
+const threshold = $(10);
+
+$e(() => {
+  // Only subscribes to count, not threshold
+  if (count.value > threshold.peek()) {
+    console.log("Threshold exceeded!");
+  }
+});
+```
+
+**3. Memoize expensive computations:**
+```typescript
+// Bad: Re-computes on every access
+const doubled = count.value * 2;
+
+// Good: Computed once, cached until count changes
+const doubled = $(() => count.value * 2);
 ```
 
 ---

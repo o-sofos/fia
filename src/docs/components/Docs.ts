@@ -924,11 +924,146 @@ svg({ width: 100, height: 100 }, () => {
           });
 
           Section("Performance", "performance", () => {
-            List([
-              "Event Delegation: Single listener per event type.",
-              "Automatic Batching: DOM updates are batched via standard event loop microtasks.",
-              "Fragment Insertion: Children are collected in DocumentFragments before insertion.",
-            ]);
+            Paragraph("Fia achieves exceptional performance through three core optimizations: event delegation, automatic batching, and fine-grained reactivity.");
+
+            SubSection("Event Delegation", () => {
+              Paragraph("Traditional frameworks attach individual event listeners to each element. Fia uses a single delegated listener per event type.");
+
+              CodeBlock(`// Traditional approach (100 listeners!)
+for (let i = 0; i < 100; i++) {
+  button.addEventListener('click', handler);
+}
+
+// Fia's approach (1 listener!)
+document.body
+  └── 1 click handler (delegated)
+      └── WeakMap<Element, Handler>`);
+
+              SubSubSection("How it works", () => {
+                List([
+                  "One global listener per event type (click, input, etc.)",
+                  "Handlers stored in WeakMap<Element, Handler>",
+                  "Automatic cleanup when elements are removed",
+                  "Dynamic elements work without rebinding"
+                ]);
+              });
+
+              SubSubSection("Benefits", () => {
+                List([
+                  "Memory efficient: 100 buttons = 1 listener (not 100)",
+                  "Faster event dispatch: Single lookup",
+                  "No memory leaks from forgotten listeners",
+                  "Works with dynamically created elements"
+                ]);
+              });
+
+              CodeBlock(`// Create 1,000 buttons - still only 1 click listener!
+ul(() => {
+  for (let i = 0; i < 1000; i++) {
+    li(() => {
+      button(\`Button \${i}\`, () => console.log(\`Clicked \${i}\`));
+    });
+  }
+});`);
+            });
+
+            SubSection("Automatic Fragment Batching", () => {
+              Paragraph("Each DOM insertion triggers browser reflow. Fia batches all children into a single insertion using DocumentFragment.");
+
+              CodeBlock(`// Traditional approach (3 reflows!)
+container.appendChild(h1);  // Reflow #1
+container.appendChild(p1);  // Reflow #2
+container.appendChild(p2);  // Reflow #3
+
+// Fia's approach (1 reflow!)
+div(() => {
+  h1({ textContent: "Title" });    // → Fragment
+  p({ textContent: "Para 1" });     // → Fragment
+  p({ textContent: "Para 2" });     // → Fragment
+});
+// Single appendChild(fragment)`);
+
+              SubSubSection("How it works", () => {
+                List([
+                  "Children callback creates a DocumentFragment",
+                  "All child elements append to fragment (in-memory)",
+                  "Complete fragment inserted in one operation",
+                  "Browser performs one reflow instead of multiple"
+                ]);
+              });
+
+              SubSubSection("Benefits", () => {
+                List([
+                  "Single reflow: N insertions = 1 reflow (not N)",
+                  "Faster rendering with 10+ children",
+                  "Automatic - no manual optimization needed",
+                  "Composable with nested structures"
+                ]);
+              });
+
+              CodeBlock(`// Fia automatically batches 100 elements
+div(() => {
+  h1({ textContent: "Title" });
+  ul(() => {
+    for (let i = 0; i < 100; i++) {
+      li({ textContent: \`Item \${i}\` });
+    }
+  });
+  p({ textContent: "Footer" });
+});
+// Result: 2 reflows total
+// Traditional: 102 reflows`);
+            });
+
+            SubSection("Fine-Grained Reactivity", () => {
+              Paragraph("Virtual DOM frameworks re-render entire component trees. Fia updates only the changed elements.");
+
+              CodeBlock(`const count = $(0);
+
+// Only the <p> text updates when count changes
+div(() => {
+  p({ textContent: $(() => \`Count: \${count.value}\`) }); // ← Updates
+  button("+", () => count.value++); // ← Never re-renders
+});`);
+
+              SubSubSection("Performance Comparison", () => {
+                Note("React/Vue: Virtual DOM diff → Entire component tree");
+                Note("Svelte: Compile-time → Block scope");
+                Note("Fia: Direct signal subscription → Single element", "info");
+              });
+            });
+
+            SubSection("Best Practices", () => {
+              SubSubSection("1. Batch Multiple Updates", () => {
+                CodeBlock(`import { batch } from "fia";
+
+batch(() => {
+  state.name = "Alice";
+  state.age = 30;
+  state.active = true;
+}); // Triggers one effect run`);
+              });
+
+              SubSubSection("2. Use peek() for Non-Reactive Reads", () => {
+                CodeBlock(`const count = $(0);
+const threshold = $(10);
+
+$e(() => {
+  // Only subscribes to count, not threshold
+  if (count.value > threshold.peek()) {
+    console.log("Threshold exceeded!");
+  }
+});`);
+              });
+
+              SubSubSection("3. Memoize Expensive Computations", () => {
+                CodeBlock(`// Bad: Re-computes on every access
+const doubled = count.value * 2;
+
+// Good: Computed once, cached until count changes
+const doubled = $(() => count.value * 2);`);
+              });
+            });
           });
 
           Section("Examples", "examples", () => {
