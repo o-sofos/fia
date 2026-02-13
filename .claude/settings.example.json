@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bun test:*)",
+      "Bash(bun tsc:*)",
+      "Bash(bun run:*)",
+      "Write(*)",
+      "Edit(*)",
+      "Read(*)",
+      "Grep(*)",
+      "Glob(*)",
+      "Bash(*)",
+      "Skill(*)",
+      "Task(*)"
+    ]
+  }
+}
