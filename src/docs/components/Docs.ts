@@ -298,6 +298,104 @@ br();`);
       });
     });
 
+    Section("Element Factory Types", "element-factory-types", () => {
+      Paragraph("Fia provides different element factory types optimized for specific use cases. Each factory type has its own set of overloads tailored to common usage patterns.");
+
+      SubSection("Standard Elements (4 overloads)", () => {
+        Paragraph("Used for semantic structure elements. These factories support the base patterns:");
+        CodeBlock(`// 1. Empty element
+article();
+
+// 2. Props only
+article({ id: "post-1", class: "article" });
+
+// 3. Children only
+article(() => {
+  h2({ textContent: "Title" });
+  p({ textContent: "Content" });
+});
+
+// 4. Props + children (most common)
+article({ class: "post" }, () => {
+  h2({ textContent: "Article Title" });
+  p({ textContent: "Article body..." });
+});`);
+        Note("Elements: article, section, nav, form, ul, ol, table, canvas, video, and more.");
+      });
+
+      SubSection("Text Elements (11 overloads)", () => {
+        Paragraph("Optimized for elements that commonly hold text content with convenient text-first syntax.");
+        CodeBlock(`// All standard overloads plus text shortcuts:
+
+// 5. Text content (static or reactive)
+h1("Hello World");
+h1($(() => \`Count: \${count.value}\`));
+
+// 6. Text + props
+h1("Hello", { class: "title", style: { color: "blue" } });
+
+// 7. Text + children
+h1("Header", () => {
+  span({ textContent: " with nested content" });
+});
+
+// 8. Text + props + children (all three!)
+h1("Main Title", { class: "hero" }, () => {
+  span({ textContent: " subtitle", class: "sub" });
+});`);
+        Note("Elements: h1-h6, p, div, span, label, li, td, th, strong, em, code, and more.");
+      });
+
+      SubSection("Interactive Elements (10 overloads)", () => {
+        Paragraph("Special factories for interactive elements with text + click handler shorthand.");
+        CodeBlock(`// All text element overloads plus click shorthand:
+
+// 9. Text + click handler shorthand (special!)
+button("Delete", () => {
+  console.log("Delete clicked!");
+});
+
+// Equivalent full props version:
+button({
+  textContent: "Delete",
+  onclick: () => console.log("Delete clicked!"),
+  class: "btn-danger"
+});`);
+        Note("Elements: button, summary, option, optgroup.");
+      });
+
+      SubSection("Void Elements (1 overload)", () => {
+        Paragraph("Self-closing elements that cannot have children.");
+        CodeBlock(`// Props only (or empty)
+input();
+input({ type: "email", placeholder: "you@example.com" });
+br();
+hr({ style: { margin: "2rem 0" } });
+img({ src: "/photo.jpg", alt: "Description" });`);
+        Note("Elements: input, br, hr, img, area, base, col, link, meta, and more.");
+      });
+
+      SubSection("Type Safety Benefits", () => {
+        Paragraph("All factories provide full TypeScript support with autocomplete, event type inference, and ARIA attribute validation.");
+        CodeBlock(`// TypeScript knows this is an HTMLInputElement
+input({
+  type: "email",
+  oninput: (e) => {
+    // e.currentTarget is HTMLInputElement
+    console.log(e.currentTarget.value); // ✅ Type-safe
+  }
+});
+
+// ARIA attributes with autocomplete
+button({
+  textContent: "Menu",
+  ariaExpanded: $(false),      // "true" | "false" | "undefined"
+  ariaHasPopup: "menu",         // Autocomplete shows valid values!
+  onclick: () => console.log("Toggle menu")
+});`);
+      });
+    });
+
     Section("Reactivity", "reactivity", () => {
       SubSection("Signals", () => {
         Paragraph("Signals are the primitive units of reactivity.");

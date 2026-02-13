@@ -38,6 +38,7 @@ Most frameworks add layers of abstraction between you and the DOM. Fia gives you
   - [Quick Start](#quick-start)
   - [Mounting](#mounting)
 - [Element API](#-element-api)
+- [Element Factory Types](#-element-factory-types)
 - [Reactivity](#-reactivity)
   - [Signals](#primitives--signals)
   - [Stores](#objects--reactive-stores)
@@ -212,13 +213,153 @@ Access layout properties after the element is in the DOM:
 ```typescript
 div((el, onMount) => {
   el.style.height = "100vh";
-  
+
   onMount(() => {
     // Runs after mount - layout is computed
     console.log(el.offsetHeight);
   });
-  
+
   p({ textContent: "Child" });  // Still batched
+});
+```
+
+---
+
+## 📋 Element Factory Types
+
+Fia provides different element factory types optimized for specific use cases. Each factory type has its own set of overloads tailored to common usage patterns.
+
+### Standard Elements (4 overloads)
+
+Used for semantic structure elements like `article`, `section`, `nav`, `form`, `ul`, `ol`, `table`, etc.
+
+```typescript
+// 1. Empty element
+article();
+
+// 2. Props only
+article({ id: "post-1", class: "article" });
+
+// 3. Children only
+article(() => {
+  h2({ textContent: "Title" });
+  p({ textContent: "Content" });
+});
+
+// 4. Props + children (most common)
+article({ class: "post" }, () => {
+  h2({ textContent: "Article Title" });
+  p({ textContent: "Article body..." });
+});
+```
+
+**Elements:** `article`, `section`, `nav`, `form`, `ul`, `ol`, `table`, `thead`, `tbody`, `tfoot`, `tr`, `details`, `dialog`, `fieldset`, `menu`, `select`, `datalist`, `meter`, `progress`, `canvas`, `audio`, `video`, `picture`, `iframe`, `embed`, `object`
+
+### Text Elements (11 overloads)
+
+Optimized for elements that commonly hold text content with convenient text-first syntax.
+
+```typescript
+// 1-4. Same as standard elements
+h1();
+h1({ class: "title" });
+h1(() => { span({ textContent: "nested" }); });
+h1({ class: "title" }, () => { span({ textContent: "nested" }); });
+
+// 5. Text content (static or reactive)
+h1("Hello World");
+h1($(() => `Count: ${count.value}`));
+
+// 6. Text + props
+h1("Hello", { class: "title", style: { color: "blue" } });
+
+// 7. Text + children
+h1("Header", () => {
+  span({ textContent: " with nested content" });
+});
+
+// 8. Text + props + children (all three!)
+h1("Main Title", { class: "hero" }, () => {
+  span({ textContent: " subtitle", class: "sub" });
+});
+```
+
+**Elements:** `h1`, `h2`, `h3`, `h4`, `h5`, `h6`, `p`, `div`, `span`, `blockquote`, `figcaption`, `label`, `legend`, `caption`, `strong`, `em`, `small`, `mark`, `code`, `pre`, `samp`, `kbd`, `var`, `i`, `b`, `u`, `s`, `del`, `ins`, `sub`, `sup`, `li`, `td`, `th`, `dt`, `dd`, `address`, `cite`, `q`, `abbr`, `time`, `data`, `output`
+
+### Interactive Elements (10 overloads)
+
+Special factories for interactive elements with text + click handler shorthand.
+
+```typescript
+// 1-8. Same as text elements
+button("Click me");
+button("Submit", { type: "submit", class: "btn-primary" });
+
+// 9. Text + click handler shorthand (special!)
+button("Delete", () => {
+  console.log("Delete clicked!");
+});
+
+// Full props alternative (if you need more than onclick)
+button({
+  textContent: "Delete",
+  onclick: () => console.log("Delete clicked!"),
+  onmouseenter: () => console.log("Hovered!"),
+  class: "btn-danger"
+});
+```
+
+**Elements:** `button`, `summary`, `option`, `optgroup`
+
+### Void Elements (1 overload)
+
+Self-closing elements that cannot have children.
+
+```typescript
+// Props only (or empty)
+input();
+input({ type: "email", placeholder: "you@example.com", required: true });
+br();
+hr({ style: { margin: "2rem 0" } });
+img({ src: "/photo.jpg", alt: "Description", loading: "lazy" });
+```
+
+**Elements:** `input`, `br`, `hr`, `img`, `area`, `base`, `col`, `embed`, `link`, `meta`, `param`, `source`, `track`, `wbr`
+
+### Summary Table
+
+| Element Type | Overloads | Text Shorthand | Click Shorthand | Use Case |
+|--------------|-----------|----------------|-----------------|----------|
+| **Standard** | 4 | ❌ | ❌ | Semantic structure |
+| **Text** | 11 | ✅ `el("text")` | ❌ | Content-heavy elements |
+| **Interactive** | 10 | ✅ `el("text")` | ✅ `button("text", onclick)` | Buttons, interactive |
+| **Void** | 1 | ❌ | ❌ | Self-closing elements |
+
+### Type Safety Benefits
+
+All factories provide:
+- **Full TypeScript autocomplete** for props
+- **Event type inference** (`e.currentTarget` is correctly typed)
+- **CSS property validation** with autocomplete
+- **ARIA attribute support** with literal types
+- **Reactive value support** with `Signal<T>` or computed `$(() => value)`
+
+```typescript
+// TypeScript knows this is an HTMLInputElement
+input({
+  type: "email",
+  oninput: (e) => {
+    // e.currentTarget is HTMLInputElement
+    console.log(e.currentTarget.value); // ✅ Type-safe
+  }
+});
+
+// ARIA attributes with autocomplete
+button({
+  textContent: "Menu",
+  ariaExpanded: $(false),        // "true" | "false" | "undefined"
+  ariaHasPopup: "menu",           // Autocomplete shows valid values!
+  onclick: () => console.log("Toggle menu")
 });
 ```
 
