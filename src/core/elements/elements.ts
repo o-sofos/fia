@@ -81,6 +81,59 @@ type ContextualValidateProps<P, Target, K extends keyof HTMLElementTagNameMap> =
 export type Renderable = string | number | boolean | null | undefined;
 
 /**
+ * Text content that can be passed as a shorthand first argument.
+ * Supports static strings, numbers, or reactive signals.
+ */
+export type TextContent = string | number | Signal<string | number>;
+
+// =============================================================================
+// TYPE GUARDS FOR ARGUMENT PARSING
+// =============================================================================
+
+/**
+ * Check if value is text content (string, number, or signal of same)
+ */
+function isTextContent(value: unknown): value is TextContent {
+  return (
+    typeof value === "string" ||
+    typeof value === "number" ||
+    (isSignal(value) &&
+      (typeof value.peek() === "string" || typeof value.peek() === "number"))
+  );
+}
+
+/**
+ * Check if value is a click handler function.
+ * Distinguishes from children callbacks by checking function.length:
+ * - Click handlers: 0-1 parameters (e) => ...
+ * - Children callbacks: 2 parameters (el, onMount) => ...
+ */
+function isClickHandler(value: unknown): value is (e: MouseEvent) => void {
+  if (typeof value !== "function") return false;
+  if (isSignal(value)) return false;
+  return (value as (...args: unknown[]) => unknown).length <= 1;
+}
+
+/**
+ * Check if first argument looks like an href (common URL patterns)
+ */
+function looksLikeHref(value: unknown): boolean {
+  if (typeof value !== "string") return false;
+  return /^(\/|#|https?:|mailto:|tel:|\.\.?\/)/.test(value);
+}
+
+/**
+ * Check if first argument looks like an image src
+ */
+function looksLikeImgSrc(value: unknown): boolean {
+  if (typeof value !== "string") return false;
+  return (
+    /^(\/|https?:|data:image\/|blob:|\.\.?\/)/.test(value) ||
+    /\.(jpg|jpeg|png|gif|svg|webp|avif|ico|bmp)$/i.test(value)
+  );
+}
+
+/**
  * Callback that executes after an element is mounted to the DOM.
  * Use this to access layout properties like `offsetHeight`.
  * 
@@ -290,6 +343,190 @@ export interface VoidElementFactory<K extends keyof HTMLElementTagNameMap> {
    * @param props - Element attributes and event handlers
    */
   (props?: ElementProps<K>): HTMLElementTagNameMap[K];
+}
+
+/**
+ * Factory for elements that commonly hold text content.
+ * Adds text shorthand overloads: el(text), el(text, props), el(text, children), el(text, props, children)
+ *
+ * Elements: h1-h6, p, div, span, article, section, aside, header, footer,
+ *           main, blockquote, figcaption, label, legend, caption, strong,
+ *           em, small, mark, code, pre, samp, kbd, var_, i, b, u, s, del,
+ *           ins, sub, sup, li, td, th, output
+ */
+export interface TextElementFactory<K extends keyof HTMLElementTagNameMap> {
+  /** Create an empty element */
+  (): E<K>;
+
+  /** Create element with props only (non-generic, for overload resolution) */
+  (props: LooseElementProps<K>): E<K>;
+
+  /** Create element with children callback only */
+  (children: ChildrenCallback<E<K>>): E<K>;
+
+  /** Create element with props and children (non-generic) */
+  (props: LooseElementProps<K>, children: ChildrenCallback<E<K>>): E<K>;
+
+  /** Create element with text content */
+  (text: TextContent): E<K>;
+
+  /** Create element with text content and children */
+  (text: TextContent, children: ChildrenCallback<E<K>>): E<K>;
+
+  /** Create element with props only (generic, for SmartElement inference) */
+  <const P extends Record<string, unknown>>(
+    props: P & ContextualValidateProps<P, LooseElementProps<K>, K>,
+  ): SmartElement<K, P>;
+
+  /** Create element with props and children (generic) */
+  <const P extends Record<string, unknown>>(
+    props: P & ContextualValidateProps<P, LooseElementProps<K>, K>,
+    children: ChildrenCallback<SmartElement<K, P>>,
+  ): SmartElement<K, P>;
+
+  /** Create element with text content and props */
+  <const P extends Record<string, unknown>>(
+    text: TextContent,
+    props: P & ContextualValidateProps<P, LooseElementProps<K>, K>,
+  ): SmartElement<K, P>;
+
+  /** Create element with text content, props, and children */
+  <const P extends Record<string, unknown>>(
+    text: TextContent,
+    props: P & ContextualValidateProps<P, LooseElementProps<K>, K>,
+    children: ChildrenCallback<SmartElement<K, P>>,
+  ): SmartElement<K, P>;
+}
+
+/**
+ * Factory for interactive elements with text + handler shorthand.
+ * Adds: el(text), el(text, onclick), el(text, props)
+ *
+ * Elements: button, summary, option, optgroup
+ */
+export interface InteractiveElementFactory<K extends keyof HTMLElementTagNameMap> {
+  /** Create an empty element */
+  (): E<K>;
+
+  /** Create element with props only (non-generic, for overload resolution) */
+  (props: LooseElementProps<K>): E<K>;
+
+  /** Create element with children callback only */
+  (children: ChildrenCallback<E<K>>): E<K>;
+
+  /** Create element with props and children (non-generic) */
+  (props: LooseElementProps<K>, children: ChildrenCallback<E<K>>): E<K>;
+
+  /** Create element with text content */
+  (text: TextContent): E<K>;
+
+  /** Create element with text and click handler shorthand */
+  (text: TextContent, onclick: (e: MouseEvent) => void): E<K>;
+
+  /** Create element with text content and children */
+  (text: TextContent, children: ChildrenCallback<E<K>>): E<K>;
+
+  /** Create element with props only (generic, for SmartElement inference) */
+  <const P extends Record<string, unknown>>(
+    props: P & ContextualValidateProps<P, LooseElementProps<K>, K>,
+  ): SmartElement<K, P>;
+
+  /** Create element with props and children (generic) */
+  <const P extends Record<string, unknown>>(
+    props: P & ContextualValidateProps<P, LooseElementProps<K>, K>,
+    children: ChildrenCallback<SmartElement<K, P>>,
+  ): SmartElement<K, P>;
+
+  /** Create element with text content and props */
+  <const P extends Record<string, unknown>>(
+    text: TextContent,
+    props: P & ContextualValidateProps<P, LooseElementProps<K>, K>,
+  ): SmartElement<K, P>;
+
+  /** Create element with text content, props, and children */
+  <const P extends Record<string, unknown>>(
+    text: TextContent,
+    props: P & ContextualValidateProps<P, LooseElementProps<K>, K>,
+    children: ChildrenCallback<SmartElement<K, P>>,
+  ): SmartElement<K, P>;
+}
+
+/**
+ * Factory for img elements with src/alt shorthand.
+ * Overloads: img(), img(props), img(src), img(src, alt), img(src, alt, props)
+ */
+export interface ImgElementFactory {
+  /** Create empty img */
+  (): HTMLImageElement;
+
+  /** Create img with props only (non-generic, for overload resolution) */
+  (props: LooseElementProps<"img">): HTMLImageElement;
+
+  /** Create img with src shorthand */
+  (src: string): HTMLImageElement;
+
+  /** Create img with src and alt shorthand */
+  (src: string, alt: string): HTMLImageElement;
+
+  /** Create img with props only (generic, for SmartElement inference) */
+  <const P extends Record<string, unknown>>(
+    props: P & ContextualValidateProps<P, LooseElementProps<"img">, "img">,
+  ): SmartElement<"img", P>;
+
+  /** Create img with src, alt, and additional props */
+  <const P extends Record<string, unknown>>(
+    src: string,
+    alt: string,
+    props: P &
+      ContextualValidateProps<
+        P,
+        Omit<LooseElementProps<"img">, "src" | "alt">,
+        "img"
+      >,
+  ): SmartElement<"img", P & { src: string; alt: string }>;
+}
+
+/**
+ * Factory for anchor elements with href/text shorthand.
+ * Overloads: a(), a(href), a(href, text), a(href, text, props), plus existing patterns
+ */
+export interface AnchorElementFactory {
+  /** Create an empty anchor */
+  (): HTMLAnchorElement;
+
+  /** Create anchor with props only (non-generic, for overload resolution) */
+  (props: LooseElementProps<"a">): HTMLAnchorElement;
+
+  /** Create anchor with children callback only */
+  (children: ChildrenCallback<HTMLAnchorElement>): HTMLAnchorElement;
+
+  /** Create anchor with props and children (non-generic) */
+  (props: LooseElementProps<"a">, children: ChildrenCallback<HTMLAnchorElement>): HTMLAnchorElement;
+
+  /** Create anchor with href shorthand */
+  (href: string): HTMLAnchorElement;
+
+  /** Create anchor with href and text shorthand */
+  (href: string, text: TextContent): HTMLAnchorElement;
+
+  /** Create anchor with props only (generic, for SmartElement inference) */
+  <const P extends Record<string, unknown>>(
+    props: P & ContextualValidateProps<P, LooseElementProps<"a">, "a">,
+  ): SmartElement<"a", P>;
+
+  /** Create anchor with props and children (generic) */
+  <const P extends Record<string, unknown>>(
+    props: P & ContextualValidateProps<P, LooseElementProps<"a">, "a">,
+    children: ChildrenCallback<SmartElement<"a", P>>,
+  ): SmartElement<"a", P>;
+
+  /** Create anchor with href, text, and additional props */
+  <const P extends Record<string, unknown>>(
+    href: string,
+    text: TextContent,
+    props: P &
+      ContextualValidateProps<P, Omit<LooseElementProps<"a">, "href">, "a">,
+  ): SmartElement<"a", P & { href: string }>;
 }
 
 // =============================================================================
@@ -743,6 +980,23 @@ function applyStyle(element: HTMLElement, value: unknown): void {
 
 
 // =============================================================================
+// TEXT CONTENT HELPER
+// =============================================================================
+
+/**
+ * Applies text content to an element, with reactive support.
+ */
+function applyTextContent(element: HTMLElement, text: TextContent): void {
+  if (isSignal(text)) {
+    $e(() => {
+      element.textContent = String(text.value);
+    });
+  } else {
+    element.textContent = String(text);
+  }
+}
+
+// =============================================================================
 // ELEMENT FACTORY
 // =============================================================================
 
@@ -840,6 +1094,347 @@ function createVoidElement<K extends keyof HTMLElementTagNameMap>(
   };
 }
 
+/**
+ * Creates a text element factory with text shorthand support.
+ * Supports: el(), el(text), el(text, props), el(text, children), el(text, props, children),
+ *           el(props), el(children), el(props, children)
+ */
+function createTextElement<K extends keyof HTMLElementTagNameMap>(
+  tag: K,
+): TextElementFactory<K> {
+  return ((
+    arg1?: TextContent | ElementProps<K> | ChildrenCallback<E<K>>,
+    arg2?: ElementProps<K> | ChildrenCallback<E<K>>,
+    arg3?: ChildrenCallback<E<K>>,
+  ): E<K> => {
+    const element = document.createElement(tag);
+
+    let text: TextContent | undefined;
+    let props: ElementProps<K> | undefined;
+    let children: ChildrenCallback<E<K>> | undefined;
+
+    // Parse arguments based on type
+    if (arg1 === undefined) {
+      // 1. element()
+    } else if (isTextContent(arg1)) {
+      // First arg is text
+      text = arg1;
+
+      if (arg2 === undefined) {
+        // 2. element(text)
+      } else if (isChildrenCallback<E<K>>(arg2)) {
+        // 4. element(text, children)
+        children = arg2;
+      } else if (isProps<K>(arg2)) {
+        // 3 or 5. element(text, props) or element(text, props, children)
+        props = arg2;
+        if (arg3 !== undefined) {
+          children = arg3;
+        }
+      }
+    } else if (isChildrenCallback<E<K>>(arg1)) {
+      // 7. element(children)
+      children = arg1;
+    } else if (isProps<K>(arg1)) {
+      // 6 or 8. element(props) or element(props, children)
+      props = arg1;
+      if (arg2 !== undefined && isChildrenCallback<E<K>>(arg2)) {
+        children = arg2;
+      }
+    }
+
+    // Apply text content (reactive or static)
+    if (text !== undefined) {
+      applyTextContent(element, text);
+    }
+
+    // Apply props
+    if (props) {
+      applyProps(element, props);
+    }
+
+    // Execute children with implicit fragment batching
+    const mountCallbacks: (() => void)[] = [];
+    const onMount: OnMountCallback = (cb) => mountCallbacks.push(cb);
+
+    if (children) {
+      const frag = document.createDocumentFragment();
+      pushExecutionContext(frag);
+      try {
+        children(element, onMount);
+      } finally {
+        popExecutionContext();
+      }
+      element.appendChild(frag);
+    }
+
+    // Mount to current context
+    getCurrentExecutionContext().appendChild(element);
+
+    // Execute onMount callbacks after element is in DOM
+    if (mountCallbacks.length > 0) {
+      requestAnimationFrame(() => {
+        for (const cb of mountCallbacks) {
+          cb();
+        }
+      });
+    }
+
+    return element;
+  }) as TextElementFactory<K>;
+}
+
+/**
+ * Creates an interactive element factory with text + handler shorthand.
+ * Supports: el(), el(text), el(text, onclick), el(text, props), el(text, children),
+ *           el(text, props, children), el(props), el(children), el(props, children)
+ */
+function createInteractiveElement<K extends keyof HTMLElementTagNameMap>(
+  tag: K,
+): InteractiveElementFactory<K> {
+  return ((
+    arg1?: TextContent | ElementProps<K> | ChildrenCallback<E<K>>,
+    arg2?:
+      | ((e: MouseEvent) => void)
+      | ElementProps<K>
+      | ChildrenCallback<E<K>>,
+    arg3?: ChildrenCallback<E<K>>,
+  ): E<K> => {
+    const element = document.createElement(tag);
+
+    let text: TextContent | undefined;
+    let onclick: ((e: MouseEvent) => void) | undefined;
+    let props: ElementProps<K> | undefined;
+    let children: ChildrenCallback<E<K>> | undefined;
+
+    // Parse arguments
+    if (arg1 === undefined) {
+      // 1. element()
+    } else if (isTextContent(arg1)) {
+      text = arg1;
+
+      if (arg2 === undefined) {
+        // 2. element(text)
+      } else if (isClickHandler(arg2)) {
+        // 3. element(text, onclick)
+        onclick = arg2;
+      } else if (isChildrenCallback<E<K>>(arg2)) {
+        // 5. element(text, children)
+        children = arg2;
+      } else if (isProps<K>(arg2)) {
+        // 4 or 6. element(text, props) or element(text, props, children)
+        props = arg2;
+        if (arg3 !== undefined) {
+          children = arg3;
+        }
+      }
+    } else if (isChildrenCallback<E<K>>(arg1)) {
+      // 8. element(children)
+      children = arg1;
+    } else if (isProps<K>(arg1)) {
+      // 7 or 9. element(props) or element(props, children)
+      props = arg1;
+      if (arg2 !== undefined && isChildrenCallback<E<K>>(arg2)) {
+        children = arg2;
+      }
+    }
+
+    // Apply text content
+    if (text !== undefined) {
+      applyTextContent(element, text);
+    }
+
+    // Apply click handler shorthand
+    if (onclick) {
+      registerEventHandler(element, "click", onclick as EventListener);
+    }
+
+    // Apply props
+    if (props) {
+      applyProps(element, props);
+    }
+
+    // Execute children with implicit fragment batching
+    const mountCallbacks: (() => void)[] = [];
+    const onMount: OnMountCallback = (cb) => mountCallbacks.push(cb);
+
+    if (children) {
+      const frag = document.createDocumentFragment();
+      pushExecutionContext(frag);
+      try {
+        children(element, onMount);
+      } finally {
+        popExecutionContext();
+      }
+      element.appendChild(frag);
+    }
+
+    // Mount to current context
+    getCurrentExecutionContext().appendChild(element);
+
+    // Execute onMount callbacks after element is in DOM
+    if (mountCallbacks.length > 0) {
+      requestAnimationFrame(() => {
+        for (const cb of mountCallbacks) {
+          cb();
+        }
+      });
+    }
+
+    return element;
+  }) as InteractiveElementFactory<K>;
+}
+
+/**
+ * Creates the img element factory with src/alt shorthand.
+ * Supports: img(), img(props), img(src), img(src, alt), img(src, alt, props)
+ */
+function createImgElement(): ImgElementFactory {
+  return ((
+    arg1?: string | ElementProps<"img">,
+    arg2?: string | ElementProps<"img">,
+    arg3?: ElementProps<"img">,
+  ): HTMLImageElement => {
+    const element = document.createElement("img");
+
+    let src: string | undefined;
+    let alt: string | undefined;
+    let props: ElementProps<"img"> | undefined;
+
+    if (arg1 === undefined) {
+      // img() - empty
+    } else if (typeof arg1 === "string" && looksLikeImgSrc(arg1)) {
+      // First arg is src
+      src = arg1;
+
+      if (arg2 === undefined) {
+        // img(src)
+      } else if (typeof arg2 === "string") {
+        // img(src, alt) or img(src, alt, props)
+        alt = arg2;
+        if (arg3 !== undefined) {
+          props = arg3;
+        }
+      } else if (isProps<"img">(arg2)) {
+        // img(src, props) - src only with additional props
+        props = arg2;
+      }
+    } else if (isProps<"img">(arg1)) {
+      // img(props)
+      props = arg1;
+    }
+
+    // Apply src
+    if (src !== undefined) {
+      element.src = src;
+    }
+
+    // Apply alt
+    if (alt !== undefined) {
+      element.alt = alt;
+    }
+
+    // Apply props
+    if (props) {
+      applyProps(element, props);
+    }
+
+    getCurrentExecutionContext().appendChild(element);
+    return element;
+  }) as ImgElementFactory;
+}
+
+/**
+ * Creates the anchor element factory with href/text shorthand.
+ * Supports: a(), a(href), a(href, text), a(href, text, props),
+ *           a(props), a(children), a(props, children)
+ */
+function createAnchorElement(): AnchorElementFactory {
+  return ((
+    arg1?: string | ElementProps<"a"> | ChildrenCallback<HTMLAnchorElement>,
+    arg2?: TextContent | ElementProps<"a"> | ChildrenCallback<HTMLAnchorElement>,
+    arg3?: ElementProps<"a">,
+  ): HTMLAnchorElement => {
+    const element = document.createElement("a");
+
+    let href: string | undefined;
+    let text: TextContent | undefined;
+    let props: ElementProps<"a"> | undefined;
+    let children: ChildrenCallback<HTMLAnchorElement> | undefined;
+
+    if (arg1 === undefined) {
+      // a() - empty
+    } else if (typeof arg1 === "string" && looksLikeHref(arg1)) {
+      // First arg is href
+      href = arg1;
+
+      if (arg2 === undefined) {
+        // a(href)
+      } else if (isTextContent(arg2)) {
+        // a(href, text) or a(href, text, props)
+        text = arg2;
+        if (arg3 !== undefined) {
+          props = arg3;
+        }
+      } else if (isProps<"a">(arg2)) {
+        // a(href, props)
+        props = arg2;
+      }
+    } else if (isChildrenCallback<HTMLAnchorElement>(arg1)) {
+      // a(children)
+      children = arg1;
+    } else if (isProps<"a">(arg1)) {
+      // a(props) or a(props, children)
+      props = arg1;
+      if (arg2 !== undefined && isChildrenCallback<HTMLAnchorElement>(arg2)) {
+        children = arg2;
+      }
+    }
+
+    // Apply href
+    if (href !== undefined) {
+      element.href = href;
+    }
+
+    // Apply text content
+    if (text !== undefined) {
+      applyTextContent(element, text);
+    }
+
+    // Apply props
+    if (props) {
+      applyProps(element, props);
+    }
+
+    // Execute children
+    const mountCallbacks: (() => void)[] = [];
+    const onMount: OnMountCallback = (cb) => mountCallbacks.push(cb);
+
+    if (children) {
+      const frag = document.createDocumentFragment();
+      pushExecutionContext(frag);
+      try {
+        children(element, onMount);
+      } finally {
+        popExecutionContext();
+      }
+      element.appendChild(frag);
+    }
+
+    getCurrentExecutionContext().appendChild(element);
+
+    if (mountCallbacks.length > 0) {
+      requestAnimationFrame(() => {
+        for (const cb of mountCallbacks) {
+          cb();
+        }
+      });
+    }
+
+    return element;
+  }) as AnchorElementFactory;
+}
+
 // =============================================================================
 // HELPER: TYPE GUARDS
 // =============================================================================
@@ -866,115 +1461,153 @@ function isChildrenCallback<E extends HTMLElement>(
 // ELEMENT EXPORTS
 // =============================================================================
 
-export const a = createElement("a") as ElementFactory<"a">;
-export const abbr = createElement("abbr") as ElementFactory<"abbr">;
-export const address = createElement("address") as ElementFactory<"address">;
-export const area = createVoidElement("area") as VoidElementFactory<"area">;
-export const article = createElement("article") as ElementFactory<"article">;
-export const aside = createElement("aside") as ElementFactory<"aside">;
-export const audio = createElement("audio") as ElementFactory<"audio">;
-export const b = createElement("b") as ElementFactory<"b">;
-export const base = createVoidElement("base") as VoidElementFactory<"base">;
-export const bdi = createElement("bdi") as ElementFactory<"bdi">;
-export const bdo = createElement("bdo") as ElementFactory<"bdo">;
-export const blockquote = createElement("blockquote") as ElementFactory<"blockquote">;
-export const body = createElement("body") as ElementFactory<"body">;
-export const br = createVoidElement("br") as VoidElementFactory<"br">;
-export const button = createElement("button") as ElementFactory<"button">;
-export const canvas = createElement("canvas") as ElementFactory<"canvas">;
-export const caption = createElement("caption") as ElementFactory<"caption">;
-export const cite = createElement("cite") as ElementFactory<"cite">;
-export const code = createElement("code") as ElementFactory<"code">;
-export const col = createVoidElement("col") as VoidElementFactory<"col">;
-export const colgroup = createElement("colgroup") as ElementFactory<"colgroup">;
-export const data = createElement("data") as ElementFactory<"data">;
-export const datalist = createElement("datalist") as ElementFactory<"datalist">;
-export const dd = createElement("dd") as ElementFactory<"dd">;
-export const del = createElement("del") as ElementFactory<"del">;
-export const details = createElement("details") as ElementFactory<"details">;
-export const dfn = createElement("dfn") as ElementFactory<"dfn">;
-export const dialog = createElement("dialog") as ElementFactory<"dialog">;
-export const div = createElement("div") as ElementFactory<"div">;
-export const dl = createElement("dl") as ElementFactory<"dl">;
-export const dt = createElement("dt") as ElementFactory<"dt">;
-export const em = createElement("em") as ElementFactory<"em">;
-export const embed = createVoidElement("embed") as VoidElementFactory<"embed">;
-export const fieldset = createElement("fieldset") as ElementFactory<"fieldset">;
-export const figcaption = createElement("figcaption") as ElementFactory<"figcaption">;
-export const figure = createElement("figure") as ElementFactory<"figure">;
-export const footer = createElement("footer") as ElementFactory<"footer">;
-export const form = createElement("form") as ElementFactory<"form">;
-export const h1 = createElement("h1") as ElementFactory<"h1">;
-export const h2 = createElement("h2") as ElementFactory<"h2">;
-export const h3 = createElement("h3") as ElementFactory<"h3">;
-export const h4 = createElement("h4") as ElementFactory<"h4">;
-export const h5 = createElement("h5") as ElementFactory<"h5">;
-export const h6 = createElement("h6") as ElementFactory<"h6">;
-export const head = createElement("head") as ElementFactory<"head">;
-export const header = createElement("header") as ElementFactory<"header">;
-export const hgroup = createElement("hgroup") as ElementFactory<"hgroup">;
-export const hr = createVoidElement("hr") as VoidElementFactory<"hr">;
-export const html = createElement("html") as ElementFactory<"html">;
-export const i = createElement("i") as ElementFactory<"i">;
-export const iframe = createElement("iframe") as ElementFactory<"iframe">;
-export const img = createVoidElement("img") as VoidElementFactory<"img">;
+// -----------------------------------------------------------------------------
+// Special elements with custom factories
+// -----------------------------------------------------------------------------
+export const a = createAnchorElement();
+export const img = createImgElement();
+
+// -----------------------------------------------------------------------------
+// Interactive elements (text + handler shorthand)
+// -----------------------------------------------------------------------------
+export const button = createInteractiveElement("button") as InteractiveElementFactory<"button">;
+export const summary = createInteractiveElement("summary") as InteractiveElementFactory<"summary">;
+export const option = createInteractiveElement("option") as InteractiveElementFactory<"option">;
+export const optgroup = createInteractiveElement("optgroup") as InteractiveElementFactory<"optgroup">;
+
+// -----------------------------------------------------------------------------
+// Text-holding elements (text shorthand)
+// -----------------------------------------------------------------------------
+// Headings
+export const h1 = createTextElement("h1") as TextElementFactory<"h1">;
+export const h2 = createTextElement("h2") as TextElementFactory<"h2">;
+export const h3 = createTextElement("h3") as TextElementFactory<"h3">;
+export const h4 = createTextElement("h4") as TextElementFactory<"h4">;
+export const h5 = createTextElement("h5") as TextElementFactory<"h5">;
+export const h6 = createTextElement("h6") as TextElementFactory<"h6">;
+
+// Block elements
+export const p = createTextElement("p") as TextElementFactory<"p">;
+export const div = createTextElement("div") as TextElementFactory<"div">;
+export const article = createTextElement("article") as TextElementFactory<"article">;
+export const section = createTextElement("section") as TextElementFactory<"section">;
+export const aside = createTextElement("aside") as TextElementFactory<"aside">;
+export const header = createTextElement("header") as TextElementFactory<"header">;
+export const footer = createTextElement("footer") as TextElementFactory<"footer">;
+export const main = createTextElement("main") as TextElementFactory<"main">;
+export const blockquote = createTextElement("blockquote") as TextElementFactory<"blockquote">;
+export const figcaption = createTextElement("figcaption") as TextElementFactory<"figcaption">;
+export const pre = createTextElement("pre") as TextElementFactory<"pre">;
+export const address = createTextElement("address") as TextElementFactory<"address">;
+
+// Inline elements
+export const span = createTextElement("span") as TextElementFactory<"span">;
+export const strong = createTextElement("strong") as TextElementFactory<"strong">;
+export const em = createTextElement("em") as TextElementFactory<"em">;
+export const small = createTextElement("small") as TextElementFactory<"small">;
+export const mark = createTextElement("mark") as TextElementFactory<"mark">;
+export const code = createTextElement("code") as TextElementFactory<"code">;
+export const samp = createTextElement("samp") as TextElementFactory<"samp">;
+export const kbd = createTextElement("kbd") as TextElementFactory<"kbd">;
+export const var_ = createTextElement("var") as TextElementFactory<"var">; // var is reserved
+export const i = createTextElement("i") as TextElementFactory<"i">;
+export const b = createTextElement("b") as TextElementFactory<"b">;
+export const u = createTextElement("u") as TextElementFactory<"u">;
+export const s = createTextElement("s") as TextElementFactory<"s">;
+export const del = createTextElement("del") as TextElementFactory<"del">;
+export const ins = createTextElement("ins") as TextElementFactory<"ins">;
+export const sub = createTextElement("sub") as TextElementFactory<"sub">;
+export const sup = createTextElement("sup") as TextElementFactory<"sup">;
+export const abbr = createTextElement("abbr") as TextElementFactory<"abbr">;
+export const cite = createTextElement("cite") as TextElementFactory<"cite">;
+export const dfn = createTextElement("dfn") as TextElementFactory<"dfn">;
+export const q = createTextElement("q") as TextElementFactory<"q">;
+export const time = createTextElement("time") as TextElementFactory<"time">;
+export const data = createTextElement("data") as TextElementFactory<"data">;
+export const bdi = createTextElement("bdi") as TextElementFactory<"bdi">;
+export const bdo = createTextElement("bdo") as TextElementFactory<"bdo">;
+export const ruby = createTextElement("ruby") as TextElementFactory<"ruby">;
+export const rp = createTextElement("rp") as TextElementFactory<"rp">;
+export const rt = createTextElement("rt") as TextElementFactory<"rt">;
+
+// Form-adjacent
+export const label = createTextElement("label") as TextElementFactory<"label">;
+export const legend = createTextElement("legend") as TextElementFactory<"legend">;
+export const output = createTextElement("output") as TextElementFactory<"output">;
+
+// Table cells
+export const caption = createTextElement("caption") as TextElementFactory<"caption">;
+export const td = createTextElement("td") as TextElementFactory<"td">;
+export const th = createTextElement("th") as TextElementFactory<"th">;
+
+// List items
+export const li = createTextElement("li") as TextElementFactory<"li">;
+export const dd = createTextElement("dd") as TextElementFactory<"dd">;
+export const dt = createTextElement("dt") as TextElementFactory<"dt">;
+
+// Title
+export const title = createTextElement("title") as TextElementFactory<"title">;
+
+// -----------------------------------------------------------------------------
+// Void elements (no children, props only)
+// -----------------------------------------------------------------------------
 export const input = createVoidElement("input") as VoidElementFactory<"input">;
-export const ins = createElement("ins") as ElementFactory<"ins">;
-export const kbd = createElement("kbd") as ElementFactory<"kbd">;
-export const label = createElement("label") as ElementFactory<"label">;
-export const legend = createElement("legend") as ElementFactory<"legend">;
-export const li = createElement("li") as ElementFactory<"li">;
-export const link = createVoidElement("link") as VoidElementFactory<"link">;
-export const main = createElement("main") as ElementFactory<"main">;
-export const map = createElement("map") as ElementFactory<"map">;
-export const mark = createElement("mark") as ElementFactory<"mark">;
-export const menu = createElement("menu") as ElementFactory<"menu">;
+export const br = createVoidElement("br") as VoidElementFactory<"br">;
+export const hr = createVoidElement("hr") as VoidElementFactory<"hr">;
 export const meta = createVoidElement("meta") as VoidElementFactory<"meta">;
-export const meter = createElement("meter") as ElementFactory<"meter">;
-export const nav = createElement("nav") as ElementFactory<"nav">;
-export const noscript = createElement("noscript") as ElementFactory<"noscript">;
-export const object = createElement("object") as ElementFactory<"object">;
-export const ol = createElement("ol") as ElementFactory<"ol">;
-export const optgroup = createElement("optgroup") as ElementFactory<"optgroup">;
-export const option = createElement("option") as ElementFactory<"option">;
-export const output = createElement("output") as ElementFactory<"output">;
-export const p = createElement("p") as ElementFactory<"p">;
-export const picture = createElement("picture") as ElementFactory<"picture">;
-export const pre = createElement("pre") as ElementFactory<"pre">;
-export const progress = createElement("progress") as ElementFactory<"progress">;
-export const q = createElement("q") as ElementFactory<"q">;
-export const rp = createElement("rp") as ElementFactory<"rp">;
-export const rt = createElement("rt") as ElementFactory<"rt">;
-export const ruby = createElement("ruby") as ElementFactory<"ruby">;
-export const s = createElement("s") as ElementFactory<"s">;
-export const samp = createElement("samp") as ElementFactory<"samp">;
-export const script = createElement("script") as ElementFactory<"script">;
-export const search = createElement("search") as ElementFactory<"search">;
-export const section = createElement("section") as ElementFactory<"section">;
-export const select = createElement("select") as ElementFactory<"select">;
-export const slot = createElement("slot") as ElementFactory<"slot">;
-export const small = createElement("small") as ElementFactory<"small">;
+export const link = createVoidElement("link") as VoidElementFactory<"link">;
+export const area = createVoidElement("area") as VoidElementFactory<"area">;
+export const base = createVoidElement("base") as VoidElementFactory<"base">;
+export const col = createVoidElement("col") as VoidElementFactory<"col">;
+export const embed = createVoidElement("embed") as VoidElementFactory<"embed">;
 export const source = createVoidElement("source") as VoidElementFactory<"source">;
-export const span = createElement("span") as ElementFactory<"span">;
-export const strong = createElement("strong") as ElementFactory<"strong">;
-export const style = createElement("style") as ElementFactory<"style">;
-export const sub = createElement("sub") as ElementFactory<"sub">;
-export const summary = createElement("summary") as ElementFactory<"summary">;
-export const sup = createElement("sup") as ElementFactory<"sup">;
+export const track = createVoidElement("track") as VoidElementFactory<"track">;
+export const wbr = createVoidElement("wbr") as VoidElementFactory<"wbr">;
+
+// -----------------------------------------------------------------------------
+// Container elements (no text shorthand, props + children only)
+// -----------------------------------------------------------------------------
+export const ul = createElement("ul") as ElementFactory<"ul">;
+export const ol = createElement("ol") as ElementFactory<"ol">;
+export const menu = createElement("menu") as ElementFactory<"menu">;
 export const table = createElement("table") as ElementFactory<"table">;
 export const tbody = createElement("tbody") as ElementFactory<"tbody">;
-export const td = createElement("td") as ElementFactory<"td">;
-export const template = createElement("template") as ElementFactory<"template">;
-export const textarea = createElement("textarea") as ElementFactory<"textarea">;
-export const tfoot = createElement("tfoot") as ElementFactory<"tfoot">;
-export const th = createElement("th") as ElementFactory<"th">;
 export const thead = createElement("thead") as ElementFactory<"thead">;
-export const time = createElement("time") as ElementFactory<"time">;
-export const title = createElement("title") as ElementFactory<"title">;
+export const tfoot = createElement("tfoot") as ElementFactory<"tfoot">;
 export const tr = createElement("tr") as ElementFactory<"tr">;
-export const track = createVoidElement("track") as VoidElementFactory<"track">;
-export const u = createElement("u") as ElementFactory<"u">;
-export const ul = createElement("ul") as ElementFactory<"ul">;
-export const var_ = createElement("var") as ElementFactory<"var">; // var is reserved
+export const colgroup = createElement("colgroup") as ElementFactory<"colgroup">;
+export const form = createElement("form") as ElementFactory<"form">;
+export const fieldset = createElement("fieldset") as ElementFactory<"fieldset">;
+export const details = createElement("details") as ElementFactory<"details">;
+export const dialog = createElement("dialog") as ElementFactory<"dialog">;
+export const nav = createElement("nav") as ElementFactory<"nav">;
+export const figure = createElement("figure") as ElementFactory<"figure">;
+export const select = createElement("select") as ElementFactory<"select">;
+export const datalist = createElement("datalist") as ElementFactory<"datalist">;
+export const dl = createElement("dl") as ElementFactory<"dl">;
+
+// Media/embedded
+export const audio = createElement("audio") as ElementFactory<"audio">;
 export const video = createElement("video") as ElementFactory<"video">;
-export const wbr = createVoidElement("wbr") as VoidElementFactory<"wbr">;
+export const picture = createElement("picture") as ElementFactory<"picture">;
+export const iframe = createElement("iframe") as ElementFactory<"iframe">;
+export const object = createElement("object") as ElementFactory<"object">;
+export const canvas = createElement("canvas") as ElementFactory<"canvas">;
+export const map = createElement("map") as ElementFactory<"map">;
+
+// Document structure
+export const body = createElement("body") as ElementFactory<"body">;
+export const head = createElement("head") as ElementFactory<"head">;
+export const html = createElement("html") as ElementFactory<"html">;
+export const hgroup = createElement("hgroup") as ElementFactory<"hgroup">;
+
+// Other container-like
+export const template = createElement("template") as ElementFactory<"template">;
+export const slot = createElement("slot") as ElementFactory<"slot">;
+export const noscript = createElement("noscript") as ElementFactory<"noscript">;
+export const script = createElement("script") as ElementFactory<"script">;
+export const style = createElement("style") as ElementFactory<"style">;
+export const textarea = createElement("textarea") as ElementFactory<"textarea">;
+export const meter = createElement("meter") as ElementFactory<"meter">;
+export const progress = createElement("progress") as ElementFactory<"progress">;
+export const search = createElement("search") as ElementFactory<"search">;
