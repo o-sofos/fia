@@ -445,12 +445,13 @@ function isReactiveProxy(value: unknown): boolean {
  * Create a reactive store from an object.
  * Uses Proxy for fine-grained per-property reactivity.
  */
-function createStore<T extends object>(initial: T): ReactiveStore<T> {
+function createStore<T extends object>(initial: T, mutability: Set<PropertyKey> | boolean = false): ReactiveStore<T> {
   // Per-property reactive nodes for fine-grained tracking
   const nodes = new Map<PropertyKey, ReactiveNode>();
 
   // Cache for nested proxy wrappers
-  const proxyCache = new WeakMap<object, ReactiveStore<any>>();
+  // We separate mutable and immutable proxies to ensure consistency
+  const proxyCache = new WeakMap<object, { readonly?: ReactiveStore<any>; mutable?: ReactiveStore<any> }>();
 
   function getOrCreateNode(key: PropertyKey): ReactiveNode {
     let node = nodes.get(key);
@@ -476,19 +477,41 @@ function createStore<T extends object>(initial: T): ReactiveStore<T> {
 
       // Deep reactivity: wrap nested objects in proxies
       if (value !== null && typeof value === "object" && !isReactiveProxy(value)) {
+        const isMutableKey =
+          (typeof mutability === "boolean" && mutability) ||
+          (mutability instanceof Set && mutability.has(key));
+
         // Check cache first
-        let cachedProxy = proxyCache.get(value);
-        if (!cachedProxy) {
-          cachedProxy = createStore(value);
-          proxyCache.set(value, cachedProxy);
+        let cacheEntry = proxyCache.get(value);
+        if (cacheEntry) {
+          const cached = isMutableKey ? cacheEntry.mutable : cacheEntry.readonly;
+          if (cached) return cached;
         }
-        return cachedProxy;
+
+        const newProxy = createStore(value, isMutableKey);
+
+        if (!cacheEntry) {
+          cacheEntry = {};
+          proxyCache.set(value, cacheEntry);
+        }
+
+        if (isMutableKey) cacheEntry.mutable = newProxy;
+        else cacheEntry.readonly = newProxy;
+
+        return newProxy;
       }
 
       return value;
     },
 
     set(target, key, value, receiver) {
+      // Enforce immutability
+      const isMutableKey =
+        (typeof mutability === "boolean" && mutability) ||
+        (mutability instanceof Set && mutability.has(key));
+
+      if (!isMutableKey) return false;
+
       const oldValue = Reflect.get(target, key, receiver);
 
       const rawValue = value !== null && typeof value === "object" && RAW in value
@@ -536,6 +559,13 @@ function createStore<T extends object>(initial: T): ReactiveStore<T> {
 
     // Handle delete
     deleteProperty(target, key) {
+      // Enforce immutability
+      const isMutableKey =
+        (typeof mutability === "boolean" && mutability) ||
+        (mutability instanceof Set && mutability.has(key));
+
+      if (!isMutableKey) return false;
+
       const hadKey = Reflect.has(target, key);
       const result = Reflect.deleteProperty(target, key);
 
@@ -604,7 +634,7 @@ export function $<T>(initial: T, ..._mutable: (keyof T)[]): Signal<T> | Writable
 
   // Object
   if (initial !== null && typeof initial === "object") {
-    return createStore(initial as T & object);
+    return createStore(initial as T & object, new Set(_mutable));
   }
 
   // Primitive
