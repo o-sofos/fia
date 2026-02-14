@@ -44,23 +44,14 @@ export const CodeDemo = () =>
                 t(" ");
                 div(() => { f("div"); t("(() => {"); });
                 div({ style: { paddingLeft: "1.5rem" } }, () => {
-                    f("button"); t("({ ");
-                });
-                div({ style: { paddingLeft: "3rem" } }, () => {
-                    div({ textContent: "onclick: () => count.value++," });
-                });
-                div({ style: { paddingLeft: "3rem" } }, () => {
-                    t("textContent: "); s('"Increment"');
-                });
-                div({ style: { paddingLeft: "1.5rem" } }, () => {
-                    t("});");
+                    f("button"); t("("); s('"Increment"'); t(", () => count.value++);");
                 });
                 t(" ");
                 div({ style: { paddingLeft: "1.5rem" } }, () => {
                     c("// Updates are surgical - no VDOM diffing");
                 });
                 div({ style: { paddingLeft: "1.5rem" } }, () => {
-                    f("div"); t("({ "); t("textContent"); t(": "); f("$"); t("(() => "); s('`Count: ${count.value}`'); t(") });");
+                    f("div"); t("("); f("$"); t("(() => "); s('`Count: ${count.value}`'); t("));");
                 });
                 div({ textContent: "});" });
             });
