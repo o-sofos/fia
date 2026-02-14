@@ -1,4 +1,4 @@
-import { $, button, div, Mut } from "fia";
+import { $, button, div, Each, li, Mut, ul } from "fia";
 
 export default () => {
 
@@ -27,5 +27,17 @@ export default () => {
     });
 
     div($(() => state2.value));
+
+    const friends = $(Mut([{ name: "Evan", age: 25 }, { name: "John", age: 26 }, { name: "Jane", age: 27 }]));
+
+    ul(() => {
+        Each(() => friends, (friend) => {
+            return li(`${friend.name} (${friend.age})`)
+        })
+    })
+
+    button("Add Friend", () => {
+        friends.push({ name: "Bob", age: 25 });
+    });
 
 };

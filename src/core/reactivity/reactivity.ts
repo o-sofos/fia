@@ -654,12 +654,16 @@ function createStore<T extends object>(initial: T, mutability: Set<PropertyKey> 
 export function $<T>(compute: () => T): Signal<T>;
 // Overload 2: Mutable Primitives
 export function $<const T extends string | number | boolean | null | undefined>(initial: Mutable<T>): WritableSignal<Widen<T>>;
-// Overload 3: Object (Immutable by default, or with mutable keys)
+// Overload 3: Mutable Arrays
+export function $<const T extends readonly unknown[]>(initial: Mutable<T>): ReactiveStore<T extends readonly (infer U)[] ? U[] : T, keyof (T extends readonly (infer U)[] ? U[] : T)>;
+// Overload 4: Mutable Objects (All keys mutable)
+export function $<const T extends Record<string, unknown>>(initial: Mutable<T>): ReactiveStore<T, keyof T>;
+// Overload 5: Object (Immutable by default, or with mutable keys)
 export function $<const T extends Record<string, unknown>, M extends keyof T>(initial: T, ...mutable: M[]): ReactiveStore<T, M>;
-// Overload 4: Immutable Primitives (Default)
+// Overload 6: Immutable Primitives (Default)
 export function $<const T extends string | number | boolean | null | undefined>(initial: T): Signal<Widen<T>>;
-// Overload 5: Arrays
-export function $<const T extends readonly unknown[]>(initial: T): ReactiveStore<T extends readonly (infer U)[] ? U[] : T>;
+// Overload 7: Immutable Arrays (Default)
+export function $<const T extends readonly unknown[]>(initial: T): ReactiveStore<Readonly<T extends readonly (infer U)[] ? U[] : T>>;
 
 // Implementation
 export function $<T>(initial: T | Mutable<T>, ..._mutable: (keyof T)[]): Signal<T> | WritableSignal<T> | ReactiveStore<T & object> {
@@ -673,8 +677,13 @@ export function $<T>(initial: T | Mutable<T>, ..._mutable: (keyof T)[]): Signal<
     return createStore(initial as T & object, new Set(_mutable));
   }
 
-  // Mutable Primitive
+  // Mutable Wrapper (Primitive or Object)
   if (isMutableWrapper<T>(initial)) {
+    if (typeof initial.value === "object" && initial.value !== null) {
+      // Create fully mutable store (pass true)
+      return createStore(initial.value as T & object, true);
+    }
+    // Primitive
     return createSignal(initial.value, false) as WritableSignal<T>;
   }
 
