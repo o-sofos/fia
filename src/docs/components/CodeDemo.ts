@@ -35,25 +35,19 @@ export const CodeDemo = () =>
             const k = (text: string) => span({ style: { color: "var(--syntax-keyword)" }, textContent: text });
             const f = (text: string) => span({ style: { color: "var(--syntax-function)" }, textContent: text });
             const s = (text: string) => span({ style: { color: "var(--syntax-string)" }, textContent: text });
-            const c = (text: string) => span({ style: { color: "var(--syntax-comment)" }, textContent: text });
 
             pre({ style: { transform: "translateZ(40px)" } }, () => {
-                div(() => { k("import"); t(" { $, div, button } "); k("from"); s(' "fia"'); t(";"); });
+                div(() => { k("import"); t(" { $, div, button, Mut } "); k("from"); s(' "fia"'); t(";"); });
                 t(" "); // newline
-                div(() => { k("const"); t(" count = "); f("$"); t("(0);"); });
+                div(() => { k("const"); t(" count = "); f("$"); t("("); f("Mut"); t("(0));"); });
                 t(" ");
-                div(() => { f("div"); t("(() => {"); });
-                div({ style: { paddingLeft: "1.5rem" } }, () => {
+                div(() => {
                     f("button"); t("("); s('"Increment"'); t(", () => count.value++);");
                 });
                 t(" ");
-                div({ style: { paddingLeft: "1.5rem" } }, () => {
-                    c("// Updates are surgical - no VDOM diffing");
-                });
-                div({ style: { paddingLeft: "1.5rem" } }, () => {
+                div(() => {
                     f("div"); t("("); f("$"); t("(() => "); s('`Count: ${count.value}`'); t("));");
                 });
-                div({ textContent: "});" });
             });
         });
     });

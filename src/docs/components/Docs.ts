@@ -14,6 +14,7 @@ import {
   img,
   button,
   $,
+  Mut,
 } from "fia";
 
 // Helper to append text nodes
@@ -139,7 +140,7 @@ const CodeBlock = (content: string) =>
           );
 
           // Copy Button
-          const copied = $(false);
+          const copied = $(Mut(false));
           button({
             textContent: $(() => (copied.value ? "Copied!" : "Copy")),
             style: {
@@ -300,13 +301,13 @@ const sections = [
   { id: "immutability", title: "Immutability" },
   { id: "control-flow", title: "Control Flow" },
   { id: "components", title: "Components" },
-  { id: "svg", title: "SVG" },
+
   { id: "performance", title: "Performance" },
   { id: "examples", title: "Examples" },
 ];
 
 const TableOfContents = () => {
-  const activeSection = $("intro");
+  const activeSection = $(Mut("intro"));
 
   // Track scroll position to highlight active section
   const handleScroll = () => {
@@ -604,7 +605,7 @@ export const Docs = () =>
               CodeBlock(`import { $, div, h1, button, p } from "fia";
 
 // Reactive store for state
-const state = $({ count: 0 }, "count");
+const state = $(Mut({ count: 0 }));
 
 div({ class: "app" }, () => {
   h1({ textContent: "Counter App" });
@@ -812,7 +813,7 @@ button({
           Section("Reactivity", "reactivity", () => {
             SubSection("Signals", () => {
               Paragraph("Signals are the primitive units of reactivity.");
-              CodeBlock(`const count = $(0);
+              CodeBlock(`const count = $(Mut(0));
 console.log(count.value); // 0
 count.value++;`);
             });
@@ -825,7 +826,7 @@ const config = $({ theme: "dark" });
 // config.theme = "light"; // Error!
 
 // Mutable Store (Opt-in)
-const state = $({ count: 0 }, "count");
+const state = $(Mut({ count: 0 }));
 state.count++; // Works!`);
               Note(
                 "Destructuring breaks reactivity. Always access properties directly: state.count",
@@ -853,16 +854,78 @@ const doubled = $(() => count.value * 2);`);
             Paragraph(
               "Fia embraces an Immutable-by-Default philosophy for state management. This differs from many other signals-based frameworks but aligns with functional programming principles.",
             );
-            SubSection("Working with Immutable State", () => {
-              Paragraph(
-                "When a store is immutable, you update state by replacing objects, not mutating properties.",
-              );
-              CodeBlock(`const state = $({ 
-  user: { name: "Evan", score: 10 } 
-}, "user"); // 'user' key is mutable
+            SubSection("Data Types & Behavior", () => {
+              SubSubSection("1. Primitives (String, Number, Boolean)", () => {
+                Paragraph("Primitives are immutable by default. To make them mutable, use Mut.");
+                CodeBlock(`// ❌ Error: Read-only
+const count = $(0);
+// count.value = 1;
 
-// Correct: Replace the object
-state.user = { ...state.user, score: state.user.score + 1 };`);
+// ✅ Valid: Replace value (if using a distinct signal)
+const name = $("Evan");
+// name.value can't be set, but you can create a new signal
+
+// ✅ Valid: Mutable Primitive
+const score = $(Mut(0));
+score.value = 10;`);
+              });
+
+              SubSubSection("2. Objects", () => {
+                Paragraph("Objects are shallowly immutable by default. You cannot add, remove, or change properties.");
+                CodeBlock(`const user = $({ name: "Evan", age: 30 });
+
+// ❌ Error: Read-only property
+// user.age = 31;
+
+// ✅ Valid: Replace entire object
+// This triggers updates for all changed properties
+const userSignal = $(Mut({ name: "Evan" })); // If the signal itself is mutable
+// OR with stores, you often replace nested objects in a parent store.`);
+
+                Paragraph("Mutable Objects:");
+                CodeBlock(`// Option A: Specific keys
+const state = $({ count: 0 }, "count");
+state.count++;
+
+// Option B: Full object mutability
+const config = $(Mut({ theme: "dark", debug: false }));
+config.theme = "light";
+config.debug = true;`);
+              });
+
+              SubSubSection("3. Arrays", () => {
+                Paragraph("Arrays are immutable by default. Methods that mutate (push, pop, splice, sort) are typed to not exist or error.");
+                CodeBlock(`const list = $({ items: [1, 2, 3] });
+
+// ❌ Error: Property 'push' does not exist on type 'readonly number[]'
+// list.items.push(4);
+
+// ✅ Valid: Replace array
+list.items = [...list.items, 4]; // Only works if 'items' key is mutable`);
+
+                Paragraph("Mutable Arrays:");
+                CodeBlock(`const todos = $(Mut({ list: [] as string[] }));
+
+// ✅ Valid: Mutation methods work
+todos.list.push("Buy milk");
+todos.list.splice(0, 1);`);
+              });
+
+              SubSubSection("4. Nested Objects (Deep Reactivity)", () => {
+                Paragraph("Deeply nested objects inherit the mutability context of their parent property assignment, but by default, Fia encourages replacing nested objects.");
+                CodeBlock(`const app = $(Mut({
+  settings: {
+    notifications: { email: true }
+  }
+}));
+
+// ✅ Valid: Traverse and mutate (because app was wrapped in Mut)
+app.settings.notifications.email = false;
+
+// ℹ️ Pattern: Immutable Tree with Mutable Root
+// If 'settings' wasn't mutable, you'd do:
+// app.settings = { ...app.settings, notifications: { ... } };`);
+              });
             });
           });
 
@@ -878,7 +941,7 @@ state.user = { ...state.user, score: state.user.score + 1 };`);
             SubSection("Each", () => {
               Paragraph("Reactive list rendering that re-renders efficiently.");
               CodeBlock(`const items = $({ list: ["Apple", "Banana"] });
-Each(() => items.list, item => li({ textContent: item }));`);
+Each(items.list, item => li({ textContent: item }));`);
             });
             SubSection("Match", () => {
               Paragraph("Reactive pattern matching for switch/case logic.");
@@ -914,14 +977,7 @@ Each(() => items.list, item => li({ textContent: item }));`);
             });
           });
 
-          Section("SVG", "svg", () => {
-            Paragraph("Fia supports SVG elements with full type safety.");
-            CodeBlock(`import { svg, svgCircle } from "fia";
 
-svg({ width: 100, height: 100 }, () => {
-  svgCircle({ cx: 50, cy: 50, r: 40, fill: "red" });
-});`);
-          });
 
           Section("Performance", "performance", () => {
             Paragraph("Fia achieves exceptional performance through three core optimizations: event delegation, automatic batching, and fine-grained reactivity.");
@@ -1018,7 +1074,7 @@ div(() => {
             SubSection("Fine-Grained Reactivity", () => {
               Paragraph("Virtual DOM frameworks re-render entire component trees. Fia updates only the changed elements.");
 
-              CodeBlock(`const count = $(0);
+              CodeBlock(`const count = $(Mut(0));
 
 // Only the <p> text updates when count changes
 div(() => {
@@ -1026,11 +1082,7 @@ div(() => {
   button("+", () => count.value++); // ← Never re-renders
 });`);
 
-              SubSubSection("Performance Comparison", () => {
-                Note("React/Vue: Virtual DOM diff → Entire component tree");
-                Note("Svelte: Compile-time → Block scope");
-                Note("Fia: Direct signal subscription → Single element", "info");
-              });
+
             });
 
             SubSection("Best Practices", () => {
@@ -1045,7 +1097,7 @@ batch(() => {
               });
 
               SubSubSection("2. Use peek() for Non-Reactive Reads", () => {
-                CodeBlock(`const count = $(0);
+                CodeBlock(`const count = $(Mut(0));
 const threshold = $(10);
 
 $e(() => {
@@ -1070,30 +1122,30 @@ const doubled = $(() => count.value * 2);`);
             SubSection("🟢 Beginner", () => {
               SubSubSection("1. Hello World", () => {
                 Paragraph("The simplest possible Fia code.");
-                CodeBlock(`h1({ textContent: "Hello, World!" });`);
+                CodeBlock(`h1("Hello, World!");`);
               });
 
               SubSubSection("2. Counter", () => {
                 Paragraph("Signals hold reactive state.");
-                CodeBlock(`const count = $(0);
-button({ textContent: "+", onclick: () => count.value++ });
-p({ textContent: count });`);
+                CodeBlock(`const count = $(Mut(0));
+button("+", () => count.value++);
+p(count);`);
               });
 
               SubSubSection("3. Toggle", () => {
                 Paragraph("Computed signals derive values from other signals.");
-                CodeBlock(`const visible = $(true);
-button({ textContent: "Toggle", onclick: () => visible.value = !visible.value });
+                CodeBlock(`const visible = $(Mut(true));
+button("Toggle", () => visible.value = !visible.value);
 div({ style: { display: $(() => visible.value ? "block" : "none") } }, () => {
-  p({ textContent: "Now you see me!" });
+  p("Now you see me!");
 });`);
               });
 
               SubSubSection("4. Input Binding", () => {
                 Paragraph("Two-way binding is manual but explicit.");
-                CodeBlock(`const name = $("");
+                CodeBlock(`const name = $(Mut(""));
 input({ type: "text", oninput: (e) => name.value = e.currentTarget.value });
-p({ textContent: $(() => \`Hello, \${name.value || "stranger"}!\`) });`);
+p($(() => \`Hello, \${name.value || "stranger"}!\`));`);
               });
 
               SubSubSection("5. List Rendering (Static)", () => {
@@ -1106,53 +1158,51 @@ ul(() => items.forEach(item => li({ textContent: item })));`);
             SubSection("🟡 Intermediate", () => {
               SubSubSection("6. Reactive Store Counter", () => {
                 Paragraph("Objects passed to $() become reactive stores.");
-                CodeBlock(`const state = $({ count: 0 }, "count");
+                CodeBlock(`const state = $(Mut({ count: 0 }));
 
 div(() => {
-  h1({ textContent: $(() => \`Count: \${state.count}\`) });
-  button({ textContent: "+", onclick: () => state.count++ });
-  button({ textContent: "-", onclick: () => state.count-- });
+  h1($(() => \`Count: \${state.count}\`));
+  button("+", () => state.count++);
+  button("-", () => state.count--);
 });`);
               });
 
               SubSubSection("7. Conditional Classes", () => {
                 Paragraph("Computed signals work in class props too.");
-                CodeBlock(`const active = $(false);
+                CodeBlock(`const active = $(Mut(false));
 
-button({
-  textContent: "Toggle Active",
-  class: $(() => active.value ? "btn active" : "btn"),
-  onclick: () => active.value = !active.value,
-});`);
+button("Toggle Active", {
+  class: $(() => active.value ? "btn active" : "btn")
+}, () => active.value = !active.value);`);
               });
 
               SubSubSection("8. Form Handling", () => {
                 Paragraph("Reactive stores are perfect for forms.");
-                CodeBlock(`const formData = $({ email: "", password: "" }, "email", "password");
+                CodeBlock(`const formData = $(Mut({ email: "", password: "" }));
 
 form({ onsubmit: (e) => { e.preventDefault(); console.log(formData); } }, () => {
   input({ type: "email", oninput: (e) => formData.email = e.currentTarget.value });
   input({ type: "password", oninput: (e) => formData.password = e.currentTarget.value });
-  button({ textContent: "Submit", type: "submit" });
+  button("Submit", { type: "submit" });
 });`);
               });
 
               SubSubSection("9. Computed Values", () => {
                 Paragraph("Track dependencies automatically.");
-                CodeBlock(`const state = $({ price: 100, quantity: 2 }, "quantity");
+                CodeBlock(`const state = $(Mut({ price: 100, quantity: 2 }));
 const total = $(() => state.price * state.quantity);
 
 div(() => {
-  p({ textContent: $(() => \`Price: $\${state.price}\`) });
-  p({ textContent: $(() => \`Qty: \${state.quantity}\`) });
-  p({ textContent: $(() => \`Total: $\${total.value}\`) });
-  button({ textContent: "Add", onclick: () => state.quantity++ });
+  p($(() => \`Price: $\${state.price}\`));
+  p($(() => \`Qty: \${state.quantity}\`));
+  p($(() => \`Total: $\${total.value}\`));
+  button("Add", () => state.quantity++);
 });`);
               });
 
               SubSubSection("10. Dynamic Styling", () => {
                 Paragraph("Reactive styles allow theming.");
-                CodeBlock(`const theme = $("light");
+                CodeBlock(`const theme = $(Mut("light"));
 
 div({
   style: {
@@ -1161,9 +1211,9 @@ div({
     padding: "2rem",
   }
 }, () => {
-  button({ textContent: "Toggle Theme", onclick: () => {
+  button("Toggle Theme", () => {
     theme.value = theme.value === "dark" ? "light" : "dark";
-  }});
+  });
 });`);
               });
             });
@@ -1171,7 +1221,7 @@ div({
             SubSection("🔴 Advanced", () => {
               SubSubSection("11. Todo App", () => {
                 Paragraph("A complete todo app using Each.");
-                CodeBlock(`const todos = $({ items: [] as string[], input: "" }, "items", "input");
+                CodeBlock(`const todos = $(Mut({ items: [] as string[], input: "" }));
 
 div(() => {
   input({
@@ -1179,23 +1229,17 @@ div(() => {
     value: $(() => todos.input),
     oninput: (e) => todos.input = e.currentTarget.value,
   });
-  button({
-    textContent: "Add",
-    onclick: () => {
+  button("Add", () => {
       if (todos.input.trim()) {
-        todos.items = [...todos.items, todos.input];
+        todos.items.push(todos.input);
         todos.input = "";
       }
-    },
-  });
+    });
   ul(() => {
     Each(() => todos.items, (item, i) => {
       li(() => {
-        span({ textContent: item });
-        button({
-          textContent: "×",
-          onclick: () => todos.items = todos.items.filter((_, j) => j !== i),
-        });
+        span(item);
+        button("×", () => todos.items.splice(i, 1));
       });
     });
   });
@@ -1205,37 +1249,36 @@ div(() => {
               SubSubSection("12. Tabs Component", () => {
                 Paragraph("Track active index and conditionally render.");
                 CodeBlock(`const tabs = ["Home", "About", "Contact"];
-const active = $(0);
+const active = $(Mut(0));
 
 div(() => {
   div({ class: "tabs" }, () => {
     tabs.forEach((tab, i) => {
-      button({
-        textContent: tab,
-        class: $(() => active.value === i ? "active" : ""),
-        onclick: () => active.value = i,
-      });
+      button(
+        tab,
+        { class: $(() => active.value === i ? "active" : "") },
+        () => active.value = i
+      );
     });
   });
   div({ class: "content" }, () => {
-    // Match returns a signal!
-    p({
-      textContent: Match(() => active.value, {
+    // Match returns a signal, so we can use it directly in textContent!
+    p(Match(() => active.value, {
         0: () => "Welcome to the Home page!",
         1: () => "About Fia Framework...",
         2: () => "Contact us at hello@fia.dev",
       })
-    });
+    );
   });
 });`);
               });
 
               SubSubSection("13. Async Data Fetching", () => {
                 Paragraph("Use Match for loading states.");
-                CodeBlock(`const state = $({
+                CodeBlock(`const state = $(Mut({
   status: "loading" as "loading" | "success" | "error",
   users: [] as string[]
-}, "status", "users");
+}));
 
 fetch("/api/users")
   .then(r => r.json())
@@ -1247,23 +1290,23 @@ fetch("/api/users")
 
 div(() => {
   Match(() => state.status, {
-    loading: () => p({ textContent: "Loading..." }),
-    error: () => p({ textContent: "Failed to load users" }),
-    success: () => ul(() => Each(() => state.users, u => li({ textContent: u }))),
+    loading: () => p("Loading..."),
+    error: () => p("Failed to load users"),
+    success: () => ul(() => Each(() => state.users, u => li(u))),
   });
 });`);
               });
 
               SubSubSection("14. Modal Dialog", () => {
                 Paragraph("Modal patterns with explicit types.");
-                CodeBlock(`const modal = $<{ open: boolean; title: string }, "open" | "title">({ open: false, title: "" }, "open", "title");
+                CodeBlock(`const modal = $(Mut({ open: false, title: "" }));
 
 function openModal(title: string) {
   modal.title = title;
   modal.open = true;
 }
 
-button({ textContent: "Open Modal", onclick: () => openModal("Hello!") });
+button("Open Modal", () => openModal("Hello!"));
 
 div({
   class: "modal-backdrop",
@@ -1274,8 +1317,8 @@ div({
     class: "modal",
     onclick: (e) => e.stopPropagation(),
   }, () => {
-    h2({ textContent: $(() => modal.title) });
-    button({ textContent: "Close", onclick: () => modal.open = false });
+    h2($(() => modal.title));
+    button("Close", () => modal.open = false);
   });
 });`);
               });

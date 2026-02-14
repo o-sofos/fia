@@ -15,9 +15,7 @@ import { div, nav, a, h3, button } from "../core/elements/elements";
 // Reusable Component: NavLink
 // Just a plain function that returns an element!
 function NavLink(text: string, href: string) {
-  return a({
-    textContent: text,
-    href,
+  return a(href, text, {
     style: {
       textDecoration: "none",
       color: "#666",
@@ -44,7 +42,7 @@ export function Navbar() {
     },
     () => {
       // Logo
-      h3({ textContent: "Fia", style: { margin: "0", fontSize: "1.5rem" } });
+      h3("Fia", { style: { margin: "0", fontSize: "1.5rem" } });
 
       // Links container
       div(
@@ -56,8 +54,7 @@ export function Navbar() {
           NavLink("Blog", "#blog");
 
           // CTA Button
-          button({
-            textContent: "Download",
+          button("Download", {
             style: {
               padding: "0.5rem 1rem",
               background: "#000",

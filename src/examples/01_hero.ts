@@ -23,8 +23,7 @@ export function Hero() {
       },
     },
     () => {
-      h1({
-        textContent: "Build Faster with Fia",
+      h1("Build Faster with Fia", {
         style: {
           fontSize: "3.5rem",
           marginBottom: "1rem",
@@ -32,8 +31,7 @@ export function Hero() {
         },
       });
 
-      p({
-        textContent: "The 2KB framework for modern web apps. No JSX. No VDOM. Just JavaScript.",
+      p("The 2KB framework for modern web apps. No JSX. No VDOM. Just JavaScript.", {
         style: {
           fontSize: "1.25rem",
           color: "#666",
@@ -52,8 +50,7 @@ export function Hero() {
           },
         },
         () => {
-          button({
-            textContent: "Get Started",
+          button("Get Started", {
             style: {
               padding: "0.8rem 1.5rem",
               background: "#222",
@@ -65,8 +62,7 @@ export function Hero() {
             },
           });
 
-          button({
-            textContent: "Documentation",
+          button("Documentation", {
             style: {
               padding: "0.8rem 1.5rem",
               background: "white",

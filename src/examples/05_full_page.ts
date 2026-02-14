@@ -10,7 +10,7 @@
  * 3. Global State: Connecting URL hash to application state
  */
 
-import { $, div, Match } from "../core/mod";
+import { $, div, Match, Mut } from "../core/mod";
 import { Navbar } from "./02_navbar";
 import { Hero } from "./01_hero";
 import { Features } from "./03_features";
@@ -18,7 +18,7 @@ import { Contact } from "./04_contact";
 
 // Simple routing state
 function useRouter() {
-  const hash = $(window.location.hash || "#");
+  const hash = $(Mut(window.location.hash || "#"));
 
   // Listen for hash changes
   window.addEventListener("hashchange", () => {
@@ -51,13 +51,11 @@ export function LandingPage() {
       div({ style: { flex: "1" } }, () => {
         Match(() => route.value, {
           "#features": () => Features(),
-          "#docs": () => div({
-            style: { padding: "4rem", textAlign: "center" },
-            textContent: "Documentation coming soon!"
+          "#docs": () => div("Documentation coming soon!", {
+            style: { padding: "4rem", textAlign: "center" }
           }),
-          "#blog": () => div({
-            style: { padding: "4rem", textAlign: "center" },
-            textContent: "Blog coming soon!"
+          "#blog": () => div("Blog coming soon!", {
+            style: { padding: "4rem", textAlign: "center" }
           }),
           // Default route (Home)
           _: () => {
@@ -69,8 +67,7 @@ export function LandingPage() {
       });
 
       // Footer
-      div({
-        textContent: "© 2026 Fia Framework. Built with 0 dependencies.",
+      div("© 2026 Fia Framework. Built with 0 dependencies.", {
         style: {
           padding: "2rem",
           background: "#222",

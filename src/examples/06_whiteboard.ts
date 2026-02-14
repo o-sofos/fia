@@ -1,5 +1,5 @@
 import { env } from "bun";
-import { $, div, canvas, input, button, label, h2 } from "../core/mod";
+import { $, div, canvas, input, button, label, h2, Mut } from "../core/mod";
 
 /**
  * A collaborative-style whiteboard example demonstrating:
@@ -9,12 +9,12 @@ import { $, div, canvas, input, button, label, h2 } from "../core/mod";
  */
 export default function Whiteboard() {
     // Reactive tool state
-    const tools = $({
+    const tools = $(Mut({
         allowedToBeUsed: env.FIA_WHITEBOARD_ALLOWED_TO_BE_USED === "true",
         color: "#000000",
         lineWidth: 5,
         isDrawing: false
-    }, "color", "lineWidth", "isDrawing");
+    }));
 
     // Mutable drawing state
     let lastX = 0;
@@ -44,14 +44,13 @@ export default function Whiteboard() {
                 zIndex: "10"
             }
         }, () => {
-            h2({
-                style: { margin: "0", fontSize: "1.25rem", fontWeight: "600" },
-                textContent: "Fia Whiteboard"
+            h2("Fia Whiteboard", {
+                style: { margin: "0", fontSize: "1.25rem", fontWeight: "600" }
             });
 
             // Color Picker
             label({ style: { display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer" } }, () => {
-                div({ textContent: "Color", style: { fontSize: "0.9rem", fontWeight: "500" } });
+                div("Color", { style: { fontSize: "0.9rem", fontWeight: "500" } });
                 input({
                     type: "color",
                     value: $(() => tools.color),
@@ -69,8 +68,7 @@ export default function Whiteboard() {
 
             // Size Slider
             label({ style: { display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer" } }, () => {
-                div({
-                    textContent: $(() => `Size: ${tools.lineWidth}px`),
+                div($(() => `Size: ${tools.lineWidth}px`), {
                     style: { fontSize: "0.9rem", fontWeight: "500", minWidth: "80px" }
                 });
                 input({
@@ -84,8 +82,7 @@ export default function Whiteboard() {
             });
 
             // Clear Button
-            button({
-                textContent: "Clear Canvas",
+            button("Clear Canvas", {
                 style: {
                     padding: "0.5rem 1rem",
                     background: "#fff0f0",
@@ -96,11 +93,10 @@ export default function Whiteboard() {
                     cursor: "pointer",
                     marginLeft: "auto",
                     transition: "background 0.2s"
-                },
-                onclick: () => {
-                    if (ctx && ctx.canvas) {
-                        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-                    }
+                }
+            }, () => {
+                if (ctx && ctx.canvas) {
+                    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
                 }
             });
         });

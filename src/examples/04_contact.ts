@@ -11,12 +11,12 @@
  * 4. Events: Handling `onsubmit`
  */
 
-import { $, div, form, input, button, p, h2, textarea } from "../core/mod";
+import { $, div, form, input, button, p, h2, textarea, Mut } from "../core/mod";
 
 export function Contact() {
-  const email = $<string>("");
-  const message = $<string>("");
-  const sent = $<boolean>(false);
+  const email = $(Mut(""));
+  const message = $(Mut(""));
+  const sent = $(Mut(false));
 
   div({
     style: {
@@ -41,11 +41,9 @@ export function Contact() {
           boxShadow: "0 4px 6px rgba(0,0,0,0.1)"
         }
       }, () => {
-        h2({ textContent: "Message Sent! 🚀", style: { margin: "0 0 1rem 0" } });
-        p({ textContent: "Thanks so much. We'll be in touch soon." });
-        button({
-          textContent: "Send another",
-          onclick: () => sent.value = false,
+        h2("Message Sent! 🚀", { style: { margin: "0 0 1rem 0" } });
+        p("Thanks so much. We'll be in touch soon.");
+        button("Send another", {
           style: {
             marginTop: "1rem",
             padding: "0.5rem 1rem",
@@ -54,7 +52,7 @@ export function Contact() {
             borderRadius: "4px",
             cursor: "pointer"
           }
-        });
+        }, () => sent.value = false);
       });
       return;
     }
@@ -76,10 +74,10 @@ export function Contact() {
         message.value = "";
       }
     }, () => {
-      h2({ textContent: "Contact Us", style: { textAlign: "center", marginBottom: "1rem" } });
+      h2("Contact Us", { style: { textAlign: "center", marginBottom: "1rem" } });
 
       div({ style: { display: "flex", flexDirection: "column", gap: "0.5rem" } }, () => {
-        p({ textContent: "Email", style: { margin: "0", fontSize: "0.9rem", fontWeight: "bold" } });
+        p("Email", { style: { margin: "0", fontSize: "0.9rem", fontWeight: "bold" } });
         input({
           type: "email",
           placeholder: "hello@example.com",
@@ -90,7 +88,7 @@ export function Contact() {
       });
 
       div({ style: { display: "flex", flexDirection: "column", gap: "0.5rem" } }, () => {
-        p({ textContent: "Message", style: { margin: "0", fontSize: "0.9rem", fontWeight: "bold" } });
+        p("Message", { style: { margin: "0", fontSize: "0.9rem", fontWeight: "bold" } });
         textarea({
           placeholder: "How can we help?",
           value: message.value,
@@ -99,8 +97,7 @@ export function Contact() {
         });
       });
 
-      button({
-        textContent: "Send Message",
+      button("Send Message", {
         type: "submit",
         style: {
           padding: "1rem",
@@ -116,9 +113,8 @@ export function Contact() {
       });
 
       // Reactive preview
-      p({
-        style: { fontSize: "0.8rem", color: "#888", textAlign: "center", minHeight: "1.2em" },
-        textContent: $(() => email.value ? `Replying to: ${email.value}` : "")
+      p($((): string => email.value ? `Replying to: ${email.value}` : ""), {
+        style: { fontSize: "0.8rem", color: "#888", textAlign: "center", minHeight: "1.2em" }
       });
     });
   });

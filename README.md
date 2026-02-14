@@ -45,7 +45,7 @@ Most frameworks add layers of abstraction between you and the DOM. Fia gives you
   - [Immutability](#-immutability)
 - [Control Flow](#-control-flow)
 - [Component Composition](#-component-composition)
-- [SVG](#-svg)
+
 - [Performance](#-performance)
 - [Type System](#-type-system)
 - [Examples](#-examples)
@@ -109,7 +109,7 @@ npx jsr add @fia/core
 import { $, div, h1, button, p } from "fia";
 
 // Reactive store for state
-const state = $({ count: 0 }, "count");
+const state = $(Mut({ count: 0 }));
 
 div({ class: "app" }, () => {
   h1({ textContent: "Counter App" });
@@ -370,13 +370,13 @@ button({
 ### Primitives → Signals
 
 ```typescript
+// Immutable Signal (Default)
 const count = $(0);
-const name = $("World");
+// count.value++; // Error: Cannot assign to read-only property
 
-// Read/write with .value
-console.log(count.value);  // 0
-count.value++;
-name.value = "Fia";
+// Mutable Signal (Opt-in)
+const name = $(Mut("World"));
+name.value = "Fia"; // Works!
 ```
 
 ### Objects → Reactive Stores
@@ -384,18 +384,23 @@ name.value = "Fia";
 Fia stores are **immutable by default**. You must explicitly opt-in to mutability for specific keys. This encourages predictable state updates.
 
 ```typescript
-// 🔒 Immutable Store (Read-only)
+// 🔒 Immutable Store (Default)
 const config = $({ theme: "dark", version: "1.0" });
 // config.theme = "light"; // Error: Cannot assign to read-only property
 
 // 🔓 Mutable Store (Opt-in)
+// option 1: Mark specific keys as mutable
 const state = $({
   count: 0,
   name: "Evan"
-}, "count", "name"); // Pass keys you want to be mutable
+}, "count", "name"); 
 
 state.count++;      // ✅ Works
 state.name = "John"; // ✅ Works
+
+// option 2: Mark entire object as mutable
+const data = $(Mut({ items: [] }));
+data.items.push("New Item"); // ✅ Works
 ```
 
 ### Deep Reactivity
@@ -403,9 +408,9 @@ state.name = "John"; // ✅ Works
 Objects directly nested in a store are deeply reactive, but also follow immutability rules. To update deep state, **replace the object** or use a mutable key for the nested store.
 
 ```typescript
-const app = $({
+const app = $(Mut({
   user: { name: "Alice", active: true }
-}, "user");
+}));
 
 // ❌ Error: user.name is read-only
 // app.user.name = "Bob";
@@ -427,7 +432,7 @@ app.user = { ...app.user, name: "Bob" };
 const count = $(0);
 const doubled = $(() => count.value * 2);
 
-const state = $({ age: 17 });
+const state = $(Mut({ age: 17 }));
 const isAdult = $(() => state.age >= 18);
 ```
 
@@ -459,20 +464,90 @@ Fia embraces an **Immutable-by-Default** philosophy for state management. This d
 2.  **Type Safety**: TypeScript prevents accidental mutations of read-only properties.
 3.  **Deep Reactivity**: Replacing nested objects triggers updates reliably without expensive deep proxy trapping for every property access.
 
-### Working with Immutable State
+### Data Types & Behavior
 
-When a store is immutable, you update state by **replacing** objects, not mutating properties. This is similar to React's `useState` or Redux.
+#### 1. Primitives (String, Number, Boolean)
+Primitives are immutable by default. To make them mutable, use `Mut`.
 
 ```typescript
-const state = $({ 
-  user: { name: "Evan", score: 10 } 
-}, "user"); // 'user' key is mutable (can be replaced), but user.score is readonly
+// ❌ Error: Read-only
+const count = $(0);
+// count.value = 1;
 
-// ❌ Error: user.score is read-only
-// state.user.score++;
+// ✅ Valid: Replace value (if using a distinct signal)
+const name = $("Evan");
+// name.value can't be set, but you can create a new signal
 
-// ✅ Correct: Replace the object
-state.user = { ...state.user, score: state.user.score + 1 };
+// ✅ Valid: Mutable Primitive
+const score = $(Mut(0));
+score.value = 10;
+```
+
+#### 2. Objects
+Objects are shallowly immutable by default. You cannot add, remove, or change properties.
+
+```typescript
+const user = $({ name: "Evan", age: 30 });
+
+// ❌ Error: Read-only property
+// user.age = 31;
+
+// ✅ Valid: Replace entire object
+// This triggers updates for all changed properties
+const userSignal = $(Mut({ name: "Evan" })); // If the signal itself is mutable
+// OR with stores, you often replace nested objects in a parent store.
+```
+
+**Mutable Objects:**
+```typescript
+// Option A: Specific keys
+const state = $({ count: 0 }, "count");
+state.count++;
+
+// Option B: Full object mutability
+const config = $(Mut({ theme: "dark", debug: false }));
+config.theme = "light";
+config.debug = true;
+```
+
+#### 3. Arrays
+Arrays are immutable by default. Methods that mutate (`push`, `pop`, `splice`, `sort`) are typed to not exist or error.
+
+```typescript
+const list = $({ items: [1, 2, 3] });
+
+// ❌ Error: Property 'push' does not exist on type 'readonly number[]'
+// list.items.push(4);
+
+// ✅ Valid: Replace array
+list.items = [...list.items, 4]; // Only works if 'items' key is mutable
+```
+
+**Mutable Arrays:**
+```typescript
+const todos = $(Mut({ list: [] as string[] }));
+
+// ✅ Valid: Mutation methods work
+todos.list.push("Buy milk");
+todos.list.splice(0, 1);
+```
+
+#### 4. Nested Objects (Deep Reactivity)
+Deeply nested objects inherit the mutability context of their parent property *assignment*, but by default, Fia encourages replacing nested objects.
+
+```typescript
+const app = $(Mut({
+  settings: {
+    notifications: { email: true }
+  }
+}));
+
+// ✅ Valid: Traverse and mutate (because app was wrapped in Mut)
+app.settings.notifications.email = false;
+
+// ℹ️ Pattern: Immutable Tree with Mutable Root
+// If 'settings' wasn't mutable, you'd do:
+// app.settings = { ...app.settings, notifications: { ... } };
 ```
 
 ### Opt-in Mutability
@@ -480,8 +555,12 @@ state.user = { ...state.user, score: state.user.score + 1 };
 For scenarios where granular mutation is preferred (e.g., forms, high-performance counters), you can opt-in to mutability for specific keys.
 
 ```typescript
-const state = $({ count: 0 }, "count");
+const state = $(Mut({ count: 0 }));
 state.count++; // Mutable because "count" was explicitly allowed
+
+// Or use Mut helper for full mutability:
+const counter = $(Mut(0));
+counter.value++; // Mutable primitive
 ```
 
 ### Internal Proxies
@@ -522,7 +601,7 @@ Reactive list rendering that re-renders when the source array changes:
 ```typescript
 import { Each } from "fia";
 
-const todos = $({ items: ["Task 1", "Task 2"] });
+const todos = $(Mut({ items: ["Task 1", "Task 2"] }));
 
 Each(() => todos.items, (item, index) => {
   li({ textContent: `${index + 1}. ${item}` });
@@ -538,7 +617,7 @@ Reactive pattern matching for strict switch/case logic or simple routing:
 ```typescript
 import { Match } from "fia";
 
-const status = $("loading");
+const status = $(Mut("loading"));
 
 Match(() => status.value, {
   loading: () => p({ textContent: "Loading..." }),
@@ -553,7 +632,7 @@ Match(() => status.value, {
 `Match` returns a signal, so you can use it directly in properties:
 
 ```typescript
-const status = $(10);
+const status = $(Mut(10));
 
 p({
   // Returns Signal<string | undefined>
@@ -663,7 +742,7 @@ If you're coming from functional programming: **Signals are Monads**.
 You don't need explicit `flatMap`. Just access the signal value!
 
 ```typescript
-const userId = $(1);
+const userId = $(Mut(1));
 const user = $(() => fetchUser(userId.value)); // Signal<User>
 const name = $(() => user.value?.name);        // Signal<string | undefined>
 
@@ -673,26 +752,7 @@ const name = $(() => user.value?.name);        // Signal<string | undefined>
 
 ---
 
-## 🖼️ SVG
 
-Fia supports SVG elements with full type safety. Import them from the main package (prefixed, e.g., `svgCircle`) or the sub-module.
-
-```typescript
-import { svg, svgCircle } from "fia";
-
-svg({ width: 100, height: 100, viewBox: "0 0 100 100" }, () => {
-  svgCircle({
-    cx: 50,
-    cy: 50,
-    r: 40,
-    stroke: "black",
-    "stroke-width": 3,
-    fill: "red"
-  });
-});
-```
-
-> **Note**: SVG elements are in a separate namespace (`http://www.w3.org/2000/svg`) and are created correctly by these factories.
 
 ---
 
@@ -820,12 +880,7 @@ div(() => {
 });
 ```
 
-**Performance comparison:**
-| Framework | Update Strategy | Affected Elements |
-|-----------|----------------|-------------------|
-| React/Vue | Virtual DOM diff | Entire component tree |
-| Svelte | Compile-time | Block scope |
-| **Fia** | **Direct signal subscription** | **Single element** |
+
 
 ### Best Practices
 
@@ -902,26 +957,26 @@ input({
 The simplest possible Fia code. Elements are just functions—call them with props to create DOM nodes.
 
 ```typescript
-h1({ textContent: "Hello, World!" });
+h1("Hello, World!");
 ```
 
 #### 2. Counter
 Signals hold reactive state. Pass a signal as `textContent` and it updates automatically when the value changes.
 
 ```typescript
-const count = $(0);
-button({ textContent: "+", onclick: () => count.value++ });
-p({ textContent: count });
+const count = $(Mut(0));
+button("+", () => count.value++);
+p(count);
 ```
 
 #### 3. Toggle
 Computed signals (`$(() => ...)`) derive values from other signals. Here we toggle visibility using a reactive `display` style.
 
 ```typescript
-const visible = $(true);
-button({ textContent: "Toggle", onclick: () => visible.value = !visible.value });
+const visible = $(Mut(true));
+button("Toggle", () => visible.value = !visible.value);
 div({ style: { display: $(() => visible.value ? "block" : "none") } }, () => {
-  p({ textContent: "Now you see me!" });
+  p("Now you see me!");
 });
 ```
 
@@ -929,9 +984,9 @@ div({ style: { display: $(() => visible.value ? "block" : "none") } }, () => {
 Two-way binding is manual but explicit. Use `oninput` to update the signal from user input.
 
 ```typescript
-const name = $("");
+const name = $(Mut(""));
 input({ type: "text", oninput: (e) => name.value = e.currentTarget.value });
-p({ textContent: $(() => `Hello, ${name.value || "stranger"}!`) });
+p($(() => `Hello, ${name.value || "stranger"}!`));
 ```
 
 #### 5. List Rendering (Static)
@@ -939,14 +994,14 @@ For static lists, plain `forEach` works fine:
 
 ```typescript
 const items = ["Apple", "Banana", "Cherry"];
-ul(() => items.forEach(item => li({ textContent: item })));
+ul(() => items.forEach(item => li(item)));
 ```
 
 For **reactive lists** that update when data changes, use `Each`:
 
 ```typescript
-const items = $({ list: ["Apple", "Banana"] });
-ul(() => Each(() => items.list, item => li({ textContent: item })));
+const items = $(Mut({ list: ["Apple", "Banana"] }));
+ul(() => Each(() => items.list, item => li(item)));
 ```
 
 ---
@@ -957,12 +1012,12 @@ ul(() => Each(() => items.list, item => li({ textContent: item })));
 Objects passed to `$()` become reactive stores. Access properties directly without `.value`.
 
 ```typescript
-const state = $({ count: 0 }, "count");
+const state = $(Mut({ count: 0 }));
 
 div(() => {
-  h1({ textContent: $(() => `Count: ${state.count}`) });
-  button({ textContent: "+", onclick: () => state.count++ });
-  button({ textContent: "-", onclick: () => state.count-- });
+  h1($(() => `Count: ${state.count}`));
+  button("+", () => state.count++);
+  button("-", () => state.count--);
 });
 ```
 
@@ -970,25 +1025,23 @@ div(() => {
 Computed signals work anywhere—including the `class` prop. Return different class strings based on state.
 
 ```typescript
-const active = $(false);
+const active = $(Mut(false));
 
-button({
-  textContent: "Toggle Active",
-  class: $(() => active.value ? "btn active" : "btn"),
-  onclick: () => active.value = !active.value,
-});
+button("Toggle Active", {
+  class: $(() => active.value ? "btn active" : "btn")
+}, () => active.value = !active.value);
 ```
 
 #### 8. Form Handling
 Reactive stores are perfect for forms. Each field maps to a store property with live updates.
 
 ```typescript
-const formData = $({ email: "", password: "" }, "email", "password");
+const formData = $(Mut({ email: "", password: "" }));
 
 form({ onsubmit: (e) => { e.preventDefault(); console.log(formData); } }, () => {
   input({ type: "email", oninput: (e) => formData.email = e.currentTarget.value });
   input({ type: "password", oninput: (e) => formData.password = e.currentTarget.value });
-  button({ textContent: "Submit", type: "submit" });
+  button("Submit", { type: "submit" });
 });
 ```
 
@@ -996,14 +1049,14 @@ form({ onsubmit: (e) => { e.preventDefault(); console.log(formData); } }, () => 
 Computed signals automatically track dependencies. When `state.price` or `state.quantity` changes, `total` updates.
 
 ```typescript
-const state = $({ price: 100, quantity: 2 }, "quantity");
+const state = $(Mut({ price: 100, quantity: 2 }));
 const total = $(() => state.price * state.quantity);
 
 div(() => {
-  p({ textContent: $(() => `Price: $${state.price}`) });
-  p({ textContent: $(() => `Qty: ${state.quantity}`) });
-  p({ textContent: $(() => `Total: $${total.value}`) });
-  button({ textContent: "Add", onclick: () => state.quantity++ });
+  p($(() => `Price: $${state.price}`));
+  p($(() => `Qty: ${state.quantity}`));
+  p($(() => `Total: $${total.value}`));
+  button("Add", () => state.quantity++);
 });
 ```
 
@@ -1011,7 +1064,7 @@ div(() => {
 Individual style properties can be reactive. Toggle entire themes by switching computed values.
 
 ```typescript
-const theme = $("light");
+const theme = $(Mut("light"));
 
 div({
   style: {
@@ -1020,9 +1073,9 @@ div({
     padding: "2rem",
   }
 }, () => {
-  button({ textContent: "Toggle Theme", onclick: () => {
+  button("Toggle Theme", () => {
     theme.value = theme.value === "dark" ? "light" : "dark";
-  }});
+  });
 });
 ```
 
@@ -1034,7 +1087,7 @@ div({
 A complete todo app using `Each` for reactive list rendering.
 
 ```typescript
-const todos = $({ items: [] as string[], input: "" }, "items", "input");
+const todos = $(Mut({ items: [] as string[], input: "" }));
 
 div(() => {
   input({
@@ -1042,23 +1095,17 @@ div(() => {
     value: $(() => todos.input),
     oninput: (e) => todos.input = e.currentTarget.value,
   });
-  button({
-    textContent: "Add",
-    onclick: () => {
+  button("Add", () => {
       if (todos.input.trim()) {
-        todos.items = [...todos.items, todos.input];
+        todos.items.push(todos.input);
         todos.input = "";
       }
-    },
-  });
+    });
   ul(() => {
     Each(() => todos.items, (item, i) => {
       li(() => {
-        span({ textContent: item });
-        button({
-          textContent: "×",
-          onclick: () => todos.items = todos.items.filter((_, j) => j !== i),
-        });
+        span(item);
+        button("×", () => todos.items.splice(i, 1));
       });
     });
   });
@@ -1070,28 +1117,27 @@ UI patterns like tabs are natural to implement. Track active index and condition
 
 ```typescript
 const tabs = ["Home", "About", "Contact"];
-const active = $(0);
+const active = $(Mut(0));
 
 div(() => {
   div({ class: "tabs" }, () => {
     tabs.forEach((tab, i) => {
-      button({
-        textContent: tab,
-        class: $(() => active.value === i ? "active" : ""),
-        onclick: () => active.value = i,
-      });
+      button(
+        tab,
+        { class: $(() => active.value === i ? "active" : "") },
+        () => active.value = i
+      );
     });
   });
   div({ class: "content" }, () => {
   div({ class: "content" }, () => {
     // Match returns a signal, so we can use it directly in textContent!
-    p({
-      textContent: Match(() => active.value, {
+    p(Match(() => active.value, {
         0: () => "Welcome to the Home page!",
         1: () => "About Fia Framework...",
         2: () => "Contact us at hello@fia.dev",
       })
-    });
+    );
   });
 });
 });
@@ -1101,10 +1147,10 @@ div(() => {
 Use `Show` for reactive loading states that update when data arrives.
 
 ```typescript
-const state = $({
+const state = $(Mut({
   status: "loading" as "loading" | "success" | "error",
   users: [] as string[]
-}, "status", "users");
+}));
 
 fetch("/api/users")
   .then(r => r.json())
@@ -1116,9 +1162,9 @@ fetch("/api/users")
 
 div(() => {
   Match(() => state.status, {
-    loading: () => p({ textContent: "Loading..." }),
-    error: () => p({ textContent: "Failed to load users" }),
-    success: () => ul(() => Each(() => state.users, u => li({ textContent: u }))),
+    loading: () => p("Loading..."),
+    error: () => p("Failed to load users"),
+    success: () => ul(() => Each(() => state.users, u => li(u))),
   });
 });
 ```
@@ -1127,14 +1173,14 @@ div(() => {
 Modal patterns with backdrop click-to-close. Use explicit types to avoid literal type inference.
 
 ```typescript
-const modal = $<{ open: boolean; title: string }, "open" | "title">({ open: false, title: "" }, "open", "title");
+const modal = $(Mut({ open: false, title: "" }));
 
 function openModal(title: string) {
   modal.title = title;
   modal.open = true;
 }
 
-button({ textContent: "Open Modal", onclick: () => openModal("Hello!") });
+button("Open Modal", () => openModal("Hello!"));
 
 div({
   class: "modal-backdrop",
@@ -1145,8 +1191,8 @@ div({
     class: "modal",
     onclick: (e) => e.stopPropagation(),
   }, () => {
-    h2({ textContent: $(() => modal.title) });
-    button({ textContent: "Close", onclick: () => modal.open = false });
+    h2($(() => modal.title));
+    button("Close", () => modal.open = false);
   });
 });
 ```

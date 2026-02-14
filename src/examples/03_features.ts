@@ -28,8 +28,8 @@ function Card(title: string, desc: string) {
       boxShadow: "0 2px 4px rgba(0,0,0,0.05)"
     }
   }, () => {
-    h2({ textContent: title, style: { fontSize: "1.2rem", marginBottom: "0.5rem" } });
-    p({ textContent: desc, style: { color: "#555", lineHeight: "1.5" } });
+    h2(title, { style: { fontSize: "1.2rem", marginBottom: "0.5rem" } });
+    p(desc, { style: { color: "#555", lineHeight: "1.5" } });
   });
 }
 

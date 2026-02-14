@@ -1,9 +1,9 @@
-import { div, $ } from "../../core/mod";
+import { div, $, Mut } from "../../core/mod";
 
 export const Cursor = () => {
-    const x = $(0);
-    const y = $(0);
-    const opacity = $(0);
+    const x = $(Mut(0));
+    const y = $(Mut(0));
+    const opacity = $(Mut(0));
 
     // Track mouse movement
     document.addEventListener("mousemove", (e) => {
