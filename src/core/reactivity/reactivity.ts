@@ -250,7 +250,7 @@ export interface WritableSignal<T> extends Signal<T> {
 /**
  * Create a writable signal
  */
-function createSignal<T>(initial: T): WritableSignal<T> {
+function createSignal<T>(initial: T, readonly: boolean = false): Signal<T> | WritableSignal<T> {
   const node: ReactiveNode = {
     version: globalVersion,
     subs: new Set(),
@@ -261,6 +261,9 @@ function createSignal<T>(initial: T): WritableSignal<T> {
   const signal = function (newValue?: T): T | void {
     // Write path
     if (arguments.length > 0) {
+      if (readonly) {
+        throw new TypeError("Cannot update a read-only signal.");
+      }
       if (!Object.is(currentValue, newValue)) {
         currentValue = newValue!;
         trigger(node);
@@ -279,6 +282,9 @@ function createSignal<T>(initial: T): WritableSignal<T> {
       return currentValue;
     },
     set(newValue: T) {
+      if (readonly) {
+        throw new TypeError("Cannot update a read-only signal.");
+      }
       if (!Object.is(currentValue, newValue)) {
         currentValue = newValue;
         trigger(node);
@@ -381,6 +387,36 @@ function createComputed<T>(compute: () => T): Signal<T> {
   };
 
   return signal;
+}
+
+// =============================================================================
+// MUTABILITY HELPERS
+// =============================================================================
+
+const MUTABLE = Symbol("mutable");
+
+/** Wrapper for mutable primitive values */
+export type Mutable<T> = { value: T;[MUTABLE]: true };
+
+/**
+ * Mark a primitive value as mutable.
+ * Used with `$` to create a writable signal.
+ * 
+ * @example
+ * ```ts
+ * const count = $(Mut(0));
+ * count.value++; // Works
+ * 
+ * const immutable = $(0);
+ * immutable.value++; // Error
+ * ```
+ */
+export function Mut<T>(value: T): Mutable<T> {
+  return { value, [MUTABLE]: true };
+}
+
+function isMutableWrapper<T>(value: unknown): value is Mutable<T> {
+  return value !== null && typeof value === "object" && (value as any)[MUTABLE] === true;
 }
 
 // =============================================================================
@@ -616,29 +652,34 @@ function createStore<T extends object>(initial: T, mutability: Set<PropertyKey> 
  */
 // Overload 1: Computed (function)
 export function $<T>(compute: () => T): Signal<T>;
-// Overload 2: Object Default (All Immutable)
-export function $<const T extends Record<string, unknown>>(initial: T): ReactiveStore<T>;
-// Overload 3: Object with Mutable Keys
+// Overload 2: Mutable Primitives
+export function $<const T extends string | number | boolean | null | undefined>(initial: Mutable<T>): WritableSignal<Widen<T>>;
+// Overload 3: Object (Immutable by default, or with mutable keys)
 export function $<const T extends Record<string, unknown>, M extends keyof T>(initial: T, ...mutable: M[]): ReactiveStore<T, M>;
-// Overload 4: Primitives
-export function $<const T extends string | number | boolean | null | undefined>(initial: T): WritableSignal<Widen<T>>;
+// Overload 4: Immutable Primitives (Default)
+export function $<const T extends string | number | boolean | null | undefined>(initial: T): Signal<Widen<T>>;
 // Overload 5: Arrays
 export function $<const T extends readonly unknown[]>(initial: T): ReactiveStore<T extends readonly (infer U)[] ? U[] : T>;
 
 // Implementation
-export function $<T>(initial: T, ..._mutable: (keyof T)[]): Signal<T> | WritableSignal<T> | ReactiveStore<T & object> {
+export function $<T>(initial: T | Mutable<T>, ..._mutable: (keyof T)[]): Signal<T> | WritableSignal<T> | ReactiveStore<T & object> {
   // Computed
   if (typeof initial === "function") {
     return createComputed(initial as () => T) as Signal<T>;
   }
 
   // Object
-  if (initial !== null && typeof initial === "object") {
+  if (initial !== null && typeof initial === "object" && !isMutableWrapper(initial)) {
     return createStore(initial as T & object, new Set(_mutable));
   }
 
-  // Primitive
-  return createSignal(initial) as WritableSignal<T>;
+  // Mutable Primitive
+  if (isMutableWrapper<T>(initial)) {
+    return createSignal(initial.value, false) as WritableSignal<T>;
+  }
+
+  // Immutable Primitive
+  return createSignal(initial as T, true) as Signal<T>;
 }
 
 // Named export for API compatibility

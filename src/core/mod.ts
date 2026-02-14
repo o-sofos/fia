@@ -21,8 +21,8 @@
 // REACTIVITY
 // =============================================================================
 
-export { $, signal, $e, batch } from "./reactivity/reactivity";
-export type { Signal, WritableSignal } from "./reactivity/reactivity";
+export { $, signal, $e, batch, Mut } from "./reactivity/reactivity";
+export type { Signal, WritableSignal, Mutable } from "./reactivity/reactivity";
 
 // =============================================================================
 // CONTROL FLOW
