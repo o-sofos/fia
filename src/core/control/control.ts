@@ -77,7 +77,11 @@ export function Show(
  * });
  */
 export function Each<T>(
-    items: () => T[],
+    /**
+     * Reactive list or static array.
+     * Can be a signal, a function, or a direct array (which may be a reactive store).
+     */
+    items: T[] | (() => T[]),
     render: (item: T, index: number) => void,
 ): void {
     const anchor = document.createComment("Each");
@@ -92,7 +96,9 @@ export function Each<T>(
         }
         currentNodes = [];
 
-        const list = items();
+        const list = typeof items === "function" && !Array.isArray(items)
+            ? (items as () => T[])()
+            : items;
         const frag = document.createDocumentFragment();
         pushExecutionContext(frag);
 
