@@ -16,7 +16,7 @@ try {
 }
 
 import { div, button, input, img } from "./elements/elements";
-import { $ } from "./reactivity/reactivity";
+import { $, Mut } from "./reactivity/reactivity";
 import type {
   UnwrapSignal,
   Signalize,
@@ -74,7 +74,7 @@ console.log("✅ Phase 1 tests passed: Mixed reactive/static works!");
 console.log("✓ Phase 2: Testing type-safe property setters");
 
 // Test 4: Input value property - no cast needed with new inference!
-const email = $("");
+const email = $(Mut(""));
 input({
   type: "email",
   value: email,
@@ -85,7 +85,7 @@ input({
 });
 
 // Test 5: Checkbox checked property - no cast needed!
-const isChecked = $(false);
+const isChecked = $(Mut(false));
 input({
   type: "checkbox",
   checked: isChecked,
@@ -243,8 +243,8 @@ console.log(rotateStr === "45deg"); // true
 // Test 20: Branded types with signals
 // Note: For branded types, use explicit generic to preserve the brand
 import type { Pixels } from "./css/branded-types";
-const reactiveWidthPx = $<Pixels>(px(400));
-const reactiveWidthStr = $(() => toPx(reactiveWidthPx.value));
+const reactiveWidthPx = $<Pixels>(Mut(px(400)));
+const reactiveWidthStr = $(() => toPx(reactiveWidthPx.value as Pixels));
 console.log(typeof reactiveWidthStr.value === "string"); // Computed string works
 
 console.log("✅ Phase 7.2 tests passed: Branded types work!");
@@ -297,15 +297,15 @@ console.log("✅ Phase 8 tests passed: Element-typed event handlers work!");
 console.log("✓ Phase 9: Testing signal primitive type inference");
 
 // Test 24: String signal - should infer as WritableSignal<string>, not WritableSignal<"">
-const nameSignal = $(""); // No `as string` needed!
+const nameSignal = $(Mut("")); // No `as string` needed!
 nameSignal.value = "hello"; // ✓ Should compile - string assignable to string
 
 // Test 25: Number signal - should infer as WritableSignal<number>, not WritableSignal<0>
-const countSignal = $(0); // No `as number` needed!
+const countSignal = $(Mut(0)); // No `as number` needed!
 countSignal.value = 42; // ✓ Should compile - number assignable to number
 
 // Test 26: Boolean signal - should infer as WritableSignal<boolean>, not WritableSignal<false>
-const activeSignal = $(false); // No `as boolean` needed!
+const activeSignal = $(Mut(false)); // No `as boolean` needed!
 activeSignal.value = true; // ✓ Should compile - boolean assignable to boolean
 
 // Test 27: Objects preserve their structure (use `as const` for literal object values)
@@ -317,9 +317,9 @@ console.log(configSignal.mode); // "dark"
 
 // Test 28: Signals now preserve literal types (getter narrow, setter wide)
 // Literal types are preserved - use explicit type param to widen if needed
-const strLiteral = $(""); // WritableSignal<"">
-const numLiteral = $(0); // WritableSignal<0>
-const boolLiteral = $(false); // WritableSignal<false>
+const strLiteral = $(Mut("")); // WritableSignal<"">
+const numLiteral = $(Mut(0)); // WritableSignal<0>
+const boolLiteral = $(Mut(false)); // WritableSignal<false>
 // Explicit widening when needed
 const strWide = $<string>(""); // WritableSignal<string>
 const numWide = $<number>(0); // WritableSignal<number>
@@ -380,7 +380,7 @@ console.log("✅ Phase 10 tests passed: strictness confirmed!");
 console.log("✓ Running integration tests");
 
 // Test 29: Complex real-world example with all features (no casts needed!)
-const count = $(0); // WritableSignal<number> - no cast!
+const count = $(Mut(0)); // WritableSignal<number> - no cast!
 const isActive = $(false); // WritableSignal<boolean> - no cast!
 const bgColor = $("red"); // WritableSignal<string> - no cast!
 

@@ -1,7 +1,7 @@
 import { GlobalRegistrator } from "@happy-dom/global-registrator";
 import { describe, it, expect, beforeEach } from "bun:test";
 import { div, button, input, h1, span, a, p, ul, li, label, img, strong, summary, option, td, code } from "./elements";
-import { $ } from "../reactivity/reactivity";
+import { $, Mut } from "../reactivity/reactivity";
 import { hasExecutionContext, popExecutionContext } from "../context/context";
 
 try {
@@ -45,7 +45,7 @@ describe("Element System - Unified API", () => {
         });
 
         it("should apply reactive props", () => {
-            const disabled = $<boolean>(false);
+            const disabled = $(Mut(false));
             const el = button({ disabled });
             expect((el as unknown as HTMLButtonElement).disabled).toBe(false);
 
@@ -112,7 +112,7 @@ describe("Element System - Unified API", () => {
         });
 
         it("should handle reactive input value", () => {
-            const value = $<string>("");
+            const value = $(Mut(""));
             const el = input({ type: "text", value });
             expect(el.value).toBe("");
 
@@ -134,7 +134,7 @@ describe("Element System - Unified API", () => {
         });
 
         it("should apply object class (reactive)", () => {
-            const isActive = $<boolean>(false);
+            const isActive = $(Mut(false));
             const el = div({ class: { active: isActive, static: true } });
 
             expect(el.classList.contains("active")).toBe(false);
@@ -158,7 +158,7 @@ describe("Element System - Unified API", () => {
         });
 
         it("should apply reactive style properties", () => {
-            const color = $<string>("red");
+            const color = $(Mut("red"));
             const el = div({ style: { color } });
             expect((el as unknown as HTMLElement).style.color).toBe("red");
 
@@ -249,8 +249,8 @@ describe("Element System - Unified API", () => {
         });
 
         it("should create a card component pattern", () => {
-            const title = $<string>("Card Title");
-            const isExpanded = $<boolean>(false);
+            const title = $("Card Title");
+            const isExpanded = $(Mut(false));
 
             const card = div({ class: { card: true, expanded: isExpanded } }, (_el) => {
                 h1({ textContent: title, class: "card-title" });
@@ -285,7 +285,7 @@ describe("Element System - Unified API", () => {
         });
 
         it("should handle rapid reactive updates", () => {
-            const count = $<number>(0);
+            const count = $(Mut(0));
             const el = div({ textContent: count });
 
             for (let i = 0; i < 100; i++) {
@@ -356,7 +356,7 @@ describe("Element System - Unified API", () => {
         });
 
         it("should create span with reactive text", () => {
-            const text = $<string>("initial");
+            const text = $(Mut("initial"));
             const el = span(text);
             expect(el.textContent).toBe("initial");
             text.value = "updated";
@@ -364,7 +364,7 @@ describe("Element System - Unified API", () => {
         });
 
         it("should create div with reactive number text", () => {
-            const count = $<number>(0);
+            const count = $(Mut(0));
             const el = div(count);
             expect(el.textContent).toBe("0");
             count.value = 99;
@@ -421,7 +421,7 @@ describe("Element System - Unified API", () => {
         });
 
         it("should create button with reactive text", () => {
-            const text = $<string>("Loading...");
+            const text = $(Mut("Loading..."));
             const el = button(text);
             expect(el.textContent).toBe("Loading...");
             text.value = "Submit";
@@ -509,7 +509,7 @@ describe("Element System - Unified API", () => {
         });
 
         it("should handle reactive anchor text", () => {
-            const text = $<string>("Click here");
+            const text = $(Mut("Click here"));
             const el = a("/link", text);
             expect(el.textContent).toBe("Click here");
             text.value = "Updated text";

@@ -658,8 +658,10 @@ export function $<const T extends string | number | boolean | null | undefined>(
 export function $<const T extends readonly unknown[]>(initial: Mutable<T>): ReactiveStore<T extends readonly (infer U)[] ? U[] : T, keyof (T extends readonly (infer U)[] ? U[] : T)>;
 // Overload 4: Mutable Objects (All keys mutable)
 export function $<const T extends Record<string, unknown>>(initial: Mutable<T>): ReactiveStore<T, keyof T>;
-// Overload 5: Object (Immutable by default, or with mutable keys)
-export function $<const T extends Record<string, unknown>, M extends keyof T>(initial: T, ...mutable: M[]): ReactiveStore<T, M>;
+// Overload 5: Object (Immutable by default)
+export function $<const T extends object>(initial: T): ReactiveStore<T>;
+// Overload 6: Object (With mutable keys)
+export function $<const T extends object, M extends keyof T>(initial: T, ...mutable: M[]): ReactiveStore<T, M>;
 // Overload 6: Immutable Primitives (Default)
 export function $<const T extends string | number | boolean | null | undefined>(initial: T): Signal<Widen<T>>;
 // Overload 7: Immutable Arrays (Default)

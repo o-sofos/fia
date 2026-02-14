@@ -1,10 +1,10 @@
 
 import { describe, expect, test, mock } from "bun:test";
-import { $, $e } from "./reactivity";
+import { $, $e, Mut } from "./reactivity";
 
 describe("Reactivity Core", () => {
     test("Signals (Primitives)", () => {
-        const count = $(0);
+        const count = $(Mut(0));
         expect(count.value).toBe(0);
         expect(count()).toBe(0);
 
@@ -17,7 +17,7 @@ describe("Reactivity Core", () => {
     });
 
     test("Computed Values", () => {
-        const count = $(0);
+        const count = $(Mut(0));
         const double = $(() => count.value * 2);
 
         expect(double.value).toBe(0);
@@ -30,7 +30,7 @@ describe("Reactivity Core", () => {
     });
 
     test("Effects", () => {
-        const count = $(0);
+        const count = $(Mut(0));
         let runCount = 0;
         let lastValue = -1;
 
@@ -54,8 +54,8 @@ describe("Reactivity Core", () => {
     });
 
     test("Nested Effects (Cleanup)", () => {
-        const outer = $(0);
-        const inner = $(0);
+        const outer = $(Mut(0));
+        const inner = $(Mut(0));
         let innerRuns = 0;
 
         $e(() => {

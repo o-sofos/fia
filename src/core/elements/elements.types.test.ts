@@ -146,7 +146,7 @@ summary("Details");
 option("Option 1");
 
 // Text + onclick handler
-button("Submit", () => {});
+button("Submit", () => { });
 button("Click", (e) => {
   console.log(e);
 });
@@ -157,7 +157,7 @@ summary("Show", { class: "summary" });
 
 // Reactive text on interactive
 button(textSig);
-button(textSig, () => {});
+button(textSig, () => { });
 
 // =============================================================================
 // IMG SHORTHAND VALID USAGE
@@ -228,8 +228,8 @@ ul({ class: "list" }, () => {
 });
 
 table({ class: "data" });
-table(() => {});
-table({ class: "data" }, () => {});
+table(() => { });
+table({ class: "data" }, () => { });
 
 // =============================================================================
 // BACKWARD COMPATIBILITY
@@ -246,7 +246,7 @@ div({ class: "wrapper" }, () => {
 });
 
 button();
-button({ onclick: () => {} });
+button({ onclick: () => { } });
 button(() => {
   span("icon");
 });
