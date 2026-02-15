@@ -609,7 +609,7 @@ const state = $(Mut({ count: 0 }));
 
 div({ class: "app" }, () => {
   h1("Counter App");
-  p(() => \`Count: \${state.count}\`);
+  p($(() => \`Count: \${state.count}\`));
   button("+", () => state.count++);
   button("-", () => state.count--);
 });`);
@@ -638,29 +638,26 @@ el({ props })             // Props only
 el(() => { ... })         // Children only
 el({ props }, () => { })  // Props + children`);
 
-            SubSubSection("Text Content", () => {
-              Paragraph(
-                "Use the native textContent prop for static or reactive text.",
-              );
-              CodeBlock(`// Static text
-h1("Hello World");
+            //             SubSubSection("Text Content", () => {
+            //               Paragraph(
+            //                 "Use the native textContent prop for static or reactive text.",
+            //               );
+            //               CodeBlock(`// Static text
+            // h1("Hello World");
 
-// Reactive text
-const name = $("Evan");
-p(name);
+            // // Reactive text
+            // const name = $("Evan");
+            // p(name);
 
-// Computed text
-p(() => \`Hello, \${name.value}!\`);`);
-            });
+            // // Computed text
+            // p(() => \`Hello, \${name.value}!\`);`);
+            //             });
 
             SubSubSection("Event Handlers", () => {
               Paragraph(
                 "Event handlers are delegated automatically for performance.",
               );
-              CodeBlock(`button({
-  textContent: "Click me",
-  onclick: () => console.log("clicked!"),
-});
+              CodeBlock(`button("Click me", () => console.log("clicked!"));
 
 input({
   type: "text",
@@ -679,7 +676,7 @@ input({
             SubSubSection("Void Elements", () => {
               Paragraph("Elements like input, img, br only accept props.");
               CodeBlock(`input({ type: "email", placeholder: "you@example.com" });
-img({ src: "/photo.jpg", alt: "Photo" });
+img("/photo.jpg", "Photo");
 br();`);
             });
 
@@ -1150,9 +1147,7 @@ p(count);`);
                 Paragraph("Computed signals derive values from other signals.");
                 CodeBlock(`const visible = $(Mut(true));
 button("Toggle", () => visible.value = !visible.value);
-div({ style: { display: $(() => visible.value ? "block" : "none") } }, () => {
-  p("Now you see me!");
-});`);
+Show(visible, () => p("Now you see me!"));`);
               });
 
               SubSubSection("4. Input Binding", () => {
@@ -1165,7 +1160,7 @@ p($(() => \`Hello, \${name.value || "stranger"}!\`));`);
               SubSubSection("5. List Rendering (Static)", () => {
                 Paragraph("For simple static lists, forEach works fine.");
                 CodeBlock(`const items = ["Apple", "Banana", "Cherry"];
-ul(() => items.forEach(item => li(item)));`);
+ul(() => Each(items, li));`);
               });
             });
 
@@ -1184,10 +1179,7 @@ div(() => {
               SubSubSection("7. Conditional Classes", () => {
                 Paragraph("Computed signals work in class props too.");
                 CodeBlock(`const active = $(Mut(false));
-
-button("Toggle Active", {
-  class: $(() => active.value ? "btn active" : "btn")
-}, () => active.value = !active.value);`);
+button($(() => active.value ? "Deactivate" : "Activate"), () => active.value = !active.value);`);
               });
 
               SubSubSection("8. Form Handling", () => {
