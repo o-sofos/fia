@@ -2,25 +2,25 @@ import { $, button, div, Mut } from "fia";
 
 export default () => {
 
-    const state = $({
-        nested: {
-            count: 0,
-            grades: {
-                1: 0,
-                2: Mut(1), // Only this property is mutable
-                3: 0,
-                4: 0,
-                5: 0,
+    const person = $(
+        {
+            name: Mut("evan"),
+            age: 25,
+            address: {
+                city: Mut("new york"),
+                zip: Mut("10001")
             }
         }
-    });
+    );
 
+    const person2 = { ...person };
 
-    div($(() => state.nested.grades['2']));
+    div($(() => person.name));
+    div($(() => person.address.city));
+    div($(() => person.address.zip));
 
-    button("Increment", () => {
-        const { nested: { grades } } = state;
-        grades['2'] = grades['2'] + 1;
-    });
-
+    //btn for updating city
+    button("update city", () => person.address.city = "new york city");
+    button("update zip", () => person.address.zip = `${Number(person.address.zip) + 1}`);
+    button("update name", () => person.name = "evan kol");
 };

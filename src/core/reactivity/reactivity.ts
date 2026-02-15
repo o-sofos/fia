@@ -433,7 +433,9 @@ const RAW = Symbol("raw");
  * Utility type to extract keys that are wrapped in Mutable<T>
  */
 export type MutableKeys<T> = {
-  [K in keyof T]-?: T[K] extends Mutable<any> ? K : never
+  [K in keyof T]-?: T[K] extends Mutable<infer U>
+  ? (IsPlainObject<U> extends true ? never : K)
+  : never
 }[keyof T];
 
 /**
@@ -508,6 +510,55 @@ function createStore<T extends object>(initial: T, mutability: Set<PropertyKey> 
       nodes.set(key, node);
     }
     return node;
+  }
+
+  // Strict Immutability: Freeze the object if it has no mutable keys/wrappers
+  const isStrictlyImmutable = mutability === false || (mutability instanceof Set && mutability.size === 0);
+
+  if (isStrictlyImmutable) {
+    let hasMutableWrappers = false;
+
+    // Scan for Mut wrappers
+    // Using for...in to be safe with prototypes, though usually initial is plain object
+    for (const key in initial) {
+      if (isMutableWrapper(initial[key])) {
+        hasMutableWrappers = true;
+        break;
+      }
+    }
+
+    if (Array.isArray(initial) && !hasMutableWrappers) {
+      for (let i = 0; i < initial.length; i++) {
+        if (isMutableWrapper(initial[i])) {
+          hasMutableWrappers = true;
+          break;
+        }
+      }
+    }
+
+    if (!hasMutableWrappers) {
+      // Eagerly replace nested objects with their proxies before freezing
+      // This ensures Proxy Invariants are met (target prop value === get trap result)
+      if (Array.isArray(initial)) {
+        for (let i = 0; i < initial.length; i++) {
+          const val = initial[i];
+          if (val && typeof val === "object" && !isMutableWrapper(val) && !isReactiveProxy(val)) {
+            // Recursively create frozen immutable proxy
+            initial[i] = createStore(val as object, false);
+          }
+        }
+      } else {
+        for (const key in initial) {
+          const val = initial[key];
+          if (val && typeof val === "object" && !isMutableWrapper(val) && !isReactiveProxy(val)) {
+            // Recursively create frozen immutable proxy
+            // @ts-ignore
+            initial[key] = createStore(val as object, false);
+          }
+        }
+      }
+      Object.freeze(initial);
+    }
   }
 
   const proxy = new Proxy(initial, {
@@ -585,10 +636,16 @@ function createStore<T extends object>(initial: T, mutability: Set<PropertyKey> 
       // Logic: If the value being overwritten is a Mut() wrapper, 
       // strict immutability shouldn't apply - the user explicitly opted in.
       // We promote this key to be mutable for future writes too.
+      // BUT: If the inner value is an object, we should NOT allow replacing the wrapper itself.
+      // Mut({...}) means the *contents* are mutable, not the reference on the parent.
       if (!isMutableKey && isMutableWrapper(oldValue)) {
-        if (mutability === false) mutability = new Set();
-        if (mutability instanceof Set) mutability.add(key);
-        isMutableKey = true;
+        // Allow if primitive (value is not object or is null)
+        // Note: Mut(null) is ambiguous but usually means nullable primitive slot.
+        if (oldValue.value === null || typeof oldValue.value !== "object") {
+          if (mutability === false) mutability = new Set();
+          if (mutability instanceof Set) mutability.add(key);
+          isMutableKey = true;
+        }
       }
 
       if (!isMutableKey) return false;
@@ -646,10 +703,12 @@ function createStore<T extends object>(initial: T, mutability: Set<PropertyKey> 
       if (!isMutableKey) {
         const oldValue = Reflect.get(target, key);
         if (isMutableWrapper(oldValue)) {
-          // Allow deleting a Mut wrapper
-          if (mutability === false) mutability = new Set();
-          if (mutability instanceof Set) mutability.add(key);
-          isMutableKey = true;
+          // Allow deleting a Mut wrapper ONLY if it's a primitive
+          if (oldValue.value === null || typeof oldValue.value !== "object") {
+            if (mutability === false) mutability = new Set();
+            if (mutability instanceof Set) mutability.add(key);
+            isMutableKey = true;
+          }
         }
       }
 

@@ -267,7 +267,7 @@ const List = (items: string[]) =>
       },
     },
     () => {
-      items.forEach((item) => li({ textContent: item }));
+      items.forEach((item) => li(item));
     },
   );
 
@@ -608,10 +608,10 @@ export const Docs = () =>
 const state = $(Mut({ count: 0 }));
 
 div({ class: "app" }, () => {
-  h1({ textContent: "Counter App" });
-  p({ textContent: $(() => \`Count: \${state.count}\`) });
-  button({ textContent: "+", onclick: () => state.count++ });
-  button({ textContent: "-", onclick: () => state.count-- });
+  h1("Counter App");
+  p(() => \`Count: \${state.count}\`);
+  button("+", () => state.count++);
+  button("-", () => state.count--);
 });`);
             });
 
@@ -643,19 +643,19 @@ el({ props }, () => { })  // Props + children`);
                 "Use the native textContent prop for static or reactive text.",
               );
               CodeBlock(`// Static text
-h1({ textContent: "Hello World" });
+h1("Hello World");
 
 // Reactive text
 const name = $("Evan");
-p({ textContent: name });
+p(name);
 
 // Computed text
-p({ textContent: $(() => \`Hello, \${name.value}!\`) });`);
+p(() => \`Hello, \${name.value}!\`);`);
             });
 
             SubSubSection("Event Handlers", () => {
               Paragraph(
-                "Event handlers are delegated automatically foon this pager performance.",
+                "Event handlers are delegated automatically for performance.",
               );
               CodeBlock(`button({
   textContent: "Click me",
@@ -671,8 +671,8 @@ input({
             SubSubSection("Nesting Elements", () => {
               Paragraph("Use a callback function to nest elements.");
               CodeBlock(`div({ class: "card" }, () => {
-  h1({ textContent: "Title" });
-  p({ textContent: "Description" });
+  h1("Title");
+  p("Description");
 });`);
             });
 
@@ -713,14 +713,14 @@ article({ id: "post-1", class: "article" });
 
 // 3. Children only
 article(() => {
-  h2({ textContent: "Title" });
-  p({ textContent: "Content" });
+  h2("Title");
+  p("Content");
 });
 
 // 4. Props + children (most common)
 article({ class: "post" }, () => {
-  h2({ textContent: "Article Title" });
-  p({ textContent: "Article body..." });
+  h2("Article Title");
+  p("Article body...");
 });`);
               Note(
                 "Elements: article, section, nav, form, ul, ol, table, canvas, video, and more.",
@@ -742,12 +742,12 @@ h1("Hello", { class: "title", style: { color: "blue" } });
 
 // 7. Text + children
 h1("Header", () => {
-  span({ textContent: " with nested content" });
+  span("with nested content");
 });
 
 // 8. Text + props + children (all three!)
 h1("Main Title", { class: "hero" }, () => {
-  span({ textContent: " subtitle", class: "sub" });
+  span("subtitle", { class: "sub" });
 });`);
               Note(
                 "Elements: h1-h6, p, div, span, label, li, td, th, strong, em, code, and more.",
@@ -832,6 +832,10 @@ state.count++; // Works!`);
                 "Destructuring breaks reactivity. Always access properties directly: state.count",
                 "warning",
               );
+              Note(
+                "Immutable stores are physically frozen with Object.freeze(). Any attempt to mutate them via $raw or other means will fail.",
+                "info",
+              );
             });
             SubSection("Computed Values", () => {
               Paragraph(
@@ -883,59 +887,62 @@ const userSignal = $(Mut({ name: "Evan" })); // If the signal itself is mutable
 // OR with stores, you often replace nested objects in a parent store.`);
 
                 Paragraph("Mutable Objects:");
-                CodeBlock(`// Option A: Specific keys
-const state = $({ count: 0 }, "count");
-state.count++;
+                CodeBlock("// Option A: Specific keys\n" +
+                  "const state = $({ count: 0 }, \"count\");\n" +
+                  "state.count++;\n\n" +
+                  "// Option B: Full object mutability\n" +
+                  "const config = $(Mut({ theme: \"dark\", debug: false }));\n" +
+                  "config.theme = \"light\";\n" +
+                  "config.debug = true;\n\n" +
+                  "// Option C: Selective Nested Mutability\n" +
+                  "const user = $({\n" +
+                  "  name: \"Evan\",\n" +
+                  "  settings: {\n" +
+                  "    notifications: Mut(true), // Mutable Primitive: can be replaced\n" +
+                  "    theme: \"dark\"             // Read-only\n" +
+                  "  }\n" +
+                  "});\n" +
+                  "user.settings.notifications = false; // Works!\n\n" +
+                  "// Note: Mut({}) on an object makes its *properties* mutable,\n" +
+                  "// unless the parent key is also mutable.");
+              });
 
-// Option B: Full object mutability
-const config = $(Mut({ theme: "dark", debug: false }));
-config.theme = "light";
-config.debug = true;
-
-// Option C: Selective Nested Mutability
-const user = $({
-  name: "Evan",
-  settings: {
-    notifications: Mut(true), // Only this property is mutable
-    theme: "dark"             // Read-only
-  }
-});
-user.settings.notifications = false; // Works!
-// user.settings.theme = "light";    // Error!`);
+              SubSubSection("Secure Immutability by Design", () => {
+                Paragraph("Fia's reactive stores are designed to prevent accidental leaks of reactivity. When you spread a store, you get a plain object snapshot, not a reactive clone.");
+                CodeBlock("const original = $({ name: \"Evan\", details: { age: 30 } });\n" +
+                  "const snapshot = { ...original };\n\n" +
+                  "// To create a truly independent reactive copy:\n" +
+                  "const clone = $({ ...original }); // New store with copied values");
+                Note("This behavior ensures you never accidentally pass reactivity where a plain value was expected, maintaining explicit data flow.", "info");
               });
 
               SubSubSection("3. Arrays", () => {
                 Paragraph("Arrays are immutable by default. Methods that mutate (push, pop, splice, sort) are typed to not exist or error.");
-                CodeBlock(`const list = $({ items: [1, 2, 3] });
-
-// ❌ Error: Property 'push' does not exist on type 'readonly number[]'
-// list.items.push(4);
-
-// ✅ Valid: Replace array
-list.items = [...list.items, 4]; // Only works if 'items' key is mutable`);
+                CodeBlock("const list = $({ items: [1, 2, 3] });\n" +
+                  "// ❌ Error: Property 'push' does not exist on type 'readonly number[]'\n" +
+                  "// list.items.push(4);\n\n" +
+                  "// ✅ Valid: Replace array\n" +
+                  "// list.items = [...list.items, 4]; // Only works if 'items' key is mutable");
 
                 Paragraph("Mutable Arrays:");
-                CodeBlock(`const todos = $(Mut({ list: [] as string[] }));
-
-// ✅ Valid: Mutation methods work
-todos.list.push("Buy milk");
-todos.list.splice(0, 1);`);
+                CodeBlock("const todos = $(Mut({ list: [] as string[] }));\n\n" +
+                  "// ✅ Valid: Mutation methods work\n" +
+                  "todos.list.push(\"Buy milk\");\n" +
+                  "todos.list.splice(0, 1);");
               });
 
               SubSubSection("4. Nested Objects (Deep Reactivity)", () => {
                 Paragraph("Deeply nested objects inherit the mutability context of their parent property assignment, but by default, Fia encourages replacing nested objects.");
-                CodeBlock(`const app = $(Mut({
-  settings: {
-    notifications: { email: true }
-  }
-}));
-
-// ✅ Valid: Traverse and mutate (because app was wrapped in Mut)
-app.settings.notifications.email = false;
-
-// ℹ️ Pattern: Immutable Tree with Mutable Root
-// If 'settings' wasn't mutable, you'd do:
-// app.settings = { ...app.settings, notifications: { ... } };`);
+                CodeBlock("const app = $(Mut({\n" +
+                  "  settings: {\n" +
+                  "    notifications: { email: true }\n" +
+                  "  }\n" +
+                  "}));\n\n" +
+                  "// ✅ Valid: Traverse and mutate (because app was wrapped in Mut)\n" +
+                  "app.settings.notifications.email = false;\n\n" +
+                  "// ℹ️ Pattern: Immutable Tree with Mutable Root\n" +
+                  "// If 'settings' wasn't mutable, you'd do:\n" +
+                  "// app.settings = { ...app.settings, notifications: { ... } };");
               });
             });
           });
@@ -946,18 +953,18 @@ app.settings.notifications.email = false;
                 "Conditionally render content that updates when the condition changes.",
               );
               CodeBlock(
-                `Show(() => isVisible.value, () => div({ textContent: "Hello!" }));`,
+                `Show(() => isVisible.value, () => div("Hello!"));`,
               );
             });
             SubSection("Each", () => {
               Paragraph("Reactive list rendering that re-renders efficiently.");
               CodeBlock(`const items = $({ list: ["Apple", "Banana"] });
-Each(items.list, item => li({ textContent: item }));`);
+Each(items.list, item => li(item));`);
             });
             SubSection("Match", () => {
               Paragraph("Reactive pattern matching for switch/case logic.");
               CodeBlock(`Match(() => status.value, {
-  loading: () => p({ textContent: "Loading..." }),
+  loading: () => p("Loading..."),
   success: () => div({ textContent: "Data loaded!" }),
   _: () => p({ textContent: "Unknown state" }),
 });`);
@@ -987,8 +994,6 @@ Each(items.list, item => li({ textContent: item }));`);
 }`);
             });
           });
-
-
 
           Section("Performance", "performance", () => {
             Paragraph("Fia achieves exceptional performance through three core optimizations: event delegation, automatic batching, and fine-grained reactivity.");
@@ -1044,9 +1049,9 @@ container.appendChild(p2);  // Reflow #3
 
 // Fia's approach (1 reflow!)
 div(() => {
-  h1({ textContent: "Title" });    // → Fragment
-  p({ textContent: "Para 1" });     // → Fragment
-  p({ textContent: "Para 2" });     // → Fragment
+  h1("Title");    // → Fragment
+  p("Para 1");     // → Fragment
+  p("Para 2");     // → Fragment
 });
 // Single appendChild(fragment)`);
 
@@ -1070,13 +1075,13 @@ div(() => {
 
               CodeBlock(`// Fia automatically batches 100 elements
 div(() => {
-  h1({ textContent: "Title" });
+  h1("Title");
   ul(() => {
     for (let i = 0; i < 100; i++) {
-      li({ textContent: \`Item \${i}\` });
+      li(\`Item \${i}\`);
     }
   });
-  p({ textContent: "Footer" });
+  p("Footer");
 });
 // Result: 2 reflows total
 // Traditional: 102 reflows`);
@@ -1089,11 +1094,9 @@ div(() => {
 
 // Only the <p> text updates when count changes
 div(() => {
-  p({ textContent: $(() => \`Count: \${count.value}\`) }); // ← Updates
+  p(() => \`Count: \${count.value}\`); // ← Updates
   button("+", () => count.value++); // ← Never re-renders
 });`);
-
-
             });
 
             SubSection("Best Practices", () => {
@@ -1162,7 +1165,7 @@ p($(() => \`Hello, \${name.value || "stranger"}!\`));`);
               SubSubSection("5. List Rendering (Static)", () => {
                 Paragraph("For simple static lists, forEach works fine.");
                 CodeBlock(`const items = ["Apple", "Banana", "Cherry"];
-ul(() => items.forEach(item => li({ textContent: item })));`);
+ul(() => items.forEach(item => li(item)));`);
               });
             });
 
