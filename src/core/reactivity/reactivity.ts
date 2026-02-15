@@ -430,15 +430,26 @@ const REACTIVE_PROXY = Symbol("reactive-proxy");
 const RAW = Symbol("raw");
 
 /**
+ * Utility type to extract keys that are wrapped in Mutable<T>
+ */
+export type MutableKeys<T> = {
+  [K in keyof T]-?: T[K] extends Mutable<any> ? K : never
+}[keyof T];
+
+/**
  * Reactive store type - immutable by default.
  * - By default, all properties are readonly and strictly typed (literals preserved).
  * - Properties specified in `M` (Mutable Keys) become -readonly and Widened (mutable primitives).
+ * - Properties wrapped in `Mut()` are automatically treated as mutable.
  */
-export type ReactiveStore<T extends object, M extends keyof T = never> = {
+export type ReactiveStore<T extends object, M extends keyof T = never> = ReactiveStoreImpl<T, M | MutableKeys<T>>;
+
+type ReactiveStoreImpl<T extends object, M extends keyof T> = {
   // Mutable Keys: Remove readonly, Widen type, Recursive Wrap
   -readonly [K in M]: T[K] extends object
   ? T[K] extends Function ? T[K]
   : T[K] extends readonly any[] ? Widen<T[K]>
+  : T[K] extends Mutable<infer U> ? (U extends object ? ReactiveStore<U, keyof U> : Widen<U>) // Unwrap Mutable
   : T[K] extends { $raw: any } ? T[K]
   : ReactiveStore<T[K]> // Children inherit immutability by default
   : Widen<T[K]>;
@@ -447,6 +458,7 @@ export type ReactiveStore<T extends object, M extends keyof T = never> = {
   readonly [K in Exclude<keyof T, M>]: T[K] extends object
   ? T[K] extends Function ? T[K]
   : T[K] extends readonly any[] ? T[K]
+  : T[K] extends Mutable<infer U> ? (U extends object ? ReactiveStore<U, keyof U> : Widen<U>) // Unwrap AND make mutable!
   : T[K] extends { $raw: any } ? T[K]
   : ReactiveStore<T[K]> // Children inherit immutability by default
   : T[K];
@@ -512,6 +524,28 @@ function createStore<T extends object>(initial: T, mutability: Set<PropertyKey> 
       const value = Reflect.get(target, key, receiver);
 
       // Deep reactivity: wrap nested objects in proxies
+      // Check for Mutable wrapper first to unwrap
+      if (isMutableWrapper(value)) {
+        // Check cache for the wrapper itself to ensure stable proxy reference
+        let cacheEntry = proxyCache.get(value);
+        if (cacheEntry?.mutable) return cacheEntry.mutable;
+
+        // It's a Mutable wrapper! Treat inner value as mutable.
+        const inner = value.value;
+        if (inner !== null && typeof inner === "object") {
+          const newProxy = createStore(inner as object, true);
+
+          if (!cacheEntry) {
+            cacheEntry = {};
+            proxyCache.set(value, cacheEntry);
+          }
+          cacheEntry.mutable = newProxy;
+
+          return newProxy;
+        }
+        return inner;
+      }
+
       if (value !== null && typeof value === "object" && !isReactiveProxy(value)) {
         const isMutableKey =
           (typeof mutability === "boolean" && mutability) ||
@@ -542,13 +576,22 @@ function createStore<T extends object>(initial: T, mutability: Set<PropertyKey> 
 
     set(target, key, value, receiver) {
       // Enforce immutability
-      const isMutableKey =
+      let isMutableKey =
         (typeof mutability === "boolean" && mutability) ||
         (mutability instanceof Set && mutability.has(key));
 
-      if (!isMutableKey) return false;
-
       const oldValue = Reflect.get(target, key, receiver);
+
+      // Logic: If the value being overwritten is a Mut() wrapper, 
+      // strict immutability shouldn't apply - the user explicitly opted in.
+      // We promote this key to be mutable for future writes too.
+      if (!isMutableKey && isMutableWrapper(oldValue)) {
+        if (mutability === false) mutability = new Set();
+        if (mutability instanceof Set) mutability.add(key);
+        isMutableKey = true;
+      }
+
+      if (!isMutableKey) return false;
 
       const rawValue = value !== null && typeof value === "object" && RAW in value
         ? value[RAW]
@@ -596,9 +639,19 @@ function createStore<T extends object>(initial: T, mutability: Set<PropertyKey> 
     // Handle delete
     deleteProperty(target, key) {
       // Enforce immutability
-      const isMutableKey =
+      let isMutableKey =
         (typeof mutability === "boolean" && mutability) ||
         (mutability instanceof Set && mutability.has(key));
+
+      if (!isMutableKey) {
+        const oldValue = Reflect.get(target, key);
+        if (isMutableWrapper(oldValue)) {
+          // Allow deleting a Mut wrapper
+          if (mutability === false) mutability = new Set();
+          if (mutability instanceof Set) mutability.add(key);
+          isMutableKey = true;
+        }
+      }
 
       if (!isMutableKey) return false;
 

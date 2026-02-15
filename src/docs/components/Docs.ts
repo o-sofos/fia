@@ -890,7 +890,18 @@ state.count++;
 // Option B: Full object mutability
 const config = $(Mut({ theme: "dark", debug: false }));
 config.theme = "light";
-config.debug = true;`);
+config.debug = true;
+
+// Option C: Selective Nested Mutability
+const user = $({
+  name: "Evan",
+  settings: {
+    notifications: Mut(true), // Only this property is mutable
+    theme: "dark"             // Read-only
+  }
+});
+user.settings.notifications = false; // Works!
+// user.settings.theme = "light";    // Error!`);
               });
 
               SubSubSection("3. Arrays", () => {

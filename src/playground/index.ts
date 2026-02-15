@@ -1,27 +1,26 @@
-import { $, button as Button, Each, li as Item, ul as List, Mut } from "fia";
+import { $, button, div, Mut } from "fia";
 
 export default () => {
 
-    type Friend = { name: string; age: number };
-    const evanFriend = $<Friend>({ name: "Evan", age: 25 });
-    const johnFriend = $<Friend>({ name: "John", age: 26 });
-    const janeFriend = $<Friend>({ name: "Jane", age: 27 });
-    const newFriend = $<Friend>({ name: "Bob", age: Math.random() * 100 });
-
-    const friends = $(
-        Mut(
-            [
-                evanFriend,
-                johnFriend,
-                janeFriend
-            ]
-        )
-    );
-
-    const friend = (friend: Friend) => Item(`${friend.name} (${friend.age})`)
-
-    Button("Add Friend", () => {
-        friends.push(newFriend);
+    const state = $({
+        nested: {
+            count: 0,
+            grades: {
+                1: 0,
+                2: Mut(1), // Only this property is mutable
+                3: 0,
+                4: 0,
+                5: 0,
+            }
+        }
     });
-    List(() => Each(friends, friend));
+
+
+    div($(() => state.nested.grades['2']));
+
+    button("Increment", () => {
+        const { nested: { grades } } = state;
+        grades['2'] = grades['2'] + 1;
+    });
+
 };
