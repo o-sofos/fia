@@ -1,4 +1,4 @@
-import { header, h1, p, div, button, a } from "../../core/mod";
+import { header, h1, p, div, button, a, span } from "../../core/mod";
 
 export const Hero = () =>
     header({ class: "container", style: { padding: "var(--spacing-xl) 0", textAlign: "center", maxWidth: "900px", position: "relative" } }, () => {
@@ -8,8 +8,48 @@ export const Hero = () =>
         });
 
         p({
-            style: { fontSize: "1.25rem", color: "var(--text-secondary)", marginBottom: "var(--spacing-lg)", maxWidth: "800px", margin: "0 auto var(--spacing-lg)", lineHeight: "1.6", position: "relative", zIndex: "1" },
-            textContent: "Fia is a thin abstraction layer over the native DOM. Build high-performance UIs with fine-grained signals and standard JavaScript—no weird JSX, no Virtual DOM, and absolutely zero dependencies."
+            style: {
+                fontSize: "1.25rem",
+                color: "var(--text-secondary)",
+                marginBottom: "var(--spacing-lg)",
+                maxWidth: "800px",
+                margin: "0 auto var(--spacing-lg)",
+                lineHeight: "1.8",
+                position: "relative",
+                zIndex: "1",
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "0.5rem 1.5rem",
+                justifyContent: "center",
+                alignItems: "center"
+            }
+        }, () => {
+            const features = [
+                "Almost Native DOM",
+                "Signals Immutable by Design",
+                "No JSX",
+                "No Virtual DOM",
+                "No Dependencies"
+            ];
+
+            features.forEach((feature, index) => {
+                span({
+                    style: {
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "0.5rem"
+                    }
+                }, () => {
+                    span({
+                        style: {
+                            color: "var(--mongo-green)",
+                            fontSize: "0.8em"
+                        },
+                        textContent: "✦"
+                    });
+                    span({ textContent: feature });
+                });
+            });
         });
 
         div({ style: { display: "flex", gap: "1rem", justifyContent: "center", marginTop: "var(--spacing-lg)", position: "relative", zIndex: "1" } }, () => {
