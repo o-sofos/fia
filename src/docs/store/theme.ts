@@ -69,9 +69,15 @@ $e(() => {
 
                 body {
                     background-color: var(--bg-dark);
+                    background-image: radial-gradient(circle, rgba(255, 255, 255, 0.25) 1px, transparent 1px);
+                    background-size: 40px 40px;
                     color: var(--text-primary);
                     transition: background-color 0.3s ease, color 0.3s ease;
                     cursor: auto;
+                }
+
+                [data-theme="light"] body {
+                    background-image: radial-gradient(circle, rgba(0, 0, 0, 0.5) 1px, transparent 1px);
                 }
             `;
             document.head.appendChild(style);
