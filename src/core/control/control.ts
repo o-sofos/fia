@@ -4,7 +4,7 @@
  * Reactive conditional rendering using effects.
  */
 
-import { $, $e, type Signal, type WritableSignal, type Widen } from "../reactivity/reactivity";
+import { $, $e, Mut, type Signal } from "../reactivity/reactivity";
 import {
     pushExecutionContext,
     popExecutionContext,
@@ -137,19 +137,34 @@ export function Each<T>(
  *   _: () => "Unknown",
  * });
  */
-export function Match<T extends PropertyKey, R = void>(
-    when: () => T,
-    cases: Partial<Record<T, () => R>> & { _?: () => R },
+// Overload: When '_' is provided, result is never undefined
+export function Match<T, R>(
+    when: Signal<T> | (() => T),
+    cases: Partial<Record<string, () => R>> & { _: () => R },
+): Signal<R>;
+
+// Overload: Without '_', result can be undefined
+export function Match<T, R = void>(
+    when: Signal<T> | (() => T),
+    cases: Partial<Record<string, () => R>> & { _?: () => R },
+): Signal<R | undefined>;
+
+export function Match<T, R = void>(
+    when: Signal<T> | (() => T),
+    cases: Partial<Record<string, () => R>> & { _?: () => R },
 ): Signal<R | undefined> {
     const anchor = document.createComment("Match");
     getCurrentExecutionContext().appendChild(anchor);
 
-    // Signal to hold the result of the executed arm
-    // Initialized as undefined until first run
-    // Cast to WritableSignal to allow internal updates while returning Readable
-    const output = $(undefined) as WritableSignal<R | undefined>;
+    // Use a mutable store for internal state
+    const state = $(Mut({ result: undefined as R | undefined }));
 
     let currentNodes: Node[] = [];
+
+    // Normalize the input to a getter function
+    const getter = typeof when === 'function'
+        ? when
+        : () => (when as Signal<T>).value;
 
     $e(() => {
         // Clear previous nodes
@@ -158,7 +173,8 @@ export function Match<T extends PropertyKey, R = void>(
         }
         currentNodes = [];
 
-        const key = when();
+        // Convert to string for consistent key lookup
+        const key = String(getter());
         const handler = cases[key] || cases._;
 
         if (handler) {
@@ -172,8 +188,8 @@ export function Match<T extends PropertyKey, R = void>(
                 popExecutionContext();
             }
 
-            // Update output signal
-            output.value = result as Widen<R>;
+            // Update internal state (cast needed due to reactive store type complexity)
+            state.result = result as unknown as typeof state.result;
 
             // Track nodes we're about to insert
             currentNodes = Array.from(frag.childNodes);
@@ -182,9 +198,10 @@ export function Match<T extends PropertyKey, R = void>(
             anchor.parentNode?.insertBefore(frag, anchor.nextSibling);
         } else {
             // No handler matched
-            output.value = undefined;
+            state.result = undefined as unknown as typeof state.result;
         }
     });
 
-    return output;
+    // Return a computed signal that reads from the state
+    return $(() => state.result) as Signal<R | undefined>;
 }

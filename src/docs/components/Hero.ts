@@ -32,7 +32,7 @@ export const Hero = () =>
                 "No Dependencies"
             ];
 
-            features.forEach((feature, index) => {
+            features.forEach((feature) => {
                 span({
                     style: {
                         display: "inline-flex",
