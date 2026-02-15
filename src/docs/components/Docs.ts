@@ -84,7 +84,7 @@ const CodeBlock = (content: string) =>
     {
       class: "code-block animate-fade-up",
       style: {
-        background: "var(--mongo-forest)",
+        // background: "var(--mongo-forest)",
         borderRadius: "0.75rem",
         padding: "1.5rem",
         margin: "1.5rem 0",
