@@ -64,18 +64,18 @@ export type ContextualValidateProps<
   Target,
   K extends keyof HTMLElementTagNameMap,
 > = {
-  [Key in keyof P]: Key extends keyof Target
+    [Key in keyof P]: Key extends keyof Target
     ? Key extends `on${string}`
-      ? Target[Key] extends ((e: infer BaseEv) => void) | undefined
-        ? BaseEv extends TypedEvent<any, infer NativeEv>
-          ? (e: TypedEvent<SmartElement<K, P>, NativeEv>) => void
-          : Target[Key]
-        : Target[Key]
-      : Target[Key]
+    ? Target[Key] extends ((e: infer BaseEv) => void) | undefined
+    ? BaseEv extends TypedEvent<any, infer NativeEv>
+    ? (e: TypedEvent<SmartElement<K, P>, NativeEv>) => void
+    : Target[Key]
+    : Target[Key]
+    : Target[Key]
     : Key extends `data-${string}`
-      ? P[Key]
-      : never;
-};
+    ? P[Key]
+    : never;
+  };
 
 /**
  * Types that can be rendered as text content in an element.
@@ -478,8 +478,11 @@ import {
   createVoidElement,
   type VoidElementFactory,
 } from "./VoidElementFactory";
-import { createImgElement } from "./ImgElementFactory";
-import { createAnchorElement } from "./AnchorElementFactory";
+import { createImgElement, type ImgElementFactory } from "./ImgElementFactory";
+import {
+  createAnchorElement,
+  type AnchorElementFactory,
+} from "./AnchorElementFactory";
 
 // Re-export types for external use
 export type {
@@ -487,6 +490,8 @@ export type {
   VoidElementFactory,
   TextElementFactory,
   InteractiveElementFactory,
+  AnchorElementFactory,
+  ImgElementFactory,
 };
 
 /**
@@ -721,8 +726,8 @@ export function isChildrenCallback<E extends HTMLElement>(
 // -----------------------------------------------------------------------------
 // Special elements with custom factories
 // -----------------------------------------------------------------------------
-export const a = createAnchorElement();
-export const img = createImgElement();
+export const a = createAnchorElement() as AnchorElementFactory;
+export const img = createImgElement() as ImgElementFactory;
 
 // -----------------------------------------------------------------------------
 // Interactive elements (text + handler shorthand)
