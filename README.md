@@ -668,10 +668,30 @@ Each(
 ```
 
 **How Automatic Keying Works:**
-- **Objects**: Assigned stable internal IDs via WeakMap (no memory leaks, automatic garbage collection)
+- **Objects/Arrays**: Each reference gets a unique stable internal ID via WeakMap (no memory leaks, automatic garbage collection)
 - **Primitives**: Keyed by `type:value` (e.g., "string:Apple", "number:42")
 - **Custom keyFn**: Takes precedence when provided (useful for database IDs)
 - **Performance**: Same O(1) operations whether automatic or custom keys are used
+
+**When Automatic Keying Works:**
+- ✅ **Object arrays** - Each object gets a unique ID
+- ✅ **Unique primitive values** - `[1, 2, 3]` or `["a", "b", "c"]`
+- ✅ **Arrays of arrays** - Each array reference gets a unique ID
+
+**When to Provide Custom keyFn:**
+- ⚠️ **Duplicate primitive values** - `[1, 2, 1]` means both `1`s share key `"number:1"`
+- ⚠️ **Same object reference multiple times** - `[obj, obj]` results in duplicate keys
+- 🎯 **Explicit control needed** - Database IDs, debugging, cross-system sync
+
+```typescript
+// ⚠️ Example: Duplicate primitives need custom keyFn
+const tags = ["react", "vue", "react"];  // Duplicate "react"
+
+Each(() => tags, (tag) => {
+  span({ textContent: tag });
+}, (tag, index) => `${tag}-${index}`);  // ✅ Make keys unique with index
+// Warning: "[Each] Duplicate key: "string:react"" (if keyFn omitted)
+```
 ```
 
 #### Performance Characteristics

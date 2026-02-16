@@ -26,7 +26,6 @@ const t = (text: string) => {
 
 // --- Styled Components ---
 
-
 const CodeBlock = (content: string) =>
   div(
     {
@@ -180,7 +179,8 @@ const AnchorLink = (id: string) => {
       const target = document.getElementById(id);
       if (target) {
         const offset = 100;
-        const targetPosition = target.getBoundingClientRect().top + window.scrollY - offset;
+        const targetPosition =
+          target.getBoundingClientRect().top + window.scrollY - offset;
         window.scrollTo({ top: targetPosition, behavior: "smooth" });
       }
     },
@@ -230,9 +230,17 @@ const Section = (title: string, id: string, children: () => void) => {
   );
 };
 
-const SubSection = (title: string, idOrChildren: string | (() => void), children?: () => void) => {
-  const id = typeof idOrChildren === 'string' ? idOrChildren : title.toLowerCase().replace(/\s+/g, "-");
-  const childrenFn = typeof idOrChildren === 'function' ? idOrChildren : children!;
+const SubSection = (
+  title: string,
+  idOrChildren: string | (() => void),
+  children?: () => void,
+) => {
+  const id =
+    typeof idOrChildren === "string"
+      ? idOrChildren
+      : title.toLowerCase().replace(/\s+/g, "-");
+  const childrenFn =
+    typeof idOrChildren === "function" ? idOrChildren : children!;
 
   div(
     {
@@ -270,9 +278,17 @@ const SubSection = (title: string, idOrChildren: string | (() => void), children
   );
 };
 
-const SubSubSection = (title: string, idOrChildren: string | (() => void), children?: () => void) => {
-  const id = typeof idOrChildren === 'string' ? idOrChildren : title.toLowerCase().replace(/\s+/g, "-");
-  const childrenFn = typeof idOrChildren === 'function' ? idOrChildren : children!;
+const SubSubSection = (
+  title: string,
+  idOrChildren: string | (() => void),
+  children?: () => void,
+) => {
+  const id =
+    typeof idOrChildren === "string"
+      ? idOrChildren
+      : title.toLowerCase().replace(/\s+/g, "-");
+  const childrenFn =
+    typeof idOrChildren === "function" ? idOrChildren : children!;
 
   div({ class: "heading-group", style: { marginBottom: "1.5rem" } }, () => {
     div(
@@ -370,9 +386,9 @@ const sections = [
           { id: "match-strings", title: "Strings" },
           { id: "match-booleans", title: "Booleans" },
           { id: "match-numbers", title: "Numbers" },
-        ]
+        ],
       },
-    ]
+    ],
   },
   { id: "components", title: "Components" },
 
@@ -495,9 +511,7 @@ const TableOfContents = () => {
                       display: "block",
                       padding: "0.25rem 0",
                       transition: "color 0.2s",
-                      fontWeight: $(() =>
-                        isSectionActive() ? "600" : "400",
-                      ),
+                      fontWeight: $(() => (isSectionActive() ? "600" : "400")),
                       borderLeft: $(() =>
                         isSectionActive()
                           ? "2px solid var(--mongo-green)"
@@ -512,7 +526,10 @@ const TableOfContents = () => {
                       const target = document.getElementById(section.id);
                       if (target) {
                         const offset = 100;
-                        const targetPosition = target.getBoundingClientRect().top + window.scrollY - offset;
+                        const targetPosition =
+                          target.getBoundingClientRect().top +
+                          window.scrollY -
+                          offset;
                         window.scrollTo({
                           top: targetPosition,
                           behavior: "smooth",
@@ -525,90 +542,131 @@ const TableOfContents = () => {
                   // Render nested children if present
                   if ((section as any).children) {
                     ul(
-                      { style: { listStyle: "none", padding: "0", marginTop: "0.5rem" } },
+                      {
+                        style: {
+                          listStyle: "none",
+                          padding: "0",
+                          marginTop: "0.5rem",
+                        },
+                      },
                       () => {
-                        ((section as any).children as any[]).forEach((child: any) => {
-                          li({ style: { marginBottom: "0.25rem" } }, () => {
-                            a({
-                              href: `#${child.id}`,
-                              style: {
-                                color: $(() =>
-                                  activeSection.value === child.id
-                                    ? "var(--mongo-green)"
-                                    : "var(--text-tertiary)",
-                                ),
-                                textDecoration: "none",
-                                fontSize: "0.8rem",
-                                display: "block",
-                                padding: "0.25rem 0 0.25rem 1.5rem",
-                                transition: "color 0.2s",
-                                fontWeight: $(() =>
-                                  activeSection.value === child.id ? "600" : "400",
-                                ),
-                              },
-                              textContent: child.title,
-                              onclick: (e) => {
-                                e.preventDefault();
-                                const target = document.getElementById(child.id);
-                                if (target) {
-                                  const offset = 100;
-                                  const targetPosition = target.getBoundingClientRect().top + window.scrollY - offset;
-                                  window.scrollTo({
-                                    top: targetPosition,
-                                    behavior: "smooth",
-                                  });
-                                }
-                                activeSection.value = child.id;
-                              },
-                            });
-
-                            // Render 2nd level nested children if present (for Match subsections)
-                            if ((child as any).children) {
-                              ul(
-                                { style: { listStyle: "none", padding: "0", marginTop: "0.25rem" } },
-                                () => {
-                                  ((child as any).children as any[]).forEach((grandchild: any) => {
-                                    li({ style: { marginBottom: "0.25rem" } }, () => {
-                                      a({
-                                        href: `#${grandchild.id}`,
-                                        style: {
-                                          color: $(() =>
-                                            activeSection.value === grandchild.id
-                                              ? "var(--mongo-green)"
-                                              : "var(--text-tertiary)",
-                                          ),
-                                          textDecoration: "none",
-                                          fontSize: "0.75rem",
-                                          display: "block",
-                                          padding: "0.25rem 0 0.25rem 3rem",
-                                          transition: "color 0.2s",
-                                          fontWeight: $(() =>
-                                            activeSection.value === grandchild.id ? "600" : "400",
-                                          ),
-                                        },
-                                        textContent: grandchild.title,
-                                        onclick: (e) => {
-                                          e.preventDefault();
-                                          const target = document.getElementById(grandchild.id);
-                                          if (target) {
-                                            const offset = 100;
-                                            const targetPosition = target.getBoundingClientRect().top + window.scrollY - offset;
-                                            window.scrollTo({
-                                              top: targetPosition,
-                                              behavior: "smooth",
-                                            });
-                                          }
-                                          activeSection.value = grandchild.id;
-                                        },
-                                      });
+                        ((section as any).children as any[]).forEach(
+                          (child: any) => {
+                            li({ style: { marginBottom: "0.25rem" } }, () => {
+                              a({
+                                href: `#${child.id}`,
+                                style: {
+                                  color: $(() =>
+                                    activeSection.value === child.id
+                                      ? "var(--mongo-green)"
+                                      : "var(--text-tertiary)",
+                                  ),
+                                  textDecoration: "none",
+                                  fontSize: "0.8rem",
+                                  display: "block",
+                                  padding: "0.25rem 0 0.25rem 1.5rem",
+                                  transition: "color 0.2s",
+                                  fontWeight: $(() =>
+                                    activeSection.value === child.id
+                                      ? "600"
+                                      : "400",
+                                  ),
+                                },
+                                textContent: child.title,
+                                onclick: (e) => {
+                                  e.preventDefault();
+                                  const target = document.getElementById(
+                                    child.id,
+                                  );
+                                  if (target) {
+                                    const offset = 100;
+                                    const targetPosition =
+                                      target.getBoundingClientRect().top +
+                                      window.scrollY -
+                                      offset;
+                                    window.scrollTo({
+                                      top: targetPosition,
+                                      behavior: "smooth",
                                     });
-                                  });
-                                }
-                              );
-                            }
-                          });
-                        });
-                      }
+                                  }
+                                  activeSection.value = child.id;
+                                },
+                              });
+
+                              // Render 2nd level nested children if present (for Match subsections)
+                              if ((child as any).children) {
+                                ul(
+                                  {
+                                    style: {
+                                      listStyle: "none",
+                                      padding: "0",
+                                      marginTop: "0.25rem",
+                                    },
+                                  },
+                                  () => {
+                                    ((child as any).children as any[]).forEach(
+                                      (grandchild: any) => {
+                                        li(
+                                          {
+                                            style: { marginBottom: "0.25rem" },
+                                          },
+                                          () => {
+                                            a({
+                                              href: `#${grandchild.id}`,
+                                              style: {
+                                                color: $(() =>
+                                                  activeSection.value ===
+                                                  grandchild.id
+                                                    ? "var(--mongo-green)"
+                                                    : "var(--text-tertiary)",
+                                                ),
+                                                textDecoration: "none",
+                                                fontSize: "0.75rem",
+                                                display: "block",
+                                                padding:
+                                                  "0.25rem 0 0.25rem 3rem",
+                                                transition: "color 0.2s",
+                                                fontWeight: $(() =>
+                                                  activeSection.value ===
+                                                  grandchild.id
+                                                    ? "600"
+                                                    : "400",
+                                                ),
+                                              },
+                                              textContent: grandchild.title,
+                                              onclick: (e) => {
+                                                e.preventDefault();
+                                                const target =
+                                                  document.getElementById(
+                                                    grandchild.id,
+                                                  );
+                                                if (target) {
+                                                  const offset = 100;
+                                                  const targetPosition =
+                                                    target.getBoundingClientRect()
+                                                      .top +
+                                                    window.scrollY -
+                                                    offset;
+                                                  window.scrollTo({
+                                                    top: targetPosition,
+                                                    behavior: "smooth",
+                                                  });
+                                                }
+                                                activeSection.value =
+                                                  grandchild.id;
+                                              },
+                                            });
+                                          },
+                                        );
+                                      },
+                                    );
+                                  },
+                                );
+                              }
+                            });
+                          },
+                        );
+                      },
                     );
                   }
                 });
@@ -909,7 +967,7 @@ br();`);
                 {
                   label: "Empty",
                   code: `// Empty element
-article();`
+article();`,
                 },
                 {
                   label: "Props Only",
@@ -918,7 +976,7 @@ article({
   id: "post-1", 
   class: "article",
   role: "article"
-});`
+});`,
                 },
                 {
                   label: "Children",
@@ -926,7 +984,7 @@ article({
 article(() => {
   h2("Article Title");
   p("Article content goes here...");
-});`
+});`,
                 },
                 {
                   label: "Props + Children",
@@ -935,8 +993,8 @@ article({ class: "post" }, () => {
   h2("Article Title");
   p("Article body...");
   footer("Published: 2024");
-});`
-                }
+});`,
+                },
               ]);
 
               Note(
@@ -953,7 +1011,7 @@ article({ class: "post" }, () => {
                 {
                   label: "Empty",
                   code: `// Empty element
-h1();`
+h1();`,
                 },
                 {
                   label: "Props Only",
@@ -961,7 +1019,7 @@ h1();`
 h1({ 
   class: "title", 
   style: { color: "blue", fontSize: "32px" } 
-});`
+});`,
                 },
                 {
                   label: "Children",
@@ -969,7 +1027,7 @@ h1({
 h1(() => {
   span("Welcome ");
   strong("User");
-});`
+});`,
                 },
                 {
                   label: "Props + Children",
@@ -977,7 +1035,7 @@ h1(() => {
 h1({ class: "hero" }, () => {
   span("Welcome ", { class: "greeting" });
   strong("User");
-});`
+});`,
                 },
                 {
                   label: "Text Content",
@@ -986,7 +1044,7 @@ h1("Welcome User");
 
 // Also works with signals:
 const user = $(Mut("User"));
-h1($(() => \`Welcome \${user.value}\`));`
+h1($(() => \`Welcome \${user.value}\`));`,
                 },
                 {
                   label: "Text + Props",
@@ -994,21 +1052,21 @@ h1($(() => \`Welcome \${user.value}\`));`
 h1("Welcome User", { 
   class: "hero", 
   id: "main-heading" 
-});`
+});`,
                 },
                 {
                   label: "Text + Children",
                   code: `// Text + children
 h1("Welcome", () => {
   strong(" User");
-});`
+});`,
                 },
                 {
                   label: "All Three",
                   code: `// Text + props + children 
 h1("Welcome", { class: "hero" }, () => {
   strong(" User");
-});`
+});`,
                 },
                 {
                   label: "onMount",
@@ -1024,8 +1082,8 @@ h1((el, onMount) => {
 h1({ class: "hero" }, (el, onMount) => {
   el.textContent = "Welcome User";
   onMount(() => el.scrollIntoView());
-});`
-                }
+});`,
+                },
               ]);
 
               Note(
@@ -1053,7 +1111,7 @@ button("Save", () => save());
 button({
   textContent: "Delete",
   onclick: () => confirmDelete()
-});`
+});`,
                 },
                 {
                   label: "Text + Props",
@@ -1068,7 +1126,7 @@ button("Submit", {
 button("Submit", {
   class: "btn-primary",
   disabled: $(() => !isValid.value)
-});`
+});`,
                 },
                 {
                   label: "Text + Children",
@@ -1080,7 +1138,7 @@ button("Delete", () => {
 button("Menu", () => {
   span(menuIcon);
   span("Options");
-});`
+});`,
                 },
                 {
                   label: "Text + Props + Children",
@@ -1088,7 +1146,7 @@ button("Menu", () => {
 button("Delete", { class: "btn-danger" }, () => {
   span({ class: "icon" }, () => t("🗑️"));
   span("Delete Item");
-});`
+});`,
                 },
                 {
                   label: "Props Only",
@@ -1097,7 +1155,7 @@ button({
   textContent: "Click",
   class: "btn",
   onclick: () => handleClick()
-});`
+});`,
                 },
                 {
                   label: "Props + Children",
@@ -1110,8 +1168,8 @@ button({ class: "btn-danger" }, () => {
 // Note: onclick goes in props, not as 3rd arg!
 button({ class: "btn", onclick: () => save() }, () => {
   span("Save");
-});`
-                }
+});`,
+                },
               ]);
 
               Note("Elements: button, summary, option, optgroup.");
@@ -1203,7 +1261,9 @@ const doubled = $(() => count.value * 2);`);
             );
             SubSection("Data Types & Behavior", () => {
               SubSubSection("1. Primitives (String, Number, Boolean)", () => {
-                Paragraph("Primitives are immutable by default. To make them mutable, use Mut.");
+                Paragraph(
+                  "Primitives are immutable by default. To make them mutable, use Mut.",
+                );
                 CodeBlock(`// ❌ Error: Read-only
 const count = $(0);
 // count.value = 1;
@@ -1218,7 +1278,9 @@ score.value = 10;`);
               });
 
               SubSubSection("2. Objects", () => {
-                Paragraph("Objects are shallowly immutable by default. You cannot add, remove, or change properties.");
+                Paragraph(
+                  "Objects are shallowly immutable by default. You cannot add, remove, or change properties.",
+                );
                 CodeBlock(`const user = $({ name: "Evan", age: 30 });
 
 // ❌ Error: Read-only property
@@ -1230,62 +1292,81 @@ const userSignal = $(Mut({ name: "Evan" })); // If the signal itself is mutable
 // OR with stores, you often replace nested objects in a parent store.`);
 
                 Paragraph("Mutable Objects:");
-                CodeBlock("// Option A: Specific keys\n" +
-                  "const state = $({ count: 0 }, \"count\");\n" +
-                  "state.count++;\n\n" +
-                  "// Option B: Full object mutability\n" +
-                  "const config = $(Mut({ theme: \"dark\", debug: false }));\n" +
-                  "config.theme = \"light\";\n" +
-                  "config.debug = true;\n\n" +
-                  "// Option C: Selective Nested Mutability\n" +
-                  "const user = $({\n" +
-                  "  name: \"Evan\",\n" +
-                  "  settings: {\n" +
-                  "    notifications: Mut(true), // Mutable Primitive: can be replaced\n" +
-                  "    theme: \"dark\"             // Read-only\n" +
-                  "  }\n" +
-                  "});\n" +
-                  "user.settings.notifications = false; // Works!\n\n" +
-                  "// Note: Mut({}) on an object makes its *properties* mutable,\n" +
-                  "// unless the parent key is also mutable.");
+                CodeBlock(
+                  "// Option A: Specific keys\n" +
+                    'const state = $({ count: 0 }, "count");\n' +
+                    "state.count++;\n\n" +
+                    "// Option B: Full object mutability\n" +
+                    'const config = $(Mut({ theme: "dark", debug: false }));\n' +
+                    'config.theme = "light";\n' +
+                    "config.debug = true;\n\n" +
+                    "// Option C: Selective Nested Mutability\n" +
+                    "const user = $({\n" +
+                    '  name: "Evan",\n' +
+                    "  settings: {\n" +
+                    "    notifications: Mut(true), // Mutable Primitive: can be replaced\n" +
+                    '    theme: "dark"             // Read-only\n' +
+                    "  }\n" +
+                    "});\n" +
+                    "user.settings.notifications = false; // Works!\n\n" +
+                    "// Note: Mut({}) on an object makes its *properties* mutable,\n" +
+                    "// unless the parent key is also mutable.",
+                );
               });
 
               SubSubSection("Secure Immutability by Design", () => {
-                Paragraph("Fia's reactive stores are designed to prevent accidental leaks of reactivity. When you spread a store, you get a plain object snapshot, not a reactive clone.");
-                CodeBlock("const original = $({ name: \"Evan\", details: { age: 30 } });\n" +
-                  "const snapshot = { ...original };\n\n" +
-                  "// To create a truly independent reactive copy:\n" +
-                  "const clone = $({ ...original }); // New store with copied values");
-                Note("This behavior ensures you never accidentally pass reactivity where a plain value was expected, maintaining explicit data flow.", "info");
+                Paragraph(
+                  "Fia's reactive stores are designed to prevent accidental leaks of reactivity. When you spread a store, you get a plain object snapshot, not a reactive clone.",
+                );
+                CodeBlock(
+                  'const original = $({ name: "Evan", details: { age: 30 } });\n' +
+                    "const snapshot = { ...original };\n\n" +
+                    "// To create a truly independent reactive copy:\n" +
+                    "const clone = $({ ...original }); // New store with copied values",
+                );
+                Note(
+                  "This behavior ensures you never accidentally pass reactivity where a plain value was expected, maintaining explicit data flow.",
+                  "info",
+                );
               });
 
               SubSubSection("3. Arrays", () => {
-                Paragraph("Arrays are immutable by default. Methods that mutate (push, pop, splice, sort) are typed to not exist or error.");
-                CodeBlock("const list = $({ items: [1, 2, 3] });\n" +
-                  "// ❌ Error: Property 'push' does not exist on type 'readonly number[]'\n" +
-                  "// list.items.push(4);\n\n" +
-                  "// ✅ Valid: Replace array\n" +
-                  "// list.items = [...list.items, 4]; // Only works if 'items' key is mutable");
+                Paragraph(
+                  "Arrays are immutable by default. Methods that mutate (push, pop, splice, sort) are typed to not exist or error.",
+                );
+                CodeBlock(
+                  "const list = $({ items: [1, 2, 3] });\n" +
+                    "// ❌ Error: Property 'push' does not exist on type 'readonly number[]'\n" +
+                    "// list.items.push(4);\n\n" +
+                    "// ✅ Valid: Replace array\n" +
+                    "// list.items = [...list.items, 4]; // Only works if 'items' key is mutable",
+                );
 
                 Paragraph("Mutable Arrays:");
-                CodeBlock("const todos = $(Mut({ list: [] as string[] }));\n\n" +
-                  "// ✅ Valid: Mutation methods work\n" +
-                  "todos.list.push(\"Buy milk\");\n" +
-                  "todos.list.splice(0, 1);");
+                CodeBlock(
+                  "const todos = $(Mut({ list: [] as string[] }));\n\n" +
+                    "// ✅ Valid: Mutation methods work\n" +
+                    'todos.list.push("Buy milk");\n' +
+                    "todos.list.splice(0, 1);",
+                );
               });
 
               SubSubSection("4. Nested Objects (Deep Reactivity)", () => {
-                Paragraph("Deeply nested objects inherit the mutability context of their parent property assignment, but by default, Fia encourages replacing nested objects.");
-                CodeBlock("const app = $(Mut({\n" +
-                  "  settings: {\n" +
-                  "    notifications: { email: true }\n" +
-                  "  }\n" +
-                  "}));\n\n" +
-                  "// ✅ Valid: Traverse and mutate (because app was wrapped in Mut)\n" +
-                  "app.settings.notifications.email = false;\n\n" +
-                  "// ℹ️ Pattern: Immutable Tree with Mutable Root\n" +
-                  "// If 'settings' wasn't mutable, you'd do:\n" +
-                  "// app.settings = { ...app.settings, notifications: { ... } };");
+                Paragraph(
+                  "Deeply nested objects inherit the mutability context of their parent property assignment, but by default, Fia encourages replacing nested objects.",
+                );
+                CodeBlock(
+                  "const app = $(Mut({\n" +
+                    "  settings: {\n" +
+                    "    notifications: { email: true }\n" +
+                    "  }\n" +
+                    "}));\n\n" +
+                    "// ✅ Valid: Traverse and mutate (because app was wrapped in Mut)\n" +
+                    "app.settings.notifications.email = false;\n\n" +
+                    "// ℹ️ Pattern: Immutable Tree with Mutable Root\n" +
+                    "// If 'settings' wasn't mutable, you'd do:\n" +
+                    "// app.settings = { ...app.settings, notifications: { ... } };",
+                );
               });
             });
           });
@@ -1295,15 +1376,17 @@ const userSignal = $(Mut({ name: "Evan" })); // If the signal itself is mutable
               Paragraph(
                 "Conditionally render content that updates when the condition changes.",
               );
-              CodeBlock(
-                `Show(() => isVisible.value, () => div("Hello!"));`,
-              );
+              CodeBlock(`Show(() => isVisible.value, () => div("Hello!"));`);
             });
             SubSection("Each", "control-flow-each", () => {
-              Paragraph("High-performance keyed list rendering with efficient reconciliation. Each automatically assigns stable keys to items - no key function needed! Minimizes DOM operations by reusing existing nodes instead of recreating them.");
+              Paragraph(
+                "High-performance keyed list rendering with efficient reconciliation. Each automatically assigns stable keys to items - no key function needed! Minimizes DOM operations by reusing existing nodes instead of recreating them.",
+              );
 
               SubSubSection("Automatic Key Assignment", () => {
-                Paragraph("Each automatically assigns stable keys to both primitives and objects:");
+                Paragraph(
+                  "Each automatically assigns stable keys to both primitives and objects:",
+                );
                 CodeBlock(`// Primitives: automatically keyed by value
 const items = $({ list: ["Apple", "Banana", "Cherry"] });
 Each(() => items.list, (item, index) => {
@@ -1333,7 +1416,9 @@ Each(() => todos.items, (todo) => {
               });
 
               SubSubSection("Custom Key Function (Optional)", () => {
-                Paragraph("For explicit control (e.g., database IDs), provide a custom key function:");
+                Paragraph(
+                  "For explicit control (e.g., database IDs), provide a custom key function:",
+                );
                 CodeBlock(`// Optional: use database ID as key
 Each(
   () => todos.items,
@@ -1352,16 +1437,58 @@ Each(
   (todo) => todo.id  // Optional: custom key function
 );`);
 
-                Note("How automatic keying works: Objects get stable internal IDs via WeakMap (no memory leaks). Primitives are keyed by type:value. Custom keyFn takes precedence when provided.", "info");
+                Note(
+                  "How automatic keying works: Objects/arrays get stable internal IDs via WeakMap (no memory leaks). Primitives are keyed by type:value. Custom keyFn takes precedence when provided.",
+                  "info",
+                );
+              });
+
+              SubSubSection("When to Use Custom Keys", () => {
+                Paragraph(
+                  "Automatic keying works great in most cases, but provide a custom keyFn when:",
+                );
+
+                CodeBlock(`// ✅ Automatic keying works:
+// - Object arrays (each gets unique ID)
+// - Unique primitives: [1, 2, 3] or ["a", "b", "c"]
+// - Arrays of arrays (each array reference gets unique ID)
+
+// ⚠️ Provide custom keyFn for:
+// - Duplicate primitives
+const tags = ["react", "vue", "react"];  // Both "react" share key "string:react"
+Each(tags, span, (tag, idx) => \`\${tag}-\${idx}\`);
+
+// - Same object reference multiple times
+const item = { x: 1 };
+const items = [item, item];  // Both share same key!
+
+// - Explicit control (database IDs, debugging)
+Each(users, (user) => div(user.name), (user) => user.id);`);
+
+                Note(
+                  "Warning: If duplicate keys are detected, Each will log: '[Each] Duplicate key: \"...\". Keys must be unique.' Check the console and provide a custom keyFn if needed.",
+                  "warning",
+                );
               });
 
               SubSubSection("Performance Characteristics", () => {
-                Paragraph("Each uses keyed reconciliation (automatic or custom) to achieve O(1) performance for common operations:");
+                Paragraph(
+                  "Each uses keyed reconciliation (automatic or custom) to achieve O(1) performance for common operations:",
+                );
 
-                Note("Add 1 item to 1000: O(1) - creates 1 node (~0.5ms)", "info");
-                Note("Remove 1 item from 1000: O(1) - removes 1 node (~0.3ms)", "info");
+                Note(
+                  "Add 1 item to 1000: O(1) - creates 1 node (~0.5ms)",
+                  "info",
+                );
+                Note(
+                  "Remove 1 item from 1000: O(1) - removes 1 node (~0.3ms)",
+                  "info",
+                );
                 Note("Move/reorder items: O(1) - moves nodes (~0.2ms)", "info");
-                Note("Preserves: input focus, scroll position, component state", "info");
+                Note(
+                  "Preserves: input focus, scroll position, component state",
+                  "info",
+                );
 
                 CodeBlock(`// Performance comparison
 const items = Array(1000).fill(0).map((_, i) => ({ id: i, value: i }));
@@ -1377,7 +1504,9 @@ const items = Array(1000).fill(0).map((_, i) => ({ id: i, value: i }));
               });
 
               SubSubSection("Custom Key Function Best Practices", () => {
-                Paragraph("While automatic keying works great, you may want custom keys for specific use cases:");
+                Paragraph(
+                  "While automatic keying works great, you may want custom keys for specific use cases:",
+                );
 
                 CodeBlock(`// ✅ Good: Database ID (explicit control)
 (item) => item.id
@@ -1397,11 +1526,16 @@ const items = Array(1000).fill(0).map((_, i) => ({ id: i, value: i }));
 // ❌ Bad: Non-unique field (causes collisions)
 (item) => item.category`);
 
-                Note("When to use custom keys: Database objects with existing IDs, cross-system synchronization, debugging (readable keys in DevTools). When automatic keying is fine: Most common cases, primitive arrays, local component state.", "tip");
+                Note(
+                  "When to use custom keys: Database objects with existing IDs, cross-system synchronization, debugging (readable keys in DevTools). When automatic keying is fine: Most common cases, primitive arrays, local component state.",
+                  "info",
+                );
               });
 
               SubSubSection("Real-World Example", () => {
-                Paragraph("Complete todo list with add, remove, and toggle functionality:");
+                Paragraph(
+                  "Complete todo list with add, remove, and toggle functionality:",
+                );
                 CodeBlock(`const state = $({
   todos: [],
   nextId: 0
@@ -1455,15 +1589,18 @@ div(() => {
                   "Use custom key function for explicit control (database IDs, cross-system sync)",
                   "Custom keys are optional but useful for debugging (readable keys in DevTools)",
                   "Batch multiple updates with batch() for better performance",
-                  "Same O(1) performance whether using automatic or custom keys"
+                  "Same O(1) performance whether using automatic or custom keys",
                 ]);
               });
             });
             SubSection("Match", "control-flow-match", () => {
-              Paragraph("Reactive pattern matching for switch/case logic. Automatically updates rendering when the matched value changes.");
+              Paragraph(
+                "Reactive pattern matching for switch/case logic. Automatically updates rendering when the matched value changes.",
+              );
 
-              Paragraph("Match accepts signals or getter functions, and returns Signal<R> with '_' default or Signal<R | undefined> without.");
-
+              Paragraph(
+                "Match accepts signals or getter functions, and returns Signal<R> with '_' default or Signal<R | undefined> without.",
+              );
 
               SubSubSection("Strings", "match-strings", () => {
                 Paragraph("Match exact string values:");
@@ -1478,7 +1615,9 @@ Match(status, {
               });
 
               SubSubSection("Booleans", "match-booleans", () => {
-                Paragraph("Boolean values are automatically converted to string keys:");
+                Paragraph(
+                  "Boolean values are automatically converted to string keys:",
+                );
                 CodeBlock(`const isActive = $(Mut(true));
 
 Match(isActive, {
@@ -1498,7 +1637,9 @@ Match(count, {
   _: () => "Many"
 });`);
 
-                Paragraph("For numeric values, Match also supports range-based comparisons using operators and interval notation:");
+                Paragraph(
+                  "For numeric values, Match also supports range-based comparisons using operators and interval notation:",
+                );
 
                 CodeBlock(`const age = $(Mut(25));
 
@@ -1536,7 +1677,10 @@ Match(age, {
   _: () => "Unknown"
 });`);
 
-                Note("Range patterns only work with numeric values. Exact string matches are checked before range patterns.", "info");
+                Note(
+                  "Range patterns only work with numeric values. Exact string matches are checked before range patterns.",
+                  "info",
+                );
               });
             });
           });
@@ -1566,10 +1710,14 @@ Match(age, {
           });
 
           Section("Performance", "performance", () => {
-            Paragraph("Fia achieves exceptional performance through three core optimizations: event delegation, automatic batching, and fine-grained reactivity.");
+            Paragraph(
+              "Fia achieves exceptional performance through three core optimizations: event delegation, automatic batching, and fine-grained reactivity.",
+            );
 
             SubSection("Event Delegation", () => {
-              Paragraph("Traditional frameworks attach individual event listeners to each element. Fia uses a single delegated listener per event type.");
+              Paragraph(
+                "Traditional frameworks attach individual event listeners to each element. Fia uses a single delegated listener per event type.",
+              );
 
               CodeBlock(`// Traditional approach (100 listeners!)
 for (let i = 0; i < 100; i++) {
@@ -1586,7 +1734,7 @@ document.body
                   "One global listener per event type (click, input, etc.)",
                   "Handlers stored in WeakMap<Element, Handler>",
                   "Automatic cleanup when elements are removed",
-                  "Dynamic elements work without rebinding"
+                  "Dynamic elements work without rebinding",
                 ]);
               });
 
@@ -1595,7 +1743,7 @@ document.body
                   "Memory efficient: 100 buttons = 1 listener (not 100)",
                   "Faster event dispatch: Single lookup",
                   "No memory leaks from forgotten listeners",
-                  "Works with dynamically created elements"
+                  "Works with dynamically created elements",
                 ]);
               });
 
@@ -1610,7 +1758,9 @@ ul(() => {
             });
 
             SubSection("Automatic Fragment Batching", () => {
-              Paragraph("Each DOM insertion triggers browser reflow. Fia batches all children into a single insertion using DocumentFragment.");
+              Paragraph(
+                "Each DOM insertion triggers browser reflow. Fia batches all children into a single insertion using DocumentFragment.",
+              );
 
               CodeBlock(`// Traditional approach (3 reflows!)
 container.appendChild(h1);  // Reflow #1
@@ -1630,7 +1780,7 @@ div(() => {
                   "Children callback creates a DocumentFragment",
                   "All child elements append to fragment (in-memory)",
                   "Complete fragment inserted in one operation",
-                  "Browser performs one reflow instead of multiple"
+                  "Browser performs one reflow instead of multiple",
                 ]);
               });
 
@@ -1639,7 +1789,7 @@ div(() => {
                   "Single reflow: N insertions = 1 reflow (not N)",
                   "Faster rendering with 10+ children",
                   "Automatic - no manual optimization needed",
-                  "Composable with nested structures"
+                  "Composable with nested structures",
                 ]);
               });
 
@@ -1658,7 +1808,9 @@ div(() => {
             });
 
             SubSection("Fine-Grained Reactivity", () => {
-              Paragraph("Virtual DOM frameworks re-render entire component trees. Fia updates only the changed elements.");
+              Paragraph(
+                "Virtual DOM frameworks re-render entire component trees. Fia updates only the changed elements.",
+              );
 
               CodeBlock(`const count = $(Mut(0));
 
@@ -1798,9 +1950,13 @@ div({
             });
 
             SubSection("🔴 Advanced", () => {
-              SubSubSection("11. Control Flow Combo (Each + Show + Match)", () => {
-                Paragraph("A complete task manager combining all control flow components:");
-                CodeBlock(`// Task manager example combining Each, Show, and Match
+              SubSubSection(
+                "11. Control Flow Combo (Each + Show + Match)",
+                () => {
+                  Paragraph(
+                    "A complete task manager combining all control flow components:",
+                  );
+                  CodeBlock(`// Task manager example combining Each, Show, and Match
 type Task = { id: number; text: string; completed: boolean };
 type Filter = "all" | "active" | "completed";
 
@@ -1966,7 +2122,8 @@ div({ style: { padding: "20px", maxWidth: "600px", margin: "0 auto" } }, () => {
     }
   });
 });`);
-              });
+                },
+              );
 
               SubSubSection("12. Todo App", () => {
                 Paragraph("A complete todo app using Each.");
