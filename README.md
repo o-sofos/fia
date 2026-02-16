@@ -550,6 +550,20 @@ app.settings.notifications.email = false;
 // app.settings = { ...app.settings, notifications: { ... } };
 ```
 
+### Secure Immutability by Design
+
+Fia's reactive stores are designed to prevent accidental leaks of reactivity. When you spread a store, you get a plain object snapshot, not a reactive clone.
+
+```typescript
+const original = $({ name: "Evan", details: { age: 30 } });
+const snapshot = { ...original };
+
+// To create a truly independent reactive copy:
+const clone = $({ ...original }); // New store with copied values
+```
+
+> **Info:** This behavior ensures you never accidentally pass reactivity where a plain value was expected, maintaining explicit data flow.
+
 ### Opt-in Mutability
 
 For scenarios where granular mutation is preferred (e.g., forms, high-performance counters), you can opt-in to mutability for specific keys.
@@ -612,20 +626,70 @@ Each(() => todos.items, (item, index) => {
 
 ### Match
 
-Reactive pattern matching for strict switch/case logic or simple routing:
+Reactive pattern matching for strict switch/case logic or simple routing. Automatically updates rendering when the matched value changes. Match accepts signals or getter functions, and returns `Signal<R>` with `_` default or `Signal<R | undefined>` without.
+
+#### Strings
+
+Match exact string values:
 
 ```typescript
-import { Match } from "fia";
+const status = $(Mut("active"));
 
-const status = $(Mut("loading"));
-
-Match(() => status.value, {
-  loading: () => p({ textContent: "Loading..." }),
-  success: () => div({ textContent: "Data loaded!" }),
-  error: () => p({ textContent: "Error loading data" }),
-  _: () => p({ textContent: "Unknown state" }), // Default case
+Match(status, {
+  "active": () => span({ class: "success" }, () => "Active"),
+  "inactive": () => span({ class: "danger" }, () => "Inactive"),
+  "pending": () => span({ class: "warning" }, () => "Pending"),
+  _: () => span("Unknown")
 });
 ```
+
+#### Booleans
+
+Boolean values are automatically converted to string keys ("true" / "false"):
+
+```typescript
+const isActive = $(Mut(true));
+
+Match(isActive, {
+  "true": () => "✅ Active",
+  "false": () => "❌ Inactive"
+});
+```
+
+#### Numbers & Ranges
+
+Numbers support exact matching and **range-based comparisons** using operators and interval notation:
+
+```typescript
+const age = $(Mut(25));
+
+// Comparison operators
+Match(age, {
+  "<18": () => "Minor",
+  ">=18": () => "Adult",
+  ">65": () => "Senior",
+  _: () => "Invalid"
+});
+
+// Range notation (N..M is inclusive)
+Match(age, {
+  "0..17": () => "Child",       // 0 <= age <= 17
+  "18..64": () => "Adult",      // 18 <= age <= 64
+  "65..120": () => "Senior",    // 65 <= age <= 120
+  _: () => "Unknown"
+});
+
+// Interval notation: [] = inclusive, () = exclusive
+Match(age, {
+  "(0..13)": () => "Child",     // 0 < age < 13
+  "[13..18)": () => "Teen",     // 13 <= age < 18
+  "[18..65)": () => "Adult",    // 18 <= age < 65
+  "[65..120]": () => "Senior",  // 65 <= age <= 120
+  _: () => "Unknown"
+});
+```
+
+> **Note:** Range patterns only work with numeric values. Exact string matches are checked before range patterns.
 
 ### Derived Values with Match
 
@@ -1083,7 +1147,179 @@ div({
 
 ### 🔴 Advanced
 
-#### 11. Todo App
+#### 11. Control Flow Combo (Each + Show + Match)
+A complete task manager combining all control flow components:
+
+```typescript
+// Task manager example combining Each, Show, and Match
+type Task = { id: number; text: string; completed: boolean };
+type Filter = "all" | "active" | "completed";
+
+const tasks = $(Mut<Task[]>([
+  { id: 1, text: "Learn Fia", completed: true },
+  { id: 2, text: "Build an app", completed: false },
+  { id: 3, text: "Deploy to production", completed: false }
+]));
+
+const currentFilter = $(Mut<Filter>("all"));
+const showCompleted = $(Mut(true));
+
+// Computed: filtered tasks based on current filter and showCompleted toggle
+const filteredTasks = $(() => {
+  const filter = currentFilter.value;
+  let result: typeof tasks = tasks;
+  
+  // Filter by completion status based on filter
+  if (filter === "active") result = tasks.filter((t: Task) => !t.completed) as typeof tasks;
+  else if (filter === "completed") result = tasks.filter((t: Task) => t.completed) as typeof tasks;
+  
+  // Additionally hide completed if showCompleted is false and filter is "all"
+  if (filter === "all" && !showCompleted.value) {
+    result = tasks.filter((t: Task) => !t.completed) as typeof tasks;
+  }
+  
+  return result;
+});
+
+div({ style: { padding: "20px", maxWidth: "600px", margin: "0 auto" } }, () => {
+  h2("Task Manager - Control Flow Demo");
+  
+  // Each: render filter buttons
+  div({ style: { marginBottom: "20px", display: "flex", gap: "10px" } }, () => {
+    const filters: Filter[] = ["all", "active", "completed"];
+    Each(filters, (filter) => {
+      button({
+        textContent: filter.charAt(0).toUpperCase() + filter.slice(1),
+        style: {
+          padding: "8px 16px",
+          background: $(() => currentFilter.value === filter ? "#4CAF50" : "#ddd"),
+          color: $(() => currentFilter.value === filter ? "white" : "black"),
+          border: "none",
+          borderRadius: "4px",
+          cursor: "pointer"
+        },
+        onclick: () => currentFilter.value = filter
+      });
+    });
+  });
+  
+  // Toggle to show/hide completed tasks
+  div({ style: { marginBottom: "20px" } }, () => {
+    button({
+      textContent: $(() => showCompleted.value ? "Hide Completed" : "Show Completed"),
+      onclick: () => showCompleted.value = !showCompleted.value
+    });
+    
+    // Show: conditionally display completed stats
+    Show(showCompleted, () => {
+      const completedCount = $(() => tasks.filter((t: Task) => t.completed).length);
+      p({
+        style: { marginTop: "10px", padding: "10px", background: "#e3f2fd", borderRadius: "4px" },
+        textContent: $(() => `Completed: ${completedCount.value} / ${tasks.length}`)
+      });
+    });
+  });
+  
+  // Match: display different messages based on filter
+  div({ style: { marginBottom: "20px", padding: "10px", background: "#fff3cd", borderRadius: "4px" } }, () => {
+    p({
+      style: { margin: "0", fontWeight: "bold" },
+      textContent: Match(currentFilter, {
+        "all": () => "📋 Showing all tasks",
+        "active": () => "⚡ Showing active tasks",
+        "completed": () => "✅ Showing completed tasks",
+        _: () => "Unknown filter"
+      })
+    });
+  });
+  
+  // Each: render the filtered task list
+  ul({ style: { listStyle: "none", padding: "0" } }, () => {
+    // Show: display message when no tasks match filter
+    Show(() => filteredTasks.value.length === 0, () => {
+      li({
+        style: { padding: "20px", textAlign: "center", color: "#999" },
+        textContent: Match(currentFilter, {
+          "all": () => "No tasks yet!",
+          "active": () => "No active tasks!",
+          "completed": () => "No completed tasks!",
+          _: () => "No tasks"
+        })
+      });
+    });
+    
+    Each(filteredTasks, (task: Task) => {
+      const taskCompleted = $(Mut(task.completed));
+      li({
+        style: {
+          padding: "12px",
+          marginBottom: "8px",
+          background: $(() => taskCompleted.value ? "#f1f8f4" : "#fff"),
+          border: "1px solid #ddd",
+          borderRadius: "4px",
+          display: "flex",
+          alignItems: "center",
+          gap: "12px"
+        }
+      }, () => {
+        // Checkbox
+        button({
+          textContent: $(() => taskCompleted.value ? "✓" : "○"),
+          style: {
+            width: "24px",
+            height: "24px",
+            border: "2px solid #4CAF50",
+            borderRadius: "50%",
+            background: $(() => taskCompleted.value ? "#4CAF50" : "white"),
+            color: "white",
+            cursor: "pointer",
+            fontSize: "14px"
+          },
+          onclick: () => {
+            taskCompleted.value = !taskCompleted.value;
+            task.completed = taskCompleted.value;
+          }
+        });
+        
+        // Task text
+        p({
+          style: {
+            margin: "0",
+            flex: "1",
+            textDecoration: $(() => taskCompleted.value ? "line-through" : "none"),
+            color: $(() => taskCompleted.value ? "#999" : "#333")
+          },
+          textContent: task.text
+        });
+      });
+    });
+  });
+  
+  // Add new task button
+  button({
+    textContent: "Add Random Task",
+    style: {
+      marginTop: "20px",
+      padding: "10px 20px",
+      background: "#2196F3",
+      color: "white",
+      border: "none",
+      borderRadius: "4px",
+      cursor: "pointer"
+    },
+    onclick: () => {
+      const newTask: Task = {
+        id: Date.now(),
+        text: `Task ${tasks.length + 1}`,
+        completed: false
+      };
+      tasks.push(newTask);
+    }
+  });
+});
+```
+
+#### 12. Todo App
 A complete todo app using `Each` for reactive list rendering.
 
 ```typescript
@@ -1112,7 +1348,7 @@ div(() => {
 });
 ```
 
-#### 12. Tabs Component
+#### 13. Tabs Component
 UI patterns like tabs are natural to implement. Track active index and conditionally apply classes.
 
 ```typescript
@@ -1143,7 +1379,7 @@ div(() => {
 });
 ```
 
-#### 13. Async Data Fetching
+#### 14. Async Data Fetching
 Use `Show` for reactive loading states that update when data arrives.
 
 ```typescript
@@ -1169,7 +1405,7 @@ div(() => {
 });
 ```
 
-#### 14. Modal Dialog
+#### 15. Modal Dialog
 Modal patterns with backdrop click-to-close. Use explicit types to avoid literal type inference.
 
 ```typescript
