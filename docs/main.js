@@ -92,50 +92,50 @@ br();`)}),N("onMount Callback",()=>{j("Access layout properties after the elemen
   onMount(() => {
     console.log(el.offsetHeight);
   });
-});`)})}),h("Element Factory Types","element-factory-types",()=>{j("Fia provides different element factory types optimized for specific use cases. Each factory type has its own set of overloads tailored to common usage patterns."),w("Standard Elements",()=>{j("Used for semantic structure elements. Click each tab to see the different patterns for creating an article:"),_0([{label:"Empty",code:`// Overload 1: Empty element
-article();`},{label:"Props Only",code:`// Overload 2: Props only
+});`)})}),h("Element Factory Types","element-factory-types",()=>{j("Fia provides different element factory types optimized for specific use cases. Each factory type has its own set of overloads tailored to common usage patterns."),w("Standard Elements",()=>{j("Used for semantic structure elements. Click each tab to see the different patterns for creating an article:"),_0([{label:"Empty",code:`// Empty element
+article();`},{label:"Props Only",code:`// Props only
 article({ 
   id: "post-1", 
   class: "article",
   role: "article"
-});`},{label:"Children",code:`// Overload 3: Children callback only
+});`},{label:"Children",code:`// Children callback only
 article(() => {
   h2("Article Title");
   p("Article content goes here...");
-});`},{label:"Props + Children",code:`// Overload 4: Props + children (most common) ⭐
+});`},{label:"Props + Children",code:`// Props + children (most common) 
 article({ class: "post" }, () => {
   h2("Article Title");
   p("Article body...");
   footer("Published: 2024");
-});`}]),p("Elements: article, section, nav, form, ul, ol, table, canvas, video, and more.")}),w("Text Elements",()=>{j("Optimized for elements that commonly hold text content. Click each tab to see different ways to create the same heading:"),_0([{label:"Empty",code:`// Overload 1: Empty element
-h1();`},{label:"Props Only",code:`// Overload 2: Props only
+});`}]),p("Elements: article, section, nav, form, ul, ol, table, canvas, video, and more.")}),w("Text Elements",()=>{j("Optimized for elements that commonly hold text content. Click each tab to see different ways to create the same heading:"),_0([{label:"Empty",code:`// Empty element
+h1();`},{label:"Props Only",code:`// Props only
 h1({ 
   class: "title", 
   style: { color: "blue", fontSize: "32px" } 
-});`},{label:"Children",code:`// Overload 3: Children callback
+});`},{label:"Children",code:`// Children callback
 h1(() => {
   span("Welcome ");
   strong("User");
-});`},{label:"Props + Children",code:`// Overload 4: Props + children
+});`},{label:"Props + Children",code:`// Props + children
 h1({ class: "hero" }, () => {
   span("Welcome ", { class: "greeting" });
   strong("User");
-});`},{label:"Text Content",code:`// Overload 5: Text content shorthand ⭐
+});`},{label:"Text Content",code:`// Text content shorthand 
 h1("Welcome User");
 
 // Also works with signals:
 const user = $(Mut("User"));
-h1($(() => \`Welcome \${user.value}\`));`},{label:"Text + Props",code:`// Overload 6: Text + props ⭐
+h1($(() => \`Welcome \${user.value}\`));`},{label:"Text + Props",code:`// Text + props 
 h1("Welcome User", { 
   class: "hero", 
   id: "main-heading" 
-});`},{label:"Text + Children",code:`// Overload 7: Text + children
+});`},{label:"Text + Children",code:`// Text + children
 h1("Welcome", () => {
   strong(" User");
-});`},{label:"All Three",code:`// Overload 8: Text + props + children ⭐
+});`},{label:"All Three",code:`// Text + props + children 
 h1("Welcome", { class: "hero" }, () => {
   strong(" User");
-});`},{label:"onMount",code:`// Overload 9-11: With onMount callback
+});`},{label:"onMount",code:`// With onMount callback
 h1((el, onMount) => {
   el.textContent = "Welcome User";
   onMount(() => {
@@ -147,7 +147,7 @@ h1((el, onMount) => {
 h1({ class: "hero" }, (el, onMount) => {
   el.textContent = "Welcome User";
   onMount(() => el.scrollIntoView());
-});`}]),p("Elements: h1-h6, p, div, span, label, li, td, th, strong, em, code, and more.")}),w("Interactive Elements",()=>{j("Special factories for interactive elements with convenient text + click handler shorthand:"),_0([{label:"Text + Click ⭐⭐",code:`// Text + click handler shorthand
+});`}]),p("Elements: h1-h6, p, div, span, label, li, td, th, strong, em, code, and more.")}),w("Interactive Elements",()=>{j("Special factories for interactive elements with convenient text + click handler shorthand:"),_0([{label:"Text + Click ",code:`// Text + click handler shorthand
 // The MOST convenient pattern!
 button("Delete", () => {
   confirmDelete();

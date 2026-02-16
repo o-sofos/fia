@@ -908,12 +908,12 @@ br();`);
               TabbedExample([
                 {
                   label: "Empty",
-                  code: `// Overload 1: Empty element
+                  code: `// Empty element
 article();`
                 },
                 {
                   label: "Props Only",
-                  code: `// Overload 2: Props only
+                  code: `// Props only
 article({ 
   id: "post-1", 
   class: "article",
@@ -922,7 +922,7 @@ article({
                 },
                 {
                   label: "Children",
-                  code: `// Overload 3: Children callback only
+                  code: `// Children callback only
 article(() => {
   h2("Article Title");
   p("Article content goes here...");
@@ -930,7 +930,7 @@ article(() => {
                 },
                 {
                   label: "Props + Children",
-                  code: `// Overload 4: Props + children (most common) ⭐
+                  code: `// Props + children (most common) 
 article({ class: "post" }, () => {
   h2("Article Title");
   p("Article body...");
@@ -952,12 +952,12 @@ article({ class: "post" }, () => {
               TabbedExample([
                 {
                   label: "Empty",
-                  code: `// Overload 1: Empty element
+                  code: `// Empty element
 h1();`
                 },
                 {
                   label: "Props Only",
-                  code: `// Overload 2: Props only
+                  code: `// Props only
 h1({ 
   class: "title", 
   style: { color: "blue", fontSize: "32px" } 
@@ -965,7 +965,7 @@ h1({
                 },
                 {
                   label: "Children",
-                  code: `// Overload 3: Children callback
+                  code: `// Children callback
 h1(() => {
   span("Welcome ");
   strong("User");
@@ -973,7 +973,7 @@ h1(() => {
                 },
                 {
                   label: "Props + Children",
-                  code: `// Overload 4: Props + children
+                  code: `// Props + children
 h1({ class: "hero" }, () => {
   span("Welcome ", { class: "greeting" });
   strong("User");
@@ -981,7 +981,7 @@ h1({ class: "hero" }, () => {
                 },
                 {
                   label: "Text Content",
-                  code: `// Overload 5: Text content shorthand ⭐
+                  code: `// Text content shorthand 
 h1("Welcome User");
 
 // Also works with signals:
@@ -990,7 +990,7 @@ h1($(() => \`Welcome \${user.value}\`));`
                 },
                 {
                   label: "Text + Props",
-                  code: `// Overload 6: Text + props ⭐
+                  code: `// Text + props 
 h1("Welcome User", { 
   class: "hero", 
   id: "main-heading" 
@@ -998,21 +998,21 @@ h1("Welcome User", {
                 },
                 {
                   label: "Text + Children",
-                  code: `// Overload 7: Text + children
+                  code: `// Text + children
 h1("Welcome", () => {
   strong(" User");
 });`
                 },
                 {
                   label: "All Three",
-                  code: `// Overload 8: Text + props + children ⭐
+                  code: `// Text + props + children 
 h1("Welcome", { class: "hero" }, () => {
   strong(" User");
 });`
                 },
                 {
                   label: "onMount",
-                  code: `// Overload 9-11: With onMount callback
+                  code: `// With onMount callback
 h1((el, onMount) => {
   el.textContent = "Welcome User";
   onMount(() => {
@@ -1040,7 +1040,7 @@ h1({ class: "hero" }, (el, onMount) => {
 
               TabbedExample([
                 {
-                  label: "Text + Click ⭐⭐",
+                  label: "Text + Click ",
                   code: `// Text + click handler shorthand
 // The MOST convenient pattern!
 button("Delete", () => {
