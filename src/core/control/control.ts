@@ -123,12 +123,25 @@ export function Each<T>(
  * Switches rendering based on a derived key from a signal.
  * Returns a Computed Signal of the result of the evaluated arm.
  * 
+ * Supports range-based comparisons for numbers:
+ * - <N, >N, <=N, >=N - comparison operators
+ * - N..M, [N..M], (N..M), [N..M), (N..M] - range notation
+ * 
  * @example
+ * // Exact string matching
  * Match(() => status.value, {
  *   loading: () => p("Loading..."),
  *   success: () => p("Success!"),
  *   error: () => p("Error!"),
  *   _: () => p("Idle"), // Default case
+ * });
+ * 
+ * // Range-based number matching
+ * Match(age, {
+ *   "<18": () => "Minor",
+ *   "[18..65)": () => "Adult",  // 18 <= age < 65
+ *   ">=65": () => "Senior",
+ *   _: () => "Unknown"
  * });
  * 
  * const message = Match(() => status.value, {
@@ -137,16 +150,81 @@ export function Each<T>(
  *   _: () => "Unknown",
  * });
  */
+
+/**
+ * Check if a value matches a comparison pattern.
+ * Supports: <N, >N, <=N, >=N, N..M, [N..M], (N..M), [N..M), (N..M]
+ * 
+ * @example
+ * matchesPattern(25, "<18")       // false
+ * matchesPattern(25, ">=18")      // true
+ * matchesPattern(25, "[18..65]")  // true
+ * matchesPattern(18, "(18..65)")  // false (exclusive start)
+ * matchesPattern(18, "[18..65)")  // true (inclusive start)
+ */
+function matchesPattern(value: unknown, pattern: string): boolean {
+    // Only works for numeric values
+    if (typeof value !== 'number') return false;
+
+    // Range pattern with optional brackets/parentheses: "[18..65]", "(18..65)", etc.
+    const rangeMatch = pattern.match(/^([\[\(])?(\d+(?:\.\d+)?)\.\.(\d+(?:\.\d+)?)([\]\)])?$/);
+    if (rangeMatch) {
+        const [, startBracket, minStr, maxStr, endBracket] = rangeMatch;
+        const min = Number(minStr);
+        const max = Number(maxStr);
+
+        // Determine inclusivity from brackets (default is inclusive)
+        const startInclusive = startBracket !== '(';  // [ or nothing = inclusive
+        const endInclusive = endBracket !== ')';      // ] or nothing = inclusive
+
+        const aboveMin = startInclusive ? value >= min : value > min;
+        const belowMax = endInclusive ? value <= max : value < max;
+
+        return aboveMin && belowMax;
+    }
+
+    // Comparison patterns: <, >, <=, >=
+    const compMatch = pattern.match(/^(<=?|>=?)(\d+(?:\.\d+)?)$/);
+    if (compMatch) {
+        const [, op, numStr] = compMatch;
+        const n = Number(numStr);
+
+        if (op === '<') return value < n;
+        if (op === '>') return value > n;
+        if (op === '<=') return value <= n;
+        if (op === '>=') return value >= n;
+    }
+
+    return false;
+}
+
+/**
+ * Helper type that suggests patterns based on the matched value type.
+ * - For numbers: suggests concrete range pattern examples
+ * - For strings/other: allows any string key
+ */
+type MatchPattern<T> = T extends number
+    ? string |
+    // Comparison patterns (examples)
+    "<18" | ">18" | "<=18" | ">=18" | "<65" | ">65" | "<=65" | ">=65" |
+    // Range patterns (examples)  
+    "0..17" | "18..64" | "65..120" |
+    "[0..17]" | "[18..64]" | "[65..120]" |
+    "(0..17)" | "(18..64)" | "(65..120)" |
+    "[0..17)" | "[18..64)" | "[65..120)" |
+    "(0..17]" | "(18..64]" | "(65..120]"
+    : string;
+
 // Overload: When '_' is provided, result is never undefined
 export function Match<T, R>(
     when: Signal<T> | (() => T),
-    cases: Partial<Record<string, () => R>> & { _: () => R },
+    cases: Partial<Record<MatchPattern<T>, () => R>> & { _: () => R },
 ): Signal<R>;
 
 // Overload: Without '_', result can be undefined
 export function Match<T, R = void>(
     when: Signal<T> | (() => T),
-    cases: Partial<Record<string, () => R>> & { _?: () => R },
+    cases: Partial<Record<MatchPattern<T>, () => R>> & { _?: () => R },
 ): Signal<R | undefined>;
 
 export function Match<T, R = void>(
@@ -173,9 +251,27 @@ export function Match<T, R = void>(
         }
         currentNodes = [];
 
-        // Convert to string for consistent key lookup
-        const key = String(getter());
-        const handler = cases[key] || cases._;
+        const value = getter();
+        const key = String(value);
+
+        // Find matching handler:
+        // 1. Try exact string match first (backward compatible)
+        let handler = cases[key];
+
+        // 2. If no exact match and value is numeric, try pattern matching
+        if (!handler && typeof value === 'number') {
+            for (const pattern in cases) {
+                if (pattern !== '_' && matchesPattern(value, pattern)) {
+                    handler = cases[pattern];
+                    break;
+                }
+            }
+        }
+
+        // 3. Fall back to default case
+        if (!handler) {
+            handler = cases._;
+        }
 
         if (handler) {
             const frag = document.createDocumentFragment();
