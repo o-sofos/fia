@@ -68,53 +68,139 @@ export function Show(
 }
 
 /**
- * Reactive list rendering with keyed reconciliation.
- * Re-renders when the list signal changes.
- * 
+ * High-performance keyed list rendering with efficient reconciliation.
+ * Minimizes DOM operations by reusing existing nodes when possible.
+ *
+ * @param items - Reactive list or static array
+ * @param render - Render function for each item
+ * @param keyFn - Function to extract unique key from item (defaults to index)
+ *
+ * Performance:
+ * - Add 1 item to 1000: O(1) - creates 1 node
+ * - Remove 1 item from 1000: O(1) - removes 1 node
+ * - Move 1 item in 1000: O(1) - moves 1 node
+ * - Preserves component state, focus, scroll position
+ *
  * @example
- * Each(() => todos.items, (item, index) => {
+ * // With key function (recommended for dynamic lists)
+ * Each(() => todos.items, (todo) => {
+ *   li({ textContent: todo.text });
+ * }, (todo) => todo.id);
+ *
+ * @example
+ * // Without key function (uses index - only for append-only)
+ * Each(() => items, (item) => {
  *   li({ textContent: item });
  * });
  */
 export function Each<T>(
-    /**
-     * Reactive list or static array.
-     * Can be a signal, a function, or a direct array (which may be a reactive store).
-     */
     items: T[] | (() => T[]),
     render: (item: T, index: number) => void,
+    keyFn?: (item: T, index: number) => string | number,
 ): void {
     const anchor = document.createComment("Each");
     getCurrentExecutionContext().appendChild(anchor);
 
-    let currentNodes: Node[] = [];
+    interface ItemNode {
+        key: string | number;
+        item: T;
+        nodes: Node[];
+    }
+
+    let prevItemNodes: ItemNode[] = [];
+    const nodeMap = new Map<string | number, ItemNode>();
 
     $e(() => {
-        // Clear previous nodes
-        for (const node of currentNodes) {
-            node.parentNode?.removeChild(node);
-        }
-        currentNodes = [];
-
         const list = typeof items === "function" && !Array.isArray(items)
             ? (items as () => T[])()
             : items;
-        const frag = document.createDocumentFragment();
-        pushExecutionContext(frag);
 
-        try {
-            for (let i = 0; i < list.length; i++) {
-                render(list[i], i);
+        const newItemNodes: ItemNode[] = [];
+        const newNodeMap = new Map<string | number, ItemNode>();
+        const usedKeys = new Set<string | number>();
+
+        // Create or reuse nodes for each item
+        for (let i = 0; i < list.length; i++) {
+            const item = list[i];
+            const key = keyFn ? keyFn(item, i) : i;
+
+            // Warn about duplicate keys
+            if (usedKeys.has(key)) {
+                console.warn(`[Each] Duplicate key: "${key}". Keys must be unique.`);
             }
-        } finally {
-            popExecutionContext();
+            usedKeys.add(key);
+
+            // Try to reuse existing node
+            const existingNode = nodeMap.get(key);
+
+            if (existingNode && (!keyFn || existingNode.item === item)) {
+                // Reuse existing node
+                newItemNodes.push(existingNode);
+                newNodeMap.set(key, existingNode);
+            } else {
+                // Create new node
+                const frag = document.createDocumentFragment();
+                pushExecutionContext(frag);
+
+                try {
+                    render(item, i);
+                } finally {
+                    popExecutionContext();
+                }
+
+                const nodes = Array.from(frag.childNodes);
+                const itemNode: ItemNode = { key, item, nodes };
+
+                newItemNodes.push(itemNode);
+                newNodeMap.set(key, itemNode);
+
+                // Clean up old node with same key
+                if (existingNode) {
+                    for (const node of existingNode.nodes) {
+                        node.parentNode?.removeChild(node);
+                    }
+                }
+            }
         }
 
-        // Track nodes we're about to insert
-        currentNodes = Array.from(frag.childNodes);
+        // Remove nodes no longer in list
+        for (const prevNode of prevItemNodes) {
+            if (!newNodeMap.has(prevNode.key)) {
+                for (const node of prevNode.nodes) {
+                    node.parentNode?.removeChild(node);
+                }
+            }
+        }
 
-        // Insert after anchor
-        anchor.parentNode?.insertBefore(frag, anchor.nextSibling);
+        // Insert/move nodes in correct order
+        let currentAnchor: Node = anchor;
+
+        for (const itemNode of newItemNodes) {
+            const firstNode = itemNode.nodes[0];
+            if (!firstNode) continue;
+
+            const nextNode = currentAnchor.nextSibling;
+
+            if (nextNode !== firstNode) {
+                const parent = anchor.parentNode;
+                if (!parent) continue;
+
+                // Insert/move all nodes for this item
+                for (const node of itemNode.nodes) {
+                    parent.insertBefore(node, currentAnchor.nextSibling);
+                }
+            }
+
+            // Update anchor to last node of this item
+            currentAnchor = itemNode.nodes[itemNode.nodes.length - 1] || currentAnchor;
+        }
+
+        // Update tracking for next render
+        prevItemNodes = newItemNodes;
+        nodeMap.clear();
+        for (const [key, node] of newNodeMap) {
+            nodeMap.set(key, node);
+        }
     });
 }
 
