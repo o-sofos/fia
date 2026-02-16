@@ -95,10 +95,8 @@ function getItemKey<T>(
     return `_o:${itemToIdMap.get(item)}`;
   }
 
-  console.log(item);
-
   // For primitives, use value with type prefix
-  return `${typeof item}:${item}:${index}`;
+  return `${typeof item}:${item}`;
 }
 
 /**
@@ -111,9 +109,19 @@ function getItemKey<T>(
  *
  * **Automatic Key Assignment:**
  * The key function is **optional**. When not provided, Each automatically assigns stable keys:
- * - **Objects**: Assigned stable internal IDs via WeakMap (no memory leaks, automatic cleanup)
+ * - **Objects/Arrays**: Each reference gets a unique stable internal ID via WeakMap (no memory leaks)
  * - **Primitives**: Keyed by `type:value` (e.g., "number:42", "string:hello")
  * - **Custom**: Provide keyFn for explicit control (e.g., database IDs)
+ *
+ * **When Automatic Keying Works:**
+ * - ✅ Object arrays (each object gets unique ID)
+ * - ✅ Unique primitive values ([1, 2, 3])
+ * - ✅ Arrays of arrays (each array reference gets unique ID)
+ *
+ * **When to Provide Custom keyFn:**
+ * - ⚠️ Duplicate primitive values ([1, 2, 1] - both 1's share key "number:1")
+ * - ⚠️ Same object reference multiple times ([obj, obj] - duplicate keys)
+ * - 🎯 Explicit control needed (database IDs, debugging)
  *
  * Performance:
  * - Add 1 item to 1000: O(1) - creates 1 node (~0.5ms)
@@ -122,19 +130,26 @@ function getItemKey<T>(
  * - Preserves component state, focus, scroll position
  *
  * @example
- * // Automatic keying - objects get stable IDs (no keyFn needed!)
+ * // ✅ Automatic keying - objects get unique stable IDs
  * Each(() => todos.items, (todo) => {
  *   li({ textContent: todo.text });
  * });
  *
  * @example
- * // Automatic keying - primitives work too
- * Each(() => numbers, (num) => {
+ * // ✅ Automatic keying - unique primitives work great
+ * Each(() => [1, 2, 3], (num) => {
  *   div({ textContent: num });
  * });
  *
  * @example
- * // Explicit key function (optional, recommended for DB objects)
+ * // ⚠️ Duplicate primitives - provide keyFn to distinguish them
+ * const tags = ["react", "vue", "react"];  // Duplicate "react"
+ * Each(() => tags, (tag) => {
+ *   span({ textContent: tag });
+ * }, (tag, index) => `${tag}-${index}`);  // Make keys unique
+ *
+ * @example
+ * // 🎯 Explicit key function (optional, useful for DB objects)
  * Each(() => todos.items, (todo) => {
  *   li({ textContent: todo.text });
  * }, (todo) => todo.id);
