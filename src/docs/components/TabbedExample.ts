@@ -1,4 +1,5 @@
 import { $, button, div, Each, Mut } from "fia";
+import { SyntaxHighlight } from "./SyntaxHighlight";
 
 /**
  * Interactive tab component for showing different code examples
@@ -53,7 +54,7 @@ export const TabbedExample = (
                         whiteSpace: "pre"
                     }
                 }, () => {
-                    div({ textContent: tab.code });
+                    SyntaxHighlight(tab.code);
                 });
             });
         });

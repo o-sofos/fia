@@ -16,6 +16,7 @@ import {
   $,
   Mut,
 } from "fia";
+import { SyntaxHighlight } from "./SyntaxHighlight";
 import { TabbedExample } from "./TabbedExample";
 
 // Helper to append text nodes
@@ -25,60 +26,6 @@ const t = (text: string) => {
 
 // --- Styled Components ---
 
-const SyntaxHighlight = (codeStr: string) => {
-  // Very basic syntax highlighting for demo purposes
-  const parts = codeStr.split(
-    /(\/\/.*|\".*?\"|\bconst\b|\bimport\b|\bfrom\b|\bfunction\b|\breturn\b|\bdiv\b|\bbutton\b|\bh1\b|\bp\b|\bul\b|\bli\b|\binput\b|\bspan\b|\bmap\b|\bfilter\b|\bconsole\b|\blog\b|\btrue\b|\bfalse\b|\bif\b|\belse\b|\bShow\b|\bEach\b|\bMatch\b)/g,
-  );
-
-  parts.forEach((part) => {
-    if (part.startsWith("//")) {
-      span({ style: { color: "var(--syntax-comment)" }, textContent: part });
-    } else if (
-      part.startsWith('"') ||
-      part.startsWith("'") ||
-      part.startsWith("`")
-    ) {
-      span({ style: { color: "var(--syntax-string)" }, textContent: part });
-    } else if (
-      [
-        "const",
-        "import",
-        "from",
-        "function",
-        "return",
-        "if",
-        "else",
-        "true",
-        "false",
-      ].includes(part)
-    ) {
-      span({ style: { color: "var(--syntax-keyword)" }, textContent: part });
-    } else if (
-      [
-        "div",
-        "button",
-        "h1",
-        "p",
-        "ul",
-        "li",
-        "input",
-        "span",
-        "console",
-        "log",
-        "map",
-        "filter",
-        "Show",
-        "Each",
-        "Match",
-      ].includes(part)
-    ) {
-      span({ style: { color: "var(--syntax-function)" }, textContent: part });
-    } else {
-      t(part);
-    }
-  });
-};
 
 const CodeBlock = (content: string) =>
   div(
@@ -953,7 +900,7 @@ br();`);
               "Fia provides different element factory types optimized for specific use cases. Each factory type has its own set of overloads tailored to common usage patterns.",
             );
 
-            SubSection("Standard Elements (4 overloads)", () => {
+            SubSection("Standard Elements", () => {
               Paragraph(
                 "Used for semantic structure elements. Click each tab to see the different patterns for creating an article:",
               );
@@ -997,7 +944,7 @@ article({ class: "post" }, () => {
               );
             });
 
-            SubSection("Text Elements (11 overloads)", () => {
+            SubSection("Text Elements", () => {
               Paragraph(
                 "Optimized for elements that commonly hold text content. Click each tab to see different ways to create the same heading:",
               );
@@ -1086,7 +1033,7 @@ h1({ class: "hero" }, (el, onMount) => {
               );
             });
 
-            SubSection("Interactive Elements (10 overloads)", () => {
+            SubSection("Interactive Elements", () => {
               Paragraph(
                 "Special factories for interactive elements with convenient text + click handler shorthand:",
               );
@@ -1170,7 +1117,7 @@ button({ class: "btn", onclick: () => save() }, () => {
               Note("Elements: button, summary, option, optgroup.");
             });
 
-            SubSection("Void Elements (1 overload)", () => {
+            SubSection("Void Elements", () => {
               Paragraph("Self-closing elements that cannot have children.");
               CodeBlock(`// Props only (or empty)
 input();
