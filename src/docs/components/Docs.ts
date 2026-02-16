@@ -173,11 +173,78 @@ const CodeBlock = (content: string) =>
     },
   );
 
+// Toast notification for copy feedback
+const showToast = (message: string) => {
+  const toast = document.createElement("div");
+  toast.textContent = message;
+  Object.assign(toast.style, {
+    position: "fixed",
+    bottom: "2rem",
+    left: "50%",
+    transform: "translateX(-50%) translateY(20px)",
+    background: "var(--mongo-green)",
+    color: "var(--mongo-dark)",
+    padding: "0.75rem 1.5rem",
+    borderRadius: "8px",
+    fontWeight: "600",
+    fontSize: "0.875rem",
+    zIndex: "9999",
+    opacity: "0",
+    transition: "opacity 0.3s, transform 0.3s",
+    pointerEvents: "none",
+    boxShadow: "0 4px 20px rgba(0, 237, 100, 0.3)",
+  });
+  document.body.appendChild(toast);
+  requestAnimationFrame(() => {
+    toast.style.opacity = "1";
+    toast.style.transform = "translateX(-50%) translateY(0)";
+  });
+  setTimeout(() => {
+    toast.style.opacity = "0";
+    toast.style.transform = "translateX(-50%) translateY(20px)";
+    setTimeout(() => toast.remove(), 300);
+  }, 2000);
+};
+
+// Anchor link icon for headers — updates URL hash and copies link to clipboard
+const AnchorLink = (id: string) => {
+  a({
+    href: `#${id}`,
+    ariaLabel: "Link to this section",
+    style: {
+      opacity: "0",
+      marginLeft: "0.5rem",
+      color: "var(--text-tertiary)",
+      textDecoration: "none",
+      fontSize: "0.75em",
+      transition: "opacity 0.2s, color 0.2s",
+      cursor: "pointer",
+      flexShrink: "0",
+    },
+    className: "anchor-link",
+    textContent: "🔗",
+    onclick: (e) => {
+      e.preventDefault();
+      history.replaceState(null, "", `#${id}`);
+      const url = window.location.href;
+      navigator.clipboard.writeText(url).then(() => {
+        showToast("✓ Link copied to clipboard");
+      });
+      const target = document.getElementById(id);
+      if (target) {
+        const offset = 100;
+        const targetPosition = target.getBoundingClientRect().top + window.scrollY - offset;
+        window.scrollTo({ top: targetPosition, behavior: "smooth" });
+      }
+    },
+  });
+};
+
 const Section = (title: string, id: string, children: () => void) => {
   section(
     {
       id,
-      class: "animate-fade-up",
+      class: "animate-fade-up heading-group",
       style: { marginBottom: "var(--spacing-xl)", scrollMarginTop: "120px" },
     },
     () => {
@@ -208,6 +275,7 @@ const Section = (title: string, id: string, children: () => void) => {
             },
             textContent: title,
           });
+          AnchorLink(id);
         },
       );
       children();
@@ -216,11 +284,12 @@ const Section = (title: string, id: string, children: () => void) => {
 };
 
 const SubSection = (title: string, idOrChildren: string | (() => void), children?: () => void) => {
-  const id = typeof idOrChildren === 'string' ? idOrChildren : undefined;
+  const id = typeof idOrChildren === 'string' ? idOrChildren : title.toLowerCase().replace(/\s+/g, "-");
   const childrenFn = typeof idOrChildren === 'function' ? idOrChildren : children!;
 
   div(
     {
+      class: "heading-group",
       style: {
         marginBottom: "3rem",
         paddingBottom: "2rem",
@@ -228,42 +297,59 @@ const SubSection = (title: string, idOrChildren: string | (() => void), children
       },
     },
     () => {
-      const h3Props: any = {
-        style: {
-          color: "var(--mongo-green)",
-          fontSize: "1.5rem",
-          marginBottom: "1.5rem",
+      div(
+        {
+          style: {
+            display: "flex",
+            alignItems: "center",
+            marginBottom: "1.5rem",
+          },
         },
-        textContent: title,
-      };
-      if (id) {
-        h3Props.id = id;
-      }
-      h3(h3Props);
+        () => {
+          h3({
+            id,
+            style: {
+              color: "var(--mongo-green)",
+              fontSize: "1.5rem",
+              scrollMarginTop: "120px",
+            },
+            textContent: title,
+          });
+          AnchorLink(id);
+        },
+      );
       childrenFn();
     },
   );
 };
 
 const SubSubSection = (title: string, idOrChildren: string | (() => void), children?: () => void) => {
-  const id = typeof idOrChildren === 'string' ? idOrChildren : undefined;
+  const id = typeof idOrChildren === 'string' ? idOrChildren : title.toLowerCase().replace(/\s+/g, "-");
   const childrenFn = typeof idOrChildren === 'function' ? idOrChildren : children!;
 
-  div({ style: { marginBottom: "1.5rem" } }, () => {
-    const h4Props: any = {
-      style: {
-        fontSize: "1.2rem",
-        marginBottom: "0.75rem",
-        color: "var(--mongo-white)",
-        fontWeight: "600",
-        scrollMarginTop: "120px",
+  div({ class: "heading-group", style: { marginBottom: "1.5rem" } }, () => {
+    div(
+      {
+        style: {
+          display: "flex",
+          alignItems: "center",
+          marginBottom: "0.75rem",
+        },
       },
-      textContent: title,
-    };
-    if (id) {
-      h4Props.id = id;
-    }
-    h4(h4Props);
+      () => {
+        h4({
+          id,
+          style: {
+            fontSize: "1.2rem",
+            color: "var(--mongo-white)",
+            fontWeight: "600",
+            scrollMarginTop: "120px",
+          },
+          textContent: title,
+        });
+        AnchorLink(id);
+      },
+    );
     childrenFn();
   });
 };

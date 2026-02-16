@@ -296,3 +296,13 @@ html {
 section[id] {
     scroll-margin-top: 120px;
 }
+
+/* Show anchor link icon on hover */
+.heading-group:hover .anchor-link {
+    opacity: 0.6 !important;
+}
+
+.heading-group .anchor-link:hover {
+    opacity: 1 !important;
+    color: var(--mongo-green) !important;
+}
