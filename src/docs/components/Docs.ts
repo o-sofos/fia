@@ -1300,26 +1300,41 @@ const userSignal = $(Mut({ name: "Evan" })); // If the signal itself is mutable
               );
             });
             SubSection("Each", "control-flow-each", () => {
-              Paragraph("High-performance keyed list rendering with efficient reconciliation. Minimizes DOM operations by reusing existing nodes instead of recreating them.");
+              Paragraph("High-performance keyed list rendering with efficient reconciliation. Each automatically assigns stable keys to items - no key function needed! Minimizes DOM operations by reusing existing nodes instead of recreating them.");
 
-              SubSubSection("Basic Usage", () => {
-                Paragraph("Simple list rendering without key function:");
-                CodeBlock(`const items = $({ list: ["Apple", "Banana", "Cherry"] });
-
-// Re-renders when list changes
+              SubSubSection("Automatic Key Assignment", () => {
+                Paragraph("Each automatically assigns stable keys to both primitives and objects:");
+                CodeBlock(`// Primitives: automatically keyed by value
+const items = $({ list: ["Apple", "Banana", "Cherry"] });
 Each(() => items.list, (item, index) => {
   li({ textContent: \`\${index + 1}. \${item}\` });
-});`);
-              });
+});
 
-              SubSubSection("With Key Function (Recommended)", () => {
-                Paragraph("For dynamic lists (add/remove/reorder), use a key function to preserve DOM nodes and component state:");
-                CodeBlock(`const todos = $({ items: [
+// Objects: automatically get stable internal IDs (via WeakMap)
+const todos = $({ items: [
   { id: 1, text: "Learn Fia", completed: false },
   { id: 2, text: "Build app", completed: false }
 ] });
 
-// Use stable ID as key
+Each(() => todos.items, (todo) => {
+  li(() => {
+    input({
+      type: "checkbox",
+      checked: todo.completed,
+      onchange: (e) => {
+        todo.completed = e.currentTarget.checked;
+      }
+    });
+    span({ textContent: todo.text });
+  });
+});
+// ✅ No key function needed - automatic stable IDs!
+// ✅ State, focus, scroll position preserved`);
+              });
+
+              SubSubSection("Custom Key Function (Optional)", () => {
+                Paragraph("For explicit control (e.g., database IDs), provide a custom key function:");
+                CodeBlock(`// Optional: use database ID as key
 Each(
   () => todos.items,
   (todo) => {
@@ -1334,15 +1349,14 @@ Each(
       span({ textContent: todo.text });
     });
   },
-  (todo) => todo.id  // ✅ Key function
-);
+  (todo) => todo.id  // Optional: custom key function
+);`);
 
-// Add item: Only creates 1 new node
-todos.items = [...todos.items, { id: 3, text: "Deploy", completed: false }];`);
+                Note("How automatic keying works: Objects get stable internal IDs via WeakMap (no memory leaks). Primitives are keyed by type:value. Custom keyFn takes precedence when provided.", "info");
               });
 
               SubSubSection("Performance Characteristics", () => {
-                Paragraph("Each uses keyed reconciliation to achieve O(1) performance for common operations:");
+                Paragraph("Each uses keyed reconciliation (automatic or custom) to achieve O(1) performance for common operations:");
 
                 Note("Add 1 item to 1000: O(1) - creates 1 node (~0.5ms)", "info");
                 Note("Remove 1 item from 1000: O(1) - removes 1 node (~0.3ms)", "info");
@@ -1352,35 +1366,38 @@ todos.items = [...todos.items, { id: 3, text: "Deploy", completed: false }];`);
                 CodeBlock(`// Performance comparison
 const items = Array(1000).fill(0).map((_, i) => ({ id: i, value: i }));
 
-// Without key function:
-// - Adding 1 item: Recreates all 1001 nodes (~150ms)
-// - Input focus is lost
+// Old approach (no keying):
+// - Adding 1 item: Recreates all 1001 nodes (~150ms) - 300x slower!
+// - Input focus is lost ❌
 
-// With key function:
+// Fia Each (automatic keying):
 // - Adding 1 item: Creates 1 node (~0.5ms)
-// - Input focus is preserved ✅`);
+// - Input focus is preserved ✅
+// - State and scroll position preserved ✅`);
               });
 
-              SubSubSection("Key Function Best Practices", () => {
-                Paragraph("Choose stable, unique keys for optimal performance:");
+              SubSubSection("Custom Key Function Best Practices", () => {
+                Paragraph("While automatic keying works great, you may want custom keys for specific use cases:");
 
-                CodeBlock(`// ✅ Good: Use database ID
+                CodeBlock(`// ✅ Good: Database ID (explicit control)
 (item) => item.id
 
-// ✅ Good: Use UUID
+// ✅ Good: UUID (distributed systems)
 (item) => item.uuid
 
-// ✅ Good: Composite key
+// ✅ Good: Composite key (multi-field uniqueness)
 (item) => \`\${item.category}-\${item.slug}\`
 
-// ❌ Bad: Index (defeats the purpose)
+// ❌ Bad: Index (automatic keying is better)
 (item, index) => index
 
-// ❌ Bad: Random number
+// ❌ Bad: Random number (never reuses nodes)
 (item) => Math.random()
 
-// ❌ Bad: Non-unique field
-(item) => item.category  // Multiple items can share category`);
+// ❌ Bad: Non-unique field (causes collisions)
+(item) => item.category`);
+
+                Note("When to use custom keys: Database objects with existing IDs, cross-system synchronization, debugging (readable keys in DevTools). When automatic keying is fine: Most common cases, primitive arrays, local component state.", "tip");
               });
 
               SubSubSection("Real-World Example", () => {
@@ -1434,11 +1451,11 @@ div(() => {
 
               SubSubSection("Performance Tips", () => {
                 List([
-                  "Always use key function for lists that can be modified",
-                  "Use stable IDs (database ID, UUID) as keys",
-                  "Avoid using index as key unless list is append-only",
+                  "Automatic keying works for most use cases (objects get stable IDs, primitives keyed by value)",
+                  "Use custom key function for explicit control (database IDs, cross-system sync)",
+                  "Custom keys are optional but useful for debugging (readable keys in DevTools)",
                   "Batch multiple updates with batch() for better performance",
-                  "Key function is optional for simple, static lists"
+                  "Same O(1) performance whether using automatic or custom keys"
                 ]);
               });
             });

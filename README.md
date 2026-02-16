@@ -612,28 +612,45 @@ Show(() => data.loading, {
 
 High-performance keyed list rendering with efficient reconciliation. Each minimizes DOM operations by reusing existing nodes instead of recreating them.
 
-#### Basic Usage
+#### Automatic Key Assignment
+
+Each **automatically assigns stable keys** to list items - no key function needed! This works for both objects and primitives:
 
 ```typescript
 import { Each } from "fia";
 
+// Primitives: automatically keyed by value
 const items = $({ list: ["Apple", "Banana", "Cherry"] });
-
 Each(() => items.list, (item, index) => {
   li({ textContent: `${index + 1}. ${item}` });
 });
-```
 
-#### With Key Function (Recommended)
-
-For dynamic lists where items can be added, removed, or reordered, use a key function to preserve DOM nodes and component state:
-
-```typescript
+// Objects: automatically get stable internal IDs (via WeakMap)
 const todos = $({ items: [
   { id: 1, text: "Learn Fia", completed: false },
   { id: 2, text: "Build app", completed: false }
 ] });
 
+Each(() => todos.items, (todo) => {
+  li(() => {
+    input({
+      type: "checkbox",
+      checked: todo.completed,
+      onchange: (e) => { todo.completed = e.currentTarget.checked; }
+    });
+    span({ textContent: todo.text });
+  });
+});
+// ✅ Objects automatically get stable IDs - no keyFn needed!
+// ✅ State, focus, and scroll position preserved on updates
+```
+
+#### Custom Key Function (Optional)
+
+For explicit control (e.g., database IDs), you can provide a custom key function:
+
+```typescript
+// Provide custom key function for explicit ID control
 Each(
   () => todos.items,
   (todo) => {
@@ -641,26 +658,28 @@ Each(
       input({
         type: "checkbox",
         checked: todo.completed,
-        onchange: (e) => {
-          todo.completed = e.currentTarget.checked;
-        }
+        onchange: (e) => { todo.completed = e.currentTarget.checked; }
       });
       span({ textContent: todo.text });
     });
   },
-  (todo) => todo.id  // ✅ Stable unique key
+  (todo) => todo.id  // Optional: use database ID as key
 );
+```
 
-// Add item: Only creates 1 new node (not 1001!)
-todos.items = [...todos.items, { id: 3, text: "Deploy", completed: false }];
+**How Automatic Keying Works:**
+- **Objects**: Assigned stable internal IDs via WeakMap (no memory leaks, automatic garbage collection)
+- **Primitives**: Keyed by `type:value` (e.g., "string:Apple", "number:42")
+- **Custom keyFn**: Takes precedence when provided (useful for database IDs)
+- **Performance**: Same O(1) operations whether automatic or custom keys are used
 ```
 
 #### Performance Characteristics
 
-Each uses keyed reconciliation to achieve **O(1) performance** for common operations:
+Each uses keyed reconciliation (automatic or custom keys) to achieve **O(1) performance** for common operations:
 
-| Operation | Without Key | With Key | Improvement |
-|-----------|-------------|----------|-------------|
+| Operation | Old Approach (No Keying) | Fia Each (Keyed) | Improvement |
+|-----------|--------------------------|------------------|-------------|
 | Add 1 item to 1000 | ~150ms<br>(recreates 1001) | ~0.5ms<br>(creates 1) | **300x faster** |
 | Remove 1 item | ~145ms<br>(recreates 999) | ~0.3ms<br>(removes 1) | **480x faster** |
 | Move/reorder item | ~30ms<br>(recreates all) | ~0.2ms<br>(moves node) | **150x faster** |
@@ -673,23 +692,25 @@ Each uses keyed reconciliation to achieve **O(1) performance** for common operat
 - ✅ Component state
 - ✅ CSS animations
 
-#### Key Function Best Practices
+#### Custom Key Function Best Practices
 
-**✅ Good Keys:**
+While automatic keying works great, you may want custom keys for specific use cases:
+
+**✅ Good Custom Keys:**
 ```typescript
-// Database ID (best)
+// Database ID (explicit control)
 (item) => item.id
 
-// UUID
+// UUID (for distributed systems)
 (item) => item.uuid
 
-// Composite unique identifier
+// Composite unique identifier (multi-field uniqueness)
 (item) => `${item.category}-${item.slug}`
 ```
 
-**❌ Bad Keys:**
+**❌ Bad Custom Keys:**
 ```typescript
-// Index (defeats the purpose)
+// Index (automatic keying is better)
 (item, index) => index
 
 // Random (never reuses nodes)
@@ -698,6 +719,16 @@ Each uses keyed reconciliation to achieve **O(1) performance** for common operat
 // Non-unique (causes collisions)
 (item) => item.category
 ```
+
+**When to use custom keys:**
+- Database objects with existing IDs (explicit control)
+- Cross-system synchronization (predictable keys)
+- Debugging (readable keys in DevTools)
+
+**When automatic keying is fine:**
+- Most common cases (objects automatically get stable IDs)
+- Primitive arrays (strings, numbers automatically keyed)
+- Local component state (no external ID requirements)
 
 #### Real-World Example
 
