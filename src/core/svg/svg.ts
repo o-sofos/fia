@@ -1,4 +1,6 @@
 /**
+ * @module @fia/core/svg
+ *
  * Fia SVG Elements
  *
  * Factory functions for SVG elements with full TypeScript support.
