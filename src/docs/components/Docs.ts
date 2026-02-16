@@ -16,6 +16,7 @@ import {
   $,
   Mut,
 } from "fia";
+import { TabbedExample } from "./TabbedExample";
 
 // Helper to append text nodes
 const t = (text: string) => {
@@ -700,25 +701,43 @@ br();`);
 
             SubSection("Standard Elements (4 overloads)", () => {
               Paragraph(
-                "Used for semantic structure elements. These factories support the base patterns:",
+                "Used for semantic structure elements. Click each tab to see the different patterns for creating an article:",
               );
-              CodeBlock(`// 1. Empty element
-article();
 
-// 2. Props only
-article({ id: "post-1", class: "article" });
-
-// 3. Children only
+              TabbedExample([
+                {
+                  label: "Empty",
+                  code: `// Overload 1: Empty element
+article();`
+                },
+                {
+                  label: "Props Only",
+                  code: `// Overload 2: Props only
+article({ 
+  id: "post-1", 
+  class: "article",
+  role: "article"
+});`
+                },
+                {
+                  label: "Children",
+                  code: `// Overload 3: Children callback only
 article(() => {
-  h2("Title");
-  p("Content");
-});
-
-// 4. Props + children (most common)
+  h2("Article Title");
+  p("Article content goes here...");
+});`
+                },
+                {
+                  label: "Props + Children",
+                  code: `// Overload 4: Props + children (most common) ⭐
 article({ class: "post" }, () => {
   h2("Article Title");
   p("Article body...");
-});`);
+  footer("Published: 2024");
+});`
+                }
+              ]);
+
               Note(
                 "Elements: article, section, nav, form, ul, ol, table, canvas, video, and more.",
               );
@@ -726,26 +745,88 @@ article({ class: "post" }, () => {
 
             SubSection("Text Elements (11 overloads)", () => {
               Paragraph(
-                "Optimized for elements that commonly hold text content with convenient text-first syntax.",
+                "Optimized for elements that commonly hold text content. Click each tab to see different ways to create the same heading:",
               );
-              CodeBlock(`// All standard overloads plus text shortcuts:
 
-// 5. Text content (static or reactive)
-h1("Hello World");
-h1($(() => \`Count: \${count.value}\`));
+              TabbedExample([
+                {
+                  label: "Empty",
+                  code: `// Overload 1: Empty element
+h1();`
+                },
+                {
+                  label: "Props Only",
+                  code: `// Overload 2: Props only
+h1({ 
+  class: "title", 
+  style: { color: "blue", fontSize: "32px" } 
+});`
+                },
+                {
+                  label: "Children",
+                  code: `// Overload 3: Children callback
+h1(() => {
+  span("Welcome ");
+  strong("User");
+});`
+                },
+                {
+                  label: "Props + Children",
+                  code: `// Overload 4: Props + children
+h1({ class: "hero" }, () => {
+  span("Welcome ", { class: "greeting" });
+  strong("User");
+});`
+                },
+                {
+                  label: "Text Content",
+                  code: `// Overload 5: Text content shorthand ⭐
+h1("Welcome User");
 
-// 6. Text + props
-h1("Hello", { class: "title", style: { color: "blue" } });
-
-// 7. Text + children
-h1("Header", () => {
-  span("with nested content");
+// Also works with signals:
+const user = $(Mut("User"));
+h1($(() => \`Welcome \${user.value}\`));`
+                },
+                {
+                  label: "Text + Props",
+                  code: `// Overload 6: Text + props ⭐
+h1("Welcome User", { 
+  class: "hero", 
+  id: "main-heading" 
+});`
+                },
+                {
+                  label: "Text + Children",
+                  code: `// Overload 7: Text + children
+h1("Welcome", () => {
+  strong(" User");
+});`
+                },
+                {
+                  label: "All Three",
+                  code: `// Overload 8: Text + props + children ⭐
+h1("Welcome", { class: "hero" }, () => {
+  strong(" User");
+});`
+                },
+                {
+                  label: "onMount",
+                  code: `// Overload 9-11: With onMount callback
+h1((el, onMount) => {
+  el.textContent = "Welcome User";
+  onMount(() => {
+    console.log("Height:", el.offsetHeight);
+  });
 });
 
-// 8. Text + props + children (all three!)
-h1("Main Title", { class: "hero" }, () => {
-  span("subtitle", { class: "sub" });
-});`);
+// Or with props:
+h1({ class: "hero" }, (el, onMount) => {
+  el.textContent = "Welcome User";
+  onMount(() => el.scrollIntoView());
+});`
+                }
+              ]);
+
               Note(
                 "Elements: h1-h6, p, div, span, label, li, td, th, strong, em, code, and more.",
               );
@@ -753,21 +834,85 @@ h1("Main Title", { class: "hero" }, () => {
 
             SubSection("Interactive Elements (10 overloads)", () => {
               Paragraph(
-                "Special factories for interactive elements with text + click handler shorthand.",
+                "Special factories for interactive elements with convenient text + click handler shorthand:",
               );
-              CodeBlock(`// All text element overloads plus click shorthand:
 
-// 9. Text + click handler shorthand (special!)
+              TabbedExample([
+                {
+                  label: "Text + Click ⭐⭐",
+                  code: `// Text + click handler shorthand
+// The MOST convenient pattern!
 button("Delete", () => {
-  console.log("Delete clicked!");
+  confirmDelete();
 });
 
-// Equivalent full props version:
+button("Save", () => save());
+
+// Equivalent to:
 button({
   textContent: "Delete",
-  onclick: () => console.log("Delete clicked!"),
-  class: "btn-danger"
-});`);
+  onclick: () => confirmDelete()
+});`
+                },
+                {
+                  label: "Text + Props",
+                  code: `// Text + props
+button("Submit", { 
+  class: "btn-primary",
+  type: "submit",
+  disabled: false
+});
+
+// With reactive props
+button("Submit", {
+  class: "btn-primary",
+  disabled: $(() => !isValid.value)
+});`
+                },
+                {
+                  label: "Text + Children",
+                  code: `// Text + children callback
+button("Delete", () => {
+  span({ class: "icon" }, () => t("🗑️"));
+});
+
+button("Menu", () => {
+  span(menuIcon);
+  span("Options");
+});`
+                },
+                {
+                  label: "Text + Props + Children",
+                  code: `// Text + props + children
+button("Delete", { class: "btn-danger" }, () => {
+  span({ class: "icon" }, () => t("🗑️"));
+  span("Delete Item");
+});`
+                },
+                {
+                  label: "Props Only",
+                  code: `// Props only (standard element pattern)
+button({
+  textContent: "Click",
+  class: "btn",
+  onclick: () => handleClick()
+});`
+                },
+                {
+                  label: "Props + Children",
+                  code: `// Props + children (standard element pattern)
+button({ class: "btn-danger" }, () => {
+  span({ class: "icon" }, () => t("🗑️"));
+  span("Delete");
+});
+
+// Note: onclick goes in props, not as 3rd arg!
+button({ class: "btn", onclick: () => save() }, () => {
+  span("Save");
+});`
+                }
+              ]);
+
               Note("Elements: button, summary, option, optgroup.");
             });
 
@@ -958,13 +1103,78 @@ const userSignal = $(Mut({ name: "Evan" })); // If the signal itself is mutable
               CodeBlock(`const items = $({ list: ["Apple", "Banana"] });
 Each(items.list, item => li(item));`);
             });
-            SubSection("Match", () => {
-              Paragraph("Reactive pattern matching for switch/case logic.");
-              CodeBlock(`Match(() => status.value, {
-  loading: () => p("Loading..."),
-  success: () => div({ textContent: "Data loaded!" }),
-  _: () => p({ textContent: "Unknown state" }),
+            SubSection("Match (2 overloads)", () => {
+              Paragraph("Reactive pattern matching for switch/case logic. Match has two overloads based on whether a default case is provided.");
+
+              SubSubSection("Overload 1: With default case '_' (returns Signal<R>)", () => {
+                Paragraph("When you provide a default '_' case, the result is never undefined:");
+                CodeBlock(`// ✅ Signal<string> (no undefined!)
+const message: Signal<string> = Match(status, {
+  "loading": () => "Loading...",
+  "success": () => "Done!",
+  "error": () => "Failed!",
+  _: () => "Unknown"  // Default case eliminates undefined
+});
+
+// Works as TextContent (requires Signal<string | number>)
+p(Match(currentTab, {
+  "0": () => "Home",
+  "1": () => "About", 
+  "2": () => "Contact",
+  _: () => "404"
+}));`);
+              });
+
+              SubSubSection("Overload 2: Without default case (returns Signal<R | undefined>)", () => {
+                Paragraph("Without a default case, the result can be undefined if no case matches:");
+                CodeBlock(`// Signal<string | undefined>
+const message = Match(status, {
+  "loading": () => "Loading...",
+  "success": () => "Done!"
+  // No default - returns undefined if status is neither
+});
+
+// Use with Show to handle undefined
+Show(() => message.value !== undefined, () => {
+  p(message.value!);
 });`);
+              });
+
+              SubSubSection("Pass signals directly", () => {
+                Paragraph("Match accepts both signals and getter functions:");
+                CodeBlock(`const activeTab = $(Mut(0));
+
+// ✅ Pass signal directly
+Match(activeTab, {
+  "0": () => div("Home"),
+  "1": () => div("About")
+});
+
+// ✅ Or use getter function
+Match(() => activeTab.value, {
+  "0": () => div("Home"),
+  "1": () => div("About")
+});`);
+              });
+
+              SubSubSection("String key normalization", () => {
+                Paragraph("All keys are automatically converted to strings for consistent matching:");
+                CodeBlock(`const count = $(Mut(0));
+
+// Boolean values → string keys
+Match(isActive, {
+  "true": () => "Active",   // Matches boolean true
+  "false": () => "Inactive" // Matches boolean false
+});
+
+// Number values → string keys  
+Match(count, {
+  "0": () => "None",
+  "1": () => "One",
+  "2": () => "Two",
+  _: () => "Many"
+});`);
+              });
             });
           });
 
