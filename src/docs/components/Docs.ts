@@ -215,32 +215,56 @@ const Section = (title: string, id: string, children: () => void) => {
   );
 };
 
-const SubSection = (title: string, children: () => void) => {
-  div({ style: { marginBottom: "2.5rem" } }, () => {
-    h3({
+const SubSection = (title: string, idOrChildren: string | (() => void), children?: () => void) => {
+  const id = typeof idOrChildren === 'string' ? idOrChildren : undefined;
+  const childrenFn = typeof idOrChildren === 'function' ? idOrChildren : children!;
+
+  div(
+    {
       style: {
-        fontSize: "1.5rem",
-        marginBottom: "1rem",
-        color: "var(--mongo-green)",
+        marginBottom: "3rem",
+        paddingBottom: "2rem",
+        borderBottom: "1px solid var(--border-subtle)",
       },
-      textContent: title,
-    });
-    children();
-  });
+    },
+    () => {
+      const h3Props: any = {
+        style: {
+          color: "var(--mongo-green)",
+          fontSize: "1.5rem",
+          marginBottom: "1.5rem",
+        },
+        textContent: title,
+      };
+      if (id) {
+        h3Props.id = id;
+      }
+      h3(h3Props);
+      childrenFn();
+    },
+  );
 };
 
-const SubSubSection = (title: string, children: () => void) => {
+const SubSubSection = (title: string, idOrChildren: string | (() => void), children?: () => void) => {
+  const id = typeof idOrChildren === 'string' ? idOrChildren : undefined;
+  const childrenFn = typeof idOrChildren === 'function' ? idOrChildren : children!;
+
   div({ style: { marginBottom: "1.5rem" } }, () => {
-    h4({
+    const h4Props: any = {
       style: {
         fontSize: "1.2rem",
         marginBottom: "0.75rem",
         color: "var(--mongo-white)",
         fontWeight: "600",
+        scrollMarginTop: "120px",
       },
       textContent: title,
-    });
-    children();
+    };
+    if (id) {
+      h4Props.id = id;
+    }
+    h4(h4Props);
+    childrenFn();
   });
 };
 
@@ -300,7 +324,23 @@ const sections = [
   { id: "element-factory-types", title: "Element Factory Types" },
   { id: "reactivity", title: "Reactivity" },
   { id: "immutability", title: "Immutability" },
-  { id: "control-flow", title: "Control Flow" },
+  {
+    id: "control-flow",
+    title: "Control Flow",
+    children: [
+      { id: "control-flow-show", title: "Show" },
+      { id: "control-flow-each", title: "Each" },
+      {
+        id: "control-flow-match",
+        title: "Match",
+        children: [
+          { id: "match-strings", title: "Strings" },
+          { id: "match-booleans", title: "Booleans" },
+          { id: "match-numbers", title: "Numbers" },
+        ]
+      },
+    ]
+  },
   { id: "components", title: "Components" },
 
   { id: "performance", title: "Performance" },
@@ -311,16 +351,37 @@ const TableOfContents = () => {
   const activeSection = $(Mut("intro"));
 
   // Track scroll position to highlight active section
-  const handleScroll = () => {
-    const scrollPosition = window.scrollY + 150; // Offset for navbar
-
-    for (let i = sections.length - 1; i >= 0; i--) {
-      const section = document.getElementById(sections[i].id);
-      if (section && section.offsetTop <= scrollPosition) {
-        activeSection.value = sections[i].id;
-        break;
+  // Flatten all IDs from sections, children, and grandchildren
+  const allIds: string[] = [];
+  for (const s of sections) {
+    allIds.push(s.id);
+    if ((s as any).children) {
+      for (const c of (s as any).children as any[]) {
+        allIds.push(c.id);
+        if (c.children) {
+          for (const gc of c.children as any[]) {
+            allIds.push(gc.id);
+          }
+        }
       }
     }
+  }
+
+  const handleScroll = () => {
+    const scrollPosition = window.scrollY + 150;
+    let bestId = allIds[0];
+
+    for (const id of allIds) {
+      const el = document.getElementById(id);
+      if (el) {
+        const top = el.getBoundingClientRect().top + window.scrollY;
+        if (top <= scrollPosition) {
+          bestId = id;
+        }
+      }
+    }
+
+    activeSection.value = bestId;
   };
 
   // Setup scroll listener on mount
@@ -369,13 +430,30 @@ const TableOfContents = () => {
           ul(
             { style: { listStyle: "none", padding: "0", margin: "0" } },
             () => {
+              // Helper: collect all descendant IDs for a section
+              const getDescendantIds = (s: any): string[] => {
+                const ids: string[] = [];
+                if (s.children) {
+                  for (const c of s.children) {
+                    ids.push(c.id);
+                    ids.push(...getDescendantIds(c));
+                  }
+                }
+                return ids;
+              };
+
               sections.forEach((section) => {
+                const descendantIds = getDescendantIds(section);
+                const isSectionActive = () =>
+                  activeSection.value === section.id ||
+                  descendantIds.includes(activeSection.value);
+
                 li({ style: { marginBottom: "0.5rem" } }, () => {
                   a({
                     href: `#${section.id}`,
                     style: {
                       color: $(() =>
-                        activeSection.value === section.id
+                        isSectionActive()
                           ? "var(--mongo-green)"
                           : "var(--text-secondary)",
                       ),
@@ -385,10 +463,10 @@ const TableOfContents = () => {
                       padding: "0.25rem 0",
                       transition: "color 0.2s",
                       fontWeight: $(() =>
-                        activeSection.value === section.id ? "600" : "400",
+                        isSectionActive() ? "600" : "400",
                       ),
                       borderLeft: $(() =>
-                        activeSection.value === section.id
+                        isSectionActive()
                           ? "2px solid var(--mongo-green)"
                           : "2px solid transparent",
                       ),
@@ -401,7 +479,7 @@ const TableOfContents = () => {
                       const target = document.getElementById(section.id);
                       if (target) {
                         const offset = 100;
-                        const targetPosition = target.offsetTop - offset;
+                        const targetPosition = target.getBoundingClientRect().top + window.scrollY - offset;
                         window.scrollTo({
                           top: targetPosition,
                           behavior: "smooth",
@@ -410,6 +488,96 @@ const TableOfContents = () => {
                       }
                     },
                   });
+
+                  // Render nested children if present
+                  if ((section as any).children) {
+                    ul(
+                      { style: { listStyle: "none", padding: "0", marginTop: "0.5rem" } },
+                      () => {
+                        ((section as any).children as any[]).forEach((child: any) => {
+                          li({ style: { marginBottom: "0.25rem" } }, () => {
+                            a({
+                              href: `#${child.id}`,
+                              style: {
+                                color: $(() =>
+                                  activeSection.value === child.id
+                                    ? "var(--mongo-green)"
+                                    : "var(--text-tertiary)",
+                                ),
+                                textDecoration: "none",
+                                fontSize: "0.8rem",
+                                display: "block",
+                                padding: "0.25rem 0 0.25rem 1.5rem",
+                                transition: "color 0.2s",
+                                fontWeight: $(() =>
+                                  activeSection.value === child.id ? "600" : "400",
+                                ),
+                              },
+                              textContent: child.title,
+                              onclick: (e) => {
+                                e.preventDefault();
+                                const target = document.getElementById(child.id);
+                                if (target) {
+                                  const offset = 100;
+                                  const targetPosition = target.getBoundingClientRect().top + window.scrollY - offset;
+                                  window.scrollTo({
+                                    top: targetPosition,
+                                    behavior: "smooth",
+                                  });
+                                }
+                                activeSection.value = child.id;
+                              },
+                            });
+
+                            // Render 2nd level nested children if present (for Match subsections)
+                            if ((child as any).children) {
+                              ul(
+                                { style: { listStyle: "none", padding: "0", marginTop: "0.25rem" } },
+                                () => {
+                                  ((child as any).children as any[]).forEach((grandchild: any) => {
+                                    li({ style: { marginBottom: "0.25rem" } }, () => {
+                                      a({
+                                        href: `#${grandchild.id}`,
+                                        style: {
+                                          color: $(() =>
+                                            activeSection.value === grandchild.id
+                                              ? "var(--mongo-green)"
+                                              : "var(--text-tertiary)",
+                                          ),
+                                          textDecoration: "none",
+                                          fontSize: "0.75rem",
+                                          display: "block",
+                                          padding: "0.25rem 0 0.25rem 3rem",
+                                          transition: "color 0.2s",
+                                          fontWeight: $(() =>
+                                            activeSection.value === grandchild.id ? "600" : "400",
+                                          ),
+                                        },
+                                        textContent: grandchild.title,
+                                        onclick: (e) => {
+                                          e.preventDefault();
+                                          const target = document.getElementById(grandchild.id);
+                                          if (target) {
+                                            const offset = 100;
+                                            const targetPosition = target.getBoundingClientRect().top + window.scrollY - offset;
+                                            window.scrollTo({
+                                              top: targetPosition,
+                                              behavior: "smooth",
+                                            });
+                                          }
+                                          activeSection.value = grandchild.id;
+                                        },
+                                      });
+                                    });
+                                  });
+                                }
+                              );
+                            }
+                          });
+                        });
+                      }
+                    );
+                  }
                 });
               });
             },
@@ -1090,7 +1258,7 @@ const userSignal = $(Mut({ name: "Evan" })); // If the signal itself is mutable
           });
 
           Section("Control Flow", "control-flow", () => {
-            SubSection("Show", () => {
+            SubSection("Show", "control-flow-show", () => {
               Paragraph(
                 "Conditionally render content that updates when the condition changes.",
               );
@@ -1098,82 +1266,89 @@ const userSignal = $(Mut({ name: "Evan" })); // If the signal itself is mutable
                 `Show(() => isVisible.value, () => div("Hello!"));`,
               );
             });
-            SubSection("Each", () => {
+            SubSection("Each", "control-flow-each", () => {
               Paragraph("Reactive list rendering that re-renders efficiently.");
               CodeBlock(`const items = $({ list: ["Apple", "Banana"] });
 Each(items.list, item => li(item));`);
             });
-            SubSection("Match (2 overloads)", () => {
-              Paragraph("Reactive pattern matching for switch/case logic. Match has two overloads based on whether a default case is provided.");
+            SubSection("Match", "control-flow-match", () => {
+              Paragraph("Reactive pattern matching for switch/case logic. Automatically updates rendering when the matched value changes.");
 
-              SubSubSection("Overload 1: With default case '_' (returns Signal<R>)", () => {
-                Paragraph("When you provide a default '_' case, the result is never undefined:");
-                CodeBlock(`// ✅ Signal<string> (no undefined!)
-const message: Signal<string> = Match(status, {
-  "loading": () => "Loading...",
-  "success": () => "Done!",
-  "error": () => "Failed!",
-  _: () => "Unknown"  // Default case eliminates undefined
-});
+              Paragraph("Match accepts signals or getter functions, and returns Signal<R> with '_' default or Signal<R | undefined> without.");
 
-// Works as TextContent (requires Signal<string | number>)
-p(Match(currentTab, {
-  "0": () => "Home",
-  "1": () => "About", 
-  "2": () => "Contact",
-  _: () => "404"
-}));`);
-              });
 
-              SubSubSection("Overload 2: Without default case (returns Signal<R | undefined>)", () => {
-                Paragraph("Without a default case, the result can be undefined if no case matches:");
-                CodeBlock(`// Signal<string | undefined>
-const message = Match(status, {
-  "loading": () => "Loading...",
-  "success": () => "Done!"
-  // No default - returns undefined if status is neither
-});
+              SubSubSection("Strings", "match-strings", () => {
+                Paragraph("Match exact string values:");
+                CodeBlock(`const status = $(Mut("active"));
 
-// Use with Show to handle undefined
-Show(() => message.value !== undefined, () => {
-  p(message.value!);
+Match(status, {
+  "active": () => span({ class: "success" }, () => t("Active")),
+  "inactive": () => span({ class: "danger" }, () => t("Inactive")),
+  "pending": () => span({ class: "warning" }, () => t("Pending")),
+  _: () => span("Unknown")
 });`);
               });
 
-              SubSubSection("Pass signals directly", () => {
-                Paragraph("Match accepts both signals and getter functions:");
-                CodeBlock(`const activeTab = $(Mut(0));
+              SubSubSection("Booleans", "match-booleans", () => {
+                Paragraph("Boolean values are automatically converted to string keys:");
+                CodeBlock(`const isActive = $(Mut(true));
 
-// ✅ Pass signal directly
-Match(activeTab, {
-  "0": () => div("Home"),
-  "1": () => div("About")
-});
-
-// ✅ Or use getter function
-Match(() => activeTab.value, {
-  "0": () => div("Home"),
-  "1": () => div("About")
-});`);
-              });
-
-              SubSubSection("String key normalization", () => {
-                Paragraph("All keys are automatically converted to strings for consistent matching:");
-                CodeBlock(`const count = $(Mut(0));
-
-// Boolean values → string keys
 Match(isActive, {
-  "true": () => "Active",   // Matches boolean true
-  "false": () => "Inactive" // Matches boolean false
-});
+  "true": () => "✅ Active",
+  "false": () => "❌ Inactive"
+});`);
+              });
 
-// Number values → string keys  
+              SubSubSection("Numbers", "match-numbers", () => {
+                Paragraph("Numbers support exact matching:");
+                CodeBlock(`const count = $(Mut(2));
+
 Match(count, {
   "0": () => "None",
   "1": () => "One",
   "2": () => "Two",
   _: () => "Many"
 });`);
+
+                Paragraph("For numeric values, Match also supports range-based comparisons using operators and interval notation:");
+
+                CodeBlock(`const age = $(Mut(25));
+
+// Comparison operators
+Match(age, {
+  "<18": () => "Minor",
+  ">=18": () => "Adult",
+  ">65": () => "Senior",
+  _: () => "Invalid"
+});
+
+// Range notation (N..M is inclusive)
+Match(age, {
+  "0..17": () => "Child",       // 0 <= age <= 17
+  "18..64": () => "Adult",      // 18 <= age <= 64
+  "65..120": () => "Senior",    // 65 <= age <= 120
+  _: () => "Unknown"
+});
+
+// Interval notation: [] = inclusive, () = exclusive
+Match(age, {
+  "(0..13)": () => "Child",     // 0 < age < 13
+  "[13..18)": () => "Teen",     // 13 <= age < 18
+  "[18..65)": () => "Adult",    // 18 <= age < 65
+  "[65..120]": () => "Senior",  // 65 <= age <= 120
+  _: () => "Unknown"
+});
+
+// Mix comparison and range patterns
+Match(age, {
+  "<18": () => "Minor",
+  "[18..21)": () => "Young Adult",
+  "[21..65)": () => "Adult",
+  ">=65": () => "Senior",
+  _: () => "Unknown"
+});`);
+
+                Note("Range patterns only work with numeric values. Exact string matches are checked before range patterns.", "info");
               });
             });
           });
