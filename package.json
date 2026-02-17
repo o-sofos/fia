@@ -22,7 +22,12 @@
     "test": "bun test src/core",
     "test:types": "bun tsc --noEmit",
     "benchmark": "bun run scripts/benchmark.ts",
-    "build:docs": "bun build ./src/docs/main.ts --outdir ./docs --minify"
+    "build:docs": "bun build ./src/docs/main.ts --outdir ./docs --minify",
+    "bundle:full": "bun build --target=browser --minify --outdir=dist ./src/core/mod.ts",
+    "bundle:analyze": "bun build --target=browser --minify --analyze ./src/core/mod.ts",
+    "bundle:signals": "bun build --target=browser --minify --outdir=dist scripts/test-bundles/signals-only.ts",
+    "bundle:elements": "bun build --target=browser --minify --outdir=dist scripts/test-bundles/elements-only.ts",
+    "bundle:hello": "bun build --target=browser --minify --outdir=dist scripts/test-bundles/hello-world.ts"
   },
   "devDependencies": {
     "@happy-dom/global-registrator": "^20.1.0",
