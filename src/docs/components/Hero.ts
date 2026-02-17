@@ -122,7 +122,7 @@ export const Hero = () =>
           background:
             "linear-gradient(135deg, var(--fia-primary), var(--fia-accent))",
           opacity: "0.2",
-          boxShadow: "0 10px 30px rgba(0,237,100,0.2)",
+          boxShadow: "0 10px 30px rgba(var(--fia-brand-rgb),0.2)",
           zIndex: "0",
           transform: "rotate(45deg)",
         },

@@ -147,7 +147,7 @@ const showToast = (message: string) => {
     opacity: "0",
     transition: "opacity 0.3s, transform 0.3s",
     pointerEvents: "none",
-    boxShadow: "0 4px 20px rgba(0, 237, 100, 0.3)",
+    boxShadow: "0 4px 20px rgba(var(--fia-brand-rgb), 0.3)",
   });
   document.body.appendChild(toast);
   requestAnimationFrame(() => {
@@ -365,7 +365,7 @@ const Note = (c: string, type: "info" | "warning" = "info") =>
         background:
           type === "warning"
             ? "rgba(255, 189, 46, 0.1)"
-            : "rgba(0, 237, 100, 0.05)",
+            : "rgba(var(--fia-brand-rgb), 0.05)",
         borderLeft: `4px solid ${type === "warning" ? "#ffbd2e" : "var(--fia-primary)"}`,
         padding: "1rem",
         borderRadius: "0 0.5rem 0.5rem 0",
@@ -630,7 +630,7 @@ const TableOfContents = () => {
                                               style: {
                                                 color: $(() =>
                                                   activeSection.value ===
-                                                  grandchild.id
+                                                    grandchild.id
                                                     ? "var(--fia-primary)"
                                                     : "var(--text-tertiary)",
                                                 ),
@@ -642,7 +642,7 @@ const TableOfContents = () => {
                                                 transition: "color 0.2s",
                                                 fontWeight: $(() =>
                                                   activeSection.value ===
-                                                  grandchild.id
+                                                    grandchild.id
                                                     ? "600"
                                                     : "400",
                                                 ),
@@ -1868,23 +1868,23 @@ const userSignal = $(Mut({ name: "Evan" })); // If the signal itself is mutable
                   Paragraph("Mutable Objects:");
                   CodeBlock(
                     "// Option A: Specific keys\n" +
-                      'const state = $({ count: 0 }, "count");\n' +
-                      "state.count++;\n\n" +
-                      "// Option B: Full object mutability\n" +
-                      'const config = $(Mut({ theme: "dark", debug: false }));\n' +
-                      'config.theme = "light";\n' +
-                      "config.debug = true;\n\n" +
-                      "// Option C: Selective Nested Mutability\n" +
-                      "const user = $({\n" +
-                      '  name: "Evan",\n' +
-                      "  settings: {\n" +
-                      "    notifications: Mut(true), // Mutable Primitive: can be replaced\n" +
-                      '    theme: "dark"             // Read-only\n' +
-                      "  }\n" +
-                      "});\n" +
-                      "user.settings.notifications = false; // Works!\n\n" +
-                      "// Note: Mut({}) on an object makes its *properties* mutable,\n" +
-                      "// unless the parent key is also mutable.",
+                    'const state = $({ count: 0 }, "count");\n' +
+                    "state.count++;\n\n" +
+                    "// Option B: Full object mutability\n" +
+                    'const config = $(Mut({ theme: "dark", debug: false }));\n' +
+                    'config.theme = "light";\n' +
+                    "config.debug = true;\n\n" +
+                    "// Option C: Selective Nested Mutability\n" +
+                    "const user = $({\n" +
+                    '  name: "Evan",\n' +
+                    "  settings: {\n" +
+                    "    notifications: Mut(true), // Mutable Primitive: can be replaced\n" +
+                    '    theme: "dark"             // Read-only\n' +
+                    "  }\n" +
+                    "});\n" +
+                    "user.settings.notifications = false; // Works!\n\n" +
+                    "// Note: Mut({}) on an object makes its *properties* mutable,\n" +
+                    "// unless the parent key is also mutable.",
                   );
                 });
 
@@ -1894,9 +1894,9 @@ const userSignal = $(Mut({ name: "Evan" })); // If the signal itself is mutable
                   );
                   CodeBlock(
                     'const original = $({ name: "Evan", details: { age: 30 } });\n' +
-                      "const snapshot = { ...original };\n\n" +
-                      "// To create a truly independent reactive copy:\n" +
-                      "const clone = $({ ...original }); // New store with copied values",
+                    "const snapshot = { ...original };\n\n" +
+                    "// To create a truly independent reactive copy:\n" +
+                    "const clone = $({ ...original }); // New store with copied values",
                   );
                   Note(
                     "This behavior ensures you never accidentally pass reactivity where a plain value was expected, maintaining explicit data flow.",
@@ -1910,18 +1910,18 @@ const userSignal = $(Mut({ name: "Evan" })); // If the signal itself is mutable
                   );
                   CodeBlock(
                     "const list = $({ items: [1, 2, 3] });\n" +
-                      "// ❌ Error: Property 'push' does not exist on type 'readonly number[]'\n" +
-                      "// list.items.push(4);\n\n" +
-                      "// ✅ Valid: Replace array\n" +
-                      "// list.items = [...list.items, 4]; // Only works if 'items' key is mutable",
+                    "// ❌ Error: Property 'push' does not exist on type 'readonly number[]'\n" +
+                    "// list.items.push(4);\n\n" +
+                    "// ✅ Valid: Replace array\n" +
+                    "// list.items = [...list.items, 4]; // Only works if 'items' key is mutable",
                   );
 
                   Paragraph("Mutable Arrays:");
                   CodeBlock(
                     "const todos = $(Mut({ list: [] as string[] }));\n\n" +
-                      "// ✅ Valid: Mutation methods work\n" +
-                      'todos.list.push("Buy milk");\n' +
-                      "todos.list.splice(0, 1);",
+                    "// ✅ Valid: Mutation methods work\n" +
+                    'todos.list.push("Buy milk");\n' +
+                    "todos.list.splice(0, 1);",
                   );
                 });
 
@@ -1931,15 +1931,15 @@ const userSignal = $(Mut({ name: "Evan" })); // If the signal itself is mutable
                   );
                   CodeBlock(
                     "const app = $(Mut({\n" +
-                      "  settings: {\n" +
-                      "    notifications: { email: true }\n" +
-                      "  }\n" +
-                      "}));\n\n" +
-                      "// ✅ Valid: Traverse and mutate (because app was wrapped in Mut)\n" +
-                      "app.settings.notifications.email = false;\n\n" +
-                      "// ℹ️ Pattern: Immutable Tree with Mutable Root\n" +
-                      "// If 'settings' wasn't mutable, you'd do:\n" +
-                      "// app.settings = { ...app.settings, notifications: { ... } };",
+                    "  settings: {\n" +
+                    "    notifications: { email: true }\n" +
+                    "  }\n" +
+                    "}));\n\n" +
+                    "// ✅ Valid: Traverse and mutate (because app was wrapped in Mut)\n" +
+                    "app.settings.notifications.email = false;\n\n" +
+                    "// ℹ️ Pattern: Immutable Tree with Mutable Root\n" +
+                    "// If 'settings' wasn't mutable, you'd do:\n" +
+                    "// app.settings = { ...app.settings, notifications: { ... } };",
                   );
                 });
               });

@@ -34,8 +34,12 @@ $e(() => {
             style.textContent = `
                 :root {
                     /* Dark Mode (Default) - Fia Brand Colors */
-                    --fia-primary: #6366f1;    /* Indigo - vibrant, modern */
-                    --fia-accent: #22d3ee;     /* Cyan - electric, energetic */
+                    --fia-brand: #2dd4bf;      /* Teal 400 */
+                    --fia-brand-rgb: 45, 212, 191;
+                    
+                    --fia-primary: var(--fia-brand);
+                    --fia-accent: #99f6e4;     /* Teal 200 */
+                    
                     --fia-dark: #0f172a;       /* Slate 900 - deep background */
                     --fia-slate: #334155;      /* Slate 700 - borders */
                     --fia-white: #f1f5f9;      /* Slate 100 - light text */
@@ -53,8 +57,12 @@ $e(() => {
 
                 [data-theme="light"] {
                     /* Light Mode Overrides - Fia Brand Colors */
-                    --fia-primary: #4f46e5;    /* Darker indigo for contrast */
-                    --fia-accent: #06b6d4;     /* Darker cyan for visibility */
+                    --fia-brand: #0d9488;      /* Teal 600 */
+                    --fia-brand-rgb: 13, 148, 136;
+                    
+                    --fia-primary: var(--fia-brand);
+                    --fia-accent: #115e59;     /* Teal 800 */
+
                     --fia-slate: #cbd5e1;      /* Light slate for borders */
                     --fia-white: #1e293b;      /* Dark slate for text */
                     --fia-gray: #f1f5f9;       /* Very light slate */
@@ -73,15 +81,13 @@ $e(() => {
 
                 body {
                     background-color: var(--bg-dark);
-                    background-image: radial-gradient(circle, rgba(255, 255, 255, 0.25) 1px, transparent 1px);
-                    background-size: 40px 40px;
                     color: var(--text-primary);
                     transition: background-color 0.3s ease, color 0.3s ease;
                     cursor: auto;
                 }
 
                 [data-theme="light"] body {
-                    background-image: radial-gradient(circle, rgba(0, 0, 0, 0.5) 1px, transparent 1px);
+                    background-color: var(--bg-dark);
                 }
             `;
             document.head.appendChild(style);
