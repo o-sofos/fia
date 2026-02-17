@@ -29,7 +29,7 @@ const FeatureCard = (title: string, desc: string, icon: string) =>
         style: {
           fontSize: "1.25rem",
           marginBottom: "0.75rem",
-          color: "var(--mongo-green)",
+          color: "var(--fia-primary)",
           fontWeight: "600",
           transform: "translateZ(10px)",
         },

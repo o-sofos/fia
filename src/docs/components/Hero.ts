@@ -69,7 +69,7 @@ export const Hero = () =>
               () => {
                 span({
                   style: {
-                    color: "var(--mongo-green)",
+                    color: "var(--fia-primary)",
                     fontSize: "0.8em",
                   },
                   textContent: "✦",
@@ -119,7 +119,7 @@ export const Hero = () =>
           height: "60px",
           borderRadius: "1rem",
           background:
-            "linear-gradient(135deg, var(--mongo-green), var(--mongo-forest))",
+            "linear-gradient(135deg, var(--fia-primary), var(--fia-accent))",
           opacity: "0.2",
           boxShadow: "0 10px 30px rgba(0,237,100,0.2)",
           zIndex: "0",
@@ -136,7 +136,7 @@ export const Hero = () =>
           width: "80px",
           height: "80px",
           borderRadius: "50%",
-          border: "2px solid var(--mongo-green)",
+          border: "2px solid var(--fia-primary)",
           opacity: "0.1",
           zIndex: "0",
         },
@@ -152,9 +152,9 @@ export const Hero = () =>
           width: "20px",
           height: "20px",
           borderRadius: "50%",
-          background: "var(--mongo-green)",
+          background: "var(--fia-primary)",
           opacity: "0.2",
-          boxShadow: "0 0 20px var(--mongo-green)",
+          boxShadow: "0 0 20px var(--fia-primary)",
           zIndex: "0",
           animationDelay: "1s",
         },
@@ -171,7 +171,7 @@ export const Hero = () =>
           height: "120px",
           borderRadius: "50%",
           background:
-            "radial-gradient(circle, var(--mongo-green) 0%, transparent 70%)",
+            "radial-gradient(circle, var(--fia-primary) 0%, transparent 70%)",
           opacity: "0.1",
           zIndex: "0",
           filter: "blur(20px)",

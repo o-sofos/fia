@@ -37,11 +37,11 @@ const CodeBlock = (content: string) =>
     {
       class: "code-block animate-fade-up",
       style: {
-        // background: "var(--mongo-forest)",
+        // background: "var(--fia-accent)",
         borderRadius: "0.75rem",
         padding: "1.5rem",
         margin: "1.5rem 0",
-        border: "1px solid var(--mongo-slate)",
+        border: "1px solid var(--fia-slate)",
         boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
         fontFamily: "'JetBrains Mono', monospace",
         fontSize: "0.9rem",
@@ -98,9 +98,9 @@ const CodeBlock = (content: string) =>
             textContent: $(() => (copied.value ? "Copied!" : "Copy")),
             style: {
               background: "transparent",
-              border: "1px solid var(--mongo-slate)",
+              border: "1px solid var(--fia-slate)",
               color: $(() =>
-                copied.value ? "var(--mongo-green)" : "var(--text-secondary)",
+                copied.value ? "var(--fia-primary)" : "var(--text-secondary)",
               ),
               borderRadius: "4px",
               padding: "2px 8px",
@@ -134,8 +134,8 @@ const showToast = (message: string) => {
     bottom: "2rem",
     left: "50%",
     transform: "translateX(-50%) translateY(20px)",
-    background: "var(--mongo-green)",
-    color: "var(--mongo-dark)",
+    background: "var(--fia-primary)",
+    color: "var(--fia-dark)",
     padding: "0.75rem 1.5rem",
     borderRadius: "8px",
     fontWeight: "600",
@@ -216,14 +216,14 @@ const Section = (title: string, id: string, children: () => void) => {
             style: {
               width: "4px",
               height: "32px",
-              background: "var(--mongo-green)",
+              background: "var(--fia-primary)",
               borderRadius: "2px",
             },
           });
           h2({
             style: {
               fontSize: "2rem",
-              color: "var(--mongo-white)",
+              color: "var(--fia-white)",
               letterSpacing: "-0.5px",
             },
             textContent: title,
@@ -270,7 +270,7 @@ const SubSection = (
           h3({
             id,
             style: {
-              color: "var(--mongo-green)",
+              color: "var(--fia-primary)",
               fontSize: "1.5rem",
               scrollMarginTop: "120px",
             },
@@ -310,7 +310,7 @@ const SubSubSection = (
           id,
           style: {
             fontSize: "1.2rem",
-            color: "var(--mongo-white)",
+            color: "var(--fia-white)",
             fontWeight: "600",
             scrollMarginTop: "120px",
           },
@@ -359,11 +359,11 @@ const Note = (text: string, type: "info" | "warning" = "info") =>
           type === "warning"
             ? "rgba(255, 189, 46, 0.1)"
             : "rgba(0, 237, 100, 0.05)",
-        borderLeft: `4px solid ${type === "warning" ? "#ffbd2e" : "var(--mongo-green)"}`,
+        borderLeft: `4px solid ${type === "warning" ? "#ffbd2e" : "var(--fia-primary)"}`,
         padding: "1rem",
         borderRadius: "0 0.5rem 0.5rem 0",
         marginBottom: "1.5rem",
-        color: type === "warning" ? "#ffbd2e" : "var(--mongo-green)",
+        color: type === "warning" ? "#ffbd2e" : "var(--fia-primary)",
       },
     },
     () => t(text),
@@ -467,7 +467,7 @@ const TableOfContents = () => {
       div(
         {
           style: {
-            borderLeft: "2px solid var(--mongo-slate)",
+            borderLeft: "2px solid var(--fia-slate)",
             paddingLeft: "1rem",
           },
         },
@@ -510,7 +510,7 @@ const TableOfContents = () => {
                     style: {
                       color: $(() =>
                         isSectionActive()
-                          ? "var(--mongo-green)"
+                          ? "var(--fia-primary)"
                           : "var(--text-secondary)",
                       ),
                       textDecoration: "none",
@@ -521,7 +521,7 @@ const TableOfContents = () => {
                       fontWeight: $(() => (isSectionActive() ? "600" : "400")),
                       borderLeft: $(() =>
                         isSectionActive()
-                          ? "2px solid var(--mongo-green)"
+                          ? "2px solid var(--fia-primary)"
                           : "2px solid transparent",
                       ),
                       paddingLeft: "0.5rem",
@@ -565,7 +565,7 @@ const TableOfContents = () => {
                                 style: {
                                   color: $(() =>
                                     activeSection.value === child.id
-                                      ? "var(--mongo-green)"
+                                      ? "var(--fia-primary)"
                                       : "var(--text-tertiary)",
                                   ),
                                   textDecoration: "none",
@@ -624,7 +624,7 @@ const TableOfContents = () => {
                                                 color: $(() =>
                                                   activeSection.value ===
                                                   grandchild.id
-                                                    ? "var(--mongo-green)"
+                                                    ? "var(--fia-primary)"
                                                     : "var(--text-tertiary)",
                                                 ),
                                                 textDecoration: "none",
@@ -764,7 +764,7 @@ export const Docs = () =>
               () => {
                 li({ style: { marginBottom: "0.5rem" } }, () => {
                   span({
-                    style: { color: "var(--mongo-white)", fontWeight: "600" },
+                    style: { color: "var(--fia-white)", fontWeight: "600" },
                     textContent: "True Fine-Grained Reactivity: ",
                   });
                   t(
@@ -773,7 +773,7 @@ export const Docs = () =>
                 });
                 li({ style: { marginBottom: "0.5rem" } }, () => {
                   span({
-                    style: { color: "var(--mongo-white)", fontWeight: "600" },
+                    style: { color: "var(--fia-white)", fontWeight: "600" },
                     textContent: "End-to-End Type Safety: ",
                   });
                   t(
@@ -782,7 +782,7 @@ export const Docs = () =>
                 });
                 li({ style: { marginBottom: "0.5rem" } }, () => {
                   span({
-                    style: { color: "var(--mongo-white)", fontWeight: "600" },
+                    style: { color: "var(--fia-white)", fontWeight: "600" },
                     textContent: "Zero-Abstraction Feel: ",
                   });
                   t(
@@ -791,7 +791,7 @@ export const Docs = () =>
                 });
                 li({ style: { marginBottom: "0.5rem" } }, () => {
                   span({
-                    style: { color: "var(--mongo-white)", fontWeight: "600" },
+                    style: { color: "var(--fia-white)", fontWeight: "600" },
                     textContent: "Minimal Footprint: ",
                   });
                   t(
@@ -822,7 +822,7 @@ export const Docs = () =>
                     style: {
                       width: "100%",
                       borderCollapse: "collapse",
-                      // background: "var(--mongo-forest)",
+                      // background: "var(--fia-accent)",
                       borderRadius: "0.75rem",
                       overflow: "hidden",
                     },
@@ -833,7 +833,7 @@ export const Docs = () =>
                         {
                           style: {
                             background: "rgba(0, 237, 100, 0.1)",
-                            // borderBottom: "2px solid var(--mongo-green)",
+                            // borderBottom: "2px solid var(--fia-primary)",
                           },
                         },
                         () => {
@@ -841,7 +841,7 @@ export const Docs = () =>
                             style: {
                               padding: "1rem",
                               textAlign: "left",
-                              color: "var(--mongo-white)",
+                              color: "var(--fia-white)",
                               fontWeight: "600",
                             },
                             textContent: "Entry Point",
@@ -850,7 +850,7 @@ export const Docs = () =>
                             style: {
                               padding: "1rem",
                               textAlign: "center",
-                              color: "var(--mongo-white)",
+                              color: "var(--fia-white)",
                               fontWeight: "600",
                             },
                             textContent: "Gzip",
@@ -859,7 +859,7 @@ export const Docs = () =>
                             style: {
                               padding: "1rem",
                               textAlign: "center",
-                              color: "var(--mongo-white)",
+                              color: "var(--fia-white)",
                               fontWeight: "600",
                             },
                             textContent: "Brotli",
@@ -868,7 +868,7 @@ export const Docs = () =>
                             style: {
                               padding: "1rem",
                               textAlign: "left",
-                              color: "var(--mongo-white)",
+                              color: "var(--fia-white)",
                               fontWeight: "600",
                             },
                             textContent: "Use Case",
@@ -881,7 +881,7 @@ export const Docs = () =>
                       tr(
                         {
                           style: {
-                            borderBottom: "1px solid var(--mongo-slate)",
+                            borderBottom: "1px solid var(--fia-slate)",
                           },
                         },
                         () => {
@@ -890,7 +890,7 @@ export const Docs = () =>
                               style: {
                                 padding: "1rem",
                                 fontFamily: "'JetBrains Mono', monospace",
-                                color: "var(--mongo-green)",
+                                color: "var(--fia-primary)",
                               },
                             },
                             () => {
@@ -901,7 +901,7 @@ export const Docs = () =>
                             style: {
                               padding: "1rem",
                               textAlign: "center",
-                              color: "var(--mongo-white)",
+                              color: "var(--fia-white)",
                               fontWeight: "600",
                             },
                             textContent: "1.46 KB",
@@ -928,7 +928,7 @@ export const Docs = () =>
                       tr(
                         {
                           style: {
-                            borderBottom: "1px solid var(--mongo-slate)",
+                            borderBottom: "1px solid var(--fia-slate)",
                           },
                         },
                         () => {
@@ -937,7 +937,7 @@ export const Docs = () =>
                               style: {
                                 padding: "1rem",
                                 fontFamily: "'JetBrains Mono', monospace",
-                                color: "var(--mongo-green)",
+                                color: "var(--fia-primary)",
                               },
                             },
                             () => {
@@ -948,7 +948,7 @@ export const Docs = () =>
                             style: {
                               padding: "1rem",
                               textAlign: "center",
-                              color: "var(--mongo-white)",
+                              color: "var(--fia-white)",
                               fontWeight: "600",
                             },
                             textContent: "2.16 KB",
@@ -975,7 +975,7 @@ export const Docs = () =>
                       tr(
                         {
                           style: {
-                            borderBottom: "1px solid var(--mongo-slate)",
+                            borderBottom: "1px solid var(--fia-slate)",
                           },
                         },
                         () => {
@@ -984,7 +984,7 @@ export const Docs = () =>
                               style: {
                                 padding: "1rem",
                                 fontFamily: "'JetBrains Mono', monospace",
-                                color: "var(--mongo-green)",
+                                color: "var(--fia-primary)",
                               },
                             },
                             () => {
@@ -995,7 +995,7 @@ export const Docs = () =>
                             style: {
                               padding: "1rem",
                               textAlign: "center",
-                              color: "var(--mongo-white)",
+                              color: "var(--fia-white)",
                               fontWeight: "600",
                             },
                             textContent: "4.05 KB",
@@ -1022,7 +1022,7 @@ export const Docs = () =>
                       tr(
                         {
                           style: {
-                            borderBottom: "1px solid var(--mongo-slate)",
+                            borderBottom: "1px solid var(--fia-slate)",
                           },
                         },
                         () => {
@@ -1031,7 +1031,7 @@ export const Docs = () =>
                               style: {
                                 padding: "1rem",
                                 fontFamily: "'JetBrains Mono', monospace",
-                                color: "var(--mongo-green)",
+                                color: "var(--fia-primary)",
                               },
                             },
                             () => {
@@ -1042,7 +1042,7 @@ export const Docs = () =>
                             style: {
                               padding: "1rem",
                               textAlign: "center",
-                              color: "var(--mongo-white)",
+                              color: "var(--fia-white)",
                               fontWeight: "600",
                             },
                             textContent: "~4 KB",
@@ -1072,7 +1072,7 @@ export const Docs = () =>
                             style: {
                               padding: "1rem",
                               fontFamily: "'JetBrains Mono', monospace",
-                              color: "var(--mongo-green)",
+                              color: "var(--fia-primary)",
                             },
                           },
                           () => {
@@ -1091,7 +1091,7 @@ export const Docs = () =>
                           style: {
                             padding: "1rem",
                             textAlign: "center",
-                            color: "var(--mongo-white)",
+                            color: "var(--fia-white)",
                             fontWeight: "600",
                           },
                           textContent: "8.21 KB",
@@ -1138,7 +1138,7 @@ export const Docs = () =>
                       style: {
                         width: "100%",
                         borderCollapse: "collapse",
-                        // background: "var(--mongo-forest)",
+                        // background: "var(--fia-accent)",
                         borderRadius: "0.75rem",
                         overflow: "hidden",
                       },
@@ -1149,7 +1149,7 @@ export const Docs = () =>
                           {
                             style: {
                               background: "rgba(0, 237, 100, 0.1)",
-                              // borderBottom: "2px solid var(--mongo-green)",
+                              // borderBottom: "2px solid var(--fia-primary)",
                             },
                           },
                           () => {
@@ -1157,7 +1157,7 @@ export const Docs = () =>
                               style: {
                                 padding: "1rem",
                                 textAlign: "left",
-                                color: "var(--mongo-white)",
+                                color: "var(--fia-white)",
                                 fontWeight: "600",
                               },
                               textContent: "Framework",
@@ -1166,7 +1166,7 @@ export const Docs = () =>
                               style: {
                                 padding: "1rem",
                                 textAlign: "center",
-                                color: "var(--mongo-white)",
+                                color: "var(--fia-white)",
                                 fontWeight: "600",
                               },
                               textContent: "Minimal",
@@ -1175,7 +1175,7 @@ export const Docs = () =>
                               style: {
                                 padding: "1rem",
                                 textAlign: "center",
-                                color: "var(--mongo-white)",
+                                color: "var(--fia-white)",
                                 fontWeight: "600",
                               },
                               textContent: "Hello World",
@@ -1184,7 +1184,7 @@ export const Docs = () =>
                               style: {
                                 padding: "1rem",
                                 textAlign: "left",
-                                color: "var(--mongo-white)",
+                                color: "var(--fia-white)",
                                 fontWeight: "600",
                               },
                               textContent: "Notes",
@@ -1251,7 +1251,7 @@ export const Docs = () =>
                               style: {
                                 borderBottom:
                                   idx < frameworks.length - 1
-                                    ? "1px solid var(--mongo-slate)"
+                                    ? "1px solid var(--fia-slate)"
                                     : "none",
                                 // background: fw.highlight
                                 //   ? "rgba(0, 237, 100, 0.05)"
@@ -1263,8 +1263,8 @@ export const Docs = () =>
                                 style: {
                                   padding: "1rem",
                                   color: fw.highlight
-                                    ? "var(--mongo-green)"
-                                    : "var(--mongo-white)",
+                                    ? "var(--fia-primary)"
+                                    : "var(--fia-white)",
                                   fontWeight: fw.highlight ? "700" : "600",
                                 },
                                 textContent: fw.name,
@@ -1273,7 +1273,7 @@ export const Docs = () =>
                                 style: {
                                   padding: "1rem",
                                   textAlign: "center",
-                                  color: "var(--mongo-white)",
+                                  color: "var(--fia-white)",
                                   fontWeight: fw.highlight ? "600" : "normal",
                                 },
                                 textContent: fw.minimal,
@@ -1282,7 +1282,7 @@ export const Docs = () =>
                                 style: {
                                   padding: "1rem",
                                   textAlign: "center",
-                                  color: "var(--mongo-white)",
+                                  color: "var(--fia-white)",
                                   fontWeight: fw.highlight ? "600" : "normal",
                                 },
                                 textContent: fw.full,
@@ -1327,7 +1327,7 @@ export const Docs = () =>
               div({ style: { marginBottom: "1rem" } }, () => {
                 h4({
                   style: {
-                    color: "var(--mongo-white)",
+                    color: "var(--fia-white)",
                     marginBottom: "0.5rem",
                   },
                   textContent: "Deno",
@@ -1338,7 +1338,7 @@ export const Docs = () =>
               div({ style: { marginBottom: "1rem" } }, () => {
                 h4({
                   style: {
-                    color: "var(--mongo-white)",
+                    color: "var(--fia-white)",
                     marginBottom: "0.5rem",
                   },
                   textContent: "Bun",
@@ -1353,7 +1353,7 @@ export const Docs = () =>
               div({ style: { marginBottom: "1rem" } }, () => {
                 h4({
                   style: {
-                    color: "var(--mongo-white)",
+                    color: "var(--fia-white)",
                     marginBottom: "0.5rem",
                   },
                   textContent: "Node.js (npm/yarn/pnpm)",

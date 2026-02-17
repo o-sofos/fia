@@ -3,7 +3,7 @@ import { footer, div } from "../../core/mod";
 export const Footer = () =>
     footer({
         style: {
-            borderTop: "1px solid var(--mongo-slate)",
+            borderTop: "1px solid var(--fia-slate)",
             marginTop: "auto",
             padding: "var(--spacing-lg) 0",
             background: "rgba(0,0,0,0.2)"

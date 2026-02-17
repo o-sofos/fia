@@ -5,7 +5,7 @@ export const Navbar = () =>
     nav({ class: "container animate-fade-up delay-100", style: { display: "flex", justifyContent: "space-between", alignItems: "center", height: "100px" } }, () => {
         // Logo
         div({ style: { fontSize: "1.5rem", fontWeight: "700", display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer" } }, () => {
-            span({ style: { color: "var(--mongo-green)" }, textContent: "fia" });
+            span({ style: { color: "var(--fia-primary)" }, textContent: "fia" });
         });
 
         // Links
@@ -23,7 +23,7 @@ export const Navbar = () =>
                     alignItems: "center",
                     justifyContent: "center",
                     fontSize: "1.2rem",
-                    color: $(() => themeStore.current === "dark" ? "var(--text-primary)" : "var(--mongo-green)")
+                    color: $(() => themeStore.current === "dark" ? "var(--text-primary)" : "var(--fia-primary)")
                 },
                 onclick: toggleTheme
             }, () => {

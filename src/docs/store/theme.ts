@@ -33,11 +33,13 @@ $e(() => {
             style.id = "fia-theme-styles";
             style.textContent = `
                 :root {
-                    /* Dark Mode (Default) */
-                    --mongo-green: #00ED64;
-                    --mongo-forest: #00684A;
-                    --mongo-slate: #1C2D38; /* Slate / Dark Blue-Grey */
-                    --mongo-white: #E3E3E3; 
+                    /* Dark Mode (Default) - Fia Brand Colors */
+                    --fia-primary: #6366f1;    /* Indigo - vibrant, modern */
+                    --fia-accent: #22d3ee;     /* Cyan - electric, energetic */
+                    --fia-dark: #0f172a;       /* Slate 900 - deep background */
+                    --fia-slate: #334155;      /* Slate 700 - borders */
+                    --fia-white: #f1f5f9;      /* Slate 100 - light text */
+                    --fia-gray: #e2e8f0;       /* Slate 200 - subtle backgrounds */
                     --bg-dark: #111111;
                     --bg-card: #181818;
                     --text-primary: #ffffff;
@@ -50,16 +52,18 @@ $e(() => {
                 }
 
                 [data-theme="light"] {
-                    /* Light Mode Overrides */
-                    --mongo-green: #00A344; /* Darker green for light bg */
-                    --mongo-forest: #E0F2F1; /* Very light teal for backgrounds */
-                    --mongo-slate: #E2E8F0;  /* Light grey for borders */
-                    --mongo-white: #1a202c;  /* Dark text for headers */
-                    --bg-dark: #FFFFFF;      /* White background */
-                    --bg-card: #F7FAFC;      /* Light grey card bg */
-                    --text-primary: #2D3748; /* Dark grey text */
+                    /* Light Mode Overrides - Fia Brand Colors */
+                    --fia-primary: #4f46e5;    /* Darker indigo for contrast */
+                    --fia-accent: #06b6d4;     /* Darker cyan for visibility */
+                    --fia-slate: #cbd5e1;      /* Light slate for borders */
+                    --fia-white: #1e293b;      /* Dark slate for text */
+                    --fia-gray: #f1f5f9;       /* Very light slate */
+                    --fia-dark: #f8fafc;       /* Almost white for cards */
+                    --bg-dark: #FFFFFF;        /* White background */
+                    --bg-card: #F7FAFC;        /* Light grey card bg */
+                    --text-primary: #2D3748;   /* Dark grey text */
                     --text-secondary: #718096;
-                    
+
                     /* Syntax Highlighting for Light Mode */
                     --syntax-comment: #008000;
                     --syntax-string: #a31515;
