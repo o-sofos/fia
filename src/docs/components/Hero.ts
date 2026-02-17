@@ -1,4 +1,4 @@
-import { header, h1, p, div, button, a, span, $ } from "../../core/mod";
+import { header, h1, div, button, a, span, $ } from "../../core/mod";
 import { t } from "../store/i18n";
 
 export const Hero = () =>
@@ -13,11 +13,32 @@ export const Hero = () =>
       },
     },
     () => {
+      // Main Title
       h1(
         {
           style: {
-            fontSize: "4.5rem",
+            fontSize: "clamp(3rem, 8vw, 5rem)",
             lineHeight: "1.1",
+            marginBottom: "var(--spacing-sm)",
+            fontWeight: "800",
+            letterSpacing: "-0.02em",
+            position: "relative",
+            zIndex: "1",
+            color: "var(--text-primary)", // White
+          },
+        },
+        () => {
+          div({ textContent: "Immutability by Design" });
+        },
+      );
+
+      // Subtitle (Gradient)
+      h1(
+        {
+          class: "text-gradient",
+          style: {
+            fontSize: "clamp(2.5rem, 6vw, 4rem)",
+            lineHeight: "1.2",
             marginBottom: "var(--spacing-md)",
             fontWeight: "800",
             letterSpacing: "-0.02em",
@@ -26,67 +47,53 @@ export const Hero = () =>
           },
         },
         () => {
-          div({ textContent: $(() => t.value.hero.title) });
-          div({ class: "text-gradient", textContent: $(() => t.value.hero.subtitle) });
+          div({ textContent: "Bare Metal JavaScript" });
         },
       );
 
-      p(
+      // Features Line
+      div(
         {
           style: {
-            fontSize: "1.25rem",
-            color: "var(--text-secondary)",
+            fontSize: "1.2rem",
+            color: "var(--text-secondary)", // Light gray
             marginBottom: "var(--spacing-lg)",
-            maxWidth: "800px",
-            margin: "0 auto var(--spacing-lg)",
-            lineHeight: "1.8",
-            position: "relative",
-            zIndex: "1",
             display: "flex",
             flexWrap: "wrap",
-            gap: "0.5rem 1.5rem",
+            gap: "1.5rem",
             justifyContent: "center",
             alignItems: "center",
+            position: "relative",
+            zIndex: "1",
           },
         },
         () => {
           const features = [
-            // "Almost Native",
-            "Immutability by Design",
             "No JSX",
             "No Virtual DOM",
             "No Dependencies",
           ];
 
           features.forEach((feature) => {
-            span(
-              {
-                style: {
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "0.5rem",
-                },
-              },
-              () => {
-                span({
-                  style: {
-                    color: "var(--fia-primary)",
-                    fontSize: "0.8em",
-                  },
-                  textContent: "✦",
-                });
-                span({ textContent: feature });
-              },
-            );
+            span({
+              style: { display: "flex", alignItems: "center", gap: "0.5rem" }
+            }, () => {
+              span({
+                style: { color: "var(--fia-primary)" },
+                textContent: "✦"
+              });
+              span({ textContent: feature });
+            });
           });
         },
       );
 
+      // Buttons
       div(
         {
           style: {
             display: "flex",
-            gap: "1rem",
+            gap: "1.5rem",
             justifyContent: "center",
             marginTop: "var(--spacing-lg)",
             position: "relative",
@@ -94,16 +101,27 @@ export const Hero = () =>
           },
         },
         () => {
+          // Get Started (Primary)
           button({
             class: "btn btn-primary",
-            style: { padding: "1rem 2rem", fontSize: "1.1rem" },
+            style: {
+              padding: "1rem 2.5rem",
+              fontSize: "1.1rem",
+              borderRadius: "2rem", // Rounded pill
+            },
             textContent: $(() => t.value.hero.getStarted),
           });
+
+          // View Source (Outline)
           a({
             href: "https://github.com/o-sofos/fia",
             target: "_blank",
             class: "btn btn-outline",
-            style: { padding: "1rem 2rem", fontSize: "1.1rem" },
+            style: {
+              padding: "1rem 2.5rem",
+              fontSize: "1.1rem",
+              borderRadius: "2rem",
+            },
             textContent: "View Source",
           });
         },
