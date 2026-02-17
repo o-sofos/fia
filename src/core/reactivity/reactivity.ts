@@ -14,13 +14,13 @@ type EffectFn = () => void;
 /** Reactive node that can be subscribed to */
 interface ReactiveNode {
   version: number;
-  subs: Set<Subscriber>;
+  subs: Subscriber[];
 }
 
 /** Subscriber that tracks its dependencies */
 interface Subscriber {
   execute: () => void;
-  deps: Set<ReactiveNode>;
+  deps: ReactiveNode[];
   cleanup: () => void;
 }
 
@@ -32,15 +32,20 @@ let globalVersion = 0;
 
 /** Batch update state */
 let batchDepth = 0;
-let pendingEffects: Set<Subscriber> | undefined = undefined;
+let pendingEffects: Subscriber[] | undefined = undefined;
 
 /**
  * Track a dependency - called when reading a reactive value
  */
 function track(node: ReactiveNode): void {
   if (activeSubscriber) {
-    node.subs.add(activeSubscriber);
-    activeSubscriber.deps.add(node);
+    // Add subscriber if not already present (avoid duplicates)
+    if (!node.subs.includes(activeSubscriber)) {
+      node.subs.push(activeSubscriber);
+    }
+    if (!activeSubscriber.deps.includes(node)) {
+      activeSubscriber.deps.push(node);
+    }
   }
 }
 
@@ -55,8 +60,10 @@ function trigger(node: ReactiveNode): void {
 
   for (const sub of subs) {
     if (batchDepth > 0) {
-      if (!pendingEffects) pendingEffects = new Set();
-      pendingEffects.add(sub);
+      if (!pendingEffects) pendingEffects = [];
+      if (!pendingEffects.includes(sub)) {
+        pendingEffects.push(sub);
+      }
     } else {
       sub.execute();
     }
@@ -68,10 +75,14 @@ function trigger(node: ReactiveNode): void {
  * This is crucial for avoiding stale subscriptions (inspired by SolidJS)
  */
 function cleanupSubscriber(sub: Subscriber): void {
-  for (const dep of sub.deps) {
-    dep.subs.delete(sub);
+  for (let i = 0; i < sub.deps.length; i++) {
+    const dep = sub.deps[i];
+    const idx = dep.subs.indexOf(sub);
+    if (idx > -1) {
+      dep.subs.splice(idx, 1);
+    }
   }
-  sub.deps.clear();
+  sub.deps.length = 0;
 }
 
 /**
@@ -137,7 +148,7 @@ export function $e(fn: EffectFn): () => void {
         activeSubscriber = prevSubscriber;
       }
     },
-    deps: new Set(),
+    deps: [],
     cleanup() {
       active = false;
       cleanupSubscriber(subscriber);
@@ -253,7 +264,7 @@ export interface WritableSignal<T> extends Signal<T> {
 function createSignal<T>(initial: T, readonly: boolean = false): Signal<T> | WritableSignal<T> {
   const node: ReactiveNode = {
     version: globalVersion,
-    subs: new Set(),
+    subs: [],
   };
 
   let currentValue = initial;
@@ -308,7 +319,7 @@ function createSignal<T>(initial: T, readonly: boolean = false): Signal<T> | Wri
 function createComputed<T>(compute: () => T): Signal<T> {
   const node: ReactiveNode = {
     version: globalVersion,
-    subs: new Set(),
+    subs: [],
   };
 
   let currentValue: T;
@@ -325,14 +336,16 @@ function createComputed<T>(compute: () => T): Signal<T> {
       const subs = [...node.subs];
       for (const sub of subs) {
         if (batchDepth > 0) {
-          if (!pendingEffects) pendingEffects = new Set();
-          pendingEffects.add(sub);
+          if (!pendingEffects) pendingEffects = [];
+          if (!pendingEffects.includes(sub)) {
+            pendingEffects.push(sub);
+          }
         } else {
           sub.execute();
         }
       }
     },
-    deps: new Set(),
+    deps: [],
     cleanup() {
       cleanupSubscriber(subscriber);
     },
@@ -506,7 +519,7 @@ function createStore<T extends object>(initial: T, mutability: Set<PropertyKey> 
   function getOrCreateNode(key: PropertyKey): ReactiveNode {
     let node = nodes.get(key);
     if (!node) {
-      node = { version: 0, subs: new Set() };
+      node = { version: 0, subs: [] };
       nodes.set(key, node);
     }
     return node;
