@@ -160,8 +160,8 @@ export const translations: Record<Language, Translations> = {
       examples: "Examples",
     },
     hero: {
-      title: "Fine-Grained Reactivity for Modern Web",
-      subtitle: "Zero dependencies. Pure TypeScript. Lightning fast.",
+      title: "Bare Metal JavaScript",
+      subtitle: "Value Native.",
       getStarted: "Get Started",
       viewDocs: "View Docs",
       features: {
