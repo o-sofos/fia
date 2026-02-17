@@ -6,6 +6,9 @@
   "type": "module",
   "exports": {
     ".": "./src/core/mod.ts",
+    "./signals": "./src/core/signals.ts",
+    "./elements": "./src/core/elements-entry.ts",
+    "./control": "./src/core/control-entry.ts",
     "./svg": "./src/core/svg/svg.ts"
   },
   "sideEffects": false,
