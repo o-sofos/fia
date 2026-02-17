@@ -1,50 +1,6 @@
-import { section, div, h3, p } from "../../core/mod";
+import { section, div, h3, p, $ } from "../../core/mod";
 import { applyTilt } from "../utils/tilt";
-
-const FeatureCard = (title: string, desc: string, icon: string) =>
-  div(
-    {
-      style: {
-        padding: "2rem",
-        background: "rgba(255,255,255,0.03)",
-        borderRadius: "1rem",
-        border: "1px solid rgba(255,255,255,0.05)",
-        transition: "transform 0.1s ease-out", // managed by tilt
-        transformStyle: "preserve-3d",
-      },
-    },
-    (el) => {
-      applyTilt(el as unknown as HTMLElement, 15);
-
-      // Content with depth
-      div({
-        style: {
-          fontSize: "2.5rem",
-          marginBottom: "1rem",
-          transform: "translateZ(20px)",
-        },
-        textContent: icon,
-      });
-      h3({
-        style: {
-          fontSize: "1.25rem",
-          marginBottom: "0.75rem",
-          color: "var(--fia-primary)",
-          fontWeight: "600",
-          transform: "translateZ(10px)",
-        },
-        textContent: title,
-      });
-      p({
-        style: {
-          color: "var(--text-secondary)",
-          lineHeight: "1.6",
-          transform: "translateZ(5px)",
-        },
-        textContent: desc,
-      });
-    },
-  );
+import { t } from "../store/i18n";
 
 export const Features = () =>
   section(
@@ -60,45 +16,71 @@ export const Features = () =>
       },
     },
     () => {
-      FeatureCard(
-        "Zero Virtual DOM",
-        "Fia updates the DOM directly. No diffing, no overhead, no reconciliation cost. Just pure performance.",
-        "⚡",
-      );
-      FeatureCard(
-        "Fine-Grained Reactivity",
-        "Signals track dependencies automatically. Only what changes updates.",
-        "🎯",
-      );
-      FeatureCard(
-        "Type Safe",
-        "Built with TypeScript, for TypeScript. Enjoy full autocomplete and type inference for all HTML attributes and events.",
-        "🛡️",
-      );
-      FeatureCard(
-        "Accessibility First",
-        "WCAG compliance built-in. Advanced ARIA types with literal values and role-specific attribute suggestions.",
-        "♿",
-      );
-      FeatureCard(
-        "Zero Dependencies",
-        "No npm packages. No supply chain risk. No version conflicts. Just pure JavaScript.",
-        "📦",
-      );
-      FeatureCard(
-        "Tiny Bundle",
-        "Only ~6KB gzipped. Smaller than most utility libraries. Fast to download, fast to parse.",
-        "⚖️",
-      );
-      FeatureCard(
-        "Event Delegation",
-        "Single delegated listener per event type.",
-        "🎪",
-      );
-      FeatureCard(
-        "Fragment Batching",
-        "Automatic DocumentFragment batching. No more intermediate nodes or layout thrashing.",
-        "🚀",
-      );
+      const features = $(() => [
+        { key: "noVdom", icon: "⚡" },
+        { key: "signals", icon: "🎯" },
+        { key: "typescript", icon: "🛡️" },
+        { key: "accessibility", icon: "♿" },
+        { key: "zeroDeps", icon: "📦" },
+        { key: "tiny", icon: "⚖️" },
+        { key: "delegation", icon: "🎪" },
+        { key: "batching", icon: "🚀" },
+      ]);
+
+      features.value.forEach(({ key, icon }) => {
+        const title = $(
+          () =>
+            t.value.features.items[key as keyof typeof t.value.features.items]
+              .title,
+        );
+        const desc = $(
+          () =>
+            t.value.features.items[key as keyof typeof t.value.features.items]
+              .desc,
+        );
+
+        div(
+          {
+            style: {
+              padding: "2rem",
+              background: "rgba(255,255,255,0.03)",
+              borderRadius: "1rem",
+              border: "1px solid rgba(255,255,255,0.05)",
+              transition: "transform 0.1s ease-out",
+              transformStyle: "preserve-3d",
+            },
+          },
+          (el) => {
+            applyTilt(el as unknown as HTMLElement, 15);
+
+            div({
+              style: {
+                fontSize: "2.5rem",
+                marginBottom: "1rem",
+                transform: "translateZ(20px)",
+              },
+              textContent: icon,
+            });
+            h3({
+              style: {
+                fontSize: "1.25rem",
+                marginBottom: "0.75rem",
+                color: "var(--fia-primary)",
+                fontWeight: "600",
+                transform: "translateZ(10px)",
+              },
+              textContent: title,
+            });
+            p({
+              style: {
+                color: "var(--text-secondary)",
+                lineHeight: "1.6",
+                transform: "translateZ(5px)",
+              },
+              textContent: desc,
+            });
+          },
+        );
+      });
     },
   );

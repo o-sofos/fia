@@ -24,10 +24,11 @@ import {
 } from "fia";
 import { SyntaxHighlight } from "./SyntaxHighlight";
 import { TabbedExample } from "./TabbedExample";
+import { t as i18n } from "../store/i18n";
 
 // Helper to append text nodes
-const t = (text: string) => {
-  getCurrentContext().appendChild(document.createTextNode(text));
+const text = (content: string) => {
+  getCurrentContext().appendChild(document.createTextNode(content));
 };
 
 // --- Styled Components ---
@@ -95,7 +96,9 @@ const CodeBlock = (content: string) =>
           // Copy Button
           const copied = $(Mut(false));
           button({
-            textContent: $(() => (copied.value ? "Copied!" : "Copy")),
+            textContent: $(() =>
+              copied.value ? i18n.value.docs.copied : i18n.value.docs.copyCode,
+            ),
             style: {
               background: "transparent",
               border: "1px solid var(--fia-slate)",
@@ -193,7 +196,11 @@ const AnchorLink = (id: string) => {
   });
 };
 
-const Section = (title: string, id: string, children: () => void) => {
+const Section = (
+  title: string | (() => string),
+  id: string,
+  children: () => void,
+) => {
   section(
     {
       id,
@@ -226,7 +233,7 @@ const Section = (title: string, id: string, children: () => void) => {
               color: "var(--fia-white)",
               letterSpacing: "-0.5px",
             },
-            textContent: title,
+            textContent: typeof title === "function" ? $(title) : title,
           });
           AnchorLink(id);
         },
@@ -323,7 +330,7 @@ const SubSubSection = (
   });
 };
 
-const Paragraph = (text: string) =>
+const Paragraph = (content: string) =>
   p(
     {
       style: {
@@ -333,7 +340,7 @@ const Paragraph = (text: string) =>
         fontSize: "1.05rem",
       },
     },
-    () => t(text),
+    () => text(content),
   );
 
 const List = (items: string[]) =>
@@ -351,7 +358,7 @@ const List = (items: string[]) =>
     },
   );
 
-const Note = (text: string, type: "info" | "warning" = "info") =>
+const Note = (c: string, type: "info" | "warning" = "info") =>
   div(
     {
       style: {
@@ -366,7 +373,7 @@ const Note = (text: string, type: "info" | "warning" = "info") =>
         color: type === "warning" ? "#ffbd2e" : "var(--fia-primary)",
       },
     },
-    () => t(text),
+    () => text(c),
   );
 
 // --- Navigation Data ---
@@ -743,391 +750,86 @@ export const Docs = () =>
             },
           );
 
-          Section("Introduction", "intro", () => {
-            Paragraph(
-              "Fia is a lightweight, framework-agnostic library designed for high-performance UI development. By leveraging fine-grained signals, Fia bypasses the overhead of a Virtual DOM to update the DOM directly and precisely.",
-            );
-          });
-
-          Section("Why Fia?", "why-fia", () => {
-            Paragraph(
-              "While modern web development is often bogged down by complex reconciliation processes, Fia focuses on surgical precision.",
-            );
-            ul(
-              {
-                style: {
-                  marginLeft: "1.5rem",
-                  marginBottom: "1.5rem",
-                  color: "var(--text-secondary)",
-                },
-              },
-              () => {
-                li({ style: { marginBottom: "0.5rem" } }, () => {
-                  span({
-                    style: { color: "var(--fia-white)", fontWeight: "600" },
-                    textContent: "True Fine-Grained Reactivity: ",
-                  });
-                  t(
-                    "Only the parts of the DOM that actually change are updated. No component re-renders, no VDOM diffing—just targeted updates.",
-                  );
-                });
-                li({ style: { marginBottom: "0.5rem" } }, () => {
-                  span({
-                    style: { color: "var(--fia-white)", fontWeight: "600" },
-                    textContent: "End-to-End Type Safety: ",
-                  });
-                  t(
-                    "Built from the ground up with TypeScript, Fia ensures your signals and effects are predictable and catch errors at compile time, not runtime.",
-                  );
-                });
-                li({ style: { marginBottom: "0.5rem" } }, () => {
-                  span({
-                    style: { color: "var(--fia-white)", fontWeight: "600" },
-                    textContent: "Zero-Abstraction Feel: ",
-                  });
-                  t(
-                    "Fia stays out of your way. It provides the reactive primitives you need to build powerful interfaces without forcing a heavy framework architecture on you.",
-                  );
-                });
-                li({ style: { marginBottom: "0.5rem" } }, () => {
-                  span({
-                    style: { color: "var(--fia-white)", fontWeight: "600" },
-                    textContent: "Minimal Footprint: ",
-                  });
-                  t(
-                    "Designed for developers who value bundle size and execution speed, Fia provides a lean reactive core that scales from small widgets to full-scale applications.",
-                  );
-                });
-              },
-            );
-          });
-
-          Section("Bundle Sizes", "bundle-sizes", () => {
-            Paragraph(
-              "Fia is designed to be lightweight with excellent tree-shaking support. Import only what you need:",
-            );
-
-            // Bundle Sizes Table
-            div(
-              {
-                style: {
-                  marginTop: "2rem",
-                  marginBottom: "2rem",
-                  overflowX: "auto",
-                },
-              },
-              () => {
-                table(
-                  {
-                    style: {
-                      width: "100%",
-                      borderCollapse: "collapse",
-                      // background: "var(--fia-accent)",
-                      borderRadius: "0.75rem",
-                      overflow: "hidden",
-                    },
-                  },
-                  () => {
-                    thead(() => {
-                      tr(
-                        {
-                          style: {
-                            background: "rgba(0, 237, 100, 0.1)",
-                            // borderBottom: "2px solid var(--fia-primary)",
-                          },
-                        },
-                        () => {
-                          th({
-                            style: {
-                              padding: "1rem",
-                              textAlign: "left",
-                              color: "var(--fia-white)",
-                              fontWeight: "600",
-                            },
-                            textContent: "Entry Point",
-                          });
-                          th({
-                            style: {
-                              padding: "1rem",
-                              textAlign: "center",
-                              color: "var(--fia-white)",
-                              fontWeight: "600",
-                            },
-                            textContent: "Gzip",
-                          });
-                          th({
-                            style: {
-                              padding: "1rem",
-                              textAlign: "center",
-                              color: "var(--fia-white)",
-                              fontWeight: "600",
-                            },
-                            textContent: "Brotli",
-                          });
-                          th({
-                            style: {
-                              padding: "1rem",
-                              textAlign: "left",
-                              color: "var(--fia-white)",
-                              fontWeight: "600",
-                            },
-                            textContent: "Use Case",
-                          });
-                        },
-                      );
-                    });
-                    tbody(() => {
-                      // Signals
-                      tr(
-                        {
-                          style: {
-                            borderBottom: "1px solid var(--fia-slate)",
-                          },
-                        },
-                        () => {
-                          td(
-                            {
-                              style: {
-                                padding: "1rem",
-                                fontFamily: "'JetBrains Mono', monospace",
-                                color: "var(--fia-primary)",
-                              },
-                            },
-                            () => {
-                              span({ textContent: "fia/signals" });
-                            },
-                          );
-                          td({
-                            style: {
-                              padding: "1rem",
-                              textAlign: "center",
-                              color: "var(--fia-white)",
-                              fontWeight: "600",
-                            },
-                            textContent: "1.46 KB",
-                          });
-                          td({
-                            style: {
-                              padding: "1rem",
-                              textAlign: "center",
-                              color: "var(--text-secondary)",
-                            },
-                            textContent: "1.28 KB",
-                          });
-                          td({
-                            style: {
-                              padding: "1rem",
-                              color: "var(--text-secondary)",
-                            },
-                            textContent: "Reactive state without DOM",
-                          });
-                        },
-                      );
-
-                      // Control
-                      tr(
-                        {
-                          style: {
-                            borderBottom: "1px solid var(--fia-slate)",
-                          },
-                        },
-                        () => {
-                          td(
-                            {
-                              style: {
-                                padding: "1rem",
-                                fontFamily: "'JetBrains Mono', monospace",
-                                color: "var(--fia-primary)",
-                              },
-                            },
-                            () => {
-                              span({ textContent: "fia/control" });
-                            },
-                          );
-                          td({
-                            style: {
-                              padding: "1rem",
-                              textAlign: "center",
-                              color: "var(--fia-white)",
-                              fontWeight: "600",
-                            },
-                            textContent: "2.16 KB",
-                          });
-                          td({
-                            style: {
-                              padding: "1rem",
-                              textAlign: "center",
-                              color: "var(--text-secondary)",
-                            },
-                            textContent: "1.90 KB",
-                          });
-                          td({
-                            style: {
-                              padding: "1rem",
-                              color: "var(--text-secondary)",
-                            },
-                            textContent: "Control flow (Show, Each)",
-                          });
-                        },
-                      );
-
-                      // Elements
-                      tr(
-                        {
-                          style: {
-                            borderBottom: "1px solid var(--fia-slate)",
-                          },
-                        },
-                        () => {
-                          td(
-                            {
-                              style: {
-                                padding: "1rem",
-                                fontFamily: "'JetBrains Mono', monospace",
-                                color: "var(--fia-primary)",
-                              },
-                            },
-                            () => {
-                              span({ textContent: "fia/elements" });
-                            },
-                          );
-                          td({
-                            style: {
-                              padding: "1rem",
-                              textAlign: "center",
-                              color: "var(--fia-white)",
-                              fontWeight: "600",
-                            },
-                            textContent: "4.05 KB",
-                          });
-                          td({
-                            style: {
-                              padding: "1rem",
-                              textAlign: "center",
-                              color: "var(--text-secondary)",
-                            },
-                            textContent: "3.58 KB",
-                          });
-                          td({
-                            style: {
-                              padding: "1rem",
-                              color: "var(--text-secondary)",
-                            },
-                            textContent: "UI with 3 elements",
-                          });
-                        },
-                      );
-
-                      // SVG
-                      tr(
-                        {
-                          style: {
-                            borderBottom: "1px solid var(--fia-slate)",
-                          },
-                        },
-                        () => {
-                          td(
-                            {
-                              style: {
-                                padding: "1rem",
-                                fontFamily: "'JetBrains Mono', monospace",
-                                color: "var(--fia-primary)",
-                              },
-                            },
-                            () => {
-                              span({ textContent: "fia/svg" });
-                            },
-                          );
-                          td({
-                            style: {
-                              padding: "1rem",
-                              textAlign: "center",
-                              color: "var(--fia-white)",
-                              fontWeight: "600",
-                            },
-                            textContent: "~4 KB",
-                          });
-                          td({
-                            style: {
-                              padding: "1rem",
-                              textAlign: "center",
-                              color: "var(--text-secondary)",
-                            },
-                            textContent: "~3.5 KB",
-                          });
-                          td({
-                            style: {
-                              padding: "1rem",
-                              color: "var(--text-secondary)",
-                            },
-                            textContent: "SVG graphics",
-                          });
-                        },
-                      );
-
-                      // Full
-                      tr(() => {
-                        td(
-                          {
-                            style: {
-                              padding: "1rem",
-                              fontFamily: "'JetBrains Mono', monospace",
-                              color: "var(--fia-primary)",
-                            },
-                          },
-                          () => {
-                            span({ textContent: "fia" });
-                            span({
-                              style: {
-                                marginLeft: "0.5rem",
-                                color: "var(--text-secondary)",
-                                fontSize: "0.875rem",
-                              },
-                              textContent: "(full)",
-                            });
-                          },
-                        );
-                        td({
-                          style: {
-                            padding: "1rem",
-                            textAlign: "center",
-                            color: "var(--fia-white)",
-                            fontWeight: "600",
-                          },
-                          textContent: "8.21 KB",
-                        });
-                        td({
-                          style: {
-                            padding: "1rem",
-                            textAlign: "center",
-                            color: "var(--text-secondary)",
-                          },
-                          textContent: "7.25 KB",
-                        });
-                        td({
-                          style: {
-                            padding: "1rem",
-                            color: "var(--text-secondary)",
-                          },
-                          textContent: "Complete library",
-                        });
-                      });
-                    });
-                  },
-                );
-              },
-            );
-
-            // Framework Comparison
-            SubSection("Framework Comparison", () => {
+          Section(
+            () => i18n.value.docs.introduction,
+            "intro",
+            () => {
               Paragraph(
-                "How Fia compares to other popular frameworks (minified + gzipped):",
+                "Fia is a lightweight, framework-agnostic library designed for high-performance UI development. By leveraging fine-grained signals, Fia bypasses the overhead of a Virtual DOM to update the DOM directly and precisely.",
+              );
+            },
+          );
+
+          Section(
+            () => i18n.value.docs.whyFia,
+            "why-fia",
+            () => {
+              Paragraph(
+                "While modern web development is often bogged down by complex reconciliation processes, Fia focuses on surgical precision.",
+              );
+              ul(
+                {
+                  style: {
+                    marginLeft: "1.5rem",
+                    marginBottom: "1.5rem",
+                    color: "var(--text-secondary)",
+                  },
+                },
+                () => {
+                  li({ style: { marginBottom: "0.5rem" } }, () => {
+                    span({
+                      style: { color: "var(--fia-white)", fontWeight: "600" },
+                      textContent: "True Fine-Grained Reactivity: ",
+                    });
+                    text(
+                      "Only the parts of the DOM that actually change are updated. No component re-renders, no VDOM diffing—just targeted updates.",
+                    );
+                  });
+                  li({ style: { marginBottom: "0.5rem" } }, () => {
+                    span({
+                      style: { color: "var(--fia-white)", fontWeight: "600" },
+                      textContent: "End-to-End Type Safety: ",
+                    });
+                    text(
+                      "Built from the ground up with TypeScript, Fia ensures your signals and effects are predictable and catch errors at compile time, not runtime.",
+                    );
+                  });
+                  li({ style: { marginBottom: "0.5rem" } }, () => {
+                    span({
+                      style: { color: "var(--fia-white)", fontWeight: "600" },
+                      textContent: "Zero-Abstraction Feel: ",
+                    });
+                    text(
+                      "Fia stays out of your way. It provides the reactive primitives you need to build powerful interfaces without forcing a heavy framework architecture on you.",
+                    );
+                  });
+                  li({ style: { marginBottom: "0.5rem" } }, () => {
+                    span({
+                      style: { color: "var(--fia-white)", fontWeight: "600" },
+                      textContent: "Minimal Footprint: ",
+                    });
+                    text(
+                      "Designed for developers who value bundle size and execution speed, Fia provides a lean reactive core that scales from small widgets to full-scale applications.",
+                    );
+                  });
+                },
+              );
+            },
+          );
+
+          Section(
+            () => i18n.value.docs.bundleSizes.title,
+            "bundle-sizes",
+            () => {
+              Paragraph(
+                "Fia is designed to be lightweight with excellent tree-shaking support. Import only what you need:",
               );
 
+              // Bundle Sizes Table
               div(
                 {
                   style: {
-                    marginTop: "1.5rem",
+                    marginTop: "2rem",
                     marginBottom: "2rem",
                     overflowX: "auto",
                   },
@@ -1160,7 +862,7 @@ export const Docs = () =>
                                 color: "var(--fia-white)",
                                 fontWeight: "600",
                               },
-                              textContent: "Framework",
+                              textContent: "Entry Point",
                             });
                             th({
                               style: {
@@ -1169,7 +871,7 @@ export const Docs = () =>
                                 color: "var(--fia-white)",
                                 fontWeight: "600",
                               },
-                              textContent: "Minimal",
+                              textContent: "Gzip",
                             });
                             th({
                               style: {
@@ -1178,7 +880,7 @@ export const Docs = () =>
                                 color: "var(--fia-white)",
                                 fontWeight: "600",
                               },
-                              textContent: "Hello World",
+                              textContent: "Brotli",
                             });
                             th({
                               style: {
@@ -1187,116 +889,246 @@ export const Docs = () =>
                                 color: "var(--fia-white)",
                                 fontWeight: "600",
                               },
-                              textContent: "Notes",
+                              textContent: "Use Case",
                             });
                           },
                         );
                       });
                       tbody(() => {
-                        const frameworks = [
+                        // Signals
+                        tr(
                           {
-                            name: "Fia",
-                            minimal: "1.46 KB",
-                            full: "~3.9 KB",
-                            notes: "Zero dependencies",
-                            highlight: true,
+                            style: {
+                              borderBottom: "1px solid var(--fia-slate)",
+                            },
                           },
-                          {
-                            name: "Preact",
-                            minimal: "~3 KB",
-                            full: "~3.5 KB",
-                            notes: "Lightweight champion",
-                            highlight: false,
+                          () => {
+                            td(
+                              {
+                                style: {
+                                  padding: "1rem",
+                                  fontFamily: "'JetBrains Mono', monospace",
+                                  color: "var(--fia-primary)",
+                                },
+                              },
+                              () => {
+                                span({ textContent: "fia/signals" });
+                              },
+                            );
+                            td({
+                              style: {
+                                padding: "1rem",
+                                textAlign: "center",
+                                color: "var(--fia-white)",
+                                fontWeight: "600",
+                              },
+                              textContent: "1.46 KB",
+                            });
+                            td({
+                              style: {
+                                padding: "1rem",
+                                textAlign: "center",
+                                color: "var(--text-secondary)",
+                              },
+                              textContent: "1.28 KB",
+                            });
+                            td({
+                              style: {
+                                padding: "1rem",
+                                color: "var(--text-secondary)",
+                              },
+                              textContent: "Reactive state without DOM",
+                            });
                           },
-                          {
-                            name: "Svelte",
-                            minimal: "~2-3 KB",
-                            full: "~4 KB",
-                            notes: "Compiler magic",
-                            highlight: false,
-                          },
-                          {
-                            name: "Solid",
-                            minimal: "~6-7 KB",
-                            full: "~6.5 KB",
-                            notes: "Fine-grained reactivity",
-                            highlight: false,
-                          },
-                          {
-                            name: "Vue",
-                            minimal: "~17 KB",
-                            full: "~22 KB",
-                            notes: "Tree-shakable",
-                            highlight: false,
-                          },
-                          {
-                            name: "React",
-                            minimal: "~7 KB",
-                            full: "~42 KB",
-                            notes: "Standard + VDOM",
-                            highlight: false,
-                          },
-                          {
-                            name: "Angular",
-                            minimal: "N/A",
-                            full: "~85 KB",
-                            notes: "Full framework",
-                            highlight: false,
-                          },
-                        ];
+                        );
 
-                        frameworks.forEach((fw, idx) => {
-                          tr(
+                        // Control
+                        tr(
+                          {
+                            style: {
+                              borderBottom: "1px solid var(--fia-slate)",
+                            },
+                          },
+                          () => {
+                            td(
+                              {
+                                style: {
+                                  padding: "1rem",
+                                  fontFamily: "'JetBrains Mono', monospace",
+                                  color: "var(--fia-primary)",
+                                },
+                              },
+                              () => {
+                                span({ textContent: "fia/control" });
+                              },
+                            );
+                            td({
+                              style: {
+                                padding: "1rem",
+                                textAlign: "center",
+                                color: "var(--fia-white)",
+                                fontWeight: "600",
+                              },
+                              textContent: "2.16 KB",
+                            });
+                            td({
+                              style: {
+                                padding: "1rem",
+                                textAlign: "center",
+                                color: "var(--text-secondary)",
+                              },
+                              textContent: "1.90 KB",
+                            });
+                            td({
+                              style: {
+                                padding: "1rem",
+                                color: "var(--text-secondary)",
+                              },
+                              textContent: "Control flow (Show, Each)",
+                            });
+                          },
+                        );
+
+                        // Elements
+                        tr(
+                          {
+                            style: {
+                              borderBottom: "1px solid var(--fia-slate)",
+                            },
+                          },
+                          () => {
+                            td(
+                              {
+                                style: {
+                                  padding: "1rem",
+                                  fontFamily: "'JetBrains Mono', monospace",
+                                  color: "var(--fia-primary)",
+                                },
+                              },
+                              () => {
+                                span({ textContent: "fia/elements" });
+                              },
+                            );
+                            td({
+                              style: {
+                                padding: "1rem",
+                                textAlign: "center",
+                                color: "var(--fia-white)",
+                                fontWeight: "600",
+                              },
+                              textContent: "4.05 KB",
+                            });
+                            td({
+                              style: {
+                                padding: "1rem",
+                                textAlign: "center",
+                                color: "var(--text-secondary)",
+                              },
+                              textContent: "3.58 KB",
+                            });
+                            td({
+                              style: {
+                                padding: "1rem",
+                                color: "var(--text-secondary)",
+                              },
+                              textContent: "UI with 3 elements",
+                            });
+                          },
+                        );
+
+                        // SVG
+                        tr(
+                          {
+                            style: {
+                              borderBottom: "1px solid var(--fia-slate)",
+                            },
+                          },
+                          () => {
+                            td(
+                              {
+                                style: {
+                                  padding: "1rem",
+                                  fontFamily: "'JetBrains Mono', monospace",
+                                  color: "var(--fia-primary)",
+                                },
+                              },
+                              () => {
+                                span({ textContent: "fia/svg" });
+                              },
+                            );
+                            td({
+                              style: {
+                                padding: "1rem",
+                                textAlign: "center",
+                                color: "var(--fia-white)",
+                                fontWeight: "600",
+                              },
+                              textContent: "~4 KB",
+                            });
+                            td({
+                              style: {
+                                padding: "1rem",
+                                textAlign: "center",
+                                color: "var(--text-secondary)",
+                              },
+                              textContent: "~3.5 KB",
+                            });
+                            td({
+                              style: {
+                                padding: "1rem",
+                                color: "var(--text-secondary)",
+                              },
+                              textContent: "SVG graphics",
+                            });
+                          },
+                        );
+
+                        // Full
+                        tr(() => {
+                          td(
                             {
                               style: {
-                                borderBottom:
-                                  idx < frameworks.length - 1
-                                    ? "1px solid var(--fia-slate)"
-                                    : "none",
-                                // background: fw.highlight
-                                //   ? "rgba(0, 237, 100, 0.05)"
-                                //   : "transparent",
+                                padding: "1rem",
+                                fontFamily: "'JetBrains Mono', monospace",
+                                color: "var(--fia-primary)",
                               },
                             },
                             () => {
-                              td({
+                              span({ textContent: "fia" });
+                              span({
                                 style: {
-                                  padding: "1rem",
-                                  color: fw.highlight
-                                    ? "var(--fia-primary)"
-                                    : "var(--fia-white)",
-                                  fontWeight: fw.highlight ? "700" : "600",
-                                },
-                                textContent: fw.name,
-                              });
-                              td({
-                                style: {
-                                  padding: "1rem",
-                                  textAlign: "center",
-                                  color: "var(--fia-white)",
-                                  fontWeight: fw.highlight ? "600" : "normal",
-                                },
-                                textContent: fw.minimal,
-                              });
-                              td({
-                                style: {
-                                  padding: "1rem",
-                                  textAlign: "center",
-                                  color: "var(--fia-white)",
-                                  fontWeight: fw.highlight ? "600" : "normal",
-                                },
-                                textContent: fw.full,
-                              });
-                              td({
-                                style: {
-                                  padding: "1rem",
+                                  marginLeft: "0.5rem",
                                   color: "var(--text-secondary)",
                                   fontSize: "0.875rem",
                                 },
-                                textContent: fw.notes,
+                                textContent: "(full)",
                               });
                             },
                           );
+                          td({
+                            style: {
+                              padding: "1rem",
+                              textAlign: "center",
+                              color: "var(--fia-white)",
+                              fontWeight: "600",
+                            },
+                            textContent: "8.21 KB",
+                          });
+                          td({
+                            style: {
+                              padding: "1rem",
+                              textAlign: "center",
+                              color: "var(--text-secondary)",
+                            },
+                            textContent: "7.25 KB",
+                          });
+                          td({
+                            style: {
+                              padding: "1rem",
+                              color: "var(--text-secondary)",
+                            },
+                            textContent: "Complete library",
+                          });
                         });
                       });
                     },
@@ -1304,81 +1136,291 @@ export const Docs = () =>
                 },
               );
 
-              Note(
-                "All sizes are minified + gzipped. Fia's tree-shaking ensures you only bundle what you use.",
-                "info",
-              );
-            });
-          });
-
-          Section("Getting Started", "getting-started", () => {
-            SubSection("Prerequisites", () => {
-              Paragraph(
-                "Fia is compatible with any modern JavaScript runtime.",
-              );
-              List(["Node.js (v18.0.0+)", "Bun (v1.0.0+)", "Deno (v1.30.0+)"]);
-            });
-
-            SubSection("Installation", () => {
-              Paragraph(
-                "Fia is published on JSR. Install it using your preferred package manager:",
-              );
-
-              div({ style: { marginBottom: "1rem" } }, () => {
-                h4({
-                  style: {
-                    color: "var(--fia-white)",
-                    marginBottom: "0.5rem",
-                  },
-                  textContent: "Deno",
-                });
-                CodeBlock("deno add jsr:@fia/core");
-              });
-
-              div({ style: { marginBottom: "1rem" } }, () => {
-                h4({
-                  style: {
-                    color: "var(--fia-white)",
-                    marginBottom: "0.5rem",
-                  },
-                  textContent: "Bun",
-                });
+              // Framework Comparison
+              SubSection("Framework Comparison", () => {
                 Paragraph(
-                  '1. Create .npmrc file: echo "@jsr:registry=https://npm.jsr.io" > .npmrc',
+                  "How Fia compares to other popular frameworks (minified + gzipped):",
                 );
-                Paragraph("2. Install (aliased as 'fia'):");
-                CodeBlock("bun add fia@npm:@jsr/fia__core");
-              });
 
-              div({ style: { marginBottom: "1rem" } }, () => {
-                h4({
-                  style: {
-                    color: "var(--fia-white)",
-                    marginBottom: "0.5rem",
+                div(
+                  {
+                    style: {
+                      marginTop: "1.5rem",
+                      marginBottom: "2rem",
+                      overflowX: "auto",
+                    },
                   },
-                  textContent: "Node.js (npm/yarn/pnpm)",
-                });
-                CodeBlock("npx jsr add @fia/core");
+                  () => {
+                    table(
+                      {
+                        style: {
+                          width: "100%",
+                          borderCollapse: "collapse",
+                          // background: "var(--fia-accent)",
+                          borderRadius: "0.75rem",
+                          overflow: "hidden",
+                        },
+                      },
+                      () => {
+                        thead(() => {
+                          tr(
+                            {
+                              style: {
+                                background: "rgba(0, 237, 100, 0.1)",
+                                // borderBottom: "2px solid var(--fia-primary)",
+                              },
+                            },
+                            () => {
+                              th({
+                                style: {
+                                  padding: "1rem",
+                                  textAlign: "left",
+                                  color: "var(--fia-white)",
+                                  fontWeight: "600",
+                                },
+                                textContent: $(
+                                  () =>
+                                    i18n.value.docs.bundleSizes.tableHeaders
+                                      .framework,
+                                ),
+                              });
+                              th({
+                                style: {
+                                  padding: "1rem",
+                                  textAlign: "center",
+                                  color: "var(--fia-white)",
+                                  fontWeight: "600",
+                                },
+                                textContent: $(
+                                  () =>
+                                    i18n.value.docs.bundleSizes.tableHeaders
+                                      .minimal,
+                                ),
+                              });
+                              th({
+                                style: {
+                                  padding: "1rem",
+                                  textAlign: "center",
+                                  color: "var(--fia-white)",
+                                  fontWeight: "600",
+                                },
+                                textContent: $(
+                                  () =>
+                                    i18n.value.docs.bundleSizes.tableHeaders
+                                      .full,
+                                ),
+                              });
+                              th({
+                                style: {
+                                  padding: "1rem",
+                                  textAlign: "left",
+                                  color: "var(--fia-white)",
+                                  fontWeight: "600",
+                                },
+                                textContent: $(
+                                  () =>
+                                    i18n.value.docs.bundleSizes.tableHeaders
+                                      .notes,
+                                ),
+                              });
+                            },
+                          );
+                        });
+                        tbody(() => {
+                          const frameworks = [
+                            {
+                              name: "Fia",
+                              minimal: "1.46 KB",
+                              full: "~3.9 KB",
+                              notes: "Zero dependencies",
+                              highlight: true,
+                            },
+                            {
+                              name: "Preact",
+                              minimal: "~3 KB",
+                              full: "~3.5 KB",
+                              notes: "Lightweight champion",
+                              highlight: false,
+                            },
+                            {
+                              name: "Svelte",
+                              minimal: "~2-3 KB",
+                              full: "~4 KB",
+                              notes: "Compiler magic",
+                              highlight: false,
+                            },
+                            {
+                              name: "Solid",
+                              minimal: "~6-7 KB",
+                              full: "~6.5 KB",
+                              notes: "Fine-grained reactivity",
+                              highlight: false,
+                            },
+                            {
+                              name: "Vue",
+                              minimal: "~17 KB",
+                              full: "~22 KB",
+                              notes: "Tree-shakable",
+                              highlight: false,
+                            },
+                            {
+                              name: "React",
+                              minimal: "~7 KB",
+                              full: "~42 KB",
+                              notes: "Standard + VDOM",
+                              highlight: false,
+                            },
+                            {
+                              name: "Angular",
+                              minimal: "N/A",
+                              full: "~85 KB",
+                              notes: "Full framework",
+                              highlight: false,
+                            },
+                          ];
+
+                          frameworks.forEach((fw, idx) => {
+                            tr(
+                              {
+                                style: {
+                                  borderBottom:
+                                    idx < frameworks.length - 1
+                                      ? "1px solid var(--fia-slate)"
+                                      : "none",
+                                  // background: fw.highlight
+                                  //   ? "rgba(0, 237, 100, 0.05)"
+                                  //   : "transparent",
+                                },
+                              },
+                              () => {
+                                td({
+                                  style: {
+                                    padding: "1rem",
+                                    color: fw.highlight
+                                      ? "var(--fia-primary)"
+                                      : "var(--fia-white)",
+                                    fontWeight: fw.highlight ? "700" : "600",
+                                  },
+                                  textContent: fw.name,
+                                });
+                                td({
+                                  style: {
+                                    padding: "1rem",
+                                    textAlign: "center",
+                                    color: "var(--fia-white)",
+                                    fontWeight: fw.highlight ? "600" : "normal",
+                                  },
+                                  textContent: fw.minimal,
+                                });
+                                td({
+                                  style: {
+                                    padding: "1rem",
+                                    textAlign: "center",
+                                    color: "var(--fia-white)",
+                                    fontWeight: fw.highlight ? "600" : "normal",
+                                  },
+                                  textContent: fw.full,
+                                });
+                                td({
+                                  style: {
+                                    padding: "1rem",
+                                    color: "var(--text-secondary)",
+                                    fontSize: "0.875rem",
+                                  },
+                                  textContent: fw.notes,
+                                });
+                              },
+                            );
+                          });
+                        });
+                      },
+                    );
+                  },
+                );
+
+                Note(
+                  "All sizes are minified + gzipped. Fia's tree-shaking ensures you only bundle what you use.",
+                  "info",
+                );
+              });
+            },
+          );
+
+          Section(
+            () => i18n.value.docs.gettingStarted,
+            "getting-started",
+            () => {
+              SubSection("Prerequisites", () => {
+                Paragraph(
+                  "Fia is compatible with any modern JavaScript runtime.",
+                );
+                List([
+                  "Node.js (v18.0.0+)",
+                  "Bun (v1.0.0+)",
+                  "Deno (v1.30.0+)",
+                ]);
               });
 
-              Note(
-                "The 'bun' command above automatically aliases the package to 'fia'. For Node.js/Deno, mapping to 'fia' in package.json/deno.json is recommended for cleaner imports.",
-                "info",
-              );
-            });
+              SubSection("Installation", () => {
+                Paragraph(
+                  "Fia is published on JSR. Install it using your preferred package manager:",
+                );
 
-            SubSection("Updating", () => {
-              Paragraph(
-                "To update to the latest version, run the installation command again (or use your package manager's update command).",
-              );
-              CodeBlock(
-                `# Deno\ndeno add jsr:@fia/core\n\n# Bun\nbun add fia@npm:@jsr/fia__core\n\n# Node.js\nnpx jsr add @fia/core`,
-              );
-            });
+                div({ style: { marginBottom: "1rem" } }, () => {
+                  h4({
+                    style: {
+                      color: "var(--fia-white)",
+                      marginBottom: "0.5rem",
+                    },
+                    textContent: "Deno",
+                  });
+                  CodeBlock("deno add jsr:@fia/core");
+                });
 
-            SubSection("Quick Start", () => {
-              Paragraph("Create your first reactive app in seconds.");
-              CodeBlock(`import { $, div, h1, button, p } from "fia";
+                div({ style: { marginBottom: "1rem" } }, () => {
+                  h4({
+                    style: {
+                      color: "var(--fia-white)",
+                      marginBottom: "0.5rem",
+                    },
+                    textContent: "Bun",
+                  });
+                  Paragraph(
+                    '1. Create .npmrc file: echo "@jsr:registry=https://npm.jsr.io" > .npmrc',
+                  );
+                  Paragraph("2. Install (aliased as 'fia'):");
+                  CodeBlock("bun add fia@npm:@jsr/fia__core");
+                });
+
+                div({ style: { marginBottom: "1rem" } }, () => {
+                  h4({
+                    style: {
+                      color: "var(--fia-white)",
+                      marginBottom: "0.5rem",
+                    },
+                    textContent: "Node.js (npm/yarn/pnpm)",
+                  });
+                  CodeBlock("npx jsr add @fia/core");
+                });
+
+                Note(
+                  "The 'bun' command above automatically aliases the package to 'fia'. For Node.js/Deno, mapping to 'fia' in package.json/deno.json is recommended for cleaner imports.",
+                  "info",
+                );
+              });
+
+              SubSection("Updating", () => {
+                Paragraph(
+                  "To update to the latest version, run the installation command again (or use your package manager's update command).",
+                );
+                CodeBlock(
+                  `# Deno\ndeno add jsr:@fia/core\n\n# Bun\nbun add fia@npm:@jsr/fia__core\n\n# Node.js\nnpx jsr add @fia/core`,
+                );
+              });
+
+              SubSection("Quick Start", () => {
+                Paragraph("Create your first reactive app in seconds.");
+                CodeBlock(`import { $, div, h1, button, p } from "fia";
 
 // Reactive store for state
 const state = $(Mut({ count: 0 }));
@@ -1389,204 +1431,212 @@ div({ class: "app" }, () => {
   button("+", () => state.count++);
   button("-", () => state.count--);
 });`);
-            });
+              });
 
-            SubSection("Mounting", () => {
-              Paragraph(
-                "For Single Page Apps (SPAs), use the mount helper to attach to a root element.",
-              );
-              CodeBlock(`import { mount, div } from "fia";
+              SubSection("Mounting", () => {
+                Paragraph(
+                  "For Single Page Apps (SPAs), use the mount helper to attach to a root element.",
+                );
+                CodeBlock(`import { mount, div } from "fia";
 
 const App = () => div(() => {
   // Your app structure
 });
 
 mount(App, "#app"); // Clears #app and mounts App`);
-            });
-          });
+              });
+            },
+          );
 
-          Section("Element API", "element-api", () => {
-            Paragraph(
-              "Fia elements have a simple, consistent API. Functions match HTML tag names.",
-            );
-            CodeBlock(`el()                      // Empty element
+          Section(
+            () => i18n.value.docs.elementApi,
+            "element-api",
+            () => {
+              Paragraph(
+                "Fia elements have a simple, consistent API. Functions match HTML tag names.",
+              );
+              CodeBlock(`el()                      // Empty element
 el({ props })             // Props only
 el(() => { ... })         // Children only
 el({ props }, () => { })  // Props + children`);
 
-            //             SubSubSection("Text Content", () => {
-            //               Paragraph(
-            //                 "Use the native textContent prop for static or reactive text.",
-            //               );
-            //               CodeBlock(`// Static text
-            // h1("Hello World");
+              //             SubSubSection("Text Content", () => {
+              //               Paragraph(
+              //                 "Use the native textContent prop for static or reactive text.",
+              //               );
+              //               CodeBlock(`// Static text
+              // h1("Hello World");
 
-            // // Reactive text
-            // const name = $("Evan");
-            // p(name);
+              // // Reactive text
+              // const name = $("Evan");
+              // p(name);
 
-            // // Computed text
-            // p(() => \`Hello, \${name.value}!\`);`);
-            //             });
+              // // Computed text
+              // p(() => \`Hello, \${name.value}!\`);`);
+              //             });
 
-            SubSubSection("Event Handlers", () => {
-              Paragraph(
-                "Event handlers are delegated automatically for performance.",
-              );
-              CodeBlock(`button("Click me", () => console.log("clicked!"));
+              SubSubSection("Event Handlers", () => {
+                Paragraph(
+                  "Event handlers are delegated automatically for performance.",
+                );
+                CodeBlock(`button("Click me", () => console.log("clicked!"));
 
 input({
   type: "text",
   oninput: (e) => console.log(e.currentTarget.value),
 });`);
-            });
+              });
 
-            SubSubSection("Nesting Elements", () => {
-              Paragraph("Use a callback function to nest elements.");
-              CodeBlock(`div({ class: "card" }, () => {
+              SubSubSection("Nesting Elements", () => {
+                Paragraph("Use a callback function to nest elements.");
+                CodeBlock(`div({ class: "card" }, () => {
   h1("Title");
   p("Description");
 });`);
-            });
+              });
 
-            SubSubSection("Void Elements", () => {
-              Paragraph("Elements like input, img, br only accept props.");
-              CodeBlock(`input({ type: "email", placeholder: "you@example.com" });
+              SubSubSection("Void Elements", () => {
+                Paragraph("Elements like input, img, br only accept props.");
+                CodeBlock(`input({ type: "email", placeholder: "you@example.com" });
 img("/photo.jpg", "Photo");
 br();`);
-            });
+              });
 
-            SubSubSection("onMount Callback", () => {
-              Paragraph(
-                "Access layout properties after the element is in the DOM.",
-              );
-              CodeBlock(`div((el, onMount) => {
+              SubSubSection("onMount Callback", () => {
+                Paragraph(
+                  "Access layout properties after the element is in the DOM.",
+                );
+                CodeBlock(`div((el, onMount) => {
   el.style.height = "100vh";
   onMount(() => {
     console.log(el.offsetHeight);
   });
 });`);
-            });
-          });
+              });
+            },
+          );
 
-          Section("Element Factory Types", "element-factory-types", () => {
-            Paragraph(
-              "Fia provides different element factory types optimized for specific use cases. Each factory type has its own set of overloads tailored to common usage patterns.",
-            );
-
-            SubSection("Standard Elements", () => {
+          Section(
+            () => i18n.value.docs.elementFactoryTypes,
+            "element-factory-types",
+            () => {
               Paragraph(
-                "Used for semantic structure elements. Click each tab to see the different patterns for creating an article:",
+                "Fia provides different element factory types optimized for specific use cases. Each factory type has its own set of overloads tailored to common usage patterns.",
               );
 
-              TabbedExample([
-                {
-                  label: "Empty",
-                  code: `// Empty element
+              SubSection("Standard Elements", () => {
+                Paragraph(
+                  "Used for semantic structure elements. Click each tab to see the different patterns for creating an article:",
+                );
+
+                TabbedExample([
+                  {
+                    label: "Empty",
+                    code: `// Empty element
 article();`,
-                },
-                {
-                  label: "Props Only",
-                  code: `// Props only
+                  },
+                  {
+                    label: "Props Only",
+                    code: `// Props only
 article({ 
   id: "post-1", 
   class: "article",
   role: "article"
 });`,
-                },
-                {
-                  label: "Children",
-                  code: `// Children callback only
+                  },
+                  {
+                    label: "Children",
+                    code: `// Children callback only
 article(() => {
   h2("Article Title");
   p("Article content goes here...");
 });`,
-                },
-                {
-                  label: "Props + Children",
-                  code: `// Props + children (most common) 
+                  },
+                  {
+                    label: "Props + Children",
+                    code: `// Props + children (most common) 
 article({ class: "post" }, () => {
   h2("Article Title");
   p("Article body...");
   footer("Published: 2024");
 });`,
-                },
-              ]);
+                  },
+                ]);
 
-              Note(
-                "Elements: article, section, nav, form, ul, ol, table, canvas, video, and more.",
-              );
-            });
+                Note(
+                  "Elements: article, section, nav, form, ul, ol, table, canvas, video, and more.",
+                );
+              });
 
-            SubSection("Text Elements", () => {
-              Paragraph(
-                "Optimized for elements that commonly hold text content. Click each tab to see different ways to create the same heading:",
-              );
+              SubSection("Text Elements", () => {
+                Paragraph(
+                  "Optimized for elements that commonly hold text content. Click each tab to see different ways to create the same heading:",
+                );
 
-              TabbedExample([
-                {
-                  label: "Empty",
-                  code: `// Empty element
+                TabbedExample([
+                  {
+                    label: "Empty",
+                    code: `// Empty element
 h1();`,
-                },
-                {
-                  label: "Props Only",
-                  code: `// Props only
+                  },
+                  {
+                    label: "Props Only",
+                    code: `// Props only
 h1({ 
   class: "title", 
   style: { color: "blue", fontSize: "32px" } 
 });`,
-                },
-                {
-                  label: "Children",
-                  code: `// Children callback
+                  },
+                  {
+                    label: "Children",
+                    code: `// Children callback
 h1(() => {
   span("Welcome ");
   strong("User");
 });`,
-                },
-                {
-                  label: "Props + Children",
-                  code: `// Props + children
+                  },
+                  {
+                    label: "Props + Children",
+                    code: `// Props + children
 h1({ class: "hero" }, () => {
   span("Welcome ", { class: "greeting" });
   strong("User");
 });`,
-                },
-                {
-                  label: "Text Content",
-                  code: `// Text content shorthand 
+                  },
+                  {
+                    label: "Text Content",
+                    code: `// Text content shorthand 
 h1("Welcome User");
 
 // Also works with signals:
 const user = $(Mut("User"));
 h1($(() => \`Welcome \${user.value}\`));`,
-                },
-                {
-                  label: "Text + Props",
-                  code: `// Text + props 
+                  },
+                  {
+                    label: "Text + Props",
+                    code: `// Text + props 
 h1("Welcome User", { 
   class: "hero", 
   id: "main-heading" 
 });`,
-                },
-                {
-                  label: "Text + Children",
-                  code: `// Text + children
+                  },
+                  {
+                    label: "Text + Children",
+                    code: `// Text + children
 h1("Welcome", () => {
   strong(" User");
 });`,
-                },
-                {
-                  label: "All Three",
-                  code: `// Text + props + children 
+                  },
+                  {
+                    label: "All Three",
+                    code: `// Text + props + children 
 h1("Welcome", { class: "hero" }, () => {
   strong(" User");
 });`,
-                },
-                {
-                  label: "onMount",
-                  code: `// With onMount callback
+                  },
+                  {
+                    label: "onMount",
+                    code: `// With onMount callback
 h1((el, onMount) => {
   el.textContent = "Welcome User";
   onMount(() => {
@@ -1599,23 +1649,23 @@ h1({ class: "hero" }, (el, onMount) => {
   el.textContent = "Welcome User";
   onMount(() => el.scrollIntoView());
 });`,
-                },
-              ]);
+                  },
+                ]);
 
-              Note(
-                "Elements: h1-h6, p, div, span, label, li, td, th, strong, em, code, and more.",
-              );
-            });
+                Note(
+                  "Elements: h1-h6, p, div, span, label, li, td, th, strong, em, code, and more.",
+                );
+              });
 
-            SubSection("Interactive Elements", () => {
-              Paragraph(
-                "Special factories for interactive elements with convenient text + click handler shorthand:",
-              );
+              SubSection("Interactive Elements", () => {
+                Paragraph(
+                  "Special factories for interactive elements with convenient text + click handler shorthand:",
+                );
 
-              TabbedExample([
-                {
-                  label: "Text + Click ",
-                  code: `// Text + click handler shorthand
+                TabbedExample([
+                  {
+                    label: "Text + Click ",
+                    code: `// Text + click handler shorthand
 // The MOST convenient pattern!
 button("Delete", () => {
   confirmDelete();
@@ -1628,10 +1678,10 @@ button({
   textContent: "Delete",
   onclick: () => confirmDelete()
 });`,
-                },
-                {
-                  label: "Text + Props",
-                  code: `// Text + props
+                  },
+                  {
+                    label: "Text + Props",
+                    code: `// Text + props
 button("Submit", { 
   class: "btn-primary",
   type: "submit",
@@ -1643,41 +1693,41 @@ button("Submit", {
   class: "btn-primary",
   disabled: $(() => !isValid.value)
 });`,
-                },
-                {
-                  label: "Text + Children",
-                  code: `// Text + children callback
+                  },
+                  {
+                    label: "Text + Children",
+                    code: `// Text + children callback
 button("Delete", () => {
-  span({ class: "icon" }, () => t("🗑️"));
+  span({ class: "icon" }, () => text("🗑️"));
 });
 
 button("Menu", () => {
   span(menuIcon);
   span("Options");
 });`,
-                },
-                {
-                  label: "Text + Props + Children",
-                  code: `// Text + props + children
+                  },
+                  {
+                    label: "Text + Props + Children",
+                    code: `// Text + props + children
 button("Delete", { class: "btn-danger" }, () => {
-  span({ class: "icon" }, () => t("🗑️"));
+  span({ class: "icon" }, () => text("🗑️"));
   span("Delete Item");
 });`,
-                },
-                {
-                  label: "Props Only",
-                  code: `// Props only (standard element pattern)
+                  },
+                  {
+                    label: "Props Only",
+                    code: `// Props only (standard element pattern)
 button({
   textContent: "Click",
   class: "btn",
   onclick: () => handleClick()
 });`,
-                },
-                {
-                  label: "Props + Children",
-                  code: `// Props + children (standard element pattern)
+                  },
+                  {
+                    label: "Props + Children",
+                    code: `// Props + children (standard element pattern)
 button({ class: "btn-danger" }, () => {
-  span({ class: "icon" }, () => t("🗑️"));
+  span({ class: "icon" }, () => text("🗑️"));
   span("Delete");
 });
 
@@ -1685,30 +1735,30 @@ button({ class: "btn-danger" }, () => {
 button({ class: "btn", onclick: () => save() }, () => {
   span("Save");
 });`,
-                },
-              ]);
+                  },
+                ]);
 
-              Note("Elements: button, summary, option, optgroup.");
-            });
+                Note("Elements: button, summary, option, optgroup.");
+              });
 
-            SubSection("Void Elements", () => {
-              Paragraph("Self-closing elements that cannot have children.");
-              CodeBlock(`// Props only (or empty)
+              SubSection("Void Elements", () => {
+                Paragraph("Self-closing elements that cannot have children.");
+                CodeBlock(`// Props only (or empty)
 input();
 input({ type: "email", placeholder: "you@example.com" });
 br();
 hr({ style: { margin: "2rem 0" } });
 img({ src: "/photo.jpg", alt: "Description" });`);
-              Note(
-                "Elements: input, br, hr, img, area, base, col, link, meta, and more.",
-              );
-            });
+                Note(
+                  "Elements: input, br, hr, img, area, base, col, link, meta, and more.",
+                );
+              });
 
-            SubSection("Type Safety Benefits", () => {
-              Paragraph(
-                "All factories provide full TypeScript support with autocomplete, event type inference, and ARIA attribute validation.",
-              );
-              CodeBlock(`// TypeScript knows this is an HTMLInputElement
+              SubSection("Type Safety Benefits", () => {
+                Paragraph(
+                  "All factories provide full TypeScript support with autocomplete, event type inference, and ARIA attribute validation.",
+                );
+                CodeBlock(`// TypeScript knows this is an HTMLInputElement
 input({
   type: "email",
   oninput: (e) => {
@@ -1724,63 +1774,71 @@ button({
   ariaHasPopup: "menu",         // Autocomplete shows valid values!
   onclick: () => console.log("Toggle menu")
 });`);
-            });
-          });
+              });
+            },
+          );
 
-          Section("Reactivity", "reactivity", () => {
-            SubSection("Signals", () => {
-              Paragraph("Signals are the primitive units of reactivity.");
-              CodeBlock(`const count = $(Mut(0));
+          Section(
+            () => i18n.value.docs.reactivity,
+            "reactivity",
+            () => {
+              SubSection("Signals", () => {
+                Paragraph("Signals are the primitive units of reactivity.");
+                CodeBlock(`const count = $(Mut(0));
 console.log(count.value); // 0
 count.value++;`);
-            });
-            SubSection("Reactive Stores", () => {
-              Paragraph(
-                "Fia stores are immutable by default for predictability.",
-              );
-              CodeBlock(`// Immutable Store
+              });
+              SubSection("Reactive Stores", () => {
+                Paragraph(
+                  "Fia stores are immutable by default for predictability.",
+                );
+                CodeBlock(`// Immutable Store
 const config = $({ theme: "dark" });
 // config.theme = "light"; // Error!
 
 // Mutable Store (Opt-in)
 const state = $(Mut({ count: 0 }));
 state.count++; // Works!`);
-              Note(
-                "Destructuring breaks reactivity. Always access properties directly: state.count",
-                "warning",
-              );
-              Note(
-                "Immutable stores are physically frozen with Object.freeze(). Any attempt to mutate them via $raw or other means will fail.",
-                "info",
-              );
-            });
-            SubSection("Computed Values", () => {
-              Paragraph(
-                "Computed signals automatically track dependencies and update when they change.",
-              );
-              CodeBlock(`const count = $(0);
+                Note(
+                  "Destructuring breaks reactivity. Always access properties directly: state.count",
+                  "warning",
+                );
+                Note(
+                  "Immutable stores are physically frozen with Object.freeze(). Any attempt to mutate them via $raw or other means will fail.",
+                  "info",
+                );
+              });
+              SubSection("Computed Values", () => {
+                Paragraph(
+                  "Computed signals automatically track dependencies and update when they change.",
+                );
+                CodeBlock(`const count = $(0);
 const doubled = $(() => count.value * 2);`);
-            });
-            SubSection("Effects", () => {
-              Paragraph(
-                "Use $e() to run side effects when dependencies change.",
-              );
-              CodeBlock(`$e(() => {
+              });
+              SubSection("Effects", () => {
+                Paragraph(
+                  "Use $e() to run side effects when dependencies change.",
+                );
+                CodeBlock(`$e(() => {
   console.log("Count changed to:", count.value);
 });`);
-            });
-          });
+              });
+            },
+          );
 
-          Section("Immutability", "immutability", () => {
-            Paragraph(
-              "Fia embraces an Immutable-by-Default philosophy for state management. This differs from many other signals-based frameworks but aligns with functional programming principles.",
-            );
-            SubSection("Data Types & Behavior", () => {
-              SubSubSection("1. Primitives (String, Number, Boolean)", () => {
-                Paragraph(
-                  "Primitives are immutable by default. To make them mutable, use Mut.",
-                );
-                CodeBlock(`// ❌ Error: Read-only
+          Section(
+            () => i18n.value.docs.immutability,
+            "immutability",
+            () => {
+              Paragraph(
+                "Fia embraces an Immutable-by-Default philosophy for state management. This differs from many other signals-based frameworks but aligns with functional programming principles.",
+              );
+              SubSection("Data Types & Behavior", () => {
+                SubSubSection("1. Primitives (String, Number, Boolean)", () => {
+                  Paragraph(
+                    "Primitives are immutable by default. To make them mutable, use Mut.",
+                  );
+                  CodeBlock(`// ❌ Error: Read-only
 const count = $(0);
 // count.value = 1;
 
@@ -1791,13 +1849,13 @@ const name = $("Evan");
 // ✅ Valid: Mutable Primitive
 const score = $(Mut(0));
 score.value = 10;`);
-              });
+                });
 
-              SubSubSection("2. Objects", () => {
-                Paragraph(
-                  "Objects are shallowly immutable by default. You cannot add, remove, or change properties.",
-                );
-                CodeBlock(`const user = $({ name: "Evan", age: 30 });
+                SubSubSection("2. Objects", () => {
+                  Paragraph(
+                    "Objects are shallowly immutable by default. You cannot add, remove, or change properties.",
+                  );
+                  CodeBlock(`const user = $({ name: "Evan", age: 30 });
 
 // ❌ Error: Read-only property
 // user.age = 31;
@@ -1807,103 +1865,107 @@ score.value = 10;`);
 const userSignal = $(Mut({ name: "Evan" })); // If the signal itself is mutable
 // OR with stores, you often replace nested objects in a parent store.`);
 
-                Paragraph("Mutable Objects:");
-                CodeBlock(
-                  "// Option A: Specific keys\n" +
-                    'const state = $({ count: 0 }, "count");\n' +
-                    "state.count++;\n\n" +
-                    "// Option B: Full object mutability\n" +
-                    'const config = $(Mut({ theme: "dark", debug: false }));\n' +
-                    'config.theme = "light";\n' +
-                    "config.debug = true;\n\n" +
-                    "// Option C: Selective Nested Mutability\n" +
-                    "const user = $({\n" +
-                    '  name: "Evan",\n' +
-                    "  settings: {\n" +
-                    "    notifications: Mut(true), // Mutable Primitive: can be replaced\n" +
-                    '    theme: "dark"             // Read-only\n' +
-                    "  }\n" +
-                    "});\n" +
-                    "user.settings.notifications = false; // Works!\n\n" +
-                    "// Note: Mut({}) on an object makes its *properties* mutable,\n" +
-                    "// unless the parent key is also mutable.",
-                );
+                  Paragraph("Mutable Objects:");
+                  CodeBlock(
+                    "// Option A: Specific keys\n" +
+                      'const state = $({ count: 0 }, "count");\n' +
+                      "state.count++;\n\n" +
+                      "// Option B: Full object mutability\n" +
+                      'const config = $(Mut({ theme: "dark", debug: false }));\n' +
+                      'config.theme = "light";\n' +
+                      "config.debug = true;\n\n" +
+                      "// Option C: Selective Nested Mutability\n" +
+                      "const user = $({\n" +
+                      '  name: "Evan",\n' +
+                      "  settings: {\n" +
+                      "    notifications: Mut(true), // Mutable Primitive: can be replaced\n" +
+                      '    theme: "dark"             // Read-only\n' +
+                      "  }\n" +
+                      "});\n" +
+                      "user.settings.notifications = false; // Works!\n\n" +
+                      "// Note: Mut({}) on an object makes its *properties* mutable,\n" +
+                      "// unless the parent key is also mutable.",
+                  );
+                });
+
+                SubSubSection("Secure Immutability by Design", () => {
+                  Paragraph(
+                    "Fia's reactive stores are designed to prevent accidental leaks of reactivity. When you spread a store, you get a plain object snapshot, not a reactive clone.",
+                  );
+                  CodeBlock(
+                    'const original = $({ name: "Evan", details: { age: 30 } });\n' +
+                      "const snapshot = { ...original };\n\n" +
+                      "// To create a truly independent reactive copy:\n" +
+                      "const clone = $({ ...original }); // New store with copied values",
+                  );
+                  Note(
+                    "This behavior ensures you never accidentally pass reactivity where a plain value was expected, maintaining explicit data flow.",
+                    "info",
+                  );
+                });
+
+                SubSubSection("3. Arrays", () => {
+                  Paragraph(
+                    "Arrays are immutable by default. Methods that mutate (push, pop, splice, sort) are typed to not exist or error.",
+                  );
+                  CodeBlock(
+                    "const list = $({ items: [1, 2, 3] });\n" +
+                      "// ❌ Error: Property 'push' does not exist on type 'readonly number[]'\n" +
+                      "// list.items.push(4);\n\n" +
+                      "// ✅ Valid: Replace array\n" +
+                      "// list.items = [...list.items, 4]; // Only works if 'items' key is mutable",
+                  );
+
+                  Paragraph("Mutable Arrays:");
+                  CodeBlock(
+                    "const todos = $(Mut({ list: [] as string[] }));\n\n" +
+                      "// ✅ Valid: Mutation methods work\n" +
+                      'todos.list.push("Buy milk");\n' +
+                      "todos.list.splice(0, 1);",
+                  );
+                });
+
+                SubSubSection("4. Nested Objects (Deep Reactivity)", () => {
+                  Paragraph(
+                    "Deeply nested objects inherit the mutability context of their parent property assignment, but by default, Fia encourages replacing nested objects.",
+                  );
+                  CodeBlock(
+                    "const app = $(Mut({\n" +
+                      "  settings: {\n" +
+                      "    notifications: { email: true }\n" +
+                      "  }\n" +
+                      "}));\n\n" +
+                      "// ✅ Valid: Traverse and mutate (because app was wrapped in Mut)\n" +
+                      "app.settings.notifications.email = false;\n\n" +
+                      "// ℹ️ Pattern: Immutable Tree with Mutable Root\n" +
+                      "// If 'settings' wasn't mutable, you'd do:\n" +
+                      "// app.settings = { ...app.settings, notifications: { ... } };",
+                  );
+                });
               });
+            },
+          );
 
-              SubSubSection("Secure Immutability by Design", () => {
+          Section(
+            () => i18n.value.docs.controlFlow,
+            "control-flow",
+            () => {
+              SubSection("Show", "control-flow-show", () => {
                 Paragraph(
-                  "Fia's reactive stores are designed to prevent accidental leaks of reactivity. When you spread a store, you get a plain object snapshot, not a reactive clone.",
+                  "Conditionally render content that updates when the condition changes.",
                 );
-                CodeBlock(
-                  'const original = $({ name: "Evan", details: { age: 30 } });\n' +
-                    "const snapshot = { ...original };\n\n" +
-                    "// To create a truly independent reactive copy:\n" +
-                    "const clone = $({ ...original }); // New store with copied values",
-                );
-                Note(
-                  "This behavior ensures you never accidentally pass reactivity where a plain value was expected, maintaining explicit data flow.",
-                  "info",
-                );
+                CodeBlock(`Show(() => isVisible.value, () => div("Hello!"));`);
               });
-
-              SubSubSection("3. Arrays", () => {
+              SubSection("Each", "control-flow-each", () => {
                 Paragraph(
-                  "Arrays are immutable by default. Methods that mutate (push, pop, splice, sort) are typed to not exist or error.",
-                );
-                CodeBlock(
-                  "const list = $({ items: [1, 2, 3] });\n" +
-                    "// ❌ Error: Property 'push' does not exist on type 'readonly number[]'\n" +
-                    "// list.items.push(4);\n\n" +
-                    "// ✅ Valid: Replace array\n" +
-                    "// list.items = [...list.items, 4]; // Only works if 'items' key is mutable",
+                  "High-performance keyed list rendering with efficient reconciliation. Each automatically assigns stable keys to items - no key function needed! Minimizes DOM operations by reusing existing nodes instead of recreating them.",
                 );
 
-                Paragraph("Mutable Arrays:");
-                CodeBlock(
-                  "const todos = $(Mut({ list: [] as string[] }));\n\n" +
-                    "// ✅ Valid: Mutation methods work\n" +
-                    'todos.list.push("Buy milk");\n' +
-                    "todos.list.splice(0, 1);",
-                );
-              });
-
-              SubSubSection("4. Nested Objects (Deep Reactivity)", () => {
-                Paragraph(
-                  "Deeply nested objects inherit the mutability context of their parent property assignment, but by default, Fia encourages replacing nested objects.",
-                );
-                CodeBlock(
-                  "const app = $(Mut({\n" +
-                    "  settings: {\n" +
-                    "    notifications: { email: true }\n" +
-                    "  }\n" +
-                    "}));\n\n" +
-                    "// ✅ Valid: Traverse and mutate (because app was wrapped in Mut)\n" +
-                    "app.settings.notifications.email = false;\n\n" +
-                    "// ℹ️ Pattern: Immutable Tree with Mutable Root\n" +
-                    "// If 'settings' wasn't mutable, you'd do:\n" +
-                    "// app.settings = { ...app.settings, notifications: { ... } };",
-                );
-              });
-            });
-          });
-
-          Section("Control Flow", "control-flow", () => {
-            SubSection("Show", "control-flow-show", () => {
-              Paragraph(
-                "Conditionally render content that updates when the condition changes.",
-              );
-              CodeBlock(`Show(() => isVisible.value, () => div("Hello!"));`);
-            });
-            SubSection("Each", "control-flow-each", () => {
-              Paragraph(
-                "High-performance keyed list rendering with efficient reconciliation. Each automatically assigns stable keys to items - no key function needed! Minimizes DOM operations by reusing existing nodes instead of recreating them.",
-              );
-
-              SubSubSection("Automatic Key Assignment", () => {
-                Paragraph(
-                  "Each automatically assigns stable keys to both primitives and objects:",
-                );
-                CodeBlock(`// Primitives: automatically keyed by value
+                SubSubSection("Automatic Key Assignment", () => {
+                  Paragraph(
+                    "Each automatically assigns stable keys to both primitives and objects:",
+                  );
+                  CodeBlock(`// Primitives: automatically keyed by value
 const items = $({ list: ["Apple", "Banana", "Cherry"] });
 Each(() => items.list, (item, index) => {
   li({ textContent: \`\${index + 1}. \${item}\` });
@@ -1929,13 +1991,13 @@ Each(() => todos.items, (todo) => {
 });
 // ✅ No key function needed - automatic stable IDs!
 // ✅ State, focus, scroll position preserved`);
-              });
+                });
 
-              SubSubSection("Custom Key Function (Optional)", () => {
-                Paragraph(
-                  "For explicit control (e.g., database IDs), provide a custom key function:",
-                );
-                CodeBlock(`// Optional: use database ID as key
+                SubSubSection("Custom Key Function (Optional)", () => {
+                  Paragraph(
+                    "For explicit control (e.g., database IDs), provide a custom key function:",
+                  );
+                  CodeBlock(`// Optional: use database ID as key
 Each(
   () => todos.items,
   (todo) => {
@@ -1953,18 +2015,18 @@ Each(
   (todo) => todo.id  // Optional: custom key function
 );`);
 
-                Note(
-                  "How automatic keying works: Objects/arrays get stable internal IDs via WeakMap (no memory leaks). Primitives are keyed by type:value. Custom keyFn takes precedence when provided.",
-                  "info",
-                );
-              });
+                  Note(
+                    "How automatic keying works: Objects/arrays get stable internal IDs via WeakMap (no memory leaks). Primitives are keyed by type:value. Custom keyFn takes precedence when provided.",
+                    "info",
+                  );
+                });
 
-              SubSubSection("When to Use Custom Keys", () => {
-                Paragraph(
-                  "Automatic keying works great in most cases, but provide a custom keyFn when:",
-                );
+                SubSubSection("When to Use Custom Keys", () => {
+                  Paragraph(
+                    "Automatic keying works great in most cases, but provide a custom keyFn when:",
+                  );
 
-                CodeBlock(`// ✅ Automatic keying works:
+                  CodeBlock(`// ✅ Automatic keying works:
 // - Object arrays (each gets unique ID)
 // - Unique primitives: [1, 2, 3] or ["a", "b", "c"]
 // - Arrays of arrays (each array reference gets unique ID)
@@ -1981,32 +2043,35 @@ const items = [item, item];  // Both share same key!
 // - Explicit control (database IDs, debugging)
 Each(users, (user) => div(user.name), (user) => user.id);`);
 
-                Note(
-                  "Warning: If duplicate keys are detected, Each will log: '[Each] Duplicate key: \"...\". Keys must be unique.' Check the console and provide a custom keyFn if needed.",
-                  "warning",
-                );
-              });
+                  Note(
+                    "Warning: If duplicate keys are detected, Each will log: '[Each] Duplicate key: \"...\". Keys must be unique.' Check the console and provide a custom keyFn if needed.",
+                    "warning",
+                  );
+                });
 
-              SubSubSection("Performance Characteristics", () => {
-                Paragraph(
-                  "Each uses keyed reconciliation (automatic or custom) to achieve O(1) performance for common operations:",
-                );
+                SubSubSection("Performance Characteristics", () => {
+                  Paragraph(
+                    "Each uses keyed reconciliation (automatic or custom) to achieve O(1) performance for common operations:",
+                  );
 
-                Note(
-                  "Add 1 item to 1000: O(1) - creates 1 node (~0.5ms)",
-                  "info",
-                );
-                Note(
-                  "Remove 1 item from 1000: O(1) - removes 1 node (~0.3ms)",
-                  "info",
-                );
-                Note("Move/reorder items: O(1) - moves nodes (~0.2ms)", "info");
-                Note(
-                  "Preserves: input focus, scroll position, component state",
-                  "info",
-                );
+                  Note(
+                    "Add 1 item to 1000: O(1) - creates 1 node (~0.5ms)",
+                    "info",
+                  );
+                  Note(
+                    "Remove 1 item from 1000: O(1) - removes 1 node (~0.3ms)",
+                    "info",
+                  );
+                  Note(
+                    "Move/reorder items: O(1) - moves nodes (~0.2ms)",
+                    "info",
+                  );
+                  Note(
+                    "Preserves: input focus, scroll position, component state",
+                    "info",
+                  );
 
-                CodeBlock(`// Performance comparison
+                  CodeBlock(`// Performance comparison
 const items = Array(1000).fill(0).map((_, i) => ({ id: i, value: i }));
 
 // Old approach (no keying):
@@ -2017,14 +2082,14 @@ const items = Array(1000).fill(0).map((_, i) => ({ id: i, value: i }));
 // - Adding 1 item: Creates 1 node (~0.5ms)
 // - Input focus is preserved ✅
 // - State and scroll position preserved ✅`);
-              });
+                });
 
-              SubSubSection("Custom Key Function Best Practices", () => {
-                Paragraph(
-                  "While automatic keying works great, you may want custom keys for specific use cases:",
-                );
+                SubSubSection("Custom Key Function Best Practices", () => {
+                  Paragraph(
+                    "While automatic keying works great, you may want custom keys for specific use cases:",
+                  );
 
-                CodeBlock(`// ✅ Good: Database ID (explicit control)
+                  CodeBlock(`// ✅ Good: Database ID (explicit control)
 (item) => item.id
 
 // ✅ Good: UUID (distributed systems)
@@ -2042,17 +2107,17 @@ const items = Array(1000).fill(0).map((_, i) => ({ id: i, value: i }));
 // ❌ Bad: Non-unique field (causes collisions)
 (item) => item.category`);
 
-                Note(
-                  "When to use custom keys: Database objects with existing IDs, cross-system synchronization, debugging (readable keys in DevTools). When automatic keying is fine: Most common cases, primitive arrays, local component state.",
-                  "info",
-                );
-              });
+                  Note(
+                    "When to use custom keys: Database objects with existing IDs, cross-system synchronization, debugging (readable keys in DevTools). When automatic keying is fine: Most common cases, primitive arrays, local component state.",
+                    "info",
+                  );
+                });
 
-              SubSubSection("Real-World Example", () => {
-                Paragraph(
-                  "Complete todo list with add, remove, and toggle functionality:",
-                );
-                CodeBlock(`const state = $({
+                SubSubSection("Real-World Example", () => {
+                  Paragraph(
+                    "Complete todo list with add, remove, and toggle functionality:",
+                  );
+                  CodeBlock(`const state = $({
   todos: [],
   nextId: 0
 }, "todos", "nextId");
@@ -2097,54 +2162,54 @@ div(() => {
     );
   });
 });`);
+                });
+
+                SubSubSection("Performance Tips", () => {
+                  List([
+                    "Automatic keying works for most use cases (objects get stable IDs, primitives keyed by value)",
+                    "Use custom key function for explicit control (database IDs, cross-system sync)",
+                    "Custom keys are optional but useful for debugging (readable keys in DevTools)",
+                    "Batch multiple updates with batch() for better performance",
+                    "Same O(1) performance whether using automatic or custom keys",
+                  ]);
+                });
               });
+              SubSection("Match", "control-flow-match", () => {
+                Paragraph(
+                  "Reactive pattern matching for switch/case logic. Automatically updates rendering when the matched value changes.",
+                );
 
-              SubSubSection("Performance Tips", () => {
-                List([
-                  "Automatic keying works for most use cases (objects get stable IDs, primitives keyed by value)",
-                  "Use custom key function for explicit control (database IDs, cross-system sync)",
-                  "Custom keys are optional but useful for debugging (readable keys in DevTools)",
-                  "Batch multiple updates with batch() for better performance",
-                  "Same O(1) performance whether using automatic or custom keys",
-                ]);
-              });
-            });
-            SubSection("Match", "control-flow-match", () => {
-              Paragraph(
-                "Reactive pattern matching for switch/case logic. Automatically updates rendering when the matched value changes.",
-              );
+                Paragraph(
+                  "Match accepts signals or getter functions, and returns Signal<R> with '_' default or Signal<R | undefined> without.",
+                );
 
-              Paragraph(
-                "Match accepts signals or getter functions, and returns Signal<R> with '_' default or Signal<R | undefined> without.",
-              );
-
-              SubSubSection("Strings", "match-strings", () => {
-                Paragraph("Match exact string values:");
-                CodeBlock(`const status = $(Mut("active"));
+                SubSubSection("Strings", "match-strings", () => {
+                  Paragraph("Match exact string values:");
+                  CodeBlock(`const status = $(Mut("active"));
 
 Match(status, {
-  "active": () => span({ class: "success" }, () => t("Active")),
-  "inactive": () => span({ class: "danger" }, () => t("Inactive")),
-  "pending": () => span({ class: "warning" }, () => t("Pending")),
+  "active": () => span({ class: "success" }, () => text("Active")),
+  "inactive": () => span({ class: "danger" }, () => text("Inactive")),
+  "pending": () => span({ class: "warning" }, () => text("Pending")),
   _: () => span("Unknown")
 });`);
-              });
+                });
 
-              SubSubSection("Booleans", "match-booleans", () => {
-                Paragraph(
-                  "Boolean values are automatically converted to string keys:",
-                );
-                CodeBlock(`const isActive = $(Mut(true));
+                SubSubSection("Booleans", "match-booleans", () => {
+                  Paragraph(
+                    "Boolean values are automatically converted to string keys:",
+                  );
+                  CodeBlock(`const isActive = $(Mut(true));
 
 Match(isActive, {
   "true": () => "✅ Active",
   "false": () => "❌ Inactive"
 });`);
-              });
+                });
 
-              SubSubSection("Numbers", "match-numbers", () => {
-                Paragraph("Numbers support exact matching:");
-                CodeBlock(`const count = $(Mut(2));
+                SubSubSection("Numbers", "match-numbers", () => {
+                  Paragraph("Numbers support exact matching:");
+                  CodeBlock(`const count = $(Mut(2));
 
 Match(count, {
   "0": () => "None",
@@ -2153,11 +2218,11 @@ Match(count, {
   _: () => "Many"
 });`);
 
-                Paragraph(
-                  "For numeric values, Match also supports range-based comparisons using operators and interval notation:",
-                );
+                  Paragraph(
+                    "For numeric values, Match also supports range-based comparisons using operators and interval notation:",
+                  );
 
-                CodeBlock(`const age = $(Mut(25));
+                  CodeBlock(`const age = $(Mut(25));
 
 // Comparison operators
 Match(age, {
@@ -2193,49 +2258,57 @@ Match(age, {
   _: () => "Unknown"
 });`);
 
-                Note(
-                  "Range patterns only work with numeric values. Exact string matches are checked before range patterns.",
-                  "info",
-                );
+                  Note(
+                    "Range patterns only work with numeric values. Exact string matches are checked before range patterns.",
+                    "info",
+                  );
+                });
               });
-            });
-          });
+            },
+          );
 
-          Section("Component Composition", "components", () => {
-            Paragraph(
-              "In Fia, components are just functions. There is no special class or type.",
-            );
-            SubSection("Basic Component", () => {
-              CodeBlock(`function Button(props: { text: string }) {
+          Section(
+            () => i18n.value.docs.components,
+            "components",
+            () => {
+              Paragraph(
+                "In Fia, components are just functions. There is no special class or type.",
+              );
+              SubSection("Basic Component", () => {
+                CodeBlock(`function Button(props: { text: string }) {
   return button({
     textContent: props.text,
     class: "btn-primary"
   });
 }`);
-            });
-            SubSection("Children & Layouts", () => {
-              Paragraph(
-                "To create wrapper components, pass a callback function as a child prop.",
-              );
-              CodeBlock(`function Card(props, children) {
+              });
+              SubSection("Children & Layouts", () => {
+                Paragraph(
+                  "To create wrapper components, pass a callback function as a child prop.",
+                );
+                CodeBlock(`function Card(props, children) {
   return div({ class: "card" }, () => {
     children();
   });
 }`);
-            });
-          });
+              });
+            },
+          );
 
-          Section("Performance", "performance", () => {
-            Paragraph(
-              "Fia achieves exceptional performance through three core optimizations: event delegation, automatic batching, and fine-grained reactivity.",
-            );
-
-            SubSection("Event Delegation", () => {
+          Section(
+            () => i18n.value.docs.performance,
+            "performance",
+            () => {
               Paragraph(
-                "Traditional frameworks attach individual event listeners to each element. Fia uses a single delegated listener per event type.",
+                "Fia achieves exceptional performance through three core optimizations: event delegation, automatic batching, and fine-grained reactivity.",
               );
 
-              CodeBlock(`// Traditional approach (100 listeners!)
+              SubSection("Event Delegation", () => {
+                Paragraph(
+                  "Traditional frameworks attach individual event listeners to each element. Fia uses a single delegated listener per event type.",
+                );
+
+                CodeBlock(`// Traditional approach (100 listeners!)
 for (let i = 0; i < 100; i++) {
   button.addEventListener('click', handler);
 }
@@ -2245,25 +2318,25 @@ document.body
   └── 1 click handler (delegated)
       └── WeakMap<Element, Handler>`);
 
-              SubSubSection("How it works", () => {
-                List([
-                  "One global listener per event type (click, input, etc.)",
-                  "Handlers stored in WeakMap<Element, Handler>",
-                  "Automatic cleanup when elements are removed",
-                  "Dynamic elements work without rebinding",
-                ]);
-              });
+                SubSubSection("How it works", () => {
+                  List([
+                    "One global listener per event type (click, input, etc.)",
+                    "Handlers stored in WeakMap<Element, Handler>",
+                    "Automatic cleanup when elements are removed",
+                    "Dynamic elements work without rebinding",
+                  ]);
+                });
 
-              SubSubSection("Benefits", () => {
-                List([
-                  "Memory efficient: 100 buttons = 1 listener (not 100)",
-                  "Faster event dispatch: Single lookup",
-                  "No memory leaks from forgotten listeners",
-                  "Works with dynamically created elements",
-                ]);
-              });
+                SubSubSection("Benefits", () => {
+                  List([
+                    "Memory efficient: 100 buttons = 1 listener (not 100)",
+                    "Faster event dispatch: Single lookup",
+                    "No memory leaks from forgotten listeners",
+                    "Works with dynamically created elements",
+                  ]);
+                });
 
-              CodeBlock(`// Create 1,000 buttons - still only 1 click listener!
+                CodeBlock(`// Create 1,000 buttons - still only 1 click listener!
 ul(() => {
   for (let i = 0; i < 1000; i++) {
     li(() => {
@@ -2271,14 +2344,14 @@ ul(() => {
     });
   }
 });`);
-            });
+              });
 
-            SubSection("Automatic Fragment Batching", () => {
-              Paragraph(
-                "Each DOM insertion triggers browser reflow. Fia batches all children into a single insertion using DocumentFragment.",
-              );
+              SubSection("Automatic Fragment Batching", () => {
+                Paragraph(
+                  "Each DOM insertion triggers browser reflow. Fia batches all children into a single insertion using DocumentFragment.",
+                );
 
-              CodeBlock(`// Traditional approach (3 reflows!)
+                CodeBlock(`// Traditional approach (3 reflows!)
 container.appendChild(h1);  // Reflow #1
 container.appendChild(p1);  // Reflow #2
 container.appendChild(p2);  // Reflow #3
@@ -2291,25 +2364,25 @@ div(() => {
 });
 // Single appendChild(fragment)`);
 
-              SubSubSection("How it works", () => {
-                List([
-                  "Children callback creates a DocumentFragment",
-                  "All child elements append to fragment (in-memory)",
-                  "Complete fragment inserted in one operation",
-                  "Browser performs one reflow instead of multiple",
-                ]);
-              });
+                SubSubSection("How it works", () => {
+                  List([
+                    "Children callback creates a DocumentFragment",
+                    "All child elements append to fragment (in-memory)",
+                    "Complete fragment inserted in one operation",
+                    "Browser performs one reflow instead of multiple",
+                  ]);
+                });
 
-              SubSubSection("Benefits", () => {
-                List([
-                  "Single reflow: N insertions = 1 reflow (not N)",
-                  "Faster rendering with 10+ children",
-                  "Automatic - no manual optimization needed",
-                  "Composable with nested structures",
-                ]);
-              });
+                SubSubSection("Benefits", () => {
+                  List([
+                    "Single reflow: N insertions = 1 reflow (not N)",
+                    "Faster rendering with 10+ children",
+                    "Automatic - no manual optimization needed",
+                    "Composable with nested structures",
+                  ]);
+                });
 
-              CodeBlock(`// Fia automatically batches 100 elements
+                CodeBlock(`// Fia automatically batches 100 elements
 div(() => {
   h1("Title");
   ul(() => {
@@ -2321,35 +2394,35 @@ div(() => {
 });
 // Result: 2 reflows total
 // Traditional: 102 reflows`);
-            });
+              });
 
-            SubSection("Fine-Grained Reactivity", () => {
-              Paragraph(
-                "Virtual DOM frameworks re-render entire component trees. Fia updates only the changed elements.",
-              );
+              SubSection("Fine-Grained Reactivity", () => {
+                Paragraph(
+                  "Virtual DOM frameworks re-render entire component trees. Fia updates only the changed elements.",
+                );
 
-              CodeBlock(`const count = $(Mut(0));
+                CodeBlock(`const count = $(Mut(0));
 
 // Only the <p> text updates when count changes
 div(() => {
   p(() => \`Count: \${count.value}\`); // ← Updates
   button("+", () => count.value++); // ← Never re-renders
 });`);
-            });
+              });
 
-            SubSection("Best Practices", () => {
-              SubSubSection("1. Batch Multiple Updates", () => {
-                CodeBlock(`import { batch } from "fia";
+              SubSection("Best Practices", () => {
+                SubSubSection("1. Batch Multiple Updates", () => {
+                  CodeBlock(`import { batch } from "fia";
 
 batch(() => {
   state.name = "Alice";
   state.age = 30;
   state.active = true;
 }); // Triggers one effect run`);
-              });
+                });
 
-              SubSubSection("2. Use peek() for Non-Reactive Reads", () => {
-                CodeBlock(`const count = $(Mut(0));
+                SubSubSection("2. Use peek() for Non-Reactive Reads", () => {
+                  CodeBlock(`const count = $(Mut(0));
 const threshold = $(10);
 
 $e(() => {
@@ -2358,85 +2431,91 @@ $e(() => {
     console.log("Threshold exceeded!");
   }
 });`);
-              });
+                });
 
-              SubSubSection("3. Memoize Expensive Computations", () => {
-                CodeBlock(`// Bad: Re-computes on every access
+                SubSubSection("3. Memoize Expensive Computations", () => {
+                  CodeBlock(`// Bad: Re-computes on every access
 const doubled = count.value * 2;
 
 // Good: Computed once, cached until count changes
 const doubled = $(() => count.value * 2);`);
+                });
               });
-            });
-          });
+            },
+          );
 
-          Section("Examples", "examples", () => {
-            SubSection("🟢 Beginner", () => {
-              SubSubSection("1. Hello World", () => {
-                Paragraph("The simplest possible Fia code.");
-                CodeBlock(`h1("Hello, World!");`);
-              });
+          Section(
+            () => i18n.value.docs.examples.title,
+            "examples",
+            () => {
+              SubSection("🟢 Beginner", () => {
+                SubSubSection("1. Hello World", () => {
+                  Paragraph("The simplest possible Fia code.");
+                  CodeBlock(`h1("Hello, World!");`);
+                });
 
-              SubSubSection("2. Counter", () => {
-                Paragraph("Signals hold reactive state.");
-                CodeBlock(`const count = $(Mut(0));
+                SubSubSection("2. Counter", () => {
+                  Paragraph("Signals hold reactive state.");
+                  CodeBlock(`const count = $(Mut(0));
 button("+", () => count.value++);
 p(count);`);
-              });
+                });
 
-              SubSubSection("3. Toggle", () => {
-                Paragraph("Computed signals derive values from other signals.");
-                CodeBlock(`const visible = $(Mut(true));
+                SubSubSection("3. Toggle", () => {
+                  Paragraph(
+                    "Computed signals derive values from other signals.",
+                  );
+                  CodeBlock(`const visible = $(Mut(true));
 button("Toggle", () => visible.value = !visible.value);
 Show(visible, () => p("Now you see me!"));`);
-              });
+                });
 
-              SubSubSection("4. Input Binding", () => {
-                Paragraph("Two-way binding is manual but explicit.");
-                CodeBlock(`const name = $(Mut(""));
+                SubSubSection("4. Input Binding", () => {
+                  Paragraph("Two-way binding is manual but explicit.");
+                  CodeBlock(`const name = $(Mut(""));
 input({ type: "text", oninput: (e) => name.value = e.currentTarget.value });
 p($(() => \`Hello, \${name.value || "stranger"}!\`));`);
-              });
+                });
 
-              SubSubSection("5. List Rendering (Static)", () => {
-                Paragraph("For simple static lists, forEach works fine.");
-                CodeBlock(`const items = ["Apple", "Banana", "Cherry"];
+                SubSubSection("5. List Rendering (Static)", () => {
+                  Paragraph("For simple static lists, forEach works fine.");
+                  CodeBlock(`const items = ["Apple", "Banana", "Cherry"];
 ul(() => Each(items, li));`);
+                });
               });
-            });
 
-            SubSection("🟡 Intermediate", () => {
-              SubSubSection("6. Reactive Store Counter", () => {
-                Paragraph("Objects passed to $() become reactive stores.");
-                CodeBlock(`const state = $(Mut({ count: 0 }));
+              SubSection("🟡 Intermediate", () => {
+                SubSubSection("6. Reactive Store Counter", () => {
+                  Paragraph("Objects passed to $() become reactive stores.");
+                  CodeBlock(`const state = $(Mut({ count: 0 }));
 
 div(() => {
   h1($(() => \`Count: \${state.count}\`));
   button("+", () => state.count++);
   button("-", () => state.count--);
 });`);
-              });
+                });
 
-              SubSubSection("7. Conditional Classes", () => {
-                Paragraph("Computed signals work in class props too.");
-                CodeBlock(`const active = $(Mut(false));
+                SubSubSection("7. Conditional Classes", () => {
+                  Paragraph("Computed signals work in class props too.");
+                  CodeBlock(`const active = $(Mut(false));
 button($(() => active.value ? "Deactivate" : "Activate"), () => active.value = !active.value);`);
-              });
+                });
 
-              SubSubSection("8. Form Handling", () => {
-                Paragraph("Reactive stores are perfect for forms.");
-                CodeBlock(`const formData = $(Mut({ email: "", password: "" }));
+                SubSubSection("8. Form Handling", () => {
+                  Paragraph("Reactive stores are perfect for forms.");
+                  CodeBlock(`const formData = $(Mut({ email: "", password: "" }));
 
 form({ onsubmit: (e) => { e.preventDefault(); console.log(formData); } }, () => {
   input({ type: "email", oninput: (e) => formData.email = e.currentTarget.value });
   input({ type: "password", oninput: (e) => formData.password = e.currentTarget.value });
   button("Submit", { type: "submit" });
 });`);
-              });
+                });
 
-              SubSubSection("9. Computed Values", () => {
-                Paragraph("Track dependencies automatically.");
-                CodeBlock(`const state = $(Mut({ price: 100, quantity: 2 }));
+                SubSubSection("9. Computed Values", () => {
+                  Paragraph("Track dependencies automatically.");
+                  CodeBlock(`const state = $(Mut({ price: 100, quantity: 2 }));
 const total = $(() => state.price * state.quantity);
 
 div(() => {
@@ -2445,11 +2524,11 @@ div(() => {
   p($(() => \`Total: $\${total.value}\`));
   button("Add", () => state.quantity++);
 });`);
-              });
+                });
 
-              SubSubSection("10. Dynamic Styling", () => {
-                Paragraph("Reactive styles allow theming.");
-                CodeBlock(`const theme = $(Mut("light"));
+                SubSubSection("10. Dynamic Styling", () => {
+                  Paragraph("Reactive styles allow theming.");
+                  CodeBlock(`const theme = $(Mut("light"));
 
 div({
   style: {
@@ -2462,17 +2541,17 @@ div({
     theme.value = theme.value === "dark" ? "light" : "dark";
   });
 });`);
+                });
               });
-            });
 
-            SubSection("🔴 Advanced", () => {
-              SubSubSection(
-                "11. Control Flow Combo (Each + Show + Match)",
-                () => {
-                  Paragraph(
-                    "A complete task manager combining all control flow components:",
-                  );
-                  CodeBlock(`// Task manager example combining Each, Show, and Match
+              SubSection("🔴 Advanced", () => {
+                SubSubSection(
+                  "11. Control Flow Combo (Each + Show + Match)",
+                  () => {
+                    Paragraph(
+                      "A complete task manager combining all control flow components:",
+                    );
+                    CodeBlock(`// Task manager example combining Each, Show, and Match
 type Task = { id: number; text: string; completed: boolean };
 type Filter = "all" | "active" | "completed";
 
@@ -2638,12 +2717,12 @@ div({ style: { padding: "20px", maxWidth: "600px", margin: "0 auto" } }, () => {
     }
   });
 });`);
-                },
-              );
+                  },
+                );
 
-              SubSubSection("12. Todo App", () => {
-                Paragraph("A complete todo app using Each.");
-                CodeBlock(`const todos = $(Mut({ items: [] as string[], input: "" }));
+                SubSubSection("12. Todo App", () => {
+                  Paragraph("A complete todo app using Each.");
+                  CodeBlock(`const todos = $(Mut({ items: [] as string[], input: "" }));
 
 div(() => {
   input({
@@ -2666,11 +2745,11 @@ div(() => {
     });
   });
 });`);
-              });
+                });
 
-              SubSubSection("12. Tabs Component", () => {
-                Paragraph("Track active index and conditionally render.");
-                CodeBlock(`const tabs = ["Home", "About", "Contact"];
+                SubSubSection("12. Tabs Component", () => {
+                  Paragraph("Track active index and conditionally render.");
+                  CodeBlock(`const tabs = ["Home", "About", "Contact"];
 const active = $(Mut(0));
 
 div(() => {
@@ -2693,11 +2772,11 @@ div(() => {
     );
   });
 });`);
-              });
+                });
 
-              SubSubSection("13. Async Data Fetching", () => {
-                Paragraph("Use Match for loading states.");
-                CodeBlock(`const state = $(Mut({
+                SubSubSection("13. Async Data Fetching", () => {
+                  Paragraph("Use Match for loading states.");
+                  CodeBlock(`const state = $(Mut({
   status: "loading" as "loading" | "success" | "error",
   users: [] as string[]
 }));
@@ -2717,11 +2796,11 @@ div(() => {
     success: () => ul(() => Each(() => state.users, u => li(u))),
   });
 });`);
-              });
+                });
 
-              SubSubSection("14. Modal Dialog", () => {
-                Paragraph("Modal patterns with explicit types.");
-                CodeBlock(`const modal = $(Mut({ open: false, title: "" }));
+                SubSubSection("14. Modal Dialog", () => {
+                  Paragraph("Modal patterns with explicit types.");
+                  CodeBlock(`const modal = $(Mut({ open: false, title: "" }));
 
 function openModal(title: string) {
   modal.title = title;
@@ -2743,9 +2822,10 @@ div({
     button("Close", () => modal.open = false);
   });
 });`);
+                });
               });
-            });
-          });
+            },
+          );
         },
       ); // Close main content div
     },

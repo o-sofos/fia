@@ -1,4 +1,5 @@
-import { footer, div } from "../../core/mod";
+import { footer, div, $ } from "../../core/mod";
+import { t } from "../store/i18n";
 
 export const Footer = () =>
     footer({
@@ -10,6 +11,14 @@ export const Footer = () =>
         }
     }, () => {
         div({ class: "container", style: { textAlign: "center", color: "var(--text-secondary)", fontSize: "0.9rem" } }, () => {
-            div({ style: { marginBottom: "1rem" }, textContent: "© 2026 Fia Framework. Open Source under MIT License." });
+            div({
+                style: { marginBottom: "0.5rem", fontWeight: "500" },
+                textContent: $(() => t.value.footer.tagline)
+            });
+            div({
+                style: { marginBottom: "1rem" },
+                textContent: $(() => `${t.value.footer.madeWith} ❤️ ${t.value.footer.by}`)
+            });
+            div({ textContent: "© 2026 Fia Framework. Open Source under MIT License." });
         });
     });

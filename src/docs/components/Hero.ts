@@ -1,4 +1,5 @@
-import { header, h1, p, div, button, a, span } from "../../core/mod";
+import { header, h1, p, div, button, a, span, $ } from "../../core/mod";
+import { t } from "../store/i18n";
 
 export const Hero = () =>
   header(
@@ -25,8 +26,8 @@ export const Hero = () =>
           },
         },
         () => {
-          div({ textContent: "Bare Metal JavaScript" });
-          div({ class: "text-gradient", textContent: "No JSX. Value Native." });
+          div({ textContent: $(() => t.value.hero.title) });
+          div({ class: "text-gradient", textContent: $(() => t.value.hero.subtitle) });
         },
       );
 
@@ -96,7 +97,7 @@ export const Hero = () =>
           button({
             class: "btn btn-primary",
             style: { padding: "1rem 2rem", fontSize: "1.1rem" },
-            textContent: "Get Started",
+            textContent: $(() => t.value.hero.getStarted),
           });
           a({
             href: "https://github.com/o-sofos/fia",
