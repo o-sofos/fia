@@ -109,6 +109,12 @@ const server = Bun.serve({
         path = "/src/core/svg/svg.ts";
       }
 
+      // Asset mapping for dev mode
+      else if (path.startsWith("/assets/")) {
+        filePath = `./src/docs${path}`;
+        file = Bun.file(filePath);
+      }
+
       // If still not found, try with .ts extension (for extensionless imports)
       else if (!(await file.exists())) {
         const tsPath = `${filePath}.ts`;

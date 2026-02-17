@@ -1,4 +1,4 @@
-import { nav, div, a, span, button, $ } from "../../core/mod";
+import { nav, div, a, span, button, img, $ } from "../../core/mod";
 import { themeStore, toggleTheme } from "../store/theme";
 import { t } from "../store/i18n";
 import { LanguageSwitcher } from "./LanguageSwitcher";
@@ -15,24 +15,47 @@ export const Navbar = () =>
       },
     },
     () => {
-      // Logo
-      div(
+      // Logo (Left side)
+      a(
         {
+          href: "/",
           style: {
-            fontSize: "1.5rem",
-            fontWeight: "700",
             display: "flex",
             alignItems: "center",
             gap: "0.5rem",
-            cursor: "pointer",
+            textDecoration: "none",
           },
         },
         () => {
-          span({ style: { color: "var(--fia-primary)" }, textContent: "fia" });
+          // SVG Logo
+          img({
+            src: "/assets/logo.svg",
+            alt: "Fia Logo",
+            style: {
+              width: "32px",
+              height: "32px",
+            }
+          });
+
+          div(
+            {
+              style: {
+                fontSize: "1.5rem",
+                fontWeight: "700",
+                display: "flex",
+                alignItems: "center",
+                gap: "0.5rem",
+                cursor: "pointer",
+              },
+            },
+            () => {
+              span({ style: { color: "var(--fia-primary)" }, textContent: "fia" });
+            },
+          );
         },
       );
 
-      // Links
+      // Links (Right side)
       div(
         { style: { display: "flex", gap: "2rem", alignItems: "center" } },
         () => {
@@ -47,9 +70,6 @@ export const Navbar = () =>
             style: { fontWeight: "500" },
             textContent: $(() => t.value.nav.github),
           });
-
-          // Language Switcher
-          // LanguageSwitcher();
 
           // Theme Toggle
           button(

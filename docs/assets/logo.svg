@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none">
+  <defs>
+    <linearGradient id="fia-gradient" x1="0" y1="0" x2="256" y2="256" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#818cf8" /> <!-- Lighter Indigo -->
+      <stop offset="100%" stop-color="#2dd4bf" /> <!-- Teal -->
+    </linearGradient>
+    <filter id="strong-glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="12" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+  
+  <!-- Phi Symbol Group with Glow -->
+  <g filter="url(#strong-glow)">
+    <g stroke="url(#fia-gradient)" stroke-width="42" stroke-linecap="round" stroke-linejoin="round" fill="none">
+        <!-- Circle -->
+        <circle cx="128" cy="128" r="72" />
+        <!-- Vertical Line -->
+        <line x1="128" y1="20" x2="128" y2="236" />
+    </g>
+    
+    <!-- Central Node (Reactivity Core) - White for max contrast -->
+    <circle cx="128" cy="128" r="18" fill="#ffffff" />
+  </g>
+</svg>
