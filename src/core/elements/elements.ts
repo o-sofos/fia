@@ -726,22 +726,22 @@ export function isChildrenCallback<E extends HTMLElement>(
 // -----------------------------------------------------------------------------
 // Special elements with custom factories
 // -----------------------------------------------------------------------------
-export const a = createAnchorElement() as AnchorElementFactory;
-export const img = createImgElement() as ImgElementFactory;
+export const a = /*#__PURE__*/ createAnchorElement() as AnchorElementFactory;
+export const img = /*#__PURE__*/ createImgElement() as ImgElementFactory;
 
 // -----------------------------------------------------------------------------
 // Interactive elements (text + handler shorthand)
 // -----------------------------------------------------------------------------
-export const button = createInteractiveElement(
+export const button = /*#__PURE__*/ createInteractiveElement(
   "button",
 ) as InteractiveElementFactory<"button">;
-export const summary = createInteractiveElement(
+export const summary = /*#__PURE__*/ createInteractiveElement(
   "summary",
 ) as InteractiveElementFactory<"summary">;
-export const option = createInteractiveElement(
+export const option = /*#__PURE__*/ createInteractiveElement(
   "option",
 ) as InteractiveElementFactory<"option">;
-export const optgroup = createInteractiveElement(
+export const optgroup = /*#__PURE__*/ createInteractiveElement(
   "optgroup",
 ) as InteractiveElementFactory<"optgroup">;
 
@@ -749,159 +749,159 @@ export const optgroup = createInteractiveElement(
 // Text-holding elements (text shorthand)
 // -----------------------------------------------------------------------------
 // Headings
-export const h1 = createTextElement("h1") as TextElementFactory<"h1">;
-export const h2 = createTextElement("h2") as TextElementFactory<"h2">;
-export const h3 = createTextElement("h3") as TextElementFactory<"h3">;
-export const h4 = createTextElement("h4") as TextElementFactory<"h4">;
-export const h5 = createTextElement("h5") as TextElementFactory<"h5">;
-export const h6 = createTextElement("h6") as TextElementFactory<"h6">;
+export const h1 = /*#__PURE__*/ createTextElement("h1") as TextElementFactory<"h1">;
+export const h2 = /*#__PURE__*/ createTextElement("h2") as TextElementFactory<"h2">;
+export const h3 = /*#__PURE__*/ createTextElement("h3") as TextElementFactory<"h3">;
+export const h4 = /*#__PURE__*/ createTextElement("h4") as TextElementFactory<"h4">;
+export const h5 = /*#__PURE__*/ createTextElement("h5") as TextElementFactory<"h5">;
+export const h6 = /*#__PURE__*/ createTextElement("h6") as TextElementFactory<"h6">;
 
 // Block elements
-export const p = createTextElement("p") as TextElementFactory<"p">;
-export const div = createTextElement("div") as TextElementFactory<"div">;
-export const article = createTextElement(
+export const p = /*#__PURE__*/ createTextElement("p") as TextElementFactory<"p">;
+export const div = /*#__PURE__*/ createTextElement("div") as TextElementFactory<"div">;
+export const article = /*#__PURE__*/ createTextElement(
   "article",
 ) as TextElementFactory<"article">;
-export const section = createTextElement(
+export const section = /*#__PURE__*/ createTextElement(
   "section",
 ) as TextElementFactory<"section">;
-export const aside = createTextElement("aside") as TextElementFactory<"aside">;
-export const header = createTextElement(
+export const aside = /*#__PURE__*/ createTextElement("aside") as TextElementFactory<"aside">;
+export const header = /*#__PURE__*/ createTextElement(
   "header",
 ) as TextElementFactory<"header">;
-export const footer = createTextElement(
+export const footer = /*#__PURE__*/ createTextElement(
   "footer",
 ) as TextElementFactory<"footer">;
-export const main = createTextElement("main") as TextElementFactory<"main">;
-export const blockquote = createTextElement(
+export const main = /*#__PURE__*/ createTextElement("main") as TextElementFactory<"main">;
+export const blockquote = /*#__PURE__*/ createTextElement(
   "blockquote",
 ) as TextElementFactory<"blockquote">;
-export const figcaption = createTextElement(
+export const figcaption = /*#__PURE__*/ createTextElement(
   "figcaption",
 ) as TextElementFactory<"figcaption">;
-export const pre = createTextElement("pre") as TextElementFactory<"pre">;
-export const address = createTextElement(
+export const pre = /*#__PURE__*/ createTextElement("pre") as TextElementFactory<"pre">;
+export const address = /*#__PURE__*/ createTextElement(
   "address",
 ) as TextElementFactory<"address">;
 
 // Inline elements
-export const span = createTextElement("span") as TextElementFactory<"span">;
-export const strong = createTextElement(
+export const span = /*#__PURE__*/ createTextElement("span") as TextElementFactory<"span">;
+export const strong = /*#__PURE__*/ createTextElement(
   "strong",
 ) as TextElementFactory<"strong">;
-export const em = createTextElement("em") as TextElementFactory<"em">;
-export const small = createTextElement("small") as TextElementFactory<"small">;
-export const mark = createTextElement("mark") as TextElementFactory<"mark">;
-export const code = createTextElement("code") as TextElementFactory<"code">;
-export const samp = createTextElement("samp") as TextElementFactory<"samp">;
-export const kbd = createTextElement("kbd") as TextElementFactory<"kbd">;
-export const var_ = createTextElement("var") as TextElementFactory<"var">; // var is reserved
-export const i = createTextElement("i") as TextElementFactory<"i">;
-export const b = createTextElement("b") as TextElementFactory<"b">;
-export const u = createTextElement("u") as TextElementFactory<"u">;
-export const s = createTextElement("s") as TextElementFactory<"s">;
-export const del = createTextElement("del") as TextElementFactory<"del">;
-export const ins = createTextElement("ins") as TextElementFactory<"ins">;
-export const sub = createTextElement("sub") as TextElementFactory<"sub">;
-export const sup = createTextElement("sup") as TextElementFactory<"sup">;
-export const abbr = createTextElement("abbr") as TextElementFactory<"abbr">;
-export const cite = createTextElement("cite") as TextElementFactory<"cite">;
-export const dfn = createTextElement("dfn") as TextElementFactory<"dfn">;
-export const q = createTextElement("q") as TextElementFactory<"q">;
-export const time = createTextElement("time") as TextElementFactory<"time">;
-export const data = createTextElement("data") as TextElementFactory<"data">;
-export const bdi = createTextElement("bdi") as TextElementFactory<"bdi">;
-export const bdo = createTextElement("bdo") as TextElementFactory<"bdo">;
-export const ruby = createTextElement("ruby") as TextElementFactory<"ruby">;
-export const rp = createTextElement("rp") as TextElementFactory<"rp">;
-export const rt = createTextElement("rt") as TextElementFactory<"rt">;
+export const em = /*#__PURE__*/ createTextElement("em") as TextElementFactory<"em">;
+export const small = /*#__PURE__*/ createTextElement("small") as TextElementFactory<"small">;
+export const mark = /*#__PURE__*/ createTextElement("mark") as TextElementFactory<"mark">;
+export const code = /*#__PURE__*/ createTextElement("code") as TextElementFactory<"code">;
+export const samp = /*#__PURE__*/ createTextElement("samp") as TextElementFactory<"samp">;
+export const kbd = /*#__PURE__*/ createTextElement("kbd") as TextElementFactory<"kbd">;
+export const var_ = /*#__PURE__*/ createTextElement("var") as TextElementFactory<"var">; // var is reserved
+export const i = /*#__PURE__*/ createTextElement("i") as TextElementFactory<"i">;
+export const b = /*#__PURE__*/ createTextElement("b") as TextElementFactory<"b">;
+export const u = /*#__PURE__*/ createTextElement("u") as TextElementFactory<"u">;
+export const s = /*#__PURE__*/ createTextElement("s") as TextElementFactory<"s">;
+export const del = /*#__PURE__*/ createTextElement("del") as TextElementFactory<"del">;
+export const ins = /*#__PURE__*/ createTextElement("ins") as TextElementFactory<"ins">;
+export const sub = /*#__PURE__*/ createTextElement("sub") as TextElementFactory<"sub">;
+export const sup = /*#__PURE__*/ createTextElement("sup") as TextElementFactory<"sup">;
+export const abbr = /*#__PURE__*/ createTextElement("abbr") as TextElementFactory<"abbr">;
+export const cite = /*#__PURE__*/ createTextElement("cite") as TextElementFactory<"cite">;
+export const dfn = /*#__PURE__*/ createTextElement("dfn") as TextElementFactory<"dfn">;
+export const q = /*#__PURE__*/ createTextElement("q") as TextElementFactory<"q">;
+export const time = /*#__PURE__*/ createTextElement("time") as TextElementFactory<"time">;
+export const data = /*#__PURE__*/ createTextElement("data") as TextElementFactory<"data">;
+export const bdi = /*#__PURE__*/ createTextElement("bdi") as TextElementFactory<"bdi">;
+export const bdo = /*#__PURE__*/ createTextElement("bdo") as TextElementFactory<"bdo">;
+export const ruby = /*#__PURE__*/ createTextElement("ruby") as TextElementFactory<"ruby">;
+export const rp = /*#__PURE__*/ createTextElement("rp") as TextElementFactory<"rp">;
+export const rt = /*#__PURE__*/ createTextElement("rt") as TextElementFactory<"rt">;
 
 // Form-adjacent
-export const label = createTextElement("label") as TextElementFactory<"label">;
-export const legend = createTextElement(
+export const label = /*#__PURE__*/ createTextElement("label") as TextElementFactory<"label">;
+export const legend = /*#__PURE__*/ createTextElement(
   "legend",
 ) as TextElementFactory<"legend">;
-export const output = createTextElement(
+export const output = /*#__PURE__*/ createTextElement(
   "output",
 ) as TextElementFactory<"output">;
 
 // Table cells
-export const caption = createTextElement(
+export const caption = /*#__PURE__*/ createTextElement(
   "caption",
 ) as TextElementFactory<"caption">;
-export const td = createTextElement("td") as TextElementFactory<"td">;
-export const th = createTextElement("th") as TextElementFactory<"th">;
+export const td = /*#__PURE__*/ createTextElement("td") as TextElementFactory<"td">;
+export const th = /*#__PURE__*/ createTextElement("th") as TextElementFactory<"th">;
 
 // List items
-export const li = createTextElement("li") as TextElementFactory<"li">;
-export const dd = createTextElement("dd") as TextElementFactory<"dd">;
-export const dt = createTextElement("dt") as TextElementFactory<"dt">;
+export const li = /*#__PURE__*/ createTextElement("li") as TextElementFactory<"li">;
+export const dd = /*#__PURE__*/ createTextElement("dd") as TextElementFactory<"dd">;
+export const dt = /*#__PURE__*/ createTextElement("dt") as TextElementFactory<"dt">;
 
 // Title
-export const title = createTextElement("title") as TextElementFactory<"title">;
+export const title = /*#__PURE__*/ createTextElement("title") as TextElementFactory<"title">;
 
 // -----------------------------------------------------------------------------
 // Void elements (no children, props only)
 // -----------------------------------------------------------------------------
-export const input = createVoidElement("input") as VoidElementFactory<"input">;
-export const br = createVoidElement("br") as VoidElementFactory<"br">;
-export const hr = createVoidElement("hr") as VoidElementFactory<"hr">;
-export const meta = createVoidElement("meta") as VoidElementFactory<"meta">;
-export const link = createVoidElement("link") as VoidElementFactory<"link">;
-export const area = createVoidElement("area") as VoidElementFactory<"area">;
-export const base = createVoidElement("base") as VoidElementFactory<"base">;
-export const col = createVoidElement("col") as VoidElementFactory<"col">;
-export const embed = createVoidElement("embed") as VoidElementFactory<"embed">;
-export const source = createVoidElement(
+export const input = /*#__PURE__*/ createVoidElement("input") as VoidElementFactory<"input">;
+export const br = /*#__PURE__*/ createVoidElement("br") as VoidElementFactory<"br">;
+export const hr = /*#__PURE__*/ createVoidElement("hr") as VoidElementFactory<"hr">;
+export const meta = /*#__PURE__*/ createVoidElement("meta") as VoidElementFactory<"meta">;
+export const link = /*#__PURE__*/ createVoidElement("link") as VoidElementFactory<"link">;
+export const area = /*#__PURE__*/ createVoidElement("area") as VoidElementFactory<"area">;
+export const base = /*#__PURE__*/ createVoidElement("base") as VoidElementFactory<"base">;
+export const col = /*#__PURE__*/ createVoidElement("col") as VoidElementFactory<"col">;
+export const embed = /*#__PURE__*/ createVoidElement("embed") as VoidElementFactory<"embed">;
+export const source = /*#__PURE__*/ createVoidElement(
   "source",
 ) as VoidElementFactory<"source">;
-export const track = createVoidElement("track") as VoidElementFactory<"track">;
-export const wbr = createVoidElement("wbr") as VoidElementFactory<"wbr">;
+export const track = /*#__PURE__*/ createVoidElement("track") as VoidElementFactory<"track">;
+export const wbr = /*#__PURE__*/ createVoidElement("wbr") as VoidElementFactory<"wbr">;
 
 // -----------------------------------------------------------------------------
 // Container elements (no text shorthand, props + children only)
 // -----------------------------------------------------------------------------
-export const ul = createElement("ul") as ElementFactory<"ul">;
-export const ol = createElement("ol") as ElementFactory<"ol">;
-export const menu = createElement("menu") as ElementFactory<"menu">;
-export const table = createElement("table") as ElementFactory<"table">;
-export const tbody = createElement("tbody") as ElementFactory<"tbody">;
-export const thead = createElement("thead") as ElementFactory<"thead">;
-export const tfoot = createElement("tfoot") as ElementFactory<"tfoot">;
-export const tr = createElement("tr") as ElementFactory<"tr">;
-export const colgroup = createElement("colgroup") as ElementFactory<"colgroup">;
-export const form = createElement("form") as ElementFactory<"form">;
-export const fieldset = createElement("fieldset") as ElementFactory<"fieldset">;
-export const details = createElement("details") as ElementFactory<"details">;
-export const dialog = createElement("dialog") as ElementFactory<"dialog">;
-export const nav = createElement("nav") as ElementFactory<"nav">;
-export const figure = createElement("figure") as ElementFactory<"figure">;
-export const select = createElement("select") as ElementFactory<"select">;
-export const datalist = createElement("datalist") as ElementFactory<"datalist">;
-export const dl = createElement("dl") as ElementFactory<"dl">;
+export const ul = /*#__PURE__*/ createElement("ul") as ElementFactory<"ul">;
+export const ol = /*#__PURE__*/ createElement("ol") as ElementFactory<"ol">;
+export const menu = /*#__PURE__*/ createElement("menu") as ElementFactory<"menu">;
+export const table = /*#__PURE__*/ createElement("table") as ElementFactory<"table">;
+export const tbody = /*#__PURE__*/ createElement("tbody") as ElementFactory<"tbody">;
+export const thead = /*#__PURE__*/ createElement("thead") as ElementFactory<"thead">;
+export const tfoot = /*#__PURE__*/ createElement("tfoot") as ElementFactory<"tfoot">;
+export const tr = /*#__PURE__*/ createElement("tr") as ElementFactory<"tr">;
+export const colgroup = /*#__PURE__*/ createElement("colgroup") as ElementFactory<"colgroup">;
+export const form = /*#__PURE__*/ createElement("form") as ElementFactory<"form">;
+export const fieldset = /*#__PURE__*/ createElement("fieldset") as ElementFactory<"fieldset">;
+export const details = /*#__PURE__*/ createElement("details") as ElementFactory<"details">;
+export const dialog = /*#__PURE__*/ createElement("dialog") as ElementFactory<"dialog">;
+export const nav = /*#__PURE__*/ createElement("nav") as ElementFactory<"nav">;
+export const figure = /*#__PURE__*/ createElement("figure") as ElementFactory<"figure">;
+export const select = /*#__PURE__*/ createElement("select") as ElementFactory<"select">;
+export const datalist = /*#__PURE__*/ createElement("datalist") as ElementFactory<"datalist">;
+export const dl = /*#__PURE__*/ createElement("dl") as ElementFactory<"dl">;
 
 // Media/embedded
-export const audio = createElement("audio") as ElementFactory<"audio">;
-export const video = createElement("video") as ElementFactory<"video">;
-export const picture = createElement("picture") as ElementFactory<"picture">;
-export const iframe = createElement("iframe") as ElementFactory<"iframe">;
-export const object = createElement("object") as ElementFactory<"object">;
-export const canvas = createElement("canvas") as ElementFactory<"canvas">;
-export const map = createElement("map") as ElementFactory<"map">;
+export const audio = /*#__PURE__*/ createElement("audio") as ElementFactory<"audio">;
+export const video = /*#__PURE__*/ createElement("video") as ElementFactory<"video">;
+export const picture = /*#__PURE__*/ createElement("picture") as ElementFactory<"picture">;
+export const iframe = /*#__PURE__*/ createElement("iframe") as ElementFactory<"iframe">;
+export const object = /*#__PURE__*/ createElement("object") as ElementFactory<"object">;
+export const canvas = /*#__PURE__*/ createElement("canvas") as ElementFactory<"canvas">;
+export const map = /*#__PURE__*/ createElement("map") as ElementFactory<"map">;
 
 // Document structure
-export const body = createElement("body") as ElementFactory<"body">;
-export const head = createElement("head") as ElementFactory<"head">;
-export const html = createElement("html") as ElementFactory<"html">;
-export const hgroup = createElement("hgroup") as ElementFactory<"hgroup">;
+export const body = /*#__PURE__*/ createElement("body") as ElementFactory<"body">;
+export const head = /*#__PURE__*/ createElement("head") as ElementFactory<"head">;
+export const html = /*#__PURE__*/ createElement("html") as ElementFactory<"html">;
+export const hgroup = /*#__PURE__*/ createElement("hgroup") as ElementFactory<"hgroup">;
 
 // Other container-like
-export const template = createElement("template") as ElementFactory<"template">;
-export const slot = createElement("slot") as ElementFactory<"slot">;
-export const noscript = createElement("noscript") as ElementFactory<"noscript">;
-export const script = createElement("script") as ElementFactory<"script">;
-export const style = createElement("style") as ElementFactory<"style">;
-export const textarea = createElement("textarea") as ElementFactory<"textarea">;
-export const meter = createElement("meter") as ElementFactory<"meter">;
-export const progress = createElement("progress") as ElementFactory<"progress">;
-export const search = createElement("search") as ElementFactory<"search">;
+export const template = /*#__PURE__*/ createElement("template") as ElementFactory<"template">;
+export const slot = /*#__PURE__*/ createElement("slot") as ElementFactory<"slot">;
+export const noscript = /*#__PURE__*/ createElement("noscript") as ElementFactory<"noscript">;
+export const script = /*#__PURE__*/ createElement("script") as ElementFactory<"script">;
+export const style = /*#__PURE__*/ createElement("style") as ElementFactory<"style">;
+export const textarea = /*#__PURE__*/ createElement("textarea") as ElementFactory<"textarea">;
+export const meter = /*#__PURE__*/ createElement("meter") as ElementFactory<"meter">;
+export const progress = /*#__PURE__*/ createElement("progress") as ElementFactory<"progress">;
+export const search = /*#__PURE__*/ createElement("search") as ElementFactory<"search">;
