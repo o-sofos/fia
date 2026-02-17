@@ -18,7 +18,7 @@ Most frameworks add layers of abstraction between you and the DOM. Fia gives you
 
 - ✨ **Reactive values** - `$()` creates signals for primitives, reactive stores for objects
 - 🎯 **Direct DOM** - No virtual DOM, no diffing, just native browser APIs
-- 📦 **~6KB gzipped** - Lightweight with zero dependencies
+- 📦 **~4KB gzipped** - Lightweight Hello World (1.5KB signals-only, 8KB full)
 - 📘 **Fully typed** - Complete TypeScript support with autocomplete
 - ⚡ **Event delegation** - Single listener per event type, automatic cleanup
 - 🚀 **No build required** - Import from JSR and start building
@@ -29,14 +29,52 @@ Most frameworks add layers of abstraction between you and the DOM. Fia gives you
 - **Zero dependencies** - No supply chain risk, no version conflicts, no surprises.
 - **Vanilla JavaScript** - Use `if`, `forEach` for static logic. Use `Show`/`Each` only for reactive DOM updates.
 
+## 📦 Bundle Sizes
+
+Fia is designed to be lightweight with excellent tree-shaking support. Import only what you need:
+
+<div align="center">
+
+| Entry Point | Bundle Size (gzip) | Bundle Size (brotli) | Use Case |
+|-------------|:------------------:|:--------------------:|----------|
+| `fia/signals` | **1.46 KB** | **1.28 KB** | Reactive state without DOM |
+| `fia/control` | **2.16 KB** | **1.90 KB** | Control flow (Show, Each) |
+| `fia/elements` | **4.05 KB** | **3.58 KB** | UI with 3 elements |
+| `fia/svg` | **~4 KB** | **~3.5 KB** | SVG graphics |
+| `fia` (full) | **8.21 KB** | **7.25 KB** | Complete library |
+
+</div>
+
+### Framework Comparison
+
+How Fia compares to other popular frameworks:
+
+<div align="center">
+
+| Framework | Minimal | Hello World | Notes |
+|-----------|:-------:|:-----------:|-------|
+| **Fia** | **1.46 KB** | **~4 KB** | Zero dependencies |
+| Preact | ~3 KB | ~3.5 KB | Lightweight champion |
+| Svelte | ~2-3 KB | ~4 KB | Compiler magic |
+| Solid | ~6-7 KB | ~6.5 KB | Fine-grained reactivity |
+| Vue | ~17 KB | ~22 KB | Tree-shakable |
+| React | ~7 KB | ~42 KB | Standard + VDOM |
+| Angular | N/A | ~85 KB | Full framework |
+
+</div>
+
+> 💡 **All sizes are minified + gzipped.** Fia's tree-shaking ensures you only bundle what you use.
+
 ## 📚 Table of Contents
 
+- [Bundle Sizes](#-bundle-sizes)
 - [Getting Started](#-getting-started)
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
   - [Updating](#updating)
   - [Quick Start](#quick-start)
   - [Mounting](#mounting)
+  - [Import Patterns](#import-patterns)
 - [Element API](#-element-api)
 - [Element Factory Types](#-element-factory-types)
 - [Reactivity](#-reactivity)
@@ -134,6 +172,34 @@ mount(App, "#app"); // Clears #app and mounts App
 ```
 
 That's it. No build step, no configuration, no boilerplate.
+
+### Import Patterns
+
+Fia provides multiple entry points for different use cases:
+
+```typescript
+// Full library (default) - 8.21 KB gzip
+import { $, div, Show } from "fia";
+
+// Signals only - 1.46 KB gzip
+import { $, $e, batch } from "fia/signals";
+
+// Elements with signals - 4.05 KB gzip
+import { $, div, button } from "fia/elements";
+
+// Control flow - 2.16 KB gzip
+import { $, Show, Each } from "fia/control";
+
+// SVG elements
+import { svg, circle, path } from "fia/svg";
+```
+
+**All entry points tree-shake identically** - use whichever feels most semantic. The separate entry points exist for:
+- ✅ **Clarity** - Express intent explicitly
+- ✅ **Better autocomplete** - Smaller import suggestions
+- ✅ **Flexibility** - Use signals without DOM on server-side
+
+See [IMPORTS.md](IMPORTS.md) for detailed usage guide.
 
 ---
 

@@ -15,6 +15,12 @@ import {
   button,
   $,
   Mut,
+  table,
+  thead,
+  tbody,
+  tr,
+  th,
+  td,
 } from "fia";
 import { SyntaxHighlight } from "./SyntaxHighlight";
 import { TabbedExample } from "./TabbedExample";
@@ -368,6 +374,7 @@ const Note = (text: string, type: "info" | "warning" = "info") =>
 const sections = [
   { id: "intro", title: "Introduction" },
   { id: "why-fia", title: "Why Fia?" },
+  { id: "bundle-sizes", title: "Bundle Sizes" },
   { id: "getting-started", title: "Getting Started" },
   { id: "element-api", title: "Element API" },
   { id: "element-factory-types", title: "Element Factory Types" },
@@ -793,6 +800,515 @@ export const Docs = () =>
                 });
               },
             );
+          });
+
+          Section("Bundle Sizes", "bundle-sizes", () => {
+            Paragraph(
+              "Fia is designed to be lightweight with excellent tree-shaking support. Import only what you need:",
+            );
+
+            // Bundle Sizes Table
+            div(
+              {
+                style: {
+                  marginTop: "2rem",
+                  marginBottom: "2rem",
+                  overflowX: "auto",
+                },
+              },
+              () => {
+                table(
+                  {
+                    style: {
+                      width: "100%",
+                      borderCollapse: "collapse",
+                      // background: "var(--mongo-forest)",
+                      borderRadius: "0.75rem",
+                      overflow: "hidden",
+                    },
+                  },
+                  () => {
+                    thead(() => {
+                      tr(
+                        {
+                          style: {
+                            background: "rgba(0, 237, 100, 0.1)",
+                            // borderBottom: "2px solid var(--mongo-green)",
+                          },
+                        },
+                        () => {
+                          th({
+                            style: {
+                              padding: "1rem",
+                              textAlign: "left",
+                              color: "var(--mongo-white)",
+                              fontWeight: "600",
+                            },
+                            textContent: "Entry Point",
+                          });
+                          th({
+                            style: {
+                              padding: "1rem",
+                              textAlign: "center",
+                              color: "var(--mongo-white)",
+                              fontWeight: "600",
+                            },
+                            textContent: "Gzip",
+                          });
+                          th({
+                            style: {
+                              padding: "1rem",
+                              textAlign: "center",
+                              color: "var(--mongo-white)",
+                              fontWeight: "600",
+                            },
+                            textContent: "Brotli",
+                          });
+                          th({
+                            style: {
+                              padding: "1rem",
+                              textAlign: "left",
+                              color: "var(--mongo-white)",
+                              fontWeight: "600",
+                            },
+                            textContent: "Use Case",
+                          });
+                        },
+                      );
+                    });
+                    tbody(() => {
+                      // Signals
+                      tr(
+                        {
+                          style: {
+                            borderBottom: "1px solid var(--mongo-slate)",
+                          },
+                        },
+                        () => {
+                          td(
+                            {
+                              style: {
+                                padding: "1rem",
+                                fontFamily: "'JetBrains Mono', monospace",
+                                color: "var(--mongo-green)",
+                              },
+                            },
+                            () => {
+                              span({ textContent: "fia/signals" });
+                            },
+                          );
+                          td({
+                            style: {
+                              padding: "1rem",
+                              textAlign: "center",
+                              color: "var(--mongo-white)",
+                              fontWeight: "600",
+                            },
+                            textContent: "1.46 KB",
+                          });
+                          td({
+                            style: {
+                              padding: "1rem",
+                              textAlign: "center",
+                              color: "var(--text-secondary)",
+                            },
+                            textContent: "1.28 KB",
+                          });
+                          td({
+                            style: {
+                              padding: "1rem",
+                              color: "var(--text-secondary)",
+                            },
+                            textContent: "Reactive state without DOM",
+                          });
+                        },
+                      );
+
+                      // Control
+                      tr(
+                        {
+                          style: {
+                            borderBottom: "1px solid var(--mongo-slate)",
+                          },
+                        },
+                        () => {
+                          td(
+                            {
+                              style: {
+                                padding: "1rem",
+                                fontFamily: "'JetBrains Mono', monospace",
+                                color: "var(--mongo-green)",
+                              },
+                            },
+                            () => {
+                              span({ textContent: "fia/control" });
+                            },
+                          );
+                          td({
+                            style: {
+                              padding: "1rem",
+                              textAlign: "center",
+                              color: "var(--mongo-white)",
+                              fontWeight: "600",
+                            },
+                            textContent: "2.16 KB",
+                          });
+                          td({
+                            style: {
+                              padding: "1rem",
+                              textAlign: "center",
+                              color: "var(--text-secondary)",
+                            },
+                            textContent: "1.90 KB",
+                          });
+                          td({
+                            style: {
+                              padding: "1rem",
+                              color: "var(--text-secondary)",
+                            },
+                            textContent: "Control flow (Show, Each)",
+                          });
+                        },
+                      );
+
+                      // Elements
+                      tr(
+                        {
+                          style: {
+                            borderBottom: "1px solid var(--mongo-slate)",
+                          },
+                        },
+                        () => {
+                          td(
+                            {
+                              style: {
+                                padding: "1rem",
+                                fontFamily: "'JetBrains Mono', monospace",
+                                color: "var(--mongo-green)",
+                              },
+                            },
+                            () => {
+                              span({ textContent: "fia/elements" });
+                            },
+                          );
+                          td({
+                            style: {
+                              padding: "1rem",
+                              textAlign: "center",
+                              color: "var(--mongo-white)",
+                              fontWeight: "600",
+                            },
+                            textContent: "4.05 KB",
+                          });
+                          td({
+                            style: {
+                              padding: "1rem",
+                              textAlign: "center",
+                              color: "var(--text-secondary)",
+                            },
+                            textContent: "3.58 KB",
+                          });
+                          td({
+                            style: {
+                              padding: "1rem",
+                              color: "var(--text-secondary)",
+                            },
+                            textContent: "UI with 3 elements",
+                          });
+                        },
+                      );
+
+                      // SVG
+                      tr(
+                        {
+                          style: {
+                            borderBottom: "1px solid var(--mongo-slate)",
+                          },
+                        },
+                        () => {
+                          td(
+                            {
+                              style: {
+                                padding: "1rem",
+                                fontFamily: "'JetBrains Mono', monospace",
+                                color: "var(--mongo-green)",
+                              },
+                            },
+                            () => {
+                              span({ textContent: "fia/svg" });
+                            },
+                          );
+                          td({
+                            style: {
+                              padding: "1rem",
+                              textAlign: "center",
+                              color: "var(--mongo-white)",
+                              fontWeight: "600",
+                            },
+                            textContent: "~4 KB",
+                          });
+                          td({
+                            style: {
+                              padding: "1rem",
+                              textAlign: "center",
+                              color: "var(--text-secondary)",
+                            },
+                            textContent: "~3.5 KB",
+                          });
+                          td({
+                            style: {
+                              padding: "1rem",
+                              color: "var(--text-secondary)",
+                            },
+                            textContent: "SVG graphics",
+                          });
+                        },
+                      );
+
+                      // Full
+                      tr(() => {
+                        td(
+                          {
+                            style: {
+                              padding: "1rem",
+                              fontFamily: "'JetBrains Mono', monospace",
+                              color: "var(--mongo-green)",
+                            },
+                          },
+                          () => {
+                            span({ textContent: "fia" });
+                            span({
+                              style: {
+                                marginLeft: "0.5rem",
+                                color: "var(--text-secondary)",
+                                fontSize: "0.875rem",
+                              },
+                              textContent: "(full)",
+                            });
+                          },
+                        );
+                        td({
+                          style: {
+                            padding: "1rem",
+                            textAlign: "center",
+                            color: "var(--mongo-white)",
+                            fontWeight: "600",
+                          },
+                          textContent: "8.21 KB",
+                        });
+                        td({
+                          style: {
+                            padding: "1rem",
+                            textAlign: "center",
+                            color: "var(--text-secondary)",
+                          },
+                          textContent: "7.25 KB",
+                        });
+                        td({
+                          style: {
+                            padding: "1rem",
+                            color: "var(--text-secondary)",
+                          },
+                          textContent: "Complete library",
+                        });
+                      });
+                    });
+                  },
+                );
+              },
+            );
+
+            // Framework Comparison
+            SubSection("Framework Comparison", () => {
+              Paragraph(
+                "How Fia compares to other popular frameworks (minified + gzipped):",
+              );
+
+              div(
+                {
+                  style: {
+                    marginTop: "1.5rem",
+                    marginBottom: "2rem",
+                    overflowX: "auto",
+                  },
+                },
+                () => {
+                  table(
+                    {
+                      style: {
+                        width: "100%",
+                        borderCollapse: "collapse",
+                        // background: "var(--mongo-forest)",
+                        borderRadius: "0.75rem",
+                        overflow: "hidden",
+                      },
+                    },
+                    () => {
+                      thead(() => {
+                        tr(
+                          {
+                            style: {
+                              background: "rgba(0, 237, 100, 0.1)",
+                              // borderBottom: "2px solid var(--mongo-green)",
+                            },
+                          },
+                          () => {
+                            th({
+                              style: {
+                                padding: "1rem",
+                                textAlign: "left",
+                                color: "var(--mongo-white)",
+                                fontWeight: "600",
+                              },
+                              textContent: "Framework",
+                            });
+                            th({
+                              style: {
+                                padding: "1rem",
+                                textAlign: "center",
+                                color: "var(--mongo-white)",
+                                fontWeight: "600",
+                              },
+                              textContent: "Minimal",
+                            });
+                            th({
+                              style: {
+                                padding: "1rem",
+                                textAlign: "center",
+                                color: "var(--mongo-white)",
+                                fontWeight: "600",
+                              },
+                              textContent: "Hello World",
+                            });
+                            th({
+                              style: {
+                                padding: "1rem",
+                                textAlign: "left",
+                                color: "var(--mongo-white)",
+                                fontWeight: "600",
+                              },
+                              textContent: "Notes",
+                            });
+                          },
+                        );
+                      });
+                      tbody(() => {
+                        const frameworks = [
+                          {
+                            name: "Fia",
+                            minimal: "1.46 KB",
+                            full: "~3.9 KB",
+                            notes: "Zero dependencies",
+                            highlight: true,
+                          },
+                          {
+                            name: "Preact",
+                            minimal: "~3 KB",
+                            full: "~3.5 KB",
+                            notes: "Lightweight champion",
+                            highlight: false,
+                          },
+                          {
+                            name: "Svelte",
+                            minimal: "~2-3 KB",
+                            full: "~4 KB",
+                            notes: "Compiler magic",
+                            highlight: false,
+                          },
+                          {
+                            name: "Solid",
+                            minimal: "~6-7 KB",
+                            full: "~6.5 KB",
+                            notes: "Fine-grained reactivity",
+                            highlight: false,
+                          },
+                          {
+                            name: "Vue",
+                            minimal: "~17 KB",
+                            full: "~22 KB",
+                            notes: "Tree-shakable",
+                            highlight: false,
+                          },
+                          {
+                            name: "React",
+                            minimal: "~7 KB",
+                            full: "~42 KB",
+                            notes: "Standard + VDOM",
+                            highlight: false,
+                          },
+                          {
+                            name: "Angular",
+                            minimal: "N/A",
+                            full: "~85 KB",
+                            notes: "Full framework",
+                            highlight: false,
+                          },
+                        ];
+
+                        frameworks.forEach((fw, idx) => {
+                          tr(
+                            {
+                              style: {
+                                borderBottom:
+                                  idx < frameworks.length - 1
+                                    ? "1px solid var(--mongo-slate)"
+                                    : "none",
+                                // background: fw.highlight
+                                //   ? "rgba(0, 237, 100, 0.05)"
+                                //   : "transparent",
+                              },
+                            },
+                            () => {
+                              td({
+                                style: {
+                                  padding: "1rem",
+                                  color: fw.highlight
+                                    ? "var(--mongo-green)"
+                                    : "var(--mongo-white)",
+                                  fontWeight: fw.highlight ? "700" : "600",
+                                },
+                                textContent: fw.name,
+                              });
+                              td({
+                                style: {
+                                  padding: "1rem",
+                                  textAlign: "center",
+                                  color: "var(--mongo-white)",
+                                  fontWeight: fw.highlight ? "600" : "normal",
+                                },
+                                textContent: fw.minimal,
+                              });
+                              td({
+                                style: {
+                                  padding: "1rem",
+                                  textAlign: "center",
+                                  color: "var(--mongo-white)",
+                                  fontWeight: fw.highlight ? "600" : "normal",
+                                },
+                                textContent: fw.full,
+                              });
+                              td({
+                                style: {
+                                  padding: "1rem",
+                                  color: "var(--text-secondary)",
+                                  fontSize: "0.875rem",
+                                },
+                                textContent: fw.notes,
+                              });
+                            },
+                          );
+                        });
+                      });
+                    },
+                  );
+                },
+              );
+
+              Note(
+                "All sizes are minified + gzipped. Fia's tree-shaking ensures you only bundle what you use.",
+                "info",
+              );
+            });
           });
 
           Section("Getting Started", "getting-started", () => {
