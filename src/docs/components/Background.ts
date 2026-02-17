@@ -37,11 +37,17 @@ export const Background = () =>
             window.addEventListener("resize", resize);
             resize();
 
-            // Mouse handler
-            // window.addEventListener("mousemove", (e) => {
-            //     mouseX = e.clientX;
-            //     mouseY = e.clientY;
-            // });
+            // Scroll handler
+            let targetScrollY = window.scrollY;
+            let currentScrollY = window.scrollY;
+
+            window.addEventListener("scroll", () => {
+                targetScrollY = window.scrollY;
+            });
+
+            const lerp = (start: number, end: number, t: number) => {
+                return start * (1 - t) + end * t;
+            };
 
             // Animation Loop
             const render = () => {
@@ -49,17 +55,33 @@ export const Background = () =>
 
                 const isDark = themeStore.current === "dark";
 
+                // Base color
                 ctx.fillStyle = isDark
                     ? "rgba(36, 247, 177, 1)"
                     : "rgba(0, 0, 0, 0.15)";
 
+                // Parallax config
+                const PARALLAX_SPEED = 0.5; // Dots move at half speed of scroll
+
+                // Smooth scroll interpolation
+                currentScrollY = lerp(currentScrollY, targetScrollY, 0.1);
+
+                const effectiveScroll = currentScrollY * PARALLAX_SPEED;
+                // Modulo to keep grid aligned without generating millions of rows
+                const rowOffset = effectiveScroll % DOT_SPACING;
+
                 const cols = Math.ceil(width / DOT_SPACING);
-                const rows = Math.ceil(height / DOT_SPACING);
+                const rows = Math.ceil(height / DOT_SPACING) + 1; // +1 to cover edges
 
                 for (let i = 0; i <= cols; i++) {
-                    for (let j = 0; j <= rows; j++) {
+                    for (let j = -1; j <= rows; j++) { // Start -1 to cover top edge
                         const x = i * DOT_SPACING;
-                        const y = j * DOT_SPACING;
+                        // y starts at grid position minus the scroll modulo
+                        // This makes the grid scroll continuously
+                        const y = j * DOT_SPACING - rowOffset;
+
+                        // Original world Y (for consistent separate noise/wave if needed)
+                        // const worldY = j * DOT_SPACING + (effectiveScroll - rowOffset);
 
                         const dx = x - mouseX;
                         const dy = y - mouseY;
@@ -73,16 +95,19 @@ export const Background = () =>
                             const rawInfluence = 1 - dist / WAVE_RADIUS;
                             const influence = rawInfluence * rawInfluence * rawInfluence;
 
-                            const angle = Math.atan2(dy, dx);
-                            drawX += Math.cos(angle) * influence * 15;
-                            drawY += Math.sin(angle) * influence * 15;
+                            // Only apply if influence is positive (sanity check)
+                            if (influence > 0) {
+                                const angle = Math.atan2(dy, dx);
+                                drawX += Math.cos(angle) * influence * 15;
+                                drawY += Math.sin(angle) * influence * 15;
 
-                            drawRadius = DOT_RADIUS + influence * 1.5;
+                                drawRadius = DOT_RADIUS + influence * 1.5;
 
-                            if (isDark) {
-                                ctx.fillStyle = "rgba(36, 247, 177, 1)";
-                            } else {
-                                ctx.fillStyle = "rgba(36, 247, 177, 1)"
+                                if (isDark) {
+                                    ctx.fillStyle = "rgba(36, 247, 177, 1)";
+                                } else {
+                                    ctx.fillStyle = "rgba(36, 247, 177, 1)";
+                                }
                             }
                         } else {
                             ctx.fillStyle = isDark
