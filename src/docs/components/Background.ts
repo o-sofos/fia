@@ -22,9 +22,9 @@ export const Background = () =>
             let mouseY = -1000;
 
             // Grid configuration
-            const DOT_SPACING = 50;
-            const DOT_RADIUS = .5;
-            const WAVE_RADIUS = 500;
+            const DOT_SPACING = 40; // Tighter grid
+            const DOT_RADIUS = 1.5; // Larger dots (3px diameter)
+            const WAVE_RADIUS = 400;
 
             // Resize handler
             const resize = () => {
@@ -57,8 +57,8 @@ export const Background = () =>
 
                 // Base color
                 ctx.fillStyle = isDark
-                    ? "rgba(36, 247, 177, 1)"
-                    : "rgba(0, 0, 0, 0.15)";
+                    ? "rgba(45, 212, 191, 0.4)" // Teal 400
+                    : "rgba(13, 148, 136, 0.5)"; // Teal 600 - higher opacity for light mode
 
                 // Parallax config
                 const PARALLAX_SPEED = 0.5; // Dots move at half speed of scroll
@@ -101,18 +101,18 @@ export const Background = () =>
                                 drawX += Math.cos(angle) * influence * 15;
                                 drawY += Math.sin(angle) * influence * 15;
 
-                                drawRadius = DOT_RADIUS + influence * 1.5;
+                                drawRadius = DOT_RADIUS + influence * 2; // More dramatic scaling
 
                                 if (isDark) {
-                                    ctx.fillStyle = "rgba(36, 247, 177, 1)";
+                                    ctx.fillStyle = "rgba(45, 212, 191, 1)";
                                 } else {
-                                    ctx.fillStyle = "rgba(36, 247, 177, 1)";
+                                    ctx.fillStyle = "rgba(13, 148, 136, 1)";
                                 }
                             }
                         } else {
                             ctx.fillStyle = isDark
-                                ? "rgba(36, 247, 177, 1)"
-                                : "rgba(0, 0, 0, 0.15)";
+                                ? "rgba(45, 212, 191, 0.4)"
+                                : "rgba(13, 148, 136, 0.5)";
                         }
 
                         ctx.beginPath();

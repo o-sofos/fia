@@ -15,22 +15,23 @@ export const TabbedExample = (
             style: {
                 display: "flex",
                 gap: "4px",
-                borderBottom: "1px solid #e0e0e0",
+                borderBottom: "1px solid var(--fia-slate)",
                 marginBottom: "1rem"
             }
         }, () => {
             Each(tabs, (tab, index) => {
+                const isActive = () => activeTab.value === index;
                 button({
                     textContent: tab.label,
                     style: {
                         padding: "8px 16px",
-                        background: $(() => activeTab.value === index ? "#2563eb" : "transparent"),
-                        color: $(() => activeTab.value === index ? "white" : "#666"),
+                        background: $(() => isActive() ? "var(--fia-primary)" : "transparent"),
+                        color: $(() => isActive() ? "white" : "var(--text-secondary)"),
                         border: "none",
-                        borderBottom: $(() => activeTab.value === index ? "2px solid #2563eb" : "2px solid transparent"),
+                        borderRadius: "4px 4px 0 0",
                         cursor: "pointer",
-                        fontSize: "14px",
-                        fontWeight: $(() => activeTab.value === index ? "600" : "400"),
+                        fontSize: "0.9rem",
+                        fontWeight: $(() => isActive() ? "600" : "400"),
                         transition: "all 0.2s"
                     },
                     onclick: () => activeTab.value = index
@@ -44,13 +45,14 @@ export const TabbedExample = (
                 div({
                     style: {
                         display: $(() => activeTab.value === index ? "block" : "none"),
-                        background: "#1e1e1e",
-                        color: "#d4d4d4",
-                        padding: "1rem",
-                        borderRadius: "4px",
-                        overflow: "auto",
-                        fontFamily: "monospace",
-                        fontSize: "14px",
+                        background: "var(--bg-code)",
+                        color: "var(--text-primary)",
+                        padding: "1.5rem",
+                        borderRadius: "0.5rem",
+                        border: "1px solid var(--fia-slate)",
+                        overflowX: "auto",
+                        fontFamily: "'JetBrains Mono', monospace",
+                        fontSize: "0.9rem",
                         whiteSpace: "pre"
                     }
                 }, () => {

@@ -28,8 +28,41 @@
     --spacing-lg: 4rem;
     --spacing-xl: 8rem;
 
+    --bg-code: #1e293b;
+    /* Slate 800 */
+
     /* Transitions */
     --transition-fast: 0.2s ease;
+}
+
+[data-theme="light"] {
+    /* Light Mode Overrides */
+    --fia-primary: #0d9488;
+    /* Teal 600 */
+    --fia-accent: #115e59;
+    /* Teal 800 */
+
+    --fia-dark: #f8fafc;
+    /* Slate 50 - Light background */
+    --fia-slate: #cbd5e1;
+    /* Slate 300 */
+    --fia-white: #1e293b;
+    /* Slate 800 - Dark text */
+    --fia-gray: #f1f5f9;
+    /* Slate 100 */
+
+    --text-primary: #0f172a;
+    /* Slate 900 */
+    --text-secondary: #475569;
+    /* Slate 600 */
+
+    /* Syntax Highlighting Light */
+    --syntax-comment: #008000;
+    --syntax-keyword: #0000ff;
+    --syntax-string: #a31515;
+    --syntax-function: #795e26;
+
+    --bg-code: #ffffff;
 }
 
 * {
@@ -45,7 +78,7 @@ body {
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
-    cursor: none;
+    /* cursor: none; */
     /* Hide default cursor */
 }
 

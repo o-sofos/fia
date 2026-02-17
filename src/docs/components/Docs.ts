@@ -38,7 +38,7 @@ const CodeBlock = (content: string) =>
     {
       class: "code-block animate-fade-up",
       style: {
-        // background: "var(--fia-accent)",
+        background: "var(--bg-code)",
         borderRadius: "0.75rem",
         padding: "1.5rem",
         margin: "1.5rem 0",

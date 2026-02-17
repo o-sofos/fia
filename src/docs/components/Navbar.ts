@@ -1,7 +1,7 @@
 import { nav, div, a, span, button, img, $ } from "../../core/mod";
 import { themeStore, toggleTheme } from "../store/theme";
 import { t } from "../store/i18n";
-import { LanguageSwitcher } from "./LanguageSwitcher";
+
 
 export const Navbar = () =>
   nav(
@@ -29,7 +29,7 @@ export const Navbar = () =>
         () => {
           // SVG Logo
           img({
-            src: "/assets/logo.svg",
+            src: "assets/logo.svg",
             alt: "Fia Logo",
             style: {
               width: "32px",

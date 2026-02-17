@@ -10,7 +10,7 @@ export const CodeDemo = () =>
     div({ class: "container animate-fade-up delay-200", style: { margin: "var(--spacing-xl) auto", maxWidth: "800px" } }, () => {
         div({
             style: {
-                // background: "var(--fia-accent)",
+                background: "var(--bg-code)",
                 borderRadius: "1rem",
                 padding: "2rem",
                 boxShadow: "0 20px 50px rgba(0,0,0,0.5)",
