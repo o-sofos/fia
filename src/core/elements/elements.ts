@@ -369,6 +369,13 @@ export function setElementProperty(
   }
 }
 
+/**
+ * Enumerated attributes whose values are the literal strings "true"/"false".
+ * Unlike boolean attributes, `false` must be serialized as ="false" —
+ * removing the attribute would fall back to the (different) default behavior.
+ */
+const ENUMERATED_BOOLEAN_ATTRS = new Set(["draggable", "spellcheck"]);
+
 export function assignProp(
   element: HTMLElement,
   key: string,
@@ -381,7 +388,9 @@ export function assignProp(
   } else if (isDOMPropertyKey(key)) {
     setElementProperty(element, key, value);
   } else if (typeof value === "boolean") {
-    if (value) {
+    if (ENUMERATED_BOOLEAN_ATTRS.has(key)) {
+      element.setAttribute(key, String(value));
+    } else if (value) {
       element.setAttribute(PROP_TO_ATTR[key] ?? key, "");
     } else {
       element.removeAttribute(PROP_TO_ATTR[key] ?? key);
@@ -617,13 +626,10 @@ export function setStyleProperty(
     return;
   }
 
-  // Vendor prefixes need kebab-case conversion
-  if (
-    property.startsWith("webkit") ||
-    property.startsWith("moz") ||
-    property.startsWith("ms") ||
-    property.startsWith("o")
-  ) {
+  // Vendor prefixes (webkitTransform, mozAppearance, msOverflowStyle, oTransition)
+  // need kebab-case conversion. The prefix must be followed by an uppercase letter
+  // so standard properties like "opacity", "order" or "outline" don't match.
+  if (/^(webkit|moz|ms|o)[A-Z]/.test(property)) {
     const kebabProp = property.replace(/([A-Z])/g, "-$1").toLowerCase();
     style.setProperty(kebabProp, value);
     return;
