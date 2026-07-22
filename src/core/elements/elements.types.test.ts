@@ -17,6 +17,7 @@ import {
   td,
   base,
   textarea,
+  form,
 } from "./elements";
 
 // =============================================================================
@@ -354,4 +355,57 @@ div({
     // @ts-expect-error - target is Element on containers, not the div
     void e.target.value;
   },
+});
+
+// =============================================================================
+// EVENT HANDLER MAP COMPLETENESS
+// =============================================================================
+
+// Toggle events carry ToggleEvent (newState/oldState)
+div({
+  popover: "auto",
+  onbeforetoggle: (e) => {
+    const s: string = e.newState;
+    void s;
+  },
+  ontoggle: (e) => {
+    void e.oldState;
+  },
+});
+
+// beforeinput is an InputEvent
+input({
+  type: "text",
+  onbeforeinput: (e) => {
+    const t: string | null = e.data;
+    void t;
+  },
+});
+
+// click handlers receive PointerEvent
+button({
+  onclick: (e) => {
+    const id: number = e.pointerId;
+    void id;
+  },
+});
+
+// formdata carries the FormData payload
+form({
+  onformdata: (e) => {
+    void e.formData.get("name");
+  },
+});
+
+// pointer capture, dialog close, auxclick exist
+div({
+  ongotpointercapture: (e) => void e.pointerId,
+  onlostpointercapture: (e) => void e.pointerId,
+  onauxclick: (e) => void e.button,
+});
+
+// Interactive shorthand handler is typed (element + PointerEvent)
+button("Save", (e) => {
+  e.currentTarget.disabled = true;
+  void e.pointerId;
 });

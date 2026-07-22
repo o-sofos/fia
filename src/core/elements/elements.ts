@@ -28,7 +28,7 @@ import type { ElementProps, TypedEvent } from "../attributes/html-attributes";
 import type { ReactiveCSSProperties } from "../css/css-types";
 
 export { type MaybeSignal, isSignal };
-export type { ElementProps };
+export type { ElementProps, TypedEvent };
 
 /**
  * Loose props type that doesn't constrain style to a specific CSS type.

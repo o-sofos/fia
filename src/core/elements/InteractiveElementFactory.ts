@@ -20,6 +20,7 @@ import {
   type TextContent,
 } from "./elements";
 import type { SmartElement } from "./SmartElement";
+import type { TypedEvent } from "../attributes/html-attributes";
 
 /**
  * Factory for interactive elements with text + handler shorthand.
@@ -46,7 +47,7 @@ export interface InteractiveElementFactory<
   (text: TextContent): E<K>;
 
   /** Create element with text and click handler shorthand */
-  (text: TextContent, onclick: (e: MouseEvent) => void): E<K>;
+  (text: TextContent, onclick: (e: TypedEvent<E<K>, PointerEvent>) => void): E<K>;
 
   /** Create element with text content and children */
   (text: TextContent, children: ChildrenCallback<E<K>>): E<K>;
