@@ -15,8 +15,8 @@ import {
   option,
   code,
   td,
+  base,
 } from "./elements";
-import type { SmartElement } from "./SmartElement";
 
 // =============================================================================
 // VALID USAGE (Should compile)
@@ -55,6 +55,7 @@ button({
 
     // Valid inferred prop
     const text = e.currentTarget.textContent;
+    void text;
 
     // Valid classList access
     e.currentTarget.classList.add("clicked");
@@ -72,6 +73,7 @@ input({
   oninput: (e) => {
     // e.currentTarget.value should be string, not Signal
     const val = e.currentTarget.value;
+    void val;
   },
 });
 
@@ -272,3 +274,36 @@ input("text");
 // Invalid img shorthand - first arg must look like src
 // @ts-expect-error - objects aren't valid for src position shorthand
 img({ invalid: true }, "alt");
+
+// =============================================================================
+// VOID ELEMENTS - SMART TYPED PATH
+// =============================================================================
+
+// Discriminated variants accepted; handlers see the concrete element
+const emailInput = input({
+  type: "email",
+  value: "a@b.c",
+  oninput: (e) => {
+    const v: string = e.currentTarget.value;
+    void v;
+  },
+});
+void emailInput;
+
+// base element attributes are typed
+base({ href: "https://example.com/", target: "_blank" });
+
+// data-* attributes allowed on void elements
+input({ type: "text", "data-testid": "name" });
+
+// @ts-expect-error - unknown props are rejected on void elements
+input({ type: "text", unknownProp: 1 });
+
+// @ts-expect-error - checked is a checkbox/radio prop, invalid on text inputs
+input({ type: "text", checked: true });
+
+// @ts-expect-error - email inputs take string values
+input({ type: "email", value: 123 });
+
+// @ts-expect-error - checkbox checked must be boolean
+input({ type: "checkbox", checked: "yes" });
