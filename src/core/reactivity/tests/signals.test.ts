@@ -1,5 +1,5 @@
 
-import { describe, expect, test, mock } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import { $, $e, Mut } from "../reactivity";
 
 describe("Signals", () => {
@@ -102,7 +102,7 @@ describe("Effects ($e)", () => {
         const dispose = $e(() => {
             runCount++;
             // Read signal
-            const _ = count.value;
+            void count.value;
         });
 
         expect(runCount).toBe(1);

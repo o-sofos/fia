@@ -1,0 +1,12 @@
+{
+  // Type-checks the test files (excluded from the main tsconfig).
+  // This is what makes @ts-expect-error assertions in *.types.test.ts an
+  // actual gate — `bun test` strips types and checks nothing.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": ["bun"],
+    "incremental": false
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist", "benchmark_repo"]
+}

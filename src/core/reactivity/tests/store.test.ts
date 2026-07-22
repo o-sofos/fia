@@ -72,7 +72,7 @@ describe("Stores (Objects)", () => {
 
         $e(() => {
             runs++;
-            const _ = state.nested.count;
+            void state.nested.count;
         });
 
         expect(runs).toBe(1);
@@ -106,7 +106,7 @@ describe("Stores (Arrays)", () => {
         let count = 0;
         $e(() => {
             count++;
-            const _ = list.length;
+            void list.length;
         });
 
         expect(count).toBe(1);

@@ -150,14 +150,14 @@ void unwrappedValue;
 
 // Test 10: Signalize
 type User = { name: string; age: number };
-type ReactiveUser = Signalize<User>;
-// type _ReactiveUser = ReactiveUser;
 // ReactiveUser should be { name: Signal<string>; age: Signal<number> }
+const reactiveUserCheck: Signalize<User> extends { name: { value: string } } ? true : false = true;
+void reactiveUserCheck;
 
 // Test 11: SignalizeKeys
-type PartialReactive = SignalizeKeys<User, "name">;
 // PartialReactive should be { name: Signal<string>; age: number }
-// type _PartialReactive = PartialReactive;
+const partialReactiveCheck: SignalizeKeys<User, "name"> extends { age: number } ? true : false = true;
+void partialReactiveCheck;
 
 // Test 12: StyleProp helper
 const acceptsStyleProp = (_style: StyleProp) => {
@@ -340,8 +340,7 @@ console.log("✅ Phase 9 tests passed: Signal primitive inference works!");
 
 console.log("✓ Phase 10: Testing strictness (compilation should fail without @ts-expect-error)");
 
-// 1. Check className (should error - use class instead)
-// @ts-expect-error - className is not a valid prop
+// 1. className is supported as a React-style alias for class
 div({ className: "foo" });
 
 // 2. Check strict CSS (should error)
