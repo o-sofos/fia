@@ -327,8 +327,23 @@ export interface ElementPropsMap {
  *   }
  * });
  */
-export type TypedEvent<E, Ev extends Event> = Ev & {
+/**
+ * Elements whose event `target` is provably the element itself because they
+ * cannot contain child elements. Detected structurally (not via
+ * `extends HTMLInputElement`) so prop-narrowed SmartElements still match.
+ */
+type NarrowableTarget =
+    | { defaultValue: string; select(): void } // input, textarea
+    | { complete: boolean; naturalWidth: number }; // img
+
+export type TypedEvent<E, Ev extends Event = Event> = Ev & {
     readonly currentTarget: E;
+    /**
+     * On childless elements (input, textarea, img) `target` is the element
+     * itself — `e.target.value` is sound. Everywhere else the target may be
+     * any descendant, so it is `Element`; narrow with `instanceof`.
+     */
+    readonly target: E extends NarrowableTarget ? EventTarget & E : Element;
 };
 
 /**
