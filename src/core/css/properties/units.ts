@@ -3,6 +3,7 @@ import type { CSSGlobalValues } from "./common";
 export type CSSLengthUnit = "px" | "rem" | "em" | "vw" | "vh" | "%" | "cm" | "mm" | "in" | "pt" | "pc" | "ex" | "ch" | "vmin" | "vmax";
 
 export type CSSLength =
+    | number // bare numbers are auto-suffixed with "px" (300 → "300px")
     | "0"
     | "auto"
     | `${number}${CSSLengthUnit}`

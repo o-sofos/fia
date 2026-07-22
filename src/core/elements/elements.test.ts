@@ -570,3 +570,36 @@ describe("Element System - Unified API", () => {
         });
     });
 });
+describe("Style: number lengths and custom properties", () => {
+    beforeEach(() => {
+        while (hasExecutionContext()) popExecutionContext();
+        document.body.innerHTML = "";
+    });
+
+    it("auto-suffixes px for length numbers", () => {
+        const el = div({ style: { width: 300, marginTop: 8 } });
+        expect(el.style.width).toBe("300px");
+        expect(el.style.marginTop).toBe("8px");
+    });
+
+    it("keeps unitless properties plain", () => {
+        const el = div({ style: { opacity: 0.5, zIndex: 3, flexGrow: 1 } });
+        expect(el.style.opacity).toBe("0.5");
+        expect(el.style.zIndex).toBe("3");
+        expect(el.style.flexGrow).toBe("1");
+    });
+
+    it("sets custom properties via setProperty", () => {
+        const el = div({ style: { "--brand": "red", "--columns": 3 } });
+        expect(el.style.getPropertyValue("--brand")).toBe("red");
+        expect(el.style.getPropertyValue("--columns")).toBe("3");
+    });
+
+    it("reactive number lengths update with px", () => {
+        const w = $(Mut(100));
+        const el = div({ style: { width: w } });
+        expect(el.style.width).toBe("100px");
+        w.value = 250;
+        expect(el.style.width).toBe("250px");
+    });
+});

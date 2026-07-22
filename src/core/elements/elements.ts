@@ -588,8 +588,57 @@ function colorObjectToString(color: CSSColorObject): string {
   }
 }
 
-function transformStyleValue(value: unknown): string {
+/**
+ * Properties whose numeric values are unitless — bare numbers must NOT be
+ * suffixed with "px". Everything else gets auto-px (width: 300 → "300px").
+ */
+const UNITLESS_STYLE_PROPS = new Set([
+  "animationIterationCount",
+  "aspectRatio",
+  "borderImageOutset",
+  "borderImageSlice",
+  "borderImageWidth",
+  "columnCount",
+  "flex",
+  "flexGrow",
+  "flexShrink",
+  "fontWeight",
+  "gridArea",
+  "gridColumn",
+  "gridColumnEnd",
+  "gridColumnStart",
+  "gridRow",
+  "gridRowEnd",
+  "gridRowStart",
+  "lineClamp",
+  "lineHeight",
+  "opacity",
+  "order",
+  "orphans",
+  "scale",
+  "tabSize",
+  "widows",
+  "zIndex",
+  "zoom",
+  // SVG presentation properties settable via style
+  "fillOpacity",
+  "floodOpacity",
+  "stopOpacity",
+  "strokeDasharray",
+  "strokeDashoffset",
+  "strokeMiterlimit",
+  "strokeOpacity",
+]);
+
+function transformStyleValue(property: string, value: unknown): string {
   if (value === null || value === undefined) return "";
+
+  if (typeof value === "number") {
+    // Custom properties pass numbers through untouched
+    return UNITLESS_STYLE_PROPS.has(property) || property.startsWith("--")
+      ? String(value)
+      : `${value}px`;
+  }
 
   if (isColorObject(value)) {
     return colorObjectToString(value);
@@ -670,7 +719,7 @@ export function applyStyle(element: HTMLElement, value: unknown): void {
           setStyleProperty(
             element.style,
             prop,
-            transformStyleValue(resolvedValue),
+            transformStyleValue(prop, resolvedValue),
           );
         }
       });
@@ -678,7 +727,7 @@ export function applyStyle(element: HTMLElement, value: unknown): void {
       // Static values - apply once without effect
       for (const prop in value) {
         const val = (value as Record<string, unknown>)[prop];
-        setStyleProperty(element.style, prop, transformStyleValue(val));
+        setStyleProperty(element.style, prop, transformStyleValue(prop, val));
       }
     }
   }
