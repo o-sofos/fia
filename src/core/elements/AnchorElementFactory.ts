@@ -46,18 +46,18 @@ export interface AnchorElementFactory {
   (href: string, text: TextContent): HTMLAnchorElement;
 
   /** Create anchor with props only (generic, for SmartElement inference) */
-  <const P extends Record<string, unknown>>(
+  <const P extends LooseElementProps<"a">>(
     props: P & ContextualValidateProps<P, LooseElementProps<"a">, "a">,
   ): SmartElement<"a", P>;
 
   /** Create anchor with props and children (generic) */
-  <const P extends Record<string, unknown>>(
+  <const P extends LooseElementProps<"a">>(
     props: P & ContextualValidateProps<P, LooseElementProps<"a">, "a">,
     children: ChildrenCallback<SmartElement<"a", P>>,
   ): SmartElement<"a", P>;
 
   /** Create anchor with href, text, and additional props */
-  <const P extends Record<string, unknown>>(
+  <const P extends Omit<LooseElementProps<"a">, "href">>(
     href: string,
     text: TextContent,
     props: P &

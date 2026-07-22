@@ -16,6 +16,7 @@ import {
   code,
   td,
   base,
+  textarea,
 } from "./elements";
 
 // =============================================================================
@@ -307,3 +308,50 @@ input({ type: "email", value: 123 });
 
 // @ts-expect-error - checkbox checked must be boolean
 input({ type: "checkbox", checked: "yes" });
+
+// =============================================================================
+// HANDLER-ONLY PROPS (regression: P inference from context-sensitive functions)
+// =============================================================================
+
+// A props literal whose only members are event handlers must still infer
+// P and contextually type the event parameter on every factory kind.
+textarea({ onchange: (e) => { void e.currentTarget.value; } });
+div({ onclick: (e) => { void e.currentTarget.classList; } });
+input({ oninput: (e) => { void e.currentTarget.value; } });
+button({ onclick: (e) => { void e.currentTarget.disabled; } });
+
+// =============================================================================
+// EVENT TARGET NARROWING
+// =============================================================================
+
+// On childless elements, e.target is the element itself
+input({
+  type: "text",
+  oninput: (e) => {
+    const v: string = e.target.value;
+    void v;
+  },
+});
+
+textarea({
+  onchange: (e) => {
+    const v: string = e.target.value;
+    void v;
+  },
+});
+
+img({
+  src: "/logo.png",
+  onload: (e) => {
+    const w: number = e.target.naturalWidth;
+    void w;
+  },
+});
+
+// On containers, target may be any descendant — stays Element
+div({
+  onchange: (e) => {
+    // @ts-expect-error - target is Element on containers, not the div
+    void e.target.value;
+  },
+});

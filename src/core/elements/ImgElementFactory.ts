@@ -27,12 +27,12 @@ export interface ImgElementFactory {
   (src: string, alt: string): HTMLImageElement;
 
   /** Create img with props only (generic, for SmartElement inference) */
-  <const P extends Record<string, unknown>>(
+  <const P extends LooseElementProps<"img">>(
     props: P & ContextualValidateProps<P, LooseElementProps<"img">, "img">,
   ): SmartElement<"img", P>;
 
   /** Create img with src, alt, and additional props */
-  <const P extends Record<string, unknown>>(
+  <const P extends Omit<LooseElementProps<"img">, "src" | "alt">>(
     src: string,
     alt: string,
     props: P &

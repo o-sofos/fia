@@ -52,24 +52,24 @@ export interface InteractiveElementFactory<
   (text: TextContent, children: ChildrenCallback<E<K>>): E<K>;
 
   /** Create element with props only (generic, for SmartElement inference) */
-  <const P extends Record<string, unknown>>(
+  <const P extends LooseElementProps<K>>(
     props: P & ContextualValidateProps<P, LooseElementProps<K>, K>,
   ): SmartElement<K, P>;
 
   /** Create element with props and children (generic) */
-  <const P extends Record<string, unknown>>(
+  <const P extends LooseElementProps<K>>(
     props: P & ContextualValidateProps<P, LooseElementProps<K>, K>,
     children: ChildrenCallback<SmartElement<K, P>>,
   ): SmartElement<K, P>;
 
   /** Create element with text content and props */
-  <const P extends Record<string, unknown>>(
+  <const P extends LooseElementProps<K>>(
     text: TextContent,
     props: P & ContextualValidateProps<P, LooseElementProps<K>, K>,
   ): SmartElement<K, P>;
 
   /** Create element with text content, props, and children */
-  <const P extends Record<string, unknown>>(
+  <const P extends LooseElementProps<K>>(
     text: TextContent,
     props: P & ContextualValidateProps<P, LooseElementProps<K>, K>,
     children: ChildrenCallback<SmartElement<K, P>>,
