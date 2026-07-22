@@ -232,9 +232,9 @@ export const EachBenchmarks = {
      * Compare old vs new Each performance
      */
     compare<T>(
-        items: T[],
-        render: (item: T, index: number) => void,
-        iterations: number = 100,
+        _items: T[],
+        _render: (item: T, index: number) => void,
+        _iterations: number = 100,
     ): { old: number; optimized: number; improvement: string } {
         // Benchmark would go here
         // For now, return mock data

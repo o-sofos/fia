@@ -185,7 +185,6 @@ export function Each<T>(
     for (let i = 0; i < list.length; i++) {
       const item = list[i];
       const key = getItemKey(item, i, keyFn);
-      console.log({ item, key });
 
       // Warn about duplicate keys
       if (usedKeys.has(key)) {
