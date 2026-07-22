@@ -70,15 +70,23 @@ export type AnchorRel =
     | "search" | "tag"
     | (string & {});
 
-export type ControlsList =
-    | "nodownload" | "nofullscreen" | "noremoteplayback"
-    | "nodownload nofullscreen" | "nodownload noremoteplayback"
-    | "nofullscreen noremoteplayback" | "nodownload nofullscreen noremoteplayback"
-    | (string & {});
+type ControlsListToken = "nodownload" | "nofullscreen" | "noremoteplayback";
 
-export type Sandbox =
+/**
+ * Space-separated controlslist tokens. The first token is validated and
+ * autocompleted; additional tokens may follow.
+ */
+export type ControlsList = ControlsListToken | `${ControlsListToken} ${string}`;
+
+type SandboxToken =
     | "allow-downloads" | "allow-forms" | "allow-modals" | "allow-orientation-lock"
     | "allow-pointer-lock" | "allow-popups" | "allow-popups-to-escape-sandbox"
     | "allow-presentation" | "allow-same-origin" | "allow-scripts"
     | "allow-top-navigation" | "allow-top-navigation-by-user-activation"
     | "allow-top-navigation-to-custom-protocols";
+
+/**
+ * Space-separated sandbox tokens. "" applies all restrictions; the first
+ * token is validated and autocompleted; additional tokens may follow.
+ */
+export type Sandbox = "" | SandboxToken | `${SandboxToken} ${string}`;

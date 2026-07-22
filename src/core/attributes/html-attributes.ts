@@ -99,6 +99,7 @@ export type {
     AreaDefaultAttrs,
     AreaGeometricAttrs,
     AreaAttrs,
+    BaseElemAttrs,
     ProgressAttrs,
     MeterAttrs,
     TimeAttrs,
@@ -165,6 +166,7 @@ import type {
 import type {
     MapAttrs,
     AreaAttrs,
+    BaseElemAttrs,
     ProgressAttrs,
     MeterAttrs,
     TimeAttrs,
@@ -204,7 +206,7 @@ export interface ElementPropsMap {
     aside: GlobalAttributes;
     audio: AudioAttrs;
     b: GlobalAttributes;
-    base: GlobalAttributes;
+    base: BaseElemAttrs;
     bdi: GlobalAttributes;
     bdo: GlobalAttributes;
     blockquote: BlockquoteAttrs;

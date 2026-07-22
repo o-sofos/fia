@@ -58,7 +58,7 @@ interface AriaPropertyValueMap {
 
 	// Enumerated
 	"aria-autocomplete": "none" | "inline" | "list" | "both";
-	"aria-dropEffect": "none" | "copy" | "execute" | "link" | "move" | "popup";
+	"aria-dropeffect": "none" | "copy" | "execute" | "link" | "move" | "popup";
 	"aria-haspopup": AriaHasPopupValue;
 	"aria-live": "off" | "polite" | "assertive";
 	"aria-orientation": "horizontal" | "vertical" | "undefined";
@@ -72,6 +72,7 @@ interface AriaPropertyValueMap {
 	"aria-level": number;
 	"aria-posinset": number;
 	"aria-rowcount": number;
+	"aria-rowindex": number;
 	"aria-rowspan": number;
 	"aria-setsize": number;
 
@@ -86,9 +87,6 @@ interface AriaPropertyValueMap {
 	"aria-keyshortcuts": string;
 	"aria-roledescription": string;
 	"aria-placeholder": string;
-
-	// Custom/data attribute
-	"data-controls": string;
 }
 
 // Derive the union type from the map keys

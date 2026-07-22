@@ -1,5 +1,5 @@
 import type { MaybeSignal } from "../../reactivity/reactivity.ts";
-import type { GlobalAttributes } from "./common.ts";
+import type { GlobalAttributes, StrictUnion } from "./common.ts";
 import type {
     Autocomplete,
     FormMethod,
@@ -266,7 +266,7 @@ export interface InputImageAttrs extends BaseInputAttrs {
 /**
  * Discriminated union of all possible Input attribute types.
  */
-export type InputAttrs =
+export type InputAttrs = StrictUnion<
     | InputTextAttrs
     | InputEmailAttrs
     | InputNumberAttrs
@@ -277,7 +277,8 @@ export type InputAttrs =
     | InputColorAttrs
     | InputHiddenAttrs
     | InputButtonAttrs
-    | InputImageAttrs;
+    | InputImageAttrs
+>;
 
 /**
  * Attributes for textarea elements.
@@ -323,6 +324,8 @@ export interface TextAreaAttrs extends GlobalAttributes {
 export interface SelectAttrs extends GlobalAttributes {
     /** Name of the control. */
     name?: MaybeSignal<string>;
+    /** The current value of the select (reflects the selected option's value). */
+    value?: MaybeSignal<string>;
     /** The control is unavailable for interaction. */
     disabled?: MaybeSignal<boolean>;
     /** The value is required. */
@@ -421,7 +424,7 @@ export interface ButtonRestAttrs extends BaseButtonAttrs {
 /**
  * Attributes for button elements (discriminated union).
  */
-export type ButtonAttrs = ButtonSubmitAttrs | ButtonRestAttrs;
+export type ButtonAttrs = StrictUnion<ButtonSubmitAttrs | ButtonRestAttrs>;
 
 /**
  * Base attributes for form elements.
@@ -459,7 +462,7 @@ export interface FormGetAttrs extends BaseFormAttrs {
 /**
  * Attributes for form elements (discriminated union).
  */
-export type FormAttrs = FormPostAttrs | FormGetAttrs;
+export type FormAttrs = StrictUnion<FormPostAttrs | FormGetAttrs>;
 
 /**
  * Attributes for label elements.

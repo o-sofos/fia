@@ -9,6 +9,21 @@ import type {
 } from "./enums.ts";
 
 /**
+ * All keys present on any member of a union.
+ */
+export type UnionKeys<T> = T extends unknown ? keyof T : never;
+
+/**
+ * Pads each member of a discriminated union with `?: never` for keys that
+ * only exist on other members. Keeps the union discriminated while making
+ * `keyof` yield every key across all members — required so excess-property
+ * validation can see variant-specific keys, and so cross-variant props
+ * (e.g. `checked` on a text input) are rejected instead of silently allowed.
+ */
+export type StrictUnion<T, All extends PropertyKey = UnionKeys<T>> =
+    T extends unknown ? T & Partial<Record<Exclude<All, keyof T>, never>> : never;
+
+/**
  * Global attributes shared by all HTML elements
  */
 export interface GlobalAttributes {
@@ -71,7 +86,7 @@ export interface GlobalAttributes {
     /** Indicates that the element is perceivable but disabled, so it is not editable or otherwise operable. */
     ariaDisabled?: MaybeSignal<AriaStateValue<"aria-disabled">>;
     /** Indicates what functions can be performed when a dragged object is released on the drop target. */
-    ariaDropEffect?: MaybeSignal<AriaValueFor<"aria-dropEffect">>;
+    ariaDropEffect?: MaybeSignal<AriaValueFor<"aria-dropeffect">>;
     /** Identifies the element that provides an error message for the object. */
     ariaErrorMessage?: MaybeSignal<AriaValueFor<"aria-errormessage">>;
     /** Indicates whether the element, or another grouping element it controls, is currently expanded or collapsed. */
@@ -123,7 +138,7 @@ export interface GlobalAttributes {
     /** Defines the total number of rows in a table, grid, or treegrid. */
     ariaRowCount?: MaybeSignal<AriaValueFor<"aria-rowcount">>;
     /** Defines an element's row index or position with respect to the total number of rows within a table, grid, or treegrid. */
-    ariaRowIndex?: MaybeSignal<AriaValueFor<"aria-colindex">>;
+    ariaRowIndex?: MaybeSignal<AriaValueFor<"aria-rowindex">>;
     /** Defines the number of rows spanned by a cell or gridcell within a table, grid, or treegrid. */
     ariaRowSpan?: MaybeSignal<AriaValueFor<"aria-rowspan">>;
     /** Indicates the current "selected" state of various widgets. */
@@ -148,10 +163,10 @@ export interface GlobalAttributes {
     // Editing
     /** Indicates whether the element is editable. */
     contentEditable?: MaybeSignal<"true" | "false" | "plaintext-only">;
-    /** Indicates whether spell checking is allowed. */
-    spellcheck?: MaybeSignal<boolean>;
-    /** Indicates whether the element is draggable. */
-    draggable?: MaybeSignal<boolean>;
+    /** Indicates whether spell checking is allowed. Enumerated: serializes as "true"/"false". */
+    spellcheck?: MaybeSignal<boolean | "true" | "false">;
+    /** Indicates whether the element is draggable. Enumerated: serializes as "true"/"false". */
+    draggable?: MaybeSignal<boolean | "true" | "false">;
 
     // Input hints
     /** Hint for the type of data that might be entered by the user. */

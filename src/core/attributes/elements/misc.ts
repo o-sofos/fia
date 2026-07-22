@@ -1,5 +1,5 @@
 import type { MaybeSignal } from "../../reactivity/reactivity.ts";
-import type { GlobalAttributes } from "./common.ts";
+import type { GlobalAttributes, StrictUnion } from "./common.ts";
 import type {
     ThScope,
     Target,
@@ -62,7 +62,7 @@ export interface AreaGeometricAttrs extends BaseAreaAttrs {
 /**
  * Attributes for area elements (discriminated union).
  */
-export type AreaAttrs = AreaDefaultAttrs | AreaGeometricAttrs;
+export type AreaAttrs = StrictUnion<AreaDefaultAttrs | AreaGeometricAttrs>;
 
 // =============================================================================
 // PROGRESS & METER
@@ -313,7 +313,17 @@ export interface LinkOtherAttrs extends BaseLinkAttrs {
 /**
  * Attributes for link elements (discriminated union).
  */
-export type LinkAttrs = LinkPreloadAttrs | LinkStylesheetAttrs | LinkIconAttrs | LinkOtherAttrs;
+export type LinkAttrs = StrictUnion<LinkPreloadAttrs | LinkStylesheetAttrs | LinkIconAttrs | LinkOtherAttrs>;
+
+/**
+ * Attributes for the base element (document base URL).
+ */
+export interface BaseElemAttrs extends GlobalAttributes {
+    /** Base URL for relative URLs in the document. */
+    href?: MaybeSignal<string>;
+    /** Default browsing context for navigations from the document. */
+    target?: MaybeSignal<Target>;
+}
 
 /**
  * Base attributes for meta elements.
@@ -348,7 +358,7 @@ export interface MetaCharsetAttrs extends GlobalAttributes {
 /**
  * Attributes for meta elements (discriminated union).
  */
-export type MetaAttrs = MetaNameAttrs | MetaHttpEquivAttrs | MetaCharsetAttrs;
+export type MetaAttrs = StrictUnion<MetaNameAttrs | MetaHttpEquivAttrs | MetaCharsetAttrs>;
 
 /**
  * Base attributes for script elements.
@@ -397,7 +407,7 @@ export interface ScriptImportMapAttrs extends BaseScriptAttrs {
 /**
  * Attributes for script elements (discriminated union).
  */
-export type ScriptAttrs = ScriptClassicAttrs | ScriptModuleAttrs | ScriptImportMapAttrs;
+export type ScriptAttrs = StrictUnion<ScriptClassicAttrs | ScriptModuleAttrs | ScriptImportMapAttrs>;
 
 /**
  * Attributes for style elements.

@@ -1,6 +1,6 @@
 
 import type { MaybeSignal } from "../../reactivity/reactivity.ts";
-import type { GlobalAttributes } from "./common.ts";
+import type { GlobalAttributes, StrictUnion } from "./common.ts";
 import type {
     Target,
     AnchorRel,
@@ -181,7 +181,7 @@ export interface SourceImageAttrs extends BaseSourceAttrs {
 /**
  * Attributes for source elements (discriminated union).
  */
-export type SourceAttrs = SourceMediaAttrs | SourceImageAttrs;
+export type SourceAttrs = StrictUnion<SourceMediaAttrs | SourceImageAttrs>;
 
 /**
  * Base attributes for track elements.
@@ -212,7 +212,7 @@ export interface TrackOtherAttrs extends BaseTrackAttrs {
 /**
  * Attributes for track elements (discriminated union).
  */
-export type TrackAttrs = TrackSubtitlesAttrs | TrackOtherAttrs;
+export type TrackAttrs = StrictUnion<TrackSubtitlesAttrs | TrackOtherAttrs>;
 
 /**
  * Attributes for canvas elements.
