@@ -356,9 +356,10 @@ export type TypedEvent<E, Ev extends Event = Event> = Ev & {
  * - e.currentTarget is typed to the specific element (no casting needed!)
  */
 type PreciseEventHandlers<E extends Element> = {
-    // Mouse events
-    onclick?: (event: TypedEvent<E, MouseEvent>) => void;
-    oncontextmenu?: (event: TypedEvent<E, MouseEvent>) => void;
+    // Mouse events (click/auxclick/contextmenu are PointerEvents per spec)
+    onclick?: (event: TypedEvent<E, PointerEvent>) => void;
+    onauxclick?: (event: TypedEvent<E, PointerEvent>) => void;
+    oncontextmenu?: (event: TypedEvent<E, PointerEvent>) => void;
     ondblclick?: (event: TypedEvent<E, MouseEvent>) => void;
     onmousedown?: (event: TypedEvent<E, MouseEvent>) => void;
     onmouseenter?: (event: TypedEvent<E, MouseEvent>) => void;
@@ -380,7 +381,9 @@ type PreciseEventHandlers<E extends Element> = {
     onfocusout?: (event: TypedEvent<E, FocusEvent>) => void;
 
     // Form events
+    onbeforeinput?: (event: TypedEvent<E, InputEvent>) => void;
     onchange?: (event: TypedEvent<E, Event>) => void;
+    onformdata?: (event: TypedEvent<E, FormDataEvent>) => void;
     oninput?: (event: TypedEvent<E, InputEvent>) => void;
     oninvalid?: (event: TypedEvent<E, Event>) => void;
     onreset?: (event: TypedEvent<E, Event>) => void;
@@ -402,6 +405,8 @@ type PreciseEventHandlers<E extends Element> = {
     ontouchstart?: (event: TypedEvent<E, TouchEvent>) => void;
 
     // Pointer events
+    ongotpointercapture?: (event: TypedEvent<E, PointerEvent>) => void;
+    onlostpointercapture?: (event: TypedEvent<E, PointerEvent>) => void;
     onpointercancel?: (event: TypedEvent<E, PointerEvent>) => void;
     onpointerdown?: (event: TypedEvent<E, PointerEvent>) => void;
     onpointerenter?: (event: TypedEvent<E, PointerEvent>) => void;
@@ -464,6 +469,7 @@ type PreciseEventHandlers<E extends Element> = {
     ontimeupdate?: (event: TypedEvent<E, Event>) => void;
     onvolumechange?: (event: TypedEvent<E, Event>) => void;
     onwaiting?: (event: TypedEvent<E, Event>) => void;
+    oncuechange?: (event: TypedEvent<E, Event>) => void;
 
     // Loading events
     onload?: (event: TypedEvent<E, Event>) => void;
@@ -476,8 +482,24 @@ type PreciseEventHandlers<E extends Element> = {
     // Resize events
     onresize?: (event: TypedEvent<E, UIEvent>) => void;
 
-    // Toggle events
-    ontoggle?: (event: TypedEvent<E, Event>) => void;
+    // Toggle events (details, popover)
+    onbeforetoggle?: (event: TypedEvent<E, ToggleEvent>) => void;
+    ontoggle?: (event: TypedEvent<E, ToggleEvent>) => void;
+
+    // Dialog events
+    oncancel?: (event: TypedEvent<E, Event>) => void;
+    onclose?: (event: TypedEvent<E, Event>) => void;
+
+    // Canvas context events
+    oncontextlost?: (event: TypedEvent<E, Event>) => void;
+    oncontextrestored?: (event: TypedEvent<E, Event>) => void;
+
+    // Misc
+    onbeforematch?: (event: TypedEvent<E, Event>) => void;
+    onslotchange?: (event: TypedEvent<E, Event>) => void;
+    onsecuritypolicyviolation?: (
+        event: TypedEvent<E, SecurityPolicyViolationEvent>,
+    ) => void;
 };
 
 /**
