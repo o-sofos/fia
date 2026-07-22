@@ -1,5 +1,5 @@
 import { describe, it, expect } from "bun:test";
-import { $, $e, batch } from "./reactivity/reactivity";
+import { $, $e, batch, Mut } from "./reactivity/reactivity";
 
 describe("Array Reactivity (Store)", () => {
     it("should update when mutating the array in place (push)", () => {
@@ -25,8 +25,17 @@ describe("Array Reactivity (Store)", () => {
         // expect(updateCount).toBe(2);
     });
 
-    it("should update when modifying existing index", () => {
+    it("should reject index assignment on immutable arrays (default)", () => {
         const list = $<string[]>(["Apple"]);
+
+        expect(() => {
+            (list as any)[0] = "Banana";
+        }).toThrow(TypeError);
+        expect(list[0]).toBe("Apple");
+    });
+
+    it("should update when modifying existing index", () => {
+        const list = $(Mut(["Apple"]));
         let updateCount = 0;
 
         $e(() => {
@@ -36,12 +45,12 @@ describe("Array Reactivity (Store)", () => {
 
         expect(updateCount).toBe(1);
 
-        (list as any)[0] = "Banana";
+        list[0] = "Banana";
         expect(updateCount).toBe(2);
     });
 
     it("should update when using splice (mutation)", () => {
-        const list = $<string[]>(["Apple"]);
+        const list = $(Mut(["Apple"]));
         let updateCount = 0;
 
         $e(() => {

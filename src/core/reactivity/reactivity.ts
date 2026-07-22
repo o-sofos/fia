@@ -189,7 +189,7 @@ export type Widen<T> =
   T extends string ? string :
   T extends number ? number :
   T extends boolean ? boolean :
-  T extends readonly [] ? any[] :
+  T extends readonly [] ? unknown[] :
   T extends readonly (infer U)[] ? Widen<U>[] :
   IsPlainObject<T> extends true ? { -readonly [K in keyof T]: Widen<T[K]> } :
   T;
@@ -661,7 +661,12 @@ function createStore<T extends object>(initial: T, mutability: Set<PropertyKey> 
         }
       }
 
-      if (!isMutableKey) return false;
+      if (!isMutableKey) {
+        throw new TypeError(
+          `[Fia] Cannot mutate immutable store property "${String(key)}". ` +
+          `Opt in with $(obj, "${String(key)}") or wrap the value in Mut().`,
+        );
+      }
 
       const rawValue = value !== null && typeof value === "object" && RAW in value
         ? value[RAW]
@@ -725,7 +730,12 @@ function createStore<T extends object>(initial: T, mutability: Set<PropertyKey> 
         }
       }
 
-      if (!isMutableKey) return false;
+      if (!isMutableKey) {
+        throw new TypeError(
+          `[Fia] Cannot delete immutable store property "${String(key)}". ` +
+          `Opt in with $(obj, "${String(key)}") or wrap the value in Mut().`,
+        );
+      }
 
       const hadKey = Reflect.has(target, key);
       const result = Reflect.deleteProperty(target, key);

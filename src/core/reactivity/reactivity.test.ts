@@ -1,5 +1,5 @@
 
-import { describe, expect, test, mock } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import { $, $e, Mut } from "./reactivity";
 
 describe("Reactivity Core", () => {
@@ -85,11 +85,13 @@ describe("Reactivity Core", () => {
             const state = $({ count: 0 });
             expect(state.count).toBe(0);
 
-            // Runtime check: modifying readonly prop should succeed at runtime (proxy) 
-            // but fail types. We verify runtime.
-            // @ts-ignore
-            state.count = 1;
-            expect(state.count as number).toBe(1);
+            // Runtime check: immutability is enforced by the proxy, not just
+            // the types — writing a readonly prop throws a descriptive error.
+            expect(() => {
+                // @ts-ignore
+                state.count = 1;
+            }).toThrow(TypeError);
+            expect(state.count).toBe(0);
         });
 
         test("Mutable Opt-in", () => {
