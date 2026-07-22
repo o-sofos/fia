@@ -142,6 +142,12 @@ export interface StrictCSSProperties extends
     TableProperties {
     // Color is defined in TypographyProperties but we override with strict CSSColor type
     color?: CSSColor;
+    /**
+     * CSS custom properties (variables). Values pass through as-is —
+     * numbers are NOT auto-suffixed with "px" here.
+     * @example { "--brand": "oklch(0.7 0.1 200)", "--columns": 3 }
+     */
+    [customProperty: `--${string}`]: string | number | undefined;
 }
 
 // =============================================================================
