@@ -24,7 +24,6 @@ import type {
   StyleProp,
   ClassProp,
 } from "./reactivity/reactivity-types";
-import { px, toPx, pct, toPct, deg, toDeg } from "./css/branded-types";
 import type { CSSRgbFunction, CSSHslFunction } from "./css/properties/visual";
 
 // =============================================================================
@@ -217,37 +216,21 @@ input({
 console.log("✅ Phase 7.1 tests passed: Precise event handlers work!");
 
 // =============================================================================
-// PHASE 7.2: BRANDED TYPES FOR CSS VALUES
+// PHASE 7.2: NUMBER LENGTHS (auto-px) AND CUSTOM PROPERTIES
 // =============================================================================
 
-console.log("✓ Phase 7.2: Testing branded types for CSS values");
+console.log("✓ Phase 7.2: Testing number lengths and custom properties");
 
-// Test 18: Basic branded type usage
-const widthPx = px(300);
-const heightPct = pct(50);
-const rotationDeg = deg(45);
+// Test 18: Bare numbers are accepted for length properties (auto-px at runtime)
+div({ style: { width: 300, marginTop: 8 } });
 
-// Convert to CSS strings
-const widthStr = toPx(widthPx); // "300px"
-const heightStr = toPct(heightPct); // "50%"
-const rotateStr = toDeg(rotationDeg); // "45deg"
+// Test 19: Unitless properties keep plain numbers
+div({ style: { opacity: 0.5, zIndex: 3, flexGrow: 1, lineHeight: 1.4 } });
 
-// Verify the branded type functions work correctly
-console.log(widthStr === "300px"); // true
-console.log(heightStr === "50%"); // true
-console.log(rotateStr === "45deg"); // true
+// Test 20: Custom properties accept strings and numbers
+div({ style: { "--brand": "rebeccapurple", "--columns": 3 } });
 
-// Test 19: Type safety prevents mixing units
-// const mixed = widthPx + heightPct; // Would be a type error (can't add Pixels + Percentage)
-
-// Test 20: Branded types with signals
-// Note: For branded types, use explicit generic to preserve the brand
-import type { Pixels } from "./css/branded-types";
-const reactiveWidthPx = $<Pixels>(Mut(px(400)));
-const reactiveWidthStr = $(() => toPx(reactiveWidthPx.value as Pixels));
-console.log(typeof reactiveWidthStr.value === "string"); // Computed string works
-
-console.log("✅ Phase 7.2 tests passed: Branded types work!");
+console.log("✅ Phase 7.2 tests passed: number lengths and custom properties work!");
 
 // =============================================================================
 // ELEMENT-TYPED EVENT HANDLERS (currentTarget narrowing)
