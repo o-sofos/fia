@@ -52,30 +52,22 @@ export type LooseElementProps<K extends keyof HTMLElementTagNameMap> =
   };
 
 /**
- * Validates that all properties in P are present in Target or match allowable patterns (data-*).
- * This prevents excess properties from being allowed by generic constraints.
+ * Validates that all properties in P are present in Target or match allowable
+ * patterns (data-*). Non-matching keys map to `never`, poisoning the
+ * intersection so excess props are rejected.
+ *
+ * Event handlers deliberately pass through the Target type untouched: the
+ * generic constraint is then the single contextual source for handler
+ * parameters, which keeps editor hovers clean — re-typing handlers here
+ * would union a second, near-identical event type onto the parameter.
  */
-/**
- * Validates that all properties in P are present in Target or match allowable patterns (data-*).
- * Also maps event handlers to be contextually typed with the current element and props.
- */
-export type ContextualValidateProps<
-  P,
-  Target,
-  K extends keyof HTMLElementTagNameMap,
-> = {
-    [Key in keyof P]: Key extends keyof Target
-    ? Key extends `on${string}`
-    ? Target[Key] extends ((e: infer BaseEv) => void) | undefined
-    ? BaseEv extends TypedEvent<any, infer NativeEv>
-    ? (e: TypedEvent<SmartElement<K, P>, NativeEv>) => void
-    : Target[Key]
-    : Target[Key]
-    : Target[Key]
-    : Key extends `data-${string}`
-    ? P[Key]
-    : never;
-  };
+export type ContextualValidateProps<P, Target> = {
+  [Key in keyof P]: Key extends keyof Target
+  ? Target[Key]
+  : Key extends `data-${string}`
+  ? P[Key]
+  : never;
+};
 
 /**
  * Types that can be rendered as text content in an element.
@@ -473,7 +465,6 @@ import type {
   ColorFunction,
   ColorMix,
 } from "../css/properties/visual";
-import type { SmartElement } from "./SmartElement";
 import { createElement, type ElementFactory } from "./ElementFactory";
 import {
   createTextElement,

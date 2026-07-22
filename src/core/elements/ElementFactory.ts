@@ -89,7 +89,7 @@ export interface ElementFactory<K extends keyof HTMLElementTagNameMap> {
    * @example input({ type: "email", placeholder: "Enter email" })
    */
   <const P extends LooseElementProps<K>>(
-    props: P & ContextualValidateProps<P, LooseElementProps<K>, K>,
+    props: P & ContextualValidateProps<P, LooseElementProps<K>>,
   ): SmartElement<K, P>;
 
   /**
@@ -106,7 +106,7 @@ export interface ElementFactory<K extends keyof HTMLElementTagNameMap> {
    * @example div({ class: "card" }, () => { h3("Title"); p("Body"); })
    */
   <const P extends LooseElementProps<K>>(
-    props: P & ContextualValidateProps<P, LooseElementProps<K>, K>,
+    props: P & ContextualValidateProps<P, LooseElementProps<K>>,
     children: ChildrenCallback<SmartElement<K, P>>,
   ): SmartElement<K, P>;
 }

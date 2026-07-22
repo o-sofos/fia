@@ -409,3 +409,26 @@ button("Save", (e) => {
   e.currentTarget.disabled = true;
   void e.pointerId;
 });
+
+// =============================================================================
+// HOVER QUALITY: handler event types are single-sourced
+// =============================================================================
+
+// Locks against the double-contextual-source regression where handler params
+// were typed as a union of near-identical event types, producing hovers like
+// "(EventTarget & HTMLInputElement) | (EventTarget & HTMLInputElement & Element)".
+type Equal<X, Y> = (<T>() => T extends X ? 1 : 2) extends <T>() => T extends Y
+  ? 1
+  : 2
+  ? true
+  : false;
+
+input({
+  type: "email",
+  oninput: (e) => {
+    const targetIsExact: Equal<typeof e.target, EventTarget & HTMLInputElement> = true;
+    const currentTargetIsExact: Equal<typeof e.currentTarget, EventTarget & HTMLInputElement> = true;
+    void targetIsExact;
+    void currentTargetIsExact;
+  },
+});
