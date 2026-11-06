@@ -26,11 +26,27 @@ export type NarrowedStyle<S> = {
 };
 
 /**
+ * The non-property members of `element.style` (methods, cssText, length...),
+ * which the narrowed property view must keep.
+ */
+export type StyleDeclarationMembers = Pick<
+  CSSStyleDeclaration,
+  | "cssText"
+  | "length"
+  | "parentRule"
+  | "getPropertyPriority"
+  | "getPropertyValue"
+  | "item"
+  | "removeProperty"
+  | "setProperty"
+>;
+
+/**
  * Combined style type: narrowed defined props + full CSS for others.
  */
 export type MergedStyle<S> = S extends object
-  ? NarrowedStyle<S> & Omit<ReactiveCSSProperties, keyof S>
-  : ReactiveCSSProperties;
+  ? NarrowedStyle<S> & Omit<ReactiveCSSProperties, keyof S> & StyleDeclarationMembers
+  : ReactiveCSSProperties & StyleDeclarationMembers;
 
 /**
  * Processes props to merge style property with full CSS types.

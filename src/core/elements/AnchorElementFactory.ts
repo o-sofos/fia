@@ -27,17 +27,10 @@ export interface AnchorElementFactory {
   /** Create an empty anchor */
   (): HTMLAnchorElement;
 
-  /** Create anchor with props only (non-generic, for overload resolution) */
-  (props: LooseElementProps<"a">): HTMLAnchorElement;
 
   /** Create anchor with children callback only */
   (children: ChildrenCallback<HTMLAnchorElement>): HTMLAnchorElement;
 
-  /** Create anchor with props and children (non-generic) */
-  (
-    props: LooseElementProps<"a">,
-    children: ChildrenCallback<HTMLAnchorElement>,
-  ): HTMLAnchorElement;
 
   /** Create anchor with href shorthand */
   (href: string): HTMLAnchorElement;

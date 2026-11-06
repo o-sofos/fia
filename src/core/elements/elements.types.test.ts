@@ -432,3 +432,20 @@ input({
     void currentTargetIsExact;
   },
 });
+
+// Text/interactive/anchor/img factories resolve to the generic overloads, so
+// props narrow the returned element and style values get validated.
+{
+  const d = div({ id: "main", style: { display: "grid" } });
+  const id: "main" = d.id;
+  const display: "grid" | (string & {}) = d.style.display;
+  d.style.setProperty("--x", "1"); // declaration methods survive narrowing
+  const b = button("Save", { type: "submit" });
+  const type: "submit" = b.type;
+  const s = span({ title: "hint" }, () => {});
+  const title: "hint" = s.title;
+  void id;
+  void display;
+  void type;
+  void title;
+}

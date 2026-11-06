@@ -17,8 +17,6 @@ export interface ImgElementFactory {
   /** Create empty img */
   (): HTMLImageElement;
 
-  /** Create img with props only (non-generic, for overload resolution) */
-  (props: LooseElementProps<"img">): HTMLImageElement;
 
   /** Create img with src shorthand */
   (src: string): HTMLImageElement;

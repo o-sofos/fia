@@ -32,14 +32,10 @@ export interface TextElementFactory<K extends keyof HTMLElementTagNameMap> {
   /** Create an empty element */
   (): E<K>;
 
-  /** Create element with props only (non-generic, for overload resolution) */
-  (props: LooseElementProps<K>): E<K>;
 
   /** Create element with children callback only */
   (children: ChildrenCallback<E<K>>): E<K>;
 
-  /** Create element with props and children (non-generic) */
-  (props: LooseElementProps<K>, children: ChildrenCallback<E<K>>): E<K>;
 
   /** Create element with text content */
   (text: TextContent): E<K>;
