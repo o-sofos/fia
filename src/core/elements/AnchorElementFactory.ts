@@ -40,12 +40,12 @@ export interface AnchorElementFactory {
 
   /** Create anchor with props only (generic, for SmartElement inference) */
   <const P extends LooseElementProps<"a">>(
-    props: P & ContextualValidateProps<P, LooseElementProps<"a">>,
+    props: P & ContextualValidateProps<P, LooseElementProps<"a">, "a">,
   ): SmartElement<"a", P>;
 
   /** Create anchor with props and children (generic) */
   <const P extends LooseElementProps<"a">>(
-    props: P & ContextualValidateProps<P, LooseElementProps<"a">>,
+    props: P & ContextualValidateProps<P, LooseElementProps<"a">, "a">,
     children: ChildrenCallback<SmartElement<"a", P>>,
   ): SmartElement<"a", P>;
 
@@ -54,7 +54,7 @@ export interface AnchorElementFactory {
     href: string,
     text: TextContent,
     props: P &
-      ContextualValidateProps<P, Omit<LooseElementProps<"a">, "href">>,
+      ContextualValidateProps<P, Omit<LooseElementProps<"a">, "href">, "a">,
   ): SmartElement<"a", P & { href: string }>;
 }
 

@@ -27,6 +27,7 @@ import { registerEventHandler } from "../events/events";
 import type { ElementProps, TypedEvent } from "../attributes/html-attributes";
 import type { ReactiveCSSProperties } from "../css/css-types";
 import type { IsValidStyleValue } from "../css/grammar";
+import type { AriaRoleRequirements } from "../a11y/aria";
 
 export { type MaybeSignal, isSignal };
 export type { ElementProps, TypedEvent };
@@ -62,11 +63,15 @@ export type LooseElementProps<K extends keyof HTMLElementTagNameMap> =
  * parameters, which keeps editor hovers clean — re-typing handlers here
  * would union a second, near-identical event type onto the parameter.
  *
+ * K (the tag) enables role checks: a literal `role` must come with the ARIA
+ * attributes WAI-ARIA requires for it, unless the element supplies them
+ * natively — see AriaRoleRequirements.
+ *
  * Style objects are validated one level deeper: `const P` inference means the
  * object is checked by assignability, not as a fresh literal, so without this
  * misspelled CSS properties (`colr`, `widht`) would slip through silently.
  */
-export type ContextualValidateProps<P, Target> = {
+export type ContextualValidateProps<P, Target, K = never> = {
   [Key in keyof P]: Key extends keyof Target
   ? Key extends "style"
     ? ValidateStyle<P[Key], Target[Key]>
@@ -74,7 +79,7 @@ export type ContextualValidateProps<P, Target> = {
   : Key extends `data-${string}`
   ? P[Key]
   : never;
-};
+} & AriaRoleRequirements<K, P>;
 
 /**
  * Object styles: every key must be a known CSS property or `--custom` one,

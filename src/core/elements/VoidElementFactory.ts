@@ -34,7 +34,7 @@ export interface VoidElementFactory<K extends keyof HTMLElementTagNameMap> {
    * @example input({ type: "email", placeholder: "you@example.com" })
    */
   <const P extends LooseElementProps<K>>(
-    props: P & ContextualValidateProps<P, LooseElementProps<K>>,
+    props: P & ContextualValidateProps<P, LooseElementProps<K>, K>,
   ): SmartElement<K, P>;
 }
 

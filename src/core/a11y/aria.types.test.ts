@@ -44,6 +44,49 @@ div({ "aria-relevant": "text text" });
 // --- Discriminated elements still accept ARIA --------------------------------
 input({ type: "checkbox", "aria-describedby": "hint" });
 
+// --- Roles: abstract roles are rejected ----------------------------------------
+div({ role: "region", "aria-label": "Filters" });
+// @ts-expect-error - abstract roles are not for authors
+div({ role: "widget" });
+// @ts-expect-error - "text" is not an ARIA role
+span({ role: "text" });
+div({ role: "paragraph" }); // ARIA 1.2 structural role
+
+// --- Roles: required states and properties ------------------------------------
+div({ role: "checkbox", "aria-checked": false, tabIndex: 0 });
+div({ role: "checkbox", ariaChecked: "mixed" }); // camelCase satisfies it too
+// @ts-expect-error - checkbox requires aria-checked
+div({ role: "checkbox" });
+// @ts-expect-error - slider requires aria-valuenow
+div({ role: "slider", "aria-label": "Volume" });
+div({ role: "slider", "aria-label": "Volume", ariaValueNow: 50 });
+// @ts-expect-error - combobox requires aria-controls (has aria-expanded)
+div({ role: "combobox", "aria-expanded": false, "aria-label": "City" });
+// @ts-expect-error - heading requires aria-level
+div({ role: "heading" });
+div({ role: "heading", ariaLevel: 2 });
+// Children callback overloads are checked too
+// @ts-expect-error - switch requires aria-checked
+div({ role: "switch" }, () => {});
+
+// --- Roles: native semantics supply the attribute -------------------------------
+input({ type: "checkbox", role: "switch" }); // checked state is native
+input({ type: "range", role: "slider" }); // value is native, and <label for> names it
+
+// --- Roles: author-named roles need a name ---------------------------------------
+// @ts-expect-error - dialog role needs aria-label / aria-labelledby / title
+div({ role: "dialog" });
+div({ role: "dialog", "aria-labelledby": "dialog-title" });
+div({ role: "dialog", ariaLabel: "Settings" });
+div({ role: "img", title: "Chart of sales" });
+// @ts-expect-error - img role needs a name
+span({ role: "img" });
+button("Menu", { role: "combobox", ariaExpanded: false, ariaControls: "list" }); // button is labelable via content
+
+// --- Roles: non-literal roles can't be checked ------------------------------------
+const asSwitch = $(Mut(false));
+div({ role: $(() => (asSwitch.value ? "switch" : "checkbox")) });
+
 test("aria type tests compile", () => {
   expect(true).toBe(true);
 });

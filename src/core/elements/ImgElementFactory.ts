@@ -26,7 +26,7 @@ export interface ImgElementFactory {
 
   /** Create img with props only (generic, for SmartElement inference) */
   <const P extends LooseElementProps<"img">>(
-    props: P & ContextualValidateProps<P, LooseElementProps<"img">>,
+    props: P & ContextualValidateProps<P, LooseElementProps<"img">, "img">,
   ): SmartElement<"img", P>;
 
   /** Create img with src, alt, and additional props */
@@ -36,7 +36,8 @@ export interface ImgElementFactory {
     props: P &
       ContextualValidateProps<
         P,
-        Omit<LooseElementProps<"img">, "src" | "alt">
+        Omit<LooseElementProps<"img">, "src" | "alt">,
+        "img"
       >,
   ): SmartElement<"img", P & { src: string; alt: string }>;
 }

@@ -5,7 +5,7 @@ import type {
     AriaAttributeValue,
     AriaInput,
     AriaKebabAttributes,
-    AriaRole,
+    ConcreteAriaRole,
 } from "../../a11y/aria.ts";
 
 /** A camelCase ARIA prop: the attribute's tokens, booleans where valid, or a signal of either */
@@ -67,7 +67,7 @@ export interface GlobalAttributes {
 
     // Accessibility (Strict Types)
     /** ARIA role indicating the semantic purpose of the element. */
-    role?: MaybeSignal<AriaRole>;
+    role?: MaybeSignal<ConcreteAriaRole>;
     /** Identifies the currently active element when focus is on a composite widget, combobox, textbox, group, or application. */
     ariaActiveDescendant?: AriaProp<"aria-activedescendant">;
     /** Indicates whether assistive technologies will present all, or only parts of, the changed region based on the change notifications defined by the aria-relevant attribute. */

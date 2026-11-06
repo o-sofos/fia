@@ -45,25 +45,25 @@ export interface TextElementFactory<K extends keyof HTMLElementTagNameMap> {
 
   /** Create element with props only (generic, for SmartElement inference) */
   <const P extends LooseElementProps<K>>(
-    props: P & ContextualValidateProps<P, LooseElementProps<K>>,
+    props: P & ContextualValidateProps<P, LooseElementProps<K>, K>,
   ): SmartElement<K, P>;
 
   /** Create element with props and children (generic) */
   <const P extends LooseElementProps<K>>(
-    props: P & ContextualValidateProps<P, LooseElementProps<K>>,
+    props: P & ContextualValidateProps<P, LooseElementProps<K>, K>,
     children: ChildrenCallback<SmartElement<K, P>>,
   ): SmartElement<K, P>;
 
   /** Create element with text content and props */
   <const P extends LooseElementProps<K>>(
     text: TextContent,
-    props: P & ContextualValidateProps<P, LooseElementProps<K>>,
+    props: P & ContextualValidateProps<P, LooseElementProps<K>, K>,
   ): SmartElement<K, P>;
 
   /** Create element with text content, props, and children */
   <const P extends LooseElementProps<K>>(
     text: TextContent,
-    props: P & ContextualValidateProps<P, LooseElementProps<K>>,
+    props: P & ContextualValidateProps<P, LooseElementProps<K>, K>,
     children: ChildrenCallback<SmartElement<K, P>>,
   ): SmartElement<K, P>;
 }

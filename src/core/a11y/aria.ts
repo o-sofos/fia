@@ -184,6 +184,7 @@ type WidgetRole =
 	| "menuitem"
 	| "menuitemcheckbox"
 	| "menuitemradio"
+	| "meter"
 	| "option"
 	| "progressbar"
 	| "radio"
@@ -226,9 +227,21 @@ type DocumentStructureRole =
 	| "rowheader"
 	| "table"
 	| "term"
-	| "text"
 	| "toolbar"
-	| "tooltip";
+	| "tooltip"
+	// ARIA 1.2
+	| "generic"
+	| "blockquote"
+	| "caption"
+	| "code"
+	| "deletion"
+	| "emphasis"
+	| "insertion"
+	| "paragraph"
+	| "strong"
+	| "subscript"
+	| "superscript"
+	| "time";
 
 // Live region roles
 type LiveRegionRole = "alert" | "log" | "marquee" | "status" | "timer";
@@ -482,3 +495,86 @@ export function getRequiredAttributes(role: AriaRole): {
 
 	return { states, properties };
 }
+
+// ============================================================
+// Type-level role validation (WAI-ARIA 1.2 MUST requirements)
+// ============================================================
+
+/**
+ * Required states and properties per role (WAI-ARIA 1.2, "Required States
+ * and Properties"). Roles not listed require none.
+ */
+interface RoleRequiredAttributes {
+	checkbox: "aria-checked";
+	combobox: "aria-controls" | "aria-expanded";
+	heading: "aria-level";
+	menuitemcheckbox: "aria-checked";
+	menuitemradio: "aria-checked";
+	meter: "aria-valuenow";
+	radio: "aria-checked";
+	scrollbar: "aria-controls" | "aria-valuenow";
+	slider: "aria-valuenow";
+	switch: "aria-checked";
+}
+
+/** Elements whose native semantics already supply an attribute */
+interface NativelySupplied {
+	"aria-checked": "input";
+	"aria-valuenow": "input" | "meter" | "progress";
+	"aria-level": "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
+	"aria-expanded": "select";
+	"aria-controls": "select";
+}
+
+/**
+ * Roles that require an accessible name which can only come from the author
+ * (WAI-ARIA 1.2: "Accessible Name Required: True", name from author only).
+ */
+type AuthorNamedRole =
+	| "alertdialog" | "dialog" | "combobox" | "grid" | "listbox" | "tree" | "treegrid"
+	| "img" | "meter" | "progressbar" | "slider" | "spinbutton" | "textbox" | "searchbox";
+
+/** Elements that get a name natively (`<label for>`, or `alt` on img) */
+type NativelyNamed = "input" | "select" | "textarea" | "button" | "meter" | "output" | "progress" | "img";
+
+/** The literal role in props, if any (signals and widened strings are unknowable) */
+type RoleOf<P> = P extends { role: infer R extends string } ? (string extends R ? never : R) : never;
+
+/** ARIA attributes present in props, normalized to kebab-case (`ariaLabelledBy` → `aria-labelledby`) */
+type ProvidedAria<P> = {
+	[C in keyof P]: C extends `aria-${string}`
+		? C
+		: C extends `aria${infer R}`
+		? `aria-${Lowercase<R>}`
+		: never;
+}[keyof P];
+
+type MissingRequired<K, R, Has> = R extends keyof RoleRequiredAttributes
+	? {
+		[N in RoleRequiredAttributes[R]]: N extends Has
+			? never
+			: N extends keyof NativelySupplied
+			? K extends NativelySupplied[N] ? never : N
+			: N;
+	}[RoleRequiredAttributes[R]]
+	: never;
+
+type NeedsName<K, R, Has, P> = R extends AuthorNamedRole
+	? K extends NativelyNamed
+		? false
+		: "aria-label" | "aria-labelledby" extends Exclude<"aria-label" | "aria-labelledby", Has>
+		? "title" extends keyof P ? false : true
+		: false
+	: false;
+
+/**
+ * Required ARIA props for the literal role in P on element K, as an object type
+ * to intersect with the props parameter: a missing requirement surfaces as
+ * "Property '"aria-checked"' is missing in type ...". Resolves to `unknown`
+ * when nothing is missing.
+ */
+export type AriaRoleRequirements<K, P> = [RoleOf<P>] extends [never]
+	? unknown
+	: {
+		[N in MissingRequired<K, RoleOf<P>, ProvidedAria<P>>]: AriaInput<AriaAttributeValue<N & AriaAttributeName>> | Signal<AriaInput<AriaAttributeValue<N & AriaAttributeName>>>;
+	} & (true extends NeedsName<K, RoleOf<P>, ProvidedAria<P>, P> ? { "aria-label": string | Signal<string> } : unknown);
