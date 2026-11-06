@@ -60,14 +60,36 @@ export type LooseElementProps<K extends keyof HTMLElementTagNameMap> =
  * generic constraint is then the single contextual source for handler
  * parameters, which keeps editor hovers clean — re-typing handlers here
  * would union a second, near-identical event type onto the parameter.
+ *
+ * Style objects are validated one level deeper: `const P` inference means the
+ * object is checked by assignability, not as a fresh literal, so without this
+ * misspelled CSS properties (`colr`, `widht`) would slip through silently.
  */
 export type ContextualValidateProps<P, Target> = {
   [Key in keyof P]: Key extends keyof Target
-  ? Target[Key]
+  ? Key extends "style"
+    ? ValidateStyle<P[Key], Target[Key]>
+    : Target[Key]
   : Key extends `data-${string}`
   ? P[Key]
   : never;
 };
+
+/**
+ * Object styles: every key must be a known CSS property or `--custom` one.
+ * Strings and signals fall back to the declared style type.
+ */
+type ValidateStyle<S, Declared> = S extends Signal<unknown>
+  ? Declared
+  : S extends object
+  ? {
+    [K in keyof S]: K extends keyof ReactiveCSSProperties
+    ? ReactiveCSSProperties[K]
+    // `never` (not a message string): P & this intersects per key, so a
+    // message literal would collapse the whole object and flag valid keys too
+    : never;
+  }
+  : Declared;
 
 /**
  * Types that can be rendered as text content in an element.

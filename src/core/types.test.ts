@@ -252,6 +252,23 @@ div({
 // @ts-expect-error - numbers only on properties known to take lengths
 div({ style: { viewTransitionName: 1 } });
 
+// Test 23: Misspelled CSS properties are rejected on every factory kind
+// @ts-expect-error - colr is not a CSS property
+div({ style: { colr: "red" } });
+// @ts-expect-error - widht is not a CSS property
+div({ style: { width: 10, widht: 10 } }, () => { });
+// @ts-expect-error - colr is not a CSS property
+input({ style: { colr: "red" } });
+// @ts-expect-error - colr is not a CSS property
+button("Save", { style: { colr: "red" } });
+// @ts-expect-error - colr is not a CSS property
+img({ src: "a.png", style: { colr: "red" } });
+
+// Test 24: String, signal and custom-property styles are still accepted
+div({ style: "color: red" });
+div({ style: $(() => "color: red") });
+div({ style: { width: $(Mut(10)), "--gap": 4 } });
+
 console.log("✅ Phase 7.3 tests passed: CSS property coverage works!");
 
 // =============================================================================
