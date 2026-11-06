@@ -355,7 +355,7 @@ export type TypedEvent<E, Ev extends Event = Event> = Ev & {
  * - onInput receives InputEvent with data, inputType, etc.
  * - e.currentTarget is typed to the specific element (no casting needed!)
  */
-type PreciseEventHandlers<E extends Element> = {
+export type PreciseEventHandlers<E extends Element> = {
     // Mouse events (click/auxclick/contextmenu are PointerEvents per spec)
     onclick?: (event: TypedEvent<E, PointerEvent>) => void;
     onauxclick?: (event: TypedEvent<E, PointerEvent>) => void;
