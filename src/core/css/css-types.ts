@@ -1,5 +1,6 @@
 
 import type { Signal } from "../reactivity/reactivity.ts";
+import type { CSSGlobalValues } from "./properties/common.ts";
 import type { BoxModelProperties } from "./properties/box-model.ts";
 import type { FlexGridProperties } from "./properties/flex-grid.ts";
 import type { InteractionProperties, TableProperties } from "./properties/interaction.ts";
@@ -124,6 +125,37 @@ export type {
 } from "./properties/interaction.ts";
 
 // =============================================================================
+// STANDARD CSS PROPERTIES (lib.dom fallback)
+// =============================================================================
+
+/** Properties with hand-written value types (literal unions, lengths, colors). */
+type TypedCSSProperties =
+    & LayoutProperties
+    & BoxModelProperties
+    & FlexGridProperties
+    & TypographyProperties
+    & VisualProperties
+    & TransformProperties
+    & InteractionProperties
+    & TableProperties;
+
+/**
+ * Every other CSS property the DOM lib knows about, accepted as a string.
+ *
+ * Derived from `CSSStyleDeclaration` so coverage tracks the TypeScript lib
+ * (including `webkit*` vendor properties), and homomorphic so editors keep
+ * the lib's MDN docs on hover. Numbers are deliberately not accepted here:
+ * auto-px is only safe where a property is known to take a length.
+ */
+export type StandardCSSProperties = {
+    -readonly [K in keyof CSSStyleDeclaration as K extends keyof TypedCSSProperties | "cssText"
+        ? never
+        : K extends string
+        ? CSSStyleDeclaration[K] extends string ? K : never
+        : never]?: CSSGlobalValues | (string & {});
+};
+
+// =============================================================================
 // STRICT CSS PROPERTIES INTERFACE
 // =============================================================================
 
@@ -139,7 +171,8 @@ export interface StrictCSSProperties extends
     VisualProperties,
     TransformProperties,
     InteractionProperties,
-    TableProperties {
+    TableProperties,
+    StandardCSSProperties {
     // Color is defined in TypographyProperties but we override with strict CSSColor type
     color?: CSSColor;
     /**

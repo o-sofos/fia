@@ -233,6 +233,28 @@ div({ style: { "--brand": "rebeccapurple", "--columns": 3 } });
 console.log("✅ Phase 7.2 tests passed: number lengths and custom properties work!");
 
 // =============================================================================
+// PHASE 7.3: FULL CSS PROPERTY COVERAGE
+// =============================================================================
+
+console.log("✓ Phase 7.3: Testing CSS property coverage");
+
+// Test 21: Every standard property is accepted (lib.dom fallback), incl. vendor ones
+div({
+  style: {
+    clipPath: "circle(50%)",
+    paintOrder: "stroke",
+    viewTransitionName: "hero",
+    webkitLineClamp: "3",
+  },
+});
+
+// Test 22: Fallback properties don't get auto-px numbers
+// @ts-expect-error - numbers only on properties known to take lengths
+div({ style: { viewTransitionName: 1 } });
+
+console.log("✅ Phase 7.3 tests passed: CSS property coverage works!");
+
+// =============================================================================
 // ELEMENT-TYPED EVENT HANDLERS (currentTarget narrowing)
 // =============================================================================
 
