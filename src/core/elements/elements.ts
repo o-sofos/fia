@@ -395,6 +395,21 @@ export function setElementProperty(
  */
 const ENUMERATED_BOOLEAN_ATTRS = new Set(["draggable", "spellcheck"]);
 
+/**
+ * HTML attribute name for a prop key. camelCase ARIA props map to their
+ * attribute (`ariaLabel` → `aria-label`, `ariaLabelledBy` → `aria-labelledby`);
+ * ARIA attribute names are all lowercase after the `aria-` prefix.
+ */
+function attributeName(key: string): string {
+  const mapped = PROP_TO_ATTR[key];
+  if (mapped !== undefined) return mapped;
+  if (key.length > 4 && key.startsWith("aria")) {
+    const c = key.charCodeAt(4);
+    if (c >= 65 && c <= 90) return "aria-" + key.slice(4).toLowerCase();
+  }
+  return key;
+}
+
 export function assignProp(
   element: HTMLElement,
   key: string,
@@ -406,16 +421,21 @@ export function assignProp(
     applyStyle(element, value);
   } else if (isDOMPropertyKey(key)) {
     setElementProperty(element, key, value);
-  } else if (typeof value === "boolean") {
-    if (ENUMERATED_BOOLEAN_ATTRS.has(key)) {
-      element.setAttribute(key, String(value));
-    } else if (value) {
-      element.setAttribute(PROP_TO_ATTR[key] ?? key, "");
-    } else {
-      element.removeAttribute(PROP_TO_ATTR[key] ?? key);
-    }
   } else {
-    element.setAttribute(PROP_TO_ATTR[key] ?? key, String(value));
+    const attr = attributeName(key);
+    if (typeof value === "boolean") {
+      // ARIA and enumerated attributes spell out "false" — removing them
+      // means "unset", which differs (aria-expanded absent ≠ collapsed)
+      if (ENUMERATED_BOOLEAN_ATTRS.has(attr) || attr.startsWith("aria-")) {
+        element.setAttribute(attr, String(value));
+      } else if (value) {
+        element.setAttribute(attr, "");
+      } else {
+        element.removeAttribute(attr);
+      }
+    } else {
+      element.setAttribute(attr, String(value));
+    }
   }
 }
 

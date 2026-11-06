@@ -640,3 +640,38 @@ describe("Style: number lengths and custom properties", () => {
         expect(el.style.width).toBe("250px");
     });
 });
+
+describe("ARIA attributes", () => {
+    beforeEach(() => {
+        while (hasExecutionContext()) popExecutionContext();
+        document.body.innerHTML = "";
+    });
+
+    it("maps camelCase ARIA props to aria-* attributes", () => {
+        const el = button({ ariaLabel: "Close", ariaLabelledBy: "t", ariaActiveDescendant: "o1" });
+        expect(el.getAttribute("aria-label")).toBe("Close");
+        expect(el.getAttribute("aria-labelledby")).toBe("t");
+        expect(el.getAttribute("aria-activedescendant")).toBe("o1");
+        expect(el.hasAttribute("arialabel")).toBe(false);
+    });
+
+    it("binds reactive ARIA props", () => {
+        const open = $(Mut(false));
+        const expanded = $(() => (open.value ? "true" : "false"));
+        const el = button({ ariaExpanded: expanded });
+        expect(el.getAttribute("aria-expanded")).toBe("false");
+        open.value = true;
+        expect(el.getAttribute("aria-expanded")).toBe("true");
+    });
+
+    it("serializes boolean ARIA values instead of removing them", () => {
+        const el = div({ "aria-hidden": false, "aria-busy": true } as never);
+        expect(el.getAttribute("aria-hidden")).toBe("false");
+        expect(el.getAttribute("aria-busy")).toBe("true");
+    });
+
+    it("leaves non-ARIA attributes alone", () => {
+        const el = div({ title: "aria" });
+        expect(el.getAttribute("title")).toBe("aria");
+    });
+});
