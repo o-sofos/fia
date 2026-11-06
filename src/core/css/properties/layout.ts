@@ -42,7 +42,22 @@ export interface LayoutProperties {
     overflowY?: CSSOverflow;
     isolation?: "auto" | "isolate" | CSSGlobalValues;
     aspectRatio?: "auto" | string | number | CSSGlobalValues;
+
+    // Containment & container queries
+    containerType?: CSSContainerType;
+    /** One or more space-separated names */
+    containerName?: "none" | CSSGlobalValues | (string & {});
+    /** `<name> / <type>` shorthand, e.g. `"sidebar / inline-size"` */
+    container?: "none" | CSSContainerType | `${string} / ${CSSContainerType}` | CSSGlobalValues | (string & {});
+    contentVisibility?: "visible" | "hidden" | "auto" | CSSGlobalValues;
+    containIntrinsicSize?: CSSLength;
+    containIntrinsicWidth?: CSSLength;
+    containIntrinsicHeight?: CSSLength;
+    containIntrinsicBlockSize?: CSSLength;
+    containIntrinsicInlineSize?: CSSLength;
 }
+
+export type CSSContainerType = "normal" | "size" | "inline-size" | "scroll-state" | CSSGlobalValues;
 
 // Re-export ZIndex from here as it's layout related, even if base type in units/common
 export type { CSSZIndex };

@@ -322,6 +322,23 @@ div({ style: { writingMode: "vertical" } });
 // @ts-expect-error - not a text-wrap value
 div({ style: { textWrap: "auto" } });
 
+// Test 28: Container queries, containment and UI properties
+div({
+  style: {
+    containerType: "inline-size",
+    container: "sidebar / inline-size",
+    contentVisibility: "auto",
+    containIntrinsicSize: 500,
+    colorScheme: "light dark",
+    appearance: "none",
+    fieldSizing: "content",
+  },
+});
+// @ts-expect-error - not a container type
+div({ style: { containerType: "block-size" } });
+// @ts-expect-error - not a color scheme
+div({ style: { colorScheme: "dim" } });
+
 // Test 24: String, signal and custom-property styles are still accepted
 div({ style: "color: red" });
 div({ style: $(() => "color: red") });

@@ -33,6 +33,10 @@ export type CSSScrollSnapAlign =
     | `${CSSScrollSnapPosition} ${CSSScrollSnapPosition}`
     | CSSGlobalValues;
 
+export type CSSColorScheme =
+    | "normal" | "light" | "dark" | "light dark" | "dark light" | "only light" | "only dark"
+    | CSSGlobalValues;
+
 export interface InteractionProperties {
     cursor?: CSSCursor;
     pointerEvents?: CSSPointerEvents;
@@ -40,6 +44,12 @@ export interface InteractionProperties {
     resize?: CSSResize;
     touchAction?: "auto" | "none" | "pan-x" | "pan-y" | "manipulation" | "pinch-zoom" | CSSGlobalValues | (string & {});
     scrollBehavior?: "auto" | "smooth" | CSSGlobalValues;
+    colorScheme?: CSSColorScheme;
+    appearance?: "none" | "auto" | "base" | "menulist-button" | "textfield" | CSSGlobalValues;
+    /** `content` lets inputs, textareas and selects size to their value */
+    fieldSizing?: "fixed" | "content" | CSSGlobalValues;
+    forcedColorAdjust?: "auto" | "none" | "preserve-parent-color" | CSSGlobalValues;
+    printColorAdjust?: "economy" | "exact" | CSSGlobalValues;
     scrollMargin?: CSSLength;
     scrollMarginTop?: CSSLength;
     scrollMarginRight?: CSSLength;

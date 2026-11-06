@@ -25,6 +25,7 @@ export type {
     CSSFloat,
     CSSClear,
     CSSVisibility,
+    CSSContainerType,
     LayoutProperties
 } from "./properties/layout.ts";
 
@@ -127,6 +128,7 @@ export type {
     CSSOverscrollBehavior,
     CSSScrollSnapType,
     CSSScrollSnapAlign,
+    CSSColorScheme,
     InteractionProperties,
     TableProperties
 } from "./properties/interaction.ts";
