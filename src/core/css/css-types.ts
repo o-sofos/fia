@@ -120,6 +120,9 @@ export type {
     CSSPointerEvents,
     CSSUserSelect,
     CSSResize,
+    CSSOverscrollBehavior,
+    CSSScrollSnapType,
+    CSSScrollSnapAlign,
     InteractionProperties,
     TableProperties
 } from "./properties/interaction.ts";

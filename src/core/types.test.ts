@@ -280,6 +280,25 @@ div({
 // @ts-expect-error - not a border style
 div({ style: { borderBlockStyle: "wavy" } });
 
+// Test 26: Scroll properties
+div({
+  style: {
+    scrollMarginTop: 64,
+    scrollPaddingInline: "1rem",
+    scrollSnapType: "x mandatory",
+    scrollSnapAlign: "start",
+    overscrollBehavior: "contain none",
+    overscrollBehaviorY: "none",
+    scrollbarWidth: "thin",
+    scrollbarGutter: "stable both-edges",
+    scrollbarColor: "gray transparent",
+  },
+});
+// @ts-expect-error - not a snap strictness
+div({ style: { scrollSnapType: "x strict" } });
+// @ts-expect-error - not a scrollbar width
+div({ style: { scrollbarWidth: "wide" } });
+
 // Test 24: String, signal and custom-property styles are still accepted
 div({ style: "color: red" });
 div({ style: $(() => "color: red") });

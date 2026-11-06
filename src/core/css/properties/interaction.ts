@@ -18,6 +18,21 @@ export type CSSUserSelect = "auto" | "none" | "text" | "all" | "contain" | CSSGl
 
 export type CSSResize = "none" | "both" | "horizontal" | "vertical" | "block" | "inline" | CSSGlobalValues;
 
+export type CSSOverscrollBehavior = "auto" | "contain" | "none" | CSSGlobalValues;
+
+type CSSScrollSnapAxis = "x" | "y" | "block" | "inline" | "both";
+export type CSSScrollSnapType =
+    | "none"
+    | CSSScrollSnapAxis
+    | `${CSSScrollSnapAxis} ${"mandatory" | "proximity"}`
+    | CSSGlobalValues;
+
+type CSSScrollSnapPosition = "none" | "start" | "end" | "center";
+export type CSSScrollSnapAlign =
+    | CSSScrollSnapPosition
+    | `${CSSScrollSnapPosition} ${CSSScrollSnapPosition}`
+    | CSSGlobalValues;
+
 export interface InteractionProperties {
     cursor?: CSSCursor;
     pointerEvents?: CSSPointerEvents;
@@ -26,9 +41,39 @@ export interface InteractionProperties {
     touchAction?: "auto" | "none" | "pan-x" | "pan-y" | "manipulation" | "pinch-zoom" | CSSGlobalValues | (string & {});
     scrollBehavior?: "auto" | "smooth" | CSSGlobalValues;
     scrollMargin?: CSSLength;
+    scrollMarginTop?: CSSLength;
+    scrollMarginRight?: CSSLength;
+    scrollMarginBottom?: CSSLength;
+    scrollMarginLeft?: CSSLength;
+    scrollMarginBlock?: CSSLength;
+    scrollMarginBlockStart?: CSSLength;
+    scrollMarginBlockEnd?: CSSLength;
+    scrollMarginInline?: CSSLength;
+    scrollMarginInlineStart?: CSSLength;
+    scrollMarginInlineEnd?: CSSLength;
     scrollPadding?: CSSLength;
-    scrollSnapType?: string;
-    scrollSnapAlign?: string;
+    scrollPaddingTop?: CSSLength;
+    scrollPaddingRight?: CSSLength;
+    scrollPaddingBottom?: CSSLength;
+    scrollPaddingLeft?: CSSLength;
+    scrollPaddingBlock?: CSSLength;
+    scrollPaddingBlockStart?: CSSLength;
+    scrollPaddingBlockEnd?: CSSLength;
+    scrollPaddingInline?: CSSLength;
+    scrollPaddingInlineStart?: CSSLength;
+    scrollPaddingInlineEnd?: CSSLength;
+    scrollSnapType?: CSSScrollSnapType;
+    scrollSnapAlign?: CSSScrollSnapAlign;
+    scrollSnapStop?: "normal" | "always" | CSSGlobalValues;
+    overscrollBehavior?: CSSOverscrollBehavior | `${CSSOverscrollBehavior} ${CSSOverscrollBehavior}`;
+    overscrollBehaviorX?: CSSOverscrollBehavior;
+    overscrollBehaviorY?: CSSOverscrollBehavior;
+    overscrollBehaviorBlock?: CSSOverscrollBehavior;
+    overscrollBehaviorInline?: CSSOverscrollBehavior;
+    scrollbarWidth?: "auto" | "thin" | "none" | CSSGlobalValues;
+    scrollbarGutter?: "auto" | "stable" | "stable both-edges" | CSSGlobalValues;
+    /** `auto`, or `<thumb-color> <track-color>` */
+    scrollbarColor?: "auto" | CSSGlobalValues | (string & {});
 }
 
 export interface TableProperties {
