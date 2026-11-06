@@ -26,6 +26,7 @@ import {
 import { registerEventHandler } from "../events/events";
 import type { ElementProps, TypedEvent } from "../attributes/html-attributes";
 import type { ReactiveCSSProperties } from "../css/css-types";
+import type { IsValidStyleValue } from "../css/grammar";
 
 export { type MaybeSignal, isSignal };
 export type { ElementProps, TypedEvent };
@@ -76,7 +77,9 @@ export type ContextualValidateProps<P, Target> = {
 };
 
 /**
- * Object styles: every key must be a known CSS property or `--custom` one.
+ * Object styles: every key must be a known CSS property or `--custom` one,
+ * and literal values of grammar-checked properties (grid tracks, transitions,
+ * animations, gradients) must parse — see css/grammar.ts.
  * Strings and signals fall back to the declared style type.
  */
 type ValidateStyle<S, Declared> = S extends Signal<unknown>
@@ -84,7 +87,9 @@ type ValidateStyle<S, Declared> = S extends Signal<unknown>
   : S extends object
   ? {
     [K in keyof S]: K extends keyof ReactiveCSSProperties
-    ? ReactiveCSSProperties[K]
+    ? IsValidStyleValue<K, S[K]> extends true
+      ? ReactiveCSSProperties[K]
+      : never
     // `never` (not a message string): P & this intersects per key, so a
     // message literal would collapse the whole object and flag valid keys too
     : never;
