@@ -5,14 +5,14 @@
  *
  * @example
  * ```typescript
- * import { $, div, h1, button, p } from "@fia/core";
+ * import { $, Mut, div, h1, button, p } from "@fia/core";
  *
- * const count = $(0);
+ * const count = $(Mut(0));
  *
  * div({ class: "app" }, () => {
  *   h1("Counter App");
- *   p("Count: ", count);
- *   button("Increment", { onclick: () => count.value++ });
+ *   p($(() => `Count: ${count.value}`));
+ *   button("Increment", () => count.value++);
  * });
  * ```
  */
