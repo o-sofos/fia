@@ -939,13 +939,23 @@ const CAMEL_TO_KEBAB: Record<string, string> = {
     lightingColor: "lighting-color",
 };
 
+/**
+ * SMIL animation handlers are named after their `onbegin`-style attributes,
+ * but the events they listen for are `beginEvent`, `endEvent`, `repeatEvent`.
+ */
+const SMIL_EVENTS: Record<string, string> = {
+    begin: "beginEvent",
+    end: "endEvent",
+    repeat: "repeatEvent",
+};
+
 function applySVGProps(element: SVGElement, props: Record<string, unknown>): void {
     for (const [key, value] of Object.entries(props)) {
         if (value === null || value === undefined) continue;
 
         if (key.startsWith("on") && typeof value === "function") {
-            const eventName = key.slice(2).toLowerCase();
-            element.addEventListener(eventName, value as EventListener);
+            const name = key.slice(2).toLowerCase();
+            element.addEventListener(SMIL_EVENTS[name] ?? name, value as EventListener);
         } else if (isSignal(value)) {
             $e(() => {
                 const attrName = CAMEL_TO_KEBAB[key] ?? key;
