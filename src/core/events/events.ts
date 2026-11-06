@@ -96,8 +96,3 @@ export function registerEventHandler(
         element.addEventListener(eventType, handler);
     }
 }
-
-// Expose to window for debugging
-if (typeof window !== 'undefined') {
-    (window as any).__eventHandlerMap = handlerMap;
-}
