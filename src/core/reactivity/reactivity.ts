@@ -56,6 +56,79 @@ let batchDepth = 0;
 const effectQueue: (() => void)[] = [];
 let flushing = false;
 
+// =============================================================================
+// OWNERSHIP
+// =============================================================================
+
+/**
+ * A scope that owns the effects and computeds created while it runs.
+ * Disposing an owner disposes everything it owns (children before parents'
+ * remaining cleanups, in reverse creation order).
+ *
+ * Every effect is an owner for the duration of its run: nested effects are
+ * disposed before it re-runs. Control flow (Show/Each/Match) uses explicit
+ * owners so a removed branch or list item releases its bindings.
+ *
+ * @internal
+ */
+export interface Owner {
+  owned: (() => void)[] | undefined;
+}
+
+/** Owner of whatever is being created right now */
+let currentOwner: Owner | undefined = undefined;
+
+/**
+ * Register a cleanup with the current owner. No-op at the root (unowned).
+ * @internal
+ */
+export function onCleanup(fn: () => void): void {
+  if (currentOwner) {
+    (currentOwner.owned ??= []).push(fn);
+  }
+}
+
+/**
+ * Run `fn` with `owner` as the current owner.
+ * @internal
+ */
+export function runWithOwner<T>(owner: Owner, fn: () => T): T {
+  const prevOwner = currentOwner;
+  currentOwner = owner;
+  try {
+    return fn();
+  } finally {
+    currentOwner = prevOwner;
+  }
+}
+
+/**
+ * Dispose everything an owner owns. The owner can be reused afterwards.
+ * @internal
+ */
+export function disposeOwner(owner: Owner): void {
+  const owned = owner.owned;
+  if (!owned) return;
+  owner.owned = undefined;
+  for (let i = owned.length - 1; i >= 0; i--) {
+    owned[i]();
+  }
+}
+
+/**
+ * Run `fn` without tracking any reactive reads.
+ * @internal
+ */
+export function untrack<T>(fn: () => T): T {
+  const prevSubscriber = activeSubscriber;
+  activeSubscriber = undefined;
+  try {
+    return fn();
+  } finally {
+    activeSubscriber = prevSubscriber;
+  }
+}
+
 /**
  * Track a dependency - called when reading a reactive value
  */
@@ -176,6 +249,9 @@ export function batch(fn: () => void): void {
  * });
  * ```
  *
+ * Effects created inside another effect (or inside a Show/Each/Match branch)
+ * are owned by it and disposed automatically when it re-runs or is disposed.
+ *
  * @param fn - The effect function to run
  * @returns A dispose function to stop the effect
  */
@@ -183,7 +259,7 @@ export function $e(fn: EffectFn): () => void {
   let active = true;
   let queued = false;
 
-  const subscriber: Subscriber = {
+  const subscriber: Subscriber & Owner = {
     notify() {
       if (active && !queued) {
         queued = true;
@@ -192,19 +268,26 @@ export function $e(fn: EffectFn): () => void {
     },
     deps: [],
     depVersions: [],
+    owned: undefined,
   };
 
   function run(): void {
+    // Dispose effects/computeds created by the previous run
+    disposeOwner(subscriber);
+
     // Clean up old dependencies before re-running
     // This ensures conditional branches don't leave stale subscriptions
     cleanupSubscriber(subscriber);
 
     const prevSubscriber = activeSubscriber;
+    const prevOwner = currentOwner;
     activeSubscriber = subscriber;
+    currentOwner = subscriber;
     try {
       fn();
     } finally {
       activeSubscriber = prevSubscriber;
+      currentOwner = prevOwner;
     }
   }
 
@@ -213,14 +296,19 @@ export function $e(fn: EffectFn): () => void {
     if (active && depsChanged(subscriber)) run();
   }
 
+  const dispose = (): void => {
+    if (!active) return;
+    active = false;
+    disposeOwner(subscriber);
+    cleanupSubscriber(subscriber);
+  };
+
+  onCleanup(dispose);
+
   // Run immediately to establish initial dependencies
   run();
 
-  // Return dispose function
-  return () => {
-    active = false;
-    cleanupSubscriber(subscriber);
-  };
+  return dispose;
 }
 
 /**
@@ -406,16 +494,24 @@ function createComputed<T>(compute: () => T): Signal<T> {
     depVersions: [],
   };
 
+  /** Unsubscribed by its owner's disposal — can't trust staleness anymore */
+  let detached = false;
+
   function refresh(): void {
     if (!stale) return;
     stale = false;
-    if (initialized && !depsChanged(subscriber)) return;
+    if (initialized && !detached && !depsChanged(subscriber)) return;
+    detached = false;
 
     // Clean up old dependencies
     cleanupSubscriber(subscriber);
 
+    // Computeds aren't owners: they recompute lazily from arbitrary contexts,
+    // so anything created inside must not attach to whoever triggered the read
     const prevSubscriber = activeSubscriber;
+    const prevOwner = currentOwner;
     activeSubscriber = subscriber;
+    currentOwner = undefined;
     let newValue: T;
     try {
       newValue = compute();
@@ -424,6 +520,7 @@ function createComputed<T>(compute: () => T): Signal<T> {
       throw e;
     } finally {
       activeSubscriber = prevSubscriber;
+      currentOwner = prevOwner;
     }
 
     if (!initialized || !Object.is(currentValue, newValue)) {
@@ -432,6 +529,14 @@ function createComputed<T>(compute: () => T): Signal<T> {
       node.version = ++globalVersion;
     }
   }
+
+  // When the creating scope is disposed, stop listening to sources. A later
+  // read recomputes from scratch (and re-subscribes).
+  onCleanup(() => {
+    cleanupSubscriber(subscriber);
+    stale = true;
+    detached = true;
+  });
 
   // Initial computation
   refresh();

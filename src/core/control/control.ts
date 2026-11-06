@@ -4,7 +4,16 @@
  * Reactive conditional rendering using effects.
  */
 
-import { $, $e, Mut, type Signal } from "../reactivity/reactivity";
+import {
+  $,
+  $e,
+  Mut,
+  disposeOwner,
+  onCleanup,
+  runWithOwner,
+  type Owner,
+  type Signal,
+} from "../reactivity/reactivity";
 import {
   pushExecutionContext,
   popExecutionContext,
@@ -166,10 +175,18 @@ export function Each<T>(
     key: string | number;
     item: T;
     nodes: Node[];
+    /** Owns the effects created while rendering this item */
+    owner: Owner;
   }
 
   let prevItemNodes: ItemNode[] = [];
   const nodeMap = new Map<string | number, ItemNode>();
+
+  // Items are owned individually (not by the list effect below), so a list
+  // update only disposes the items that actually left.
+  onCleanup(() => {
+    for (const itemNode of prevItemNodes) disposeOwner(itemNode.owner);
+  });
 
   $e(() => {
     const list =
@@ -202,22 +219,25 @@ export function Each<T>(
       } else {
         // Create new node
         const frag = document.createDocumentFragment();
+        const owner: Owner = { owned: undefined };
         pushExecutionContext(frag);
 
         try {
-          render(item, i);
+          const index = i;
+          runWithOwner(owner, () => render(item, index));
         } finally {
           popExecutionContext();
         }
 
         const nodes = Array.from(frag.childNodes);
-        const itemNode: ItemNode = { key, item, nodes };
+        const itemNode: ItemNode = { key, item, nodes, owner };
 
         newItemNodes.push(itemNode);
         newNodeMap.set(key, itemNode);
 
         // Clean up old node with same key
         if (existingNode) {
+          disposeOwner(existingNode.owner);
           for (const node of existingNode.nodes) {
             node.parentNode?.removeChild(node);
           }
@@ -228,6 +248,7 @@ export function Each<T>(
     // Remove nodes no longer in list
     for (const prevNode of prevItemNodes) {
       if (!newNodeMap.has(prevNode.key)) {
+        disposeOwner(prevNode.owner);
         for (const node of prevNode.nodes) {
           node.parentNode?.removeChild(node);
         }

@@ -68,17 +68,13 @@ describe("Reactivity Core", () => {
 
         expect(innerRuns).toBe(1);
 
-        // Trigger outer -> inner should re-run (new effect created, old disposed?)
-        // Note: Fia's active effect stack handles this, but does it dispose old inner effects?
-        // Let's verify behavior.
+        // Trigger outer -> old inner effect is disposed, a new one is created
         outer.value++;
         expect(innerRuns).toBe(2);
 
-        // Trigger inner -> inner should re-run
-        // Note: Fia does NOT automatically dispose nested effects (no owner system).
-        // So the old inner effect AND the new inner effect from step 2 both run.
+        // Trigger inner -> only the live inner effect runs
         inner.value++;
-        expect(innerRuns).toBe(4);
+        expect(innerRuns).toBe(3);
     });
     describe("ReactiveStore (Objects)", () => {
         test("Immutable by Default", () => {
