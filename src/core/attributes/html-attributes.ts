@@ -415,6 +415,8 @@ type PreciseEventHandlers<E extends Element> = {
     onpointerout?: (event: TypedEvent<E, PointerEvent>) => void;
     onpointerover?: (event: TypedEvent<E, PointerEvent>) => void;
     onpointerup?: (event: TypedEvent<E, PointerEvent>) => void;
+    /** High-frequency pointer moves (secure contexts) */
+    onpointerrawupdate?: (event: TypedEvent<E, PointerEvent>) => void;
 
     // Wheel events
     onwheel?: (event: TypedEvent<E, WheelEvent>) => void;
@@ -453,7 +455,8 @@ type PreciseEventHandlers<E extends Element> = {
     ondurationchange?: (event: TypedEvent<E, Event>) => void;
     onemptied?: (event: TypedEvent<E, Event>) => void;
     onended?: (event: TypedEvent<E, Event>) => void;
-    onerror?: (event: TypedEvent<E, ErrorEvent>) => void;
+    /** Elements fire a plain Event on load failure (ErrorEvent is only for script errors on window/workers) */
+    onerror?: (event: TypedEvent<E, Event>) => void;
     onloadeddata?: (event: TypedEvent<E, Event>) => void;
     onloadedmetadata?: (event: TypedEvent<E, Event>) => void;
     onloadstart?: (event: TypedEvent<E, Event>) => void;
@@ -485,6 +488,13 @@ type PreciseEventHandlers<E extends Element> = {
     // Toggle events (details, popover)
     onbeforetoggle?: (event: TypedEvent<E, ToggleEvent>) => void;
     ontoggle?: (event: TypedEvent<E, ToggleEvent>) => void;
+
+    // Invoker commands (<button commandfor command>)
+    oncommand?: (event: TypedEvent<E, CommandEvent>) => void;
+
+    // Fullscreen
+    onfullscreenchange?: (event: TypedEvent<E, Event>) => void;
+    onfullscreenerror?: (event: TypedEvent<E, Event>) => void;
 
     // Dialog events
     oncancel?: (event: TypedEvent<E, Event>) => void;

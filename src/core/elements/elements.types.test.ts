@@ -18,6 +18,7 @@ import {
   base,
   textarea,
   form,
+  dialog,
 } from "./elements";
 
 // =============================================================================
@@ -448,4 +449,28 @@ input({
   void display;
   void type;
   void title;
+}
+
+// Event families: invoker commands, fullscreen, raw pointer updates, and
+// element load errors (a plain Event, not ErrorEvent)
+{
+  dialog({
+    oncommand: (e) => {
+      const command: string = e.command;
+      void command;
+    },
+  });
+  div({
+    onfullscreenchange: (e) => e.currentTarget.requestFullscreen,
+    onpointerrawupdate: (e) => e.pointerId,
+  });
+  img({
+    src: "a.png",
+    onerror: (e) => {
+      const isPlainEvent: Equal<Omit<typeof e, "currentTarget" | "target">, Omit<Event, "currentTarget" | "target">> = true;
+      void isPlainEvent;
+      // @ts-expect-error - element errors carry no message
+      void e.message;
+    },
+  });
 }
