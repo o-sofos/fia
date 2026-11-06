@@ -604,6 +604,14 @@ describe("Style: number lengths and custom properties", () => {
         expect(el.style.flexGrow).toBe("1");
     });
 
+    it("keeps count and ratio numbers unitless", () => {
+        const set = captureStyle({ webkitLineClamp: 3, tabSize: 4, fontSizeAdjust: 0.5, inset: 0 });
+        expect(set["-webkit-line-clamp"]).toBe("3");
+        expect(set.tabSize).toBe("4");
+        expect(set.fontSizeAdjust).toBe("0.5");
+        expect(set.inset).toBe("0px");
+    });
+
     it("sets vendor-prefixed properties with a leading dash", () => {
         const set = captureStyle({ webkitLineClamp: "3", mozAppearance: "none" });
         expect(set["-webkit-line-clamp"]).toBe("3");

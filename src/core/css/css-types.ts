@@ -68,6 +68,10 @@ export type {
     CSSVerticalAlign,
     CSSLineHeight,
     CSSLetterSpacing,
+    CSSWritingMode,
+    CSSTextWrap,
+    CSSHyphens,
+    CSSFontSettings,
     TypographyProperties
 } from "./properties/typography.ts";
 

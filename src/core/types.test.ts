@@ -299,6 +299,29 @@ div({ style: { scrollSnapType: "x strict" } });
 // @ts-expect-error - not a scrollbar width
 div({ style: { scrollbarWidth: "wide" } });
 
+// Test 27: Writing modes and modern text properties
+div({
+  style: {
+    writingMode: "vertical-rl",
+    direction: "rtl",
+    textOrientation: "upright",
+    textWrap: "balance",
+    hyphens: "auto",
+    textUnderlineOffset: 3,
+    tabSize: 4,
+    webkitLineClamp: 3,
+    fontFeatureSettings: '"tnum", "liga" 0',
+    fontVariationSettings: '"wght" 650',
+    fontVariantNumeric: "tabular-nums",
+    fontStretch: "87.5%",
+    fontSizeAdjust: 0.5,
+  },
+});
+// @ts-expect-error - not a writing mode
+div({ style: { writingMode: "vertical" } });
+// @ts-expect-error - not a text-wrap value
+div({ style: { textWrap: "auto" } });
+
 // Test 24: String, signal and custom-property styles are still accepted
 div({ style: "color: red" });
 div({ style: $(() => "color: red") });
