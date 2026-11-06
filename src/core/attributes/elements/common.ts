@@ -1,6 +1,15 @@
 import type { MaybeSignal } from "../../reactivity/reactivity.ts";
 import type { ReactiveCSSProperties } from "../../css/css-types.ts";
-import type { AriaValueFor, AriaStateValue, AriaRole } from "../../a11y/aria.ts";
+import type {
+    AriaAttributeName,
+    AriaAttributeValue,
+    AriaInput,
+    AriaKebabAttributes,
+    AriaRole,
+} from "../../a11y/aria.ts";
+
+/** A camelCase ARIA prop: the attribute's tokens, booleans where valid, or a signal of either */
+type AriaProp<N extends AriaAttributeName> = MaybeSignal<AriaInput<AriaAttributeValue<N>>>;
 import type {
     InputMode,
     AutoCapitalize,
@@ -60,101 +69,111 @@ export interface GlobalAttributes {
     /** ARIA role indicating the semantic purpose of the element. */
     role?: MaybeSignal<AriaRole>;
     /** Identifies the currently active element when focus is on a composite widget, combobox, textbox, group, or application. */
-    ariaActiveDescendant?: MaybeSignal<AriaValueFor<"aria-activedescendant">>;
+    ariaActiveDescendant?: AriaProp<"aria-activedescendant">;
     /** Indicates whether assistive technologies will present all, or only parts of, the changed region based on the change notifications defined by the aria-relevant attribute. */
-    ariaAtomic?: MaybeSignal<AriaValueFor<"aria-atomic">>;
+    ariaAtomic?: AriaProp<"aria-atomic">;
     /** Indicates whether inputting text could trigger display of one or more predictions of the user's intended value for an input and specifies how predictions would be presented if they were made. */
-    ariaAutoComplete?: MaybeSignal<AriaValueFor<"aria-autocomplete">>;
+    ariaAutoComplete?: AriaProp<"aria-autocomplete">;
     /** Indicates an element is being modified and that assistive technologies MAY want to wait until the modifications are complete before exposing them to the user. */
-    ariaBusy?: MaybeSignal<AriaStateValue<"aria-busy">>;
+    ariaBusy?: AriaProp<"aria-busy">;
     /** Indicates the current "checked" state of checkboxes, radio buttons, and other widgets. */
-    ariaChecked?: MaybeSignal<AriaStateValue<"aria-checked">>;
+    ariaChecked?: AriaProp<"aria-checked">;
     /** Defines the total number of columns in a table, grid, or treegrid. */
-    ariaColCount?: MaybeSignal<AriaValueFor<"aria-colcount">>;
+    ariaColCount?: AriaProp<"aria-colcount">;
     /** Defines an element's column index or position with respect to the total number of columns within a table, grid, or treegrid. */
-    ariaColIndex?: MaybeSignal<AriaValueFor<"aria-colindex">>;
+    ariaColIndex?: AriaProp<"aria-colindex">;
     /** Defines the number of columns spanned by a cell or gridcell within a table, grid, or treegrid. */
-    ariaColSpan?: MaybeSignal<AriaValueFor<"aria-colspan">>;
+    ariaColSpan?: AriaProp<"aria-colspan">;
     /** Identifies the element (or elements) that controls the current element. */
-    ariaControls?: MaybeSignal<AriaValueFor<"aria-controls">>;
+    ariaControls?: AriaProp<"aria-controls">;
     /** Indicates the element that represents the current item within a container or set of related elements. */
-    ariaCurrent?: MaybeSignal<AriaStateValue<"aria-current">>;
+    ariaCurrent?: AriaProp<"aria-current">;
     /** Identifies the element (or elements) that describes the object. */
-    ariaDescribedBy?: MaybeSignal<AriaValueFor<"aria-describedby">>;
+    ariaDescribedBy?: AriaProp<"aria-describedby">;
     /** Identifies the element that provides a detailed, extended description for the object. */
-    ariaDetails?: MaybeSignal<AriaValueFor<"aria-details">>;
+    ariaDetails?: AriaProp<"aria-details">;
     /** Indicates that the element is perceivable but disabled, so it is not editable or otherwise operable. */
-    ariaDisabled?: MaybeSignal<AriaStateValue<"aria-disabled">>;
+    ariaDisabled?: AriaProp<"aria-disabled">;
     /** Indicates what functions can be performed when a dragged object is released on the drop target. */
-    ariaDropEffect?: MaybeSignal<AriaValueFor<"aria-dropeffect">>;
+    ariaDropEffect?: AriaProp<"aria-dropeffect">;
     /** Identifies the element that provides an error message for the object. */
-    ariaErrorMessage?: MaybeSignal<AriaValueFor<"aria-errormessage">>;
+    ariaErrorMessage?: AriaProp<"aria-errormessage">;
     /** Indicates whether the element, or another grouping element it controls, is currently expanded or collapsed. */
-    ariaExpanded?: MaybeSignal<AriaStateValue<"aria-expanded">>;
+    ariaExpanded?: AriaProp<"aria-expanded">;
     /** Identifies the next element (or elements) in an alternate reading order of content which, at the user's discretion, allows assistive technology to override the general default of reading in document source order. */
-    ariaFlowTo?: MaybeSignal<AriaValueFor<"aria-flowto">>;
+    ariaFlowTo?: AriaProp<"aria-flowto">;
     /** Indicates an element's "grabbed" state in a drag-and-drop operation. */
-    ariaGrabbed?: MaybeSignal<AriaStateValue<"aria-grabbed">>;
+    ariaGrabbed?: AriaProp<"aria-grabbed">;
     /** Indicates the availability and type of interactive popup element, such as menu or dialog, that can be triggered by an element. */
-    ariaHasPopup?: MaybeSignal<AriaValueFor<"aria-haspopup">>;
+    ariaHasPopup?: AriaProp<"aria-haspopup">;
     /** Indicates whether the element is exposed to an accessibility API. */
-    ariaHidden?: MaybeSignal<AriaStateValue<"aria-hidden">>;
+    ariaHidden?: AriaProp<"aria-hidden">;
     /** Indicates the entered value does not conform to the format expected by the application. */
-    ariaInvalid?: MaybeSignal<AriaStateValue<"aria-invalid">>;
+    ariaInvalid?: AriaProp<"aria-invalid">;
     /** Indicates keyboard shortcuts that an author has implemented to activate or give focus to an element. */
-    ariaKeyShortcuts?: MaybeSignal<AriaValueFor<"aria-keyshortcuts">>;
+    ariaKeyShortcuts?: AriaProp<"aria-keyshortcuts">;
     /** Defines a string value that labels the current element. */
-    ariaLabel?: MaybeSignal<AriaValueFor<"aria-label">>;
+    ariaLabel?: AriaProp<"aria-label">;
     /** Identifies the element (or elements) that labels the current element. */
-    ariaLabelledBy?: MaybeSignal<AriaValueFor<"aria-labelledby">>;
+    ariaLabelledBy?: AriaProp<"aria-labelledby">;
     /** Defines the hierarchical level of an element within a structure. */
-    ariaLevel?: MaybeSignal<AriaValueFor<"aria-level">>;
+    ariaLevel?: AriaProp<"aria-level">;
     /** Indicates that an element will be updated, and describes the types of updates the user agents, assistive technologies, and user can expect from the live region. */
-    ariaLive?: MaybeSignal<AriaValueFor<"aria-live">>;
+    ariaLive?: AriaProp<"aria-live">;
     /** Indicates whether an element is modal when displayed. */
-    ariaModal?: MaybeSignal<AriaValueFor<"aria-modal">>;
+    ariaModal?: AriaProp<"aria-modal">;
     /** Indicates whether a text box accepts multiple lines of input or only a single line. */
-    ariaMultiLine?: MaybeSignal<AriaValueFor<"aria-multiline">>;
+    ariaMultiLine?: AriaProp<"aria-multiline">;
     /** Indicates that the user may select more than one item from the current selectable descendants. */
-    ariaMultiSelectable?: MaybeSignal<AriaValueFor<"aria-multiselectable">>;
+    ariaMultiSelectable?: AriaProp<"aria-multiselectable">;
     /** Indicates whether the element's orientation is horizontal, vertical, or unknown/ambiguous. */
-    ariaOrientation?: MaybeSignal<AriaValueFor<"aria-orientation">>;
+    ariaOrientation?: AriaProp<"aria-orientation">;
     /** Identifies an element (or elements) in order to define a visual, functional, or contextual parent/child relationship between DOM elements where the DOM hierarchy cannot be used to represent the relationship. */
-    ariaOwns?: MaybeSignal<AriaValueFor<"aria-owns">>;
+    ariaOwns?: AriaProp<"aria-owns">;
     /** Defines a short hint (a word or short phrase) intended to aid the user with data entry when the control has no value. A hint could be a sample value or a brief description of the expected format. */
-    ariaPlaceholder?: MaybeSignal<AriaValueFor<"aria-placeholder">>;
+    ariaPlaceholder?: AriaProp<"aria-placeholder">;
     /** Defines an element's number or position in the current set of listitems or treeitems. Not required if all elements in the set are present in the DOM. */
-    ariaPosInSet?: MaybeSignal<AriaValueFor<"aria-posinset">>;
+    ariaPosInSet?: AriaProp<"aria-posinset">;
     /** Indicates the current "pressed" state of toggle buttons. */
-    ariaPressed?: MaybeSignal<AriaStateValue<"aria-pressed">>;
+    ariaPressed?: AriaProp<"aria-pressed">;
     /** Indicates that the element is not editable, but is otherwise operable. */
-    ariaReadOnly?: MaybeSignal<AriaValueFor<"aria-readonly">>;
+    ariaReadOnly?: AriaProp<"aria-readonly">;
     /** Indicates what notifications the user agent will trigger when the accessibility tree within a live region is modified. */
-    ariaRelevant?: MaybeSignal<AriaValueFor<"aria-relevant">>;
+    ariaRelevant?: AriaProp<"aria-relevant">;
     /** Indicates that user input is required on the element before a form may be submitted. */
-    ariaRequired?: MaybeSignal<AriaValueFor<"aria-required">>;
+    ariaRequired?: AriaProp<"aria-required">;
     /** Defines a human-readable, author-localized description for the role of an element. */
-    ariaRoleDescription?: MaybeSignal<AriaValueFor<"aria-roledescription">>;
+    ariaRoleDescription?: AriaProp<"aria-roledescription">;
     /** Defines the total number of rows in a table, grid, or treegrid. */
-    ariaRowCount?: MaybeSignal<AriaValueFor<"aria-rowcount">>;
+    ariaRowCount?: AriaProp<"aria-rowcount">;
     /** Defines an element's row index or position with respect to the total number of rows within a table, grid, or treegrid. */
-    ariaRowIndex?: MaybeSignal<AriaValueFor<"aria-rowindex">>;
+    ariaRowIndex?: AriaProp<"aria-rowindex">;
     /** Defines the number of rows spanned by a cell or gridcell within a table, grid, or treegrid. */
-    ariaRowSpan?: MaybeSignal<AriaValueFor<"aria-rowspan">>;
+    ariaRowSpan?: AriaProp<"aria-rowspan">;
     /** Indicates the current "selected" state of various widgets. */
-    ariaSelected?: MaybeSignal<AriaStateValue<"aria-selected">>;
+    ariaSelected?: AriaProp<"aria-selected">;
     /** Defines the number of items in the current set of listitems or treeitems. Not required if all elements in the set are present in the DOM. */
-    ariaSetSize?: MaybeSignal<AriaValueFor<"aria-setsize">>;
+    ariaSetSize?: AriaProp<"aria-setsize">;
     /** Indicates if items in a table or grid are sorted in ascending or descending order. */
-    ariaSort?: MaybeSignal<AriaValueFor<"aria-sort">>;
+    ariaSort?: AriaProp<"aria-sort">;
     /** Defines the maximum allowed value for a range widget. */
-    ariaValueMax?: MaybeSignal<AriaValueFor<"aria-valuemax">>;
+    ariaValueMax?: AriaProp<"aria-valuemax">;
     /** Defines the minimum allowed value for a range widget. */
-    ariaValueMin?: MaybeSignal<AriaValueFor<"aria-valuemin">>;
+    ariaValueMin?: AriaProp<"aria-valuemin">;
     /** Defines the current value for a range widget. */
-    ariaValueNow?: MaybeSignal<AriaValueFor<"aria-valuenow">>;
+    ariaValueNow?: AriaProp<"aria-valuenow">;
     /** Defines the human readable text alternative of aria-valuenow for a range widget. */
-    ariaValueText?: MaybeSignal<AriaValueFor<"aria-valuetext">>;
+    ariaValueText?: AriaProp<"aria-valuetext">;
+    /** Defines a string value that describes or annotates the current element. */
+    ariaDescription?: AriaProp<"aria-description">;
+    /** Defines a string value that labels the current element, intended to be converted into Braille. */
+    ariaBrailleLabel?: AriaProp<"aria-braillelabel">;
+    /** Defines a human-readable, author-localized abbreviated description for the role of an element, intended to be converted into Braille. */
+    ariaBrailleRoleDescription?: AriaProp<"aria-brailleroledescription">;
+    /** Defines a human readable text alternative of aria-colindex. */
+    ariaColIndexText?: AriaProp<"aria-colindextext">;
+    /** Defines a human readable text alternative of aria-rowindex. */
+    ariaRowIndexText?: AriaProp<"aria-rowindextext">;
 
     // Accessibility (Legacy)
     /** Indicates if the element can take input focus. */
@@ -223,8 +242,9 @@ export interface DataAttributes {
 }
 
 /**
- * Aria attributes - re-export placeholder for backward compatibility
+ * Kebab-case ARIA attributes ("aria-label", "aria-expanded", ...), typed from
+ * the same value maps as the camelCase props
  */
-export interface AriaAttributes {
-    // Intentionally empty - ARIA attributes are in GlobalAttributes
+export interface AriaAttributes extends AriaKebabAttributes {
+    // camelCase forms (ariaLabel, ...) live in GlobalAttributes
 }

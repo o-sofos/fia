@@ -665,9 +665,17 @@ describe("ARIA attributes", () => {
     });
 
     it("serializes boolean ARIA values instead of removing them", () => {
-        const el = div({ "aria-hidden": false, "aria-busy": true } as never);
+        const el = div({ "aria-hidden": false, "aria-busy": true });
         expect(el.getAttribute("aria-hidden")).toBe("false");
         expect(el.getAttribute("aria-busy")).toBe("true");
+    });
+
+    it("binds boolean signals to kebab-case ARIA attributes", () => {
+        const open = $(Mut(false));
+        const el = button({ "aria-expanded": open });
+        expect(el.getAttribute("aria-expanded")).toBe("false");
+        open.value = true;
+        expect(el.getAttribute("aria-expanded")).toBe("true");
     });
 
     it("leaves non-ARIA attributes alone", () => {

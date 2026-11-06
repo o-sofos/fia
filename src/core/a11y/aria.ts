@@ -1,3 +1,5 @@
+import type { Signal } from "../reactivity/reactivity.ts";
+
 export type AccessibilityOptions =
 	| { __type: "role"; role: AriaRole }
 	| { __type: "state"; state: AriaState; value: AriaStateValue<AriaState> }
@@ -62,7 +64,7 @@ interface AriaPropertyValueMap {
 	"aria-haspopup": AriaHasPopupValue;
 	"aria-live": "off" | "polite" | "assertive";
 	"aria-orientation": "horizontal" | "vertical" | "undefined";
-	"aria-relevant": "additions" | "removals" | "text" | "all" | "additions text";
+	"aria-relevant": AriaRelevant;
 	"aria-sort": "none" | "ascending" | "descending" | "other";
 
 	// Numeric (integers)
@@ -87,7 +89,19 @@ interface AriaPropertyValueMap {
 	"aria-keyshortcuts": string;
 	"aria-roledescription": string;
 	"aria-placeholder": string;
+	"aria-description": string;
+	"aria-braillelabel": string;
+	"aria-brailleroledescription": string;
+	"aria-colindextext": string;
+	"aria-rowindextext": string;
 }
+
+type AriaRelevantToken = "additions" | "removals" | "text";
+/** `all`, or one to three distinct space-separated tokens */
+type AriaRelevant =
+	| "all"
+	| AriaRelevantToken
+	| { [A in AriaRelevantToken]: { [B in Exclude<AriaRelevantToken, A>]: `${A} ${B}` | `${A} ${B} ${Exclude<AriaRelevantToken, A | B>}` }[Exclude<AriaRelevantToken, A>] }[AriaRelevantToken];
 
 // Derive the union type from the map keys
 export type AriaProperty = keyof AriaPropertyValueMap;
@@ -102,6 +116,28 @@ export type AriaValueFor<P extends AriaProperty> = AriaPropertyValueMap[P];
 // Type-safe getter for state values
 export type AriaStateValueFor<S extends AriaState> = AriaStateValueMap[S];
 export type AriaStateValue<S extends AriaState> = AriaStateValueMap[S];
+
+/** Every ARIA attribute (states and properties) */
+export type AriaAttributeName = AriaProperty | AriaState;
+
+/** Value type of any ARIA attribute */
+export type AriaAttributeValue<N extends AriaAttributeName> = N extends AriaState
+	? AriaStateValueMap[N]
+	: N extends AriaProperty
+	? AriaPropertyValueMap[N]
+	: never;
+
+/**
+ * What a prop accepts for an ARIA attribute: its string tokens, plus a plain
+ * boolean wherever the tokens include "true" and "false" (serialized as such —
+ * an ARIA "false" is not the same as the attribute being absent).
+ */
+export type AriaInput<V> = V | ("true" extends V ? ("false" extends V ? boolean : never) : never);
+
+/** Kebab-case ARIA props: `"aria-label"`, `"aria-expanded"`, ... */
+export type AriaKebabAttributes = {
+	[N in AriaAttributeName]?: AriaInput<AriaAttributeValue<N>> | Signal<AriaInput<AriaAttributeValue<N>>>;
+};
 
 // Type-safe ARIA attributes object
 export type AriaAttributes = {
