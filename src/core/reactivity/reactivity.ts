@@ -11,17 +11,36 @@
 /** Effect function type */
 type EffectFn = () => void;
 
-/** Reactive node that can be subscribed to */
+/**
+ * Reactive node that can be subscribed to.
+ *
+ * `version` changes only when the node's value actually changes, so a
+ * subscriber can tell "a dependency was touched" from "a dependency changed".
+ */
 interface ReactiveNode {
   version: number;
   subs: Subscriber[];
+  /** Computed nodes only: bring the cached value up to date (may bump version). */
+  refresh?: () => void;
 }
 
-/** Subscriber that tracks its dependencies */
+/**
+ * Subscriber that tracks its dependencies.
+ *
+ * Updates are two-phase (push dirtiness, pull values):
+ * 1. A write calls `notify` down the graph. Computeds mark themselves stale and
+ *    forward; effects enqueue themselves. No user code runs in this phase.
+ * 2. `flush` runs queued effects. Each one first re-validates its deps, pulling
+ *    stale computeds up to date, and only re-runs if a dep version moved.
+ *
+ * This gives glitch-free diamonds, equality cut-off through computeds, and
+ * correct computed reads inside `batch`.
+ */
 interface Subscriber {
-  execute: () => void;
+  notify: () => void;
   deps: ReactiveNode[];
-  cleanup: () => void;
+  /** Version of each dep when it was read (parallel to `deps`). */
+  depVersions: number[];
 }
 
 /** Current tracking context */
@@ -32,20 +51,21 @@ let globalVersion = 0;
 
 /** Batch update state */
 let batchDepth = 0;
-let pendingEffects: Subscriber[] | undefined = undefined;
+
+/** Effects waiting to re-validate and possibly re-run */
+const effectQueue: (() => void)[] = [];
+let flushing = false;
 
 /**
  * Track a dependency - called when reading a reactive value
  */
 function track(node: ReactiveNode): void {
-  if (activeSubscriber) {
-    // Add subscriber if not already present (avoid duplicates)
-    if (!node.subs.includes(activeSubscriber)) {
-      node.subs.push(activeSubscriber);
-    }
-    if (!activeSubscriber.deps.includes(node)) {
-      activeSubscriber.deps.push(node);
-    }
+  const sub = activeSubscriber;
+  // deps and subs are kept symmetric, so one membership check covers both
+  if (sub && !sub.deps.includes(node)) {
+    sub.deps.push(node);
+    sub.depVersions.push(node.version);
+    node.subs.push(sub);
   }
 }
 
@@ -55,19 +75,56 @@ function track(node: ReactiveNode): void {
 function trigger(node: ReactiveNode): void {
   node.version = ++globalVersion;
 
-  // Copy subscribers to avoid mutation during iteration
-  const subs = [...node.subs];
+  // notify() never runs user code or touches subs lists, so no copy is needed
+  const subs = node.subs;
+  for (let i = 0; i < subs.length; i++) {
+    subs[i].notify();
+  }
 
-  for (const sub of subs) {
-    if (batchDepth > 0) {
-      if (!pendingEffects) pendingEffects = [];
-      if (!pendingEffects.includes(sub)) {
-        pendingEffects.push(sub);
+  if (batchDepth === 0) flush();
+}
+
+/**
+ * Run queued effects. Effects queued while flushing (writes made by effects)
+ * are picked up by the same loop. An effect error doesn't strand the rest of
+ * the queue — the first error is rethrown once everything has run.
+ */
+function flush(): void {
+  if (flushing) return;
+  flushing = true;
+
+  let error: unknown;
+  let failed = false;
+  for (let i = 0; i < effectQueue.length; i++) {
+    try {
+      effectQueue[i]();
+    } catch (e) {
+      if (!failed) {
+        failed = true;
+        error = e;
       }
-    } else {
-      sub.execute();
     }
   }
+  effectQueue.length = 0;
+  flushing = false;
+
+  if (failed) throw error;
+}
+
+/**
+ * Whether any dependency changed since the subscriber last ran.
+ * Pulls stale computed deps up to date first, so a computed that recomputes
+ * to the same value doesn't count as a change.
+ */
+function depsChanged(sub: Subscriber): boolean {
+  const deps = sub.deps;
+  const versions = sub.depVersions;
+  for (let i = 0; i < deps.length; i++) {
+    const dep = deps[i];
+    if (dep.refresh) dep.refresh();
+    if (dep.version !== versions[i]) return true;
+  }
+  return false;
 }
 
 /**
@@ -83,6 +140,7 @@ function cleanupSubscriber(sub: Subscriber): void {
     }
   }
   sub.deps.length = 0;
+  sub.depVersions.length = 0;
 }
 
 /**
@@ -104,15 +162,7 @@ export function batch(fn: () => void): void {
   try {
     fn();
   } finally {
-    batchDepth--;
-    if (batchDepth === 0 && pendingEffects) {
-      const effects = pendingEffects;
-      pendingEffects = undefined;
-
-      for (const sub of effects) {
-        sub.execute();
-      }
-    }
+    if (--batchDepth === 0) flush();
   }
 }
 
@@ -131,35 +181,46 @@ export function batch(fn: () => void): void {
  */
 export function $e(fn: EffectFn): () => void {
   let active = true;
+  let queued = false;
 
   const subscriber: Subscriber = {
-    execute() {
-      if (!active) return;
-
-      // Clean up old dependencies before re-running
-      // This ensures conditional branches don't leave stale subscriptions
-      cleanupSubscriber(subscriber);
-
-      const prevSubscriber = activeSubscriber;
-      activeSubscriber = subscriber;
-      try {
-        fn();
-      } finally {
-        activeSubscriber = prevSubscriber;
+    notify() {
+      if (active && !queued) {
+        queued = true;
+        effectQueue.push(validate);
       }
     },
     deps: [],
-    cleanup() {
-      active = false;
-      cleanupSubscriber(subscriber);
-    },
+    depVersions: [],
   };
 
+  function run(): void {
+    // Clean up old dependencies before re-running
+    // This ensures conditional branches don't leave stale subscriptions
+    cleanupSubscriber(subscriber);
+
+    const prevSubscriber = activeSubscriber;
+    activeSubscriber = subscriber;
+    try {
+      fn();
+    } finally {
+      activeSubscriber = prevSubscriber;
+    }
+  }
+
+  function validate(): void {
+    queued = false;
+    if (active && depsChanged(subscriber)) run();
+  }
+
   // Run immediately to establish initial dependencies
-  subscriber.execute();
+  run();
 
   // Return dispose function
-  return () => subscriber.cleanup();
+  return () => {
+    active = false;
+    cleanupSubscriber(subscriber);
+  };
 }
 
 /**
@@ -263,7 +324,7 @@ export interface WritableSignal<T> extends Signal<T> {
  */
 function createSignal<T>(initial: T, readonly: boolean = false): Signal<T> | WritableSignal<T> {
   const node: ReactiveNode = {
-    version: globalVersion,
+    version: 0,
     subs: [],
   };
 
@@ -314,68 +375,69 @@ function createSignal<T>(initial: T, readonly: boolean = false): Signal<T> | Wri
 
 /**
  * Create a computed signal
- * Uses version-based dirty checking (inspired by Preact Signals)
+ * Uses version-based dirty checking (inspired by Preact Signals): a stale
+ * computed only recomputes if a dependency's version moved, and only bumps
+ * its own version if the result actually changed.
  */
 function createComputed<T>(compute: () => T): Signal<T> {
-  const node: ReactiveNode = {
-    version: globalVersion,
-    subs: [],
-  };
-
   let currentValue: T;
-  let lastComputedVersion = -1;
+  let initialized = false;
+  /** A dependency was notified since the last refresh */
+  let stale = true;
+
+  const node: ReactiveNode = {
+    version: 0,
+    subs: [],
+    refresh,
+  };
 
   // Internal subscriber for tracking compute dependencies
   const subscriber: Subscriber = {
-    execute() {
-      // Mark as dirty - will recompute on next read
-      // This is called when any dependency changes
-      node.version = ++globalVersion;
-
-      // Propagate to our subscribers
-      const subs = [...node.subs];
-      for (const sub of subs) {
-        if (batchDepth > 0) {
-          if (!pendingEffects) pendingEffects = [];
-          if (!pendingEffects.includes(sub)) {
-            pendingEffects.push(sub);
-          }
-        } else {
-          sub.execute();
-        }
+    notify() {
+      // Already stale → our subscribers were already notified
+      if (stale) return;
+      stale = true;
+      const subs = node.subs;
+      for (let i = 0; i < subs.length; i++) {
+        subs[i].notify();
       }
     },
     deps: [],
-    cleanup() {
-      cleanupSubscriber(subscriber);
-    },
+    depVersions: [],
   };
 
-  const recompute = () => {
+  function refresh(): void {
+    if (!stale) return;
+    stale = false;
+    if (initialized && !depsChanged(subscriber)) return;
+
     // Clean up old dependencies
     cleanupSubscriber(subscriber);
 
     const prevSubscriber = activeSubscriber;
     activeSubscriber = subscriber;
+    let newValue: T;
     try {
-      const newValue = compute();
-      if (!Object.is(currentValue, newValue)) {
-        currentValue = newValue;
-      }
-      lastComputedVersion = node.version;
+      newValue = compute();
+    } catch (e) {
+      stale = true; // retry on next read
+      throw e;
     } finally {
       activeSubscriber = prevSubscriber;
     }
-  };
+
+    if (!initialized || !Object.is(currentValue, newValue)) {
+      currentValue = newValue;
+      initialized = true;
+      node.version = ++globalVersion;
+    }
+  }
 
   // Initial computation
-  recompute();
+  refresh();
 
   const signal = function (): T {
-    // Recompute if dirty (version changed since last compute)
-    if (lastComputedVersion !== node.version) {
-      recompute();
-    }
+    refresh();
 
     // Track this computed as a dependency
     track(node);
@@ -393,9 +455,7 @@ function createComputed<T>(compute: () => T): Signal<T> {
 
   // Peek without tracking
   signal.peek = () => {
-    if (lastComputedVersion !== node.version) {
-      recompute();
-    }
+    refresh();
     return currentValue as Readable<T>;
   };
 
