@@ -1,6 +1,6 @@
 import { GlobalRegistrator } from "@happy-dom/global-registrator";
 import { describe, it, expect, beforeEach } from "bun:test";
-import { div, button, input, h1, span, a, p, ul, li, label, img, strong, summary, option, td, code } from "./elements";
+import { div, button, input, h1, span, a, p, ul, li, label, img, strong, summary, option, td, code, applyStyle } from "./elements";
 import { $, Mut } from "../reactivity/reactivity";
 import { hasExecutionContext, popExecutionContext } from "../context/context";
 
@@ -576,6 +576,21 @@ describe("Style: number lengths and custom properties", () => {
         document.body.innerHTML = "";
     });
 
+    /**
+     * happy-dom silently drops properties it doesn't implement (vendor ones,
+     * tab-size, ...), so capture exactly what applyStyle hands the style object.
+     */
+    const captureStyle = (value: Record<string, unknown>) => {
+        const set: Record<string, string> = {};
+        const style = new Proxy({} as Record<string, unknown>, {
+            get: (_t, k) =>
+                k === "setProperty" ? (p: string, v: string) => (set[p] = v) : undefined,
+            set: (_t, k, v) => ((set[String(k)] = v), true),
+        });
+        applyStyle({ style } as unknown as HTMLElement, value);
+        return set;
+    };
+
     it("auto-suffixes px for length numbers", () => {
         const el = div({ style: { width: 300, marginTop: 8 } });
         expect(el.style.width).toBe("300px");
@@ -587,6 +602,12 @@ describe("Style: number lengths and custom properties", () => {
         expect(el.style.opacity).toBe("0.5");
         expect(el.style.zIndex).toBe("3");
         expect(el.style.flexGrow).toBe("1");
+    });
+
+    it("sets vendor-prefixed properties with a leading dash", () => {
+        const set = captureStyle({ webkitLineClamp: "3", mozAppearance: "none" });
+        expect(set["-webkit-line-clamp"]).toBe("3");
+        expect(set["-moz-appearance"]).toBe("none");
     });
 
     it("sets custom properties via setProperty", () => {

@@ -692,7 +692,8 @@ export function setStyleProperty(
   // need kebab-case conversion. The prefix must be followed by an uppercase letter
   // so standard properties like "opacity", "order" or "outline" don't match.
   if (/^(webkit|moz|ms|o)[A-Z]/.test(property)) {
-    const kebabProp = property.replace(/([A-Z])/g, "-$1").toLowerCase();
+    // webkitLineClamp → -webkit-line-clamp (the leading dash is required)
+    const kebabProp = "-" + property.replace(/([A-Z])/g, "-$1").toLowerCase();
     style.setProperty(kebabProp, value);
     return;
   }
