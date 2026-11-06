@@ -264,6 +264,22 @@ button("Save", { style: { colr: "red" } });
 // @ts-expect-error - colr is not a CSS property
 img({ src: "a.png", style: { colr: "red" } });
 
+// Test 25: Logical properties are typed as lengths (numbers auto-px)
+div({
+  style: {
+    inset: 0,
+    insetInlineStart: 8,
+    blockSize: "50vh",
+    maxInlineSize: 640,
+    borderBlockEndWidth: 1,
+    borderBlockEndStyle: "solid",
+    borderInlineStartColor: "red",
+    borderStartEndRadius: 4,
+  },
+});
+// @ts-expect-error - not a border style
+div({ style: { borderBlockStyle: "wavy" } });
+
 // Test 24: String, signal and custom-property styles are still accepted
 div({ style: "color: red" });
 div({ style: $(() => "color: red") });

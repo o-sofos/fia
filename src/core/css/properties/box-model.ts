@@ -10,6 +10,12 @@ export interface BoxModelProperties {
     maxWidth?: CSSLength;
     minHeight?: CSSLength;
     maxHeight?: CSSLength;
+    blockSize?: CSSLength;
+    minBlockSize?: CSSLength;
+    maxBlockSize?: CSSLength;
+    inlineSize?: CSSLength;
+    minInlineSize?: CSSLength;
+    maxInlineSize?: CSSLength;
     margin?: CSSLength;
     marginTop?: CSSLength;
     marginRight?: CSSLength;

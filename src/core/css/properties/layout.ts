@@ -26,6 +26,13 @@ export interface LayoutProperties {
     right?: CSSLength;
     bottom?: CSSLength;
     left?: CSSLength;
+    inset?: CSSLength;
+    insetBlock?: CSSLength;
+    insetBlockStart?: CSSLength;
+    insetBlockEnd?: CSSLength;
+    insetInline?: CSSLength;
+    insetInlineStart?: CSSLength;
+    insetInlineEnd?: CSSLength;
     zIndex?: CSSZIndex;
     float?: CSSFloat;
     clear?: CSSClear;
