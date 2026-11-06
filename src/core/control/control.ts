@@ -11,6 +11,7 @@ import {
   disposeOwner,
   onCleanup,
   runWithOwner,
+  untrack,
   type Owner,
   type Signal,
 } from "../reactivity/reactivity";
@@ -22,7 +23,8 @@ import {
 
 /**
  * Reactive conditional rendering.
- * Re-renders when the condition signal changes.
+ * Swaps branches only when the condition flips between truthy and falsy;
+ * reads inside a branch update through their own bindings, not a re-render.
  *
  * @example
  * Show(() => data.loading, {
@@ -47,7 +49,12 @@ export function Show(
   const thenFn = typeof options === "function" ? options : options.then;
   const elseFn = typeof options === "function" ? undefined : options.else;
 
+  // Only a flip of truthiness swaps branches, not every re-evaluation
+  const condition = $(() => !!when());
+
   $e(() => {
+    const branch = condition.value ? thenFn : elseFn;
+
     // Clear previous nodes
     for (const node of currentNodes) {
       node.parentNode?.removeChild(node);
@@ -59,11 +66,8 @@ export function Show(
     pushExecutionContext(frag);
 
     try {
-      if (when()) {
-        thenFn();
-      } else if (elseFn) {
-        elseFn();
-      }
+      // Reads inside the branch belong to its own bindings, not to Show
+      if (branch) untrack(branch);
     } finally {
       popExecutionContext();
     }
@@ -224,7 +228,7 @@ export function Each<T>(
 
         try {
           const index = i;
-          runWithOwner(owner, () => render(item, index));
+          runWithOwner(owner, () => untrack(() => render(item, index)));
         } finally {
           popExecutionContext();
         }
@@ -433,19 +437,14 @@ export function Match<T, R = void>(
   const getter =
     typeof when === "function" ? when : () => (when as Signal<T>).value;
 
-  $e(() => {
-    // Clear previous nodes
-    for (const node of currentNodes) {
-      node.parentNode?.removeChild(node);
-    }
-    currentNodes = [];
-
+  // Select the arm in a computed so the view only re-renders when the
+  // matched arm changes, not on every new value within the same arm
+  const selected = $(() => {
     const value = getter();
-    const key = String(value);
 
     // Find matching handler:
     // 1. Try exact string match first (backward compatible)
-    let handler = cases[key];
+    let handler = cases[String(value)];
 
     // 2. If no exact match and value is numeric, try pattern matching
     if (!handler && typeof value === "number") {
@@ -458,9 +457,17 @@ export function Match<T, R = void>(
     }
 
     // 3. Fall back to default case
-    if (!handler) {
-      handler = cases._;
+    return handler ?? cases._;
+  });
+
+  $e(() => {
+    const handler = selected.value;
+
+    // Clear previous nodes
+    for (const node of currentNodes) {
+      node.parentNode?.removeChild(node);
     }
+    currentNodes = [];
 
     if (handler) {
       const frag = document.createDocumentFragment();
@@ -468,7 +475,8 @@ export function Match<T, R = void>(
 
       let result: R;
       try {
-        result = handler();
+        // Reads inside the arm belong to its own bindings, not to Match
+        result = untrack(handler);
       } finally {
         popExecutionContext();
       }

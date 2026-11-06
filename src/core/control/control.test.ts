@@ -46,9 +46,63 @@ describe("Show", () => {
         count.value++;
         expect(branchRuns).toBe(before);
     });
+
+    test("keeps the branch DOM while the condition stays truthy", () => {
+        const n = $(Mut(1));
+        let renders = 0;
+        Show(
+            () => n.value > 0,
+            () => {
+                renders++;
+                p("positive");
+            },
+        );
+
+        const node = document.querySelector("p");
+        n.value = 2;
+        n.value = 3;
+        expect(renders).toBe(1);
+        expect(document.querySelector("p")).toBe(node);
+    });
+
+    test("reads inside a branch don't re-render it", () => {
+        const name = $(Mut("a"));
+        let renders = 0;
+        Show(
+            () => true,
+            () => {
+                renders++;
+                p(`hello ${name.value}`);
+            },
+        );
+
+        name.value = "b";
+        expect(renders).toBe(1);
+    });
 });
 
 describe("Each", () => {
+    test("reads inside an item render don't re-run the list", () => {
+        const items = $(Mut({ list: [1, 2] }));
+        const tick = $(Mut(0));
+        let keyCalls = 0;
+
+        Each(
+            () => items.list,
+            (item) => {
+                p(`${item}-${tick.value}`);
+            },
+            (item) => {
+                keyCalls++;
+                return item;
+            },
+        );
+
+        expect(keyCalls).toBe(2);
+        tick.value++;
+        expect(keyCalls).toBe(2);
+    });
+
     test("disposes bindings of removed items only", () => {
         const items = $(Mut({ list: [{ id: 1 }, { id: 2 }, { id: 3 }] }));
         const tick = $(Mut(0));
@@ -141,5 +195,43 @@ describe("Match", () => {
         const before = armRuns;
         count.value++;
         expect(armRuns).toBe(before);
+    });
+
+    test("only re-renders when the matched arm changes", () => {
+        const age = $(Mut(20));
+        let adultRenders = 0;
+
+        const label = Match(() => age.value, {
+            "<18": () => "minor",
+            "[18..65)": () => {
+                adultRenders++;
+                return "adult";
+            },
+            _: () => "senior",
+        });
+
+        age.value = 30;
+        age.value = 40;
+        expect(adultRenders).toBe(1);
+        expect(label.value).toBe("adult");
+
+        age.value = 70;
+        expect(label.value).toBe("senior");
+    });
+
+    test("reads inside an arm don't re-render it", () => {
+        const status = $(Mut("a"));
+        const name = $(Mut("x"));
+        let renders = 0;
+
+        Match(() => status.value, {
+            a: () => {
+                renders++;
+                span(name.value);
+            },
+        });
+
+        name.value = "y";
+        expect(renders).toBe(1);
     });
 });
