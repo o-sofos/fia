@@ -612,6 +612,14 @@ describe("Style: number lengths and custom properties", () => {
         expect(set.inset).toBe("0px");
     });
 
+    it("serializes individual transforms and svg numbers", () => {
+        const set = captureStyle({ translate: 10, scale: 1.5, strokeWidth: 2, strokeMiterlimit: 4 });
+        expect(set.translate).toBe("10px");
+        expect(set.scale).toBe("1.5");
+        expect(set.strokeWidth).toBe("2px");
+        expect(set.strokeMiterlimit).toBe("4");
+    });
+
     it("sets vendor-prefixed properties with a leading dash", () => {
         const set = captureStyle({ webkitLineClamp: "3", mozAppearance: "none" });
         expect(set["-webkit-line-clamp"]).toBe("3");

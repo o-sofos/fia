@@ -251,6 +251,23 @@ export type CSSBoxShadow =
 
 export type CSSOpacity = CSSGlobalValues | number | (string & {});
 
+/** SVG paint: a color, `none`, a paint server reference, or the context paint */
+export type CSSPaint = CSSColor | "none" | "context-fill" | "context-stroke" | `url(${string})`;
+
+export type CSSBasicShape =
+    | `inset(${string})` | `circle(${string})` | `ellipse(${string})`
+    | `polygon(${string})` | `path(${string})` | `rect(${string})` | `xywh(${string})` | `shape(${string})`;
+
+export type CSSGeometryBox =
+    | "border-box" | "padding-box" | "content-box" | "margin-box"
+    | "fill-box" | "stroke-box" | "view-box";
+
+export type CSSClipPath =
+    | "none" | `url(${string})` | CSSBasicShape | CSSGeometryBox
+    | CSSGlobalValues | (string & {});
+
+export type CSSFillRule = "nonzero" | "evenodd" | CSSGlobalValues;
+
 export interface VisualProperties {
     // Background
     background?: string;
@@ -332,6 +349,47 @@ export interface VisualProperties {
     objectPosition?: CSSObjectPosition;
 
     // Filters & Effects
+    // Clipping & masking
+    clipPath?: CSSClipPath;
+    mask?: string;
+    maskImage?: "none" | `url(${string})` | `${string}gradient(${string})` | CSSGlobalValues | (string & {});
+    maskMode?: "alpha" | "luminance" | "match-source" | CSSGlobalValues;
+    maskRepeat?: CSSBackgroundRepeat;
+    maskPosition?: CSSBackgroundPosition;
+    maskSize?: CSSBackgroundSize;
+    maskClip?: CSSGeometryBox | "no-clip" | CSSGlobalValues;
+    maskOrigin?: CSSGeometryBox | CSSGlobalValues;
+    maskComposite?: "add" | "subtract" | "intersect" | "exclude" | CSSGlobalValues;
+
+    // SVG paint (presentation properties settable via style)
+    fill?: CSSPaint;
+    fillOpacity?: CSSOpacity;
+    fillRule?: CSSFillRule;
+    clipRule?: CSSFillRule;
+    stroke?: CSSPaint;
+    strokeOpacity?: CSSOpacity;
+    strokeWidth?: CSSLength;
+    strokeLinecap?: "butt" | "round" | "square" | CSSGlobalValues;
+    strokeLinejoin?: "miter" | "round" | "bevel" | "miter-clip" | "arcs" | CSSGlobalValues;
+    strokeMiterlimit?: number | CSSGlobalValues;
+    /** `none`, or a dash/gap list. Bare numbers are user units (unitless). */
+    strokeDasharray?: "none" | number | CSSGlobalValues | (string & {});
+    /** Bare numbers are user units (unitless). */
+    strokeDashoffset?: number | CSSLength;
+    paintOrder?: "normal" | "fill" | "stroke" | "markers" | CSSGlobalValues | (string & {});
+    vectorEffect?: "none" | "non-scaling-stroke" | CSSGlobalValues;
+    stopColor?: CSSColor;
+    stopOpacity?: CSSOpacity;
+    floodColor?: CSSColor;
+    floodOpacity?: CSSOpacity;
+    lightingColor?: CSSColor;
+    shapeRendering?: "auto" | "optimizeSpeed" | "crispEdges" | "geometricPrecision" | CSSGlobalValues;
+    textAnchor?: "start" | "middle" | "end" | CSSGlobalValues;
+    dominantBaseline?:
+        | "auto" | "text-bottom" | "alphabetic" | "ideographic" | "middle"
+        | "central" | "mathematical" | "hanging" | "text-top"
+        | CSSGlobalValues;
+
     filter?: CSSFilter;
     backdropFilter?: CSSFilter;
     mixBlendMode?: CSSMixBlendMode;

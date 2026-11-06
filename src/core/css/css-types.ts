@@ -104,12 +104,18 @@ export type {
     CSSMixBlendMode,
     CSSBoxShadow,
     CSSOpacity,
+    CSSPaint,
+    CSSBasicShape,
+    CSSGeometryBox,
+    CSSClipPath,
+    CSSFillRule,
     VisualProperties
 } from "./properties/visual.ts";
 
 // Transform & Animation
 export type {
     CSSTransform,
+    CSSAngle,
     CSSTransformOrigin,
     CSSTransitionTimingFunction,
     CSSAnimationDirection,

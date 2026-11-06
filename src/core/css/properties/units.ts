@@ -17,3 +17,7 @@ export type CSSLength =
     | (string & {}); // Allows widened strings while preserving autocomplete
 
 export type CSSZIndex = "auto" | CSSGlobalValues | number | (string & {});
+
+export type CSSAngleUnit = "deg" | "rad" | "grad" | "turn";
+
+export type CSSAngle = "0" | `${number}${CSSAngleUnit}` | `calc(${string})` | `var(--${string})`;

@@ -339,6 +339,32 @@ div({ style: { containerType: "block-size" } });
 // @ts-expect-error - not a color scheme
 div({ style: { colorScheme: "dim" } });
 
+// Test 29: Individual transforms
+div({ style: { translate: 10, rotate: "45deg", scale: 1.5 } });
+div({ style: { translate: "10px 20%", rotate: "x 90deg", scale: "2 0.5" } });
+// @ts-expect-error - an angle needs a unit (bare numbers would become px)
+div({ style: { rotate: 45 } });
+
+// Test 30: SVG paint and clipping
+div({
+  style: {
+    fill: "none",
+    stroke: "url(#grad)",
+    strokeWidth: 2,
+    strokeLinecap: "round",
+    strokeDasharray: "4 2",
+    fillOpacity: 0.5,
+    fillRule: "evenodd",
+    clipPath: "circle(50% at center)",
+    maskImage: "linear-gradient(black, transparent)",
+    maskMode: "luminance",
+  },
+});
+// @ts-expect-error - not a line cap
+div({ style: { strokeLinecap: "pointy" } });
+// @ts-expect-error - not a fill rule
+div({ style: { fillRule: "oddeven" } });
+
 // Test 24: String, signal and custom-property styles are still accepted
 div({ style: "color: red" });
 div({ style: $(() => "color: red") });
