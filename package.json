@@ -20,6 +20,8 @@
   "scripts": {
     "dev": "bun run dev.ts",
     "test": "bun test src/core src/testing",
+    "test:coverage": "bun run scripts/coverage-gate.ts",
+    "test:fuzz": "FIA_FUZZ_SCALE=20 bun test src/core --test-name-pattern property",
     "test:types": "bun tsc --noEmit && bun tsc --noEmit -p tsconfig.tests.json",
     "benchmark": "bun run scripts/benchmark.ts",
     "build:docs": "bun build ./src/docs/main.ts --outdir ./docs --minify",
