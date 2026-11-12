@@ -1,0 +1,22 @@
+[
+  {
+    "name": "full",
+    "entry": "src/core/mod.ts",
+    "gzip": 5813
+  },
+  {
+    "name": "signals-only",
+    "entry": "scripts/test-bundles/signals-only.ts",
+    "gzip": 1932
+  },
+  {
+    "name": "elements-only",
+    "entry": "scripts/test-bundles/elements-only.ts",
+    "gzip": 4984
+  },
+  {
+    "name": "hello-world",
+    "entry": "scripts/test-bundles/hello-world.ts",
+    "gzip": 4968
+  }
+]
