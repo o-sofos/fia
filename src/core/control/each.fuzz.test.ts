@@ -16,8 +16,8 @@
 
 import { describe, test } from "bun:test";
 import { $, batch, Mut, onCleanup, type WritableSignal } from "../reactivity/reactivity";
-import { li, ul } from "../elements/elements";
-import { Each } from "./control";
+import { li, span, ul } from "../elements/elements";
+import { Each, Show } from "./control";
 import { checkProperty, render, shrinkArray, trackLeaks, type Rng } from "../../testing/mod";
 
 type Mode = "signal" | "keyFn" | "store";
@@ -35,7 +35,9 @@ type Op =
     | { t: "filter"; mask: number }
     | { t: "readd"; which: number; at: number }
     | { t: "clone"; at: number }
-    | { t: "relabel"; at: number };
+    | { t: "relabel"; at: number }
+    /** Flip a top-level Show inside every item (nested block extents) */
+    | { t: "marks" };
 
 interface Case {
     mode: Mode;
@@ -67,6 +69,7 @@ function genCase(r: Rng): Case {
                 [2, () => ({ t: "readd", which: pos(), at: pos() })],
                 [1, () => ({ t: "clone", at: pos() })],
                 [2, () => ({ t: "relabel", at: pos() })],
+                [2, () => ({ t: "marks" })],
             ])(),
         ),
     };
@@ -83,6 +86,8 @@ function check(c: Case): void {
     // Bookkeeping filled in by the render function
     const liveRenders = new Map<Item, number>();
     const nodeOf = new Map<Item, Element>();
+
+    const marks = $(Mut(false));
 
     // Reactive source per mode
     const version = $(Mut(0));
@@ -111,6 +116,8 @@ function check(c: Case): void {
                         else liveRenders.set(it, n);
                     });
                     nodeOf.set(it, li(item.label));
+                    // Top-level nested block: its nodes appear after render
+                    Show(() => marks.value, () => span({ class: "mark", textContent: `#${it.id}` }));
                 },
                 c.mode === "keyFn" ? (item) => raw(item).id : undefined,
             ),
@@ -131,17 +138,30 @@ function check(c: Case): void {
     const ul_ = view.get("ul");
     let prevNodes = new Map<Item, Element>();
     const verify = (where: string) => {
-        const lis = Array.from(ul_.children);
+        const lis = Array.from(ul_.children).filter((el) => el.tagName === "LI");
         const expectedText = model.map((m) => m.label.peek());
         const actualText = lis.map((el) => el.textContent);
         if (JSON.stringify(actualText) !== JSON.stringify(expectedText)) {
             throw new Error(`${where}: DOM ${JSON.stringify(actualText)} != model ${JSON.stringify(expectedText)}`);
         }
-        // Only the Each anchor comment besides the <li>s
+        // Each's two markers plus two per item (its Show), nothing else
         const stray = Array.from(ul_.childNodes).filter((n) => n.nodeType !== 1 && n.nodeType !== 8);
         const comments = Array.from(ul_.childNodes).filter((n) => n.nodeType === 8);
-        if (stray.length > 0 || comments.length !== 1) {
+        if (stray.length > 0 || comments.length !== 2 + 2 * model.length) {
             throw new Error(`${where}: stray nodes in list: ${ul_.innerHTML}`);
+        }
+        const markEls = ul_.querySelectorAll("span.mark");
+        if (markEls.length !== (marks.peek() ? model.length : 0)) {
+            throw new Error(`${where}: ${markEls.length} marks for ${model.length} items (marks ${marks.peek() ? "on" : "off"}): ${ul_.innerHTML}`);
+        }
+        if (marks.peek()) {
+            for (let i = 0; i < model.length; i++) {
+                // li, <!--Show-->, span.mark, <!--/Show-->
+                const mark = lis[i].nextSibling?.nextSibling as Element | null;
+                if (mark?.textContent !== `#${model[i].id}`) {
+                    throw new Error(`${where}: item ${model[i].id}'s mark is "${mark?.textContent}" (nested Show didn't move with its item)`);
+                }
+            }
         }
         for (let i = 0; i < model.length; i++) {
             const item = model[i];
@@ -226,6 +246,10 @@ function check(c: Case): void {
                     drop(next.splice(at, 1, make(next[at].id)));
                 }
                 break;
+            case "marks":
+                marks.value = !marks.value;
+                verify(where);
+                continue;
             case "relabel":
                 if (n) {
                     const item = next[op.at % n];

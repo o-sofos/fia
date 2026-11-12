@@ -21,6 +21,92 @@ import {
   getCurrentExecutionContext,
 } from "../context/context";
 
+// =============================================================================
+// Regions
+// =============================================================================
+
+/**
+ * A control-flow block owns the nodes between a start and an end comment.
+ * Tracking a live range (not a list of nodes captured at render time) keeps
+ * nesting correct: a Show/Each/Match at the top level of a branch or list
+ * item inserts its own nodes later, and those must move and disappear with
+ * the enclosing branch/item.
+ */
+interface Region {
+  start: Comment;
+  end: Comment;
+}
+
+function createRegion(name: string): Region {
+  const context = getCurrentExecutionContext();
+  const start = document.createComment(name);
+  const end = document.createComment(`/${name}`);
+  context.appendChild(start);
+  context.appendChild(end);
+  return { start, end };
+}
+
+/** Remove every node strictly between the region's markers. */
+function clearRegion(region: Region): void {
+  const parent = region.end.parentNode;
+  if (!parent) return;
+  // Whole-parent fast path: one native clear instead of N removals
+  if (parent.firstChild === region.start && parent.lastChild === region.end && parent.nodeType === 1) {
+    if (region.start.nextSibling === region.end) return;
+    (parent as Element).textContent = "";
+    parent.appendChild(region.start);
+    parent.appendChild(region.end);
+    return;
+  }
+  let node = region.start.nextSibling;
+  while (node && node !== region.end) {
+    const next = node.nextSibling;
+    parent.removeChild(node);
+    node = next;
+  }
+}
+
+/** Render `fn` untracked into a fragment. */
+function renderFragment<R>(fn: () => R): { frag: DocumentFragment; result: R } {
+  const frag = document.createDocumentFragment();
+  pushExecutionContext(frag);
+  try {
+    // Reads inside belong to the content's own bindings, not to the block
+    return { frag, result: untrack(fn) };
+  } finally {
+    popExecutionContext();
+  }
+}
+
+/**
+ * Indices (into `seq`) of a longest strictly increasing subsequence, ignoring
+ * negative entries. O(n log n).
+ */
+function longestIncreasing(seq: readonly number[]): Set<number> {
+  const tails: number[] = []; // indices into seq
+  const prev = new Array<number>(seq.length);
+  for (let i = 0; i < seq.length; i++) {
+    const v = seq[i];
+    if (v < 0) continue;
+    let lo = 0;
+    let hi = tails.length;
+    while (lo < hi) {
+      const mid = (lo + hi) >> 1;
+      if (seq[tails[mid]] < v) lo = mid + 1;
+      else hi = mid;
+    }
+    prev[i] = lo > 0 ? tails[lo - 1] : -1;
+    tails[lo] = i;
+  }
+  const out = new Set<number>();
+  let k = tails.length > 0 ? tails[tails.length - 1] : -1;
+  while (k >= 0) {
+    out.add(k);
+    k = prev[k];
+  }
+  return out;
+}
+
 /**
  * Reactive conditional rendering.
  * Swaps branches only when the condition flips between truthy and falsy;
@@ -39,12 +125,7 @@ export function Show(
   when: () => boolean,
   options: (() => void) | { then: () => void; else?: () => void },
 ): void {
-  // Create a placeholder/anchor element
-  const anchor = document.createComment("Show");
-  getCurrentExecutionContext().appendChild(anchor);
-
-  // Track currently rendered nodes
-  let currentNodes: Node[] = [];
+  const region = createRegion("Show");
 
   const thenFn = typeof options === "function" ? options : options.then;
   const elseFn = typeof options === "function" ? undefined : options.else;
@@ -54,29 +135,10 @@ export function Show(
 
   $e(() => {
     const branch = condition.value ? thenFn : elseFn;
-
-    // Clear previous nodes
-    for (const node of currentNodes) {
-      node.parentNode?.removeChild(node);
-    }
-    currentNodes = [];
-
-    // Create new content
-    const frag = document.createDocumentFragment();
-    pushExecutionContext(frag);
-
-    try {
-      // Reads inside the branch belong to its own bindings, not to Show
-      if (branch) untrack(branch);
-    } finally {
-      popExecutionContext();
-    }
-
-    // Track nodes we're about to insert
-    currentNodes = Array.from(frag.childNodes);
-
-    // Insert after anchor
-    anchor.parentNode?.insertBefore(frag, anchor.nextSibling);
+    clearRegion(region);
+    if (!branch) return;
+    const { frag } = renderFragment(branch);
+    region.end.parentNode?.insertBefore(frag, region.end);
   });
 }
 
@@ -172,19 +234,21 @@ export function Each<T>(
   render: (item: T, index: number) => void,
   keyFn?: (item: T, index: number) => string | number,
 ): void {
-  const anchor = document.createComment("Each");
-  getCurrentExecutionContext().appendChild(anchor);
+  const region = createRegion("Each");
 
   interface ItemNode {
-    key: string | number;
+    key: string | number | symbol;
     item: T;
-    nodes: Node[];
+    /** First node the item rendered (stable: an element or a nested block's start marker) */
+    first: Node | null;
+    /** Freshly rendered content waiting to be inserted (its only node, or a fragment) */
+    pending: Node | null;
     /** Owns the effects created while rendering this item */
     owner: Owner;
   }
 
   let prevItemNodes: ItemNode[] = [];
-  const nodeMap = new Map<string | number, ItemNode>();
+  const nodeMap = new Map<string | number | symbol, ItemNode>();
 
   // Items are owned individually (not by the list effect below), so a list
   // update only disposes the items that actually left.
@@ -192,103 +256,125 @@ export function Each<T>(
     for (const itemNode of prevItemNodes) disposeOwner(itemNode.owner);
   });
 
+  const renderItem = (item: T, index: number, key: string | number | symbol): ItemNode => {
+    const owner: Owner = { owned: undefined };
+    const frag = document.createDocumentFragment();
+    pushExecutionContext(frag);
+    try {
+      runWithOwner(owner, () => untrack(() => render(item, index)));
+    } finally {
+      popExecutionContext();
+    }
+    const first = frag.firstChild;
+    // A single node is inserted directly: moving it out of a fragment again costs a second DOM move
+    const pending = first !== null && first === frag.lastChild ? first : frag;
+    return { key, item, first, pending, owner };
+  };
+
   $e(() => {
     const list =
       typeof items === "function" && !Array.isArray(items)
         ? (items as () => T[])()
         : items;
 
-    const newItemNodes: ItemNode[] = [];
-    const newNodeMap = new Map<string | number, ItemNode>();
+    const newItemNodes: ItemNode[] = new Array(list.length);
+    const reused = new Set<ItemNode>();
     const usedKeys = new Set<string | number>();
 
-    // Create or reuse nodes for each item
     for (let i = 0; i < list.length; i++) {
       const item = list[i];
       const key = getItemKey(item, i, keyFn);
 
-      // Warn about duplicate keys
       if (usedKeys.has(key)) {
-        console.warn(`[Each] Duplicate key: "${key}". Keys must be unique.`);
+        // A duplicate can't share the original's DOM: render it unkeyed
+        console.warn(`[Each] Duplicate key: "${String(key)}". Keys must be unique.`);
+        newItemNodes[i] = renderItem(item, i, Symbol());
+        continue;
       }
       usedKeys.add(key);
 
-      // Try to reuse existing node
-      const existingNode = nodeMap.get(key);
-
-      if (existingNode && (!keyFn || existingNode.item === item)) {
-        // Reuse existing node
-        newItemNodes.push(existingNode);
-        newNodeMap.set(key, existingNode);
+      const existing = nodeMap.get(key);
+      if (existing && !reused.has(existing) && (!keyFn || existing.item === item)) {
+        reused.add(existing);
+        newItemNodes[i] = existing;
       } else {
-        // Create new node
-        const frag = document.createDocumentFragment();
-        const owner: Owner = { owned: undefined };
-        pushExecutionContext(frag);
+        newItemNodes[i] = renderItem(item, i, key);
+      }
+    }
 
-        try {
-          const index = i;
-          runWithOwner(owner, () => untrack(() => render(item, index)));
-        } finally {
-          popExecutionContext();
+    const parent = region.end.parentNode;
+
+    // Live extent of each previous item, measured before anything moves:
+    // from its first node up to the next item's first node (or the end
+    // marker). Includes nodes nested blocks inserted after rendering.
+    const extents = new Map<ItemNode, Node[]>();
+    if (prevItemNodes.length > 0) {
+      const firsts = new Set<Node>();
+      for (const n of prevItemNodes) if (n.first) firsts.add(n.first);
+      for (const n of prevItemNodes) {
+        const nodes: Node[] = [];
+        let node: Node | null = n.first;
+        while (node && node !== region.end) {
+          nodes.push(node);
+          node = node.nextSibling;
+          if (node && firsts.has(node)) break;
         }
+        extents.set(n, nodes);
+      }
+    }
 
-        const nodes = Array.from(frag.childNodes);
-        const itemNode: ItemNode = { key, item, nodes, owner };
+    // Remove items that left
+    if (reused.size === 0 && prevItemNodes.length > 0) {
+      for (const n of prevItemNodes) disposeOwner(n.owner);
+      clearRegion(region);
+    } else {
+      for (const n of prevItemNodes) {
+        if (reused.has(n)) continue;
+        disposeOwner(n.owner);
+        for (const node of extents.get(n) ?? []) node.parentNode?.removeChild(node);
+      }
+    }
 
-        newItemNodes.push(itemNode);
-        newNodeMap.set(key, itemNode);
+    if (parent) {
+      if (reused.size === 0) {
+        // Nothing to keep in place: append everything in order
+        const end = region.end;
+        for (let i = 0; i < newItemNodes.length; i++) {
+          const pending = newItemNodes[i].pending;
+          if (pending) parent.insertBefore(pending, end);
+        }
+      } else {
+        // Keep the longest run of items already in relative order; move or
+        // insert only the rest. Walk backwards inserting before `next`.
+        const prevIndex = new Map<ItemNode, number>();
+        for (let i = 0; i < prevItemNodes.length; i++) prevIndex.set(prevItemNodes[i], i);
+        const seq = newItemNodes.map((n) => (n.pending ? -1 : prevIndex.get(n) ?? -1));
+        const stay = longestIncreasing(seq);
 
-        // Clean up old node with same key
-        if (existingNode) {
-          disposeOwner(existingNode.owner);
-          for (const node of existingNode.nodes) {
-            node.parentNode?.removeChild(node);
+        let next: Node = region.end;
+        for (let i = newItemNodes.length - 1; i >= 0; i--) {
+          const n = newItemNodes[i];
+          if (n.pending) {
+            parent.insertBefore(n.pending, next);
+          } else if (!stay.has(i)) {
+            const nodes = extents.get(n) ?? [];
+            if (nodes.length === 1) parent.insertBefore(nodes[0], next);
+            else if (nodes.length > 1) {
+              const frag = document.createDocumentFragment();
+              for (const node of nodes) frag.appendChild(node);
+              parent.insertBefore(frag, next);
+            }
           }
+          if (n.first) next = n.first;
         }
       }
     }
-
-    // Remove nodes no longer in list
-    for (const prevNode of prevItemNodes) {
-      if (!newNodeMap.has(prevNode.key)) {
-        disposeOwner(prevNode.owner);
-        for (const node of prevNode.nodes) {
-          node.parentNode?.removeChild(node);
-        }
-      }
-    }
-
-    // Insert/move nodes in correct order
-    let currentAnchor: Node = anchor;
-
-    for (const itemNode of newItemNodes) {
-      const firstNode = itemNode.nodes[0];
-      if (!firstNode) continue;
-
-      const nextNode = currentAnchor.nextSibling;
-
-      if (nextNode !== firstNode) {
-        const parent = anchor.parentNode;
-        if (!parent) continue;
-
-        // Insert/move all nodes for this item
-        for (const node of itemNode.nodes) {
-          parent.insertBefore(node, currentAnchor.nextSibling);
-        }
-      }
-
-      // Update anchor to last node of this item
-      currentAnchor =
-        itemNode.nodes[itemNode.nodes.length - 1] || currentAnchor;
-    }
+    for (const n of newItemNodes) n.pending = null;
 
     // Update tracking for next render
     prevItemNodes = newItemNodes;
     nodeMap.clear();
-    for (const [key, node] of newNodeMap) {
-      nodeMap.set(key, node);
-    }
+    for (const n of newItemNodes) nodeMap.set(n.key, n);
   });
 }
 
@@ -425,13 +511,10 @@ export function Match<T, R = void>(
   when: Signal<T> | (() => T),
   cases: Partial<Record<string, () => R>> & { _?: () => R },
 ): Signal<R | undefined> {
-  const anchor = document.createComment("Match");
-  getCurrentExecutionContext().appendChild(anchor);
+  const region = createRegion("Match");
 
   // Use a mutable store for internal state
   const state = $(Mut({ result: undefined as R | undefined }));
-
-  let currentNodes: Node[] = [];
 
   // Normalize the input to a getter function
   const getter =
@@ -462,33 +545,13 @@ export function Match<T, R = void>(
 
   $e(() => {
     const handler = selected.value;
-
-    // Clear previous nodes
-    for (const node of currentNodes) {
-      node.parentNode?.removeChild(node);
-    }
-    currentNodes = [];
+    clearRegion(region);
 
     if (handler) {
-      const frag = document.createDocumentFragment();
-      pushExecutionContext(frag);
-
-      let result: R;
-      try {
-        // Reads inside the arm belong to its own bindings, not to Match
-        result = untrack(handler);
-      } finally {
-        popExecutionContext();
-      }
-
+      const { frag, result } = renderFragment(handler);
       // Update internal state (cast needed due to reactive store type complexity)
       state.result = result as unknown as typeof state.result;
-
-      // Track nodes we're about to insert
-      currentNodes = Array.from(frag.childNodes);
-
-      // Insert after anchor
-      anchor.parentNode?.insertBefore(frag, anchor.nextSibling);
+      region.end.parentNode?.insertBefore(frag, region.end);
     } else {
       // No handler matched
       state.result = undefined as unknown as typeof state.result;

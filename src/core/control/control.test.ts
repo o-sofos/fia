@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { Each, Match, Show } from "./control";
-import { $, $e, Mut } from "../reactivity/reactivity";
-import { li, p, span, ul } from "../elements/elements";
+import { $, $e, batch, Mut } from "../reactivity/reactivity";
+import { div, li, p, span, ul } from "../elements/elements";
 
 describe("Show", () => {
     test("swaps branches on condition change", () => {
@@ -220,5 +220,95 @@ describe("Match", () => {
 
         name.value = "y";
         expect(renders).toBe(1);
+    });
+});
+
+describe("Nested blocks at the top level of a branch or item", () => {
+    test("removing an item removes content its nested Show inserted later", () => {
+        const on = $(Mut(false));
+        const items = $(Mut(["a", "b"]));
+        const root = div(() =>
+            Each(() => [...items], (x) => {
+                Show(() => on.value, () => span(x.toUpperCase()));
+                span(x);
+            }),
+        );
+        on.value = true;
+        items.splice(0, 1);
+        expect(root.textContent).toBe("Bb");
+    });
+
+    test("moving an item moves its nested Show content", () => {
+        const on = $(Mut(false));
+        const items = $(Mut(["a", "b"]));
+        const root = div(() =>
+            Each(() => [...items], (x) => {
+                Show(() => on.value, () => span(x.toUpperCase()));
+                span(x);
+            }),
+        );
+        on.value = true;
+        items.reverse();
+        expect(root.textContent).toBe("BbAa");
+    });
+
+    test("hiding an outer Show removes a nested Show's content", () => {
+        const outer = $(Mut(true));
+        const inner = $(Mut(false));
+        const root = div(() =>
+            Show(() => outer.value, () => {
+                Show(() => inner.value, () => span("inner"));
+                span("x");
+            }),
+        );
+        inner.value = true;
+        outer.value = false;
+        expect(root.textContent).toBe("");
+    });
+
+    test("switching a Match arm removes a nested Show's content", () => {
+        const k = $(Mut("a"));
+        const on = $(Mut(false));
+        const root = div(() =>
+            Match(() => k.value, {
+                a: () => Show(() => on.value, () => span("A!")),
+                b: () => span("B"),
+            }),
+        );
+        on.value = true;
+        k.value = "b";
+        expect(root.textContent).toBe("B");
+    });
+
+    test("nested Each items move with their parent item", () => {
+        const items = $(Mut([1, 2]));
+        const sub = $(Mut([10]));
+        const root = div(() =>
+            Each(() => [...items], (x) => {
+                Each(() => [...sub], (y) => span(`${x}.${y}`));
+            }),
+        );
+        sub.push(20);
+        items.reverse();
+        expect(root.textContent).toBe("2.102.201.101.20");
+    });
+
+    test("swapping two rows moves only those rows", () => {
+        const items = $(Mut(Array.from({ length: 100 }, (_, i) => ({ id: i }))));
+        const root = div(() => Each(() => items as unknown as { id: number }[], (it) => span(String(it.id))));
+        let moves = 0;
+        const insertBefore = root.insertBefore.bind(root);
+        root.insertBefore = ((node: Node, ref: Node | null) => {
+            moves++;
+            return insertBefore(node, ref);
+        }) as typeof root.insertBefore;
+
+        batch(() => {
+            const a = items[1];
+            items[1] = items[98];
+            items[98] = a;
+        });
+        expect(root.textContent?.startsWith("0982")).toBe(true);
+        expect(moves).toBeLessThanOrEqual(2);
     });
 });
