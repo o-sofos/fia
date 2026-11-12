@@ -28,3 +28,6 @@ benchmark_repo
 *.tsbuildinfo
 # WSL/NTFS alternate-data-stream artifacts
 *:Zone.Identifier
+
+# Benchmark baselines (machine-specific)
+bench/.results

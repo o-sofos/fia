@@ -1,0 +1,11 @@
+{
+  // Type-checks the harness tooling (benchmarks, size and coverage gates),
+  // which lives outside src/.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "types": ["bun"],
+    "incremental": false
+  },
+  "include": ["bench", "scripts/size.ts", "scripts/coverage-gate.ts"],
+  "exclude": ["node_modules", "dist", "benchmark_repo", "bench/.results"]
+}
