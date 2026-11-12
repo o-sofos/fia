@@ -57,6 +57,52 @@ const effectQueue: (() => void)[] = [];
 let flushing = false;
 
 // =============================================================================
+// INSTRUMENTATION (tests / devtools only — not part of the public API)
+// =============================================================================
+
+/**
+ * Observer for reactive nodes. `deps` is the live dependency list: it's empty
+ * once the node is disposed or detached, so anything still subscribed after
+ * its scope was torn down is a leak.
+ * @internal
+ */
+export type DevHook = (kind: "effect" | "computed", node: { readonly deps: readonly unknown[] }) => void;
+
+let devHook: DevHook | undefined = undefined;
+
+/**
+ * Install (or with `undefined`, remove) the creation observer. Returns the
+ * previous hook so callers can nest.
+ * @internal
+ */
+export function setDevHook(hook: DevHook | undefined): DevHook | undefined {
+  const prev = devHook;
+  devHook = hook;
+  return prev;
+}
+
+/**
+ * Snapshot of the scheduler's global state. Between top-level operations
+ * every field should be at its idle value (0 / false).
+ * @internal
+ */
+export function inspectRuntime(): {
+  batchDepth: number;
+  flushing: boolean;
+  queued: number;
+  tracking: boolean;
+  owned: boolean;
+} {
+  return {
+    batchDepth,
+    flushing,
+    queued: effectQueue.length,
+    tracking: activeSubscriber !== undefined,
+    owned: currentOwner !== undefined,
+  };
+}
+
+// =============================================================================
 // OWNERSHIP
 // =============================================================================
 
@@ -304,6 +350,7 @@ export function $e(fn: EffectFn): () => void {
   };
 
   onCleanup(dispose);
+  if (devHook !== undefined) devHook("effect", subscriber);
 
   // Run immediately to establish initial dependencies
   run();
@@ -537,6 +584,7 @@ function createComputed<T>(compute: () => T): Signal<T> {
     stale = true;
     detached = true;
   });
+  if (devHook !== undefined) devHook("computed", subscriber);
 
   // Initial computation
   refresh();
