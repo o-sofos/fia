@@ -1,16 +1,9 @@
 /**
  * Type tests for ARIA props. Checked by `bun run test:types`.
  */
-import { GlobalRegistrator } from "@happy-dom/global-registrator";
 import { expect, test } from "bun:test";
 import { button, div, input, span } from "../elements/elements";
 import { $, Mut } from "../reactivity/reactivity";
-
-try {
-  GlobalRegistrator.register();
-} catch {
-  // Already registered
-}
 
 // --- Kebab-case and camelCase both work, typed from the same maps -----------
 div({ "aria-label": "Close", "aria-live": "polite", "aria-level": 2 });

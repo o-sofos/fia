@@ -2,17 +2,10 @@
  * Type tests for CSS value grammars (css/grammar.ts).
  * Checked by `bun run test:types`; the runtime test below only keeps bun happy.
  */
-import { GlobalRegistrator } from "@happy-dom/global-registrator";
 import { expect, test } from "bun:test";
 import type { IsValidStyleValue } from "./grammar";
 import { div } from "../elements/elements";
 import { $, Mut } from "../reactivity/reactivity";
-
-try {
-  GlobalRegistrator.register();
-} catch {
-  // Already registered
-}
 
 type Valid<K, V extends string> = IsValidStyleValue<K, V>;
 /** Rejected = anything but exactly `true` (a union with a bad branch is `boolean`) */

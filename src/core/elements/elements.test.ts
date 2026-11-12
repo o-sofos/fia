@@ -1,20 +1,8 @@
-import { GlobalRegistrator } from "@happy-dom/global-registrator";
-import { describe, it, expect, beforeEach } from "bun:test";
+import { describe, it, expect } from "bun:test";
 import { div, button, input, h1, span, a, p, ul, li, label, img, strong, summary, option, td, code, applyStyle } from "./elements";
 import { $, Mut } from "../reactivity/reactivity";
-import { hasExecutionContext, popExecutionContext } from "../context/context";
-
-try {
-    GlobalRegistrator.register();
-} catch {
-    // Already registered
-}
 
 describe("Element System - Unified API", () => {
-    beforeEach(() => {
-        while (hasExecutionContext()) popExecutionContext();
-        document.body.innerHTML = "";
-    });
 
     describe("Overload 1: element()", () => {
         it("should create empty element", () => {
@@ -571,10 +559,6 @@ describe("Element System - Unified API", () => {
     });
 });
 describe("Style: number lengths and custom properties", () => {
-    beforeEach(() => {
-        while (hasExecutionContext()) popExecutionContext();
-        document.body.innerHTML = "";
-    });
 
     /**
      * happy-dom silently drops properties it doesn't implement (vendor ones,
@@ -642,10 +626,6 @@ describe("Style: number lengths and custom properties", () => {
 });
 
 describe("ARIA attributes", () => {
-    beforeEach(() => {
-        while (hasExecutionContext()) popExecutionContext();
-        document.body.innerHTML = "";
-    });
 
     it("maps camelCase ARIA props to aria-* attributes", () => {
         const el = button({ ariaLabel: "Close", ariaLabelledBy: "t", ariaActiveDescendant: "o1" });

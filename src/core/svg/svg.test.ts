@@ -1,18 +1,5 @@
-import { GlobalRegistrator } from "@happy-dom/global-registrator";
-import { beforeEach, describe, expect, it } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import { animate, circle, g, path, rect, svg, text } from "./svg";
-import { hasExecutionContext, popExecutionContext } from "../context/context";
-
-try {
-    GlobalRegistrator.register();
-} catch {
-    // Already registered
-}
-
-beforeEach(() => {
-    while (hasExecutionContext()) popExecutionContext();
-    document.body.innerHTML = "";
-});
 
 describe("SVG events", () => {
     it("attaches SMIL animation handlers to beginEvent/endEvent/repeatEvent", () => {

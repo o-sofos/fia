@@ -1,12 +1,5 @@
-import { GlobalRegistrator } from "@happy-dom/global-registrator";
 import { describe, it, expect, beforeEach } from "bun:test";
 import { pushExecutionContext, popExecutionContext, getCurrentExecutionContext, hasExecutionContext } from "./context";
-
-try {
-    GlobalRegistrator.register();
-} catch (e) {
-    // Already registered
-}
 
 describe("Context System", () => {
     // Clear the stack before each test to ensure isolation

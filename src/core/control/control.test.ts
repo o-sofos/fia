@@ -1,20 +1,7 @@
-import { GlobalRegistrator } from "@happy-dom/global-registrator";
-import { beforeEach, describe, expect, test } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import { Each, Match, Show } from "./control";
 import { $, $e, Mut } from "../reactivity/reactivity";
 import { li, p, span, ul } from "../elements/elements";
-import { hasExecutionContext, popExecutionContext } from "../context/context";
-
-try {
-    GlobalRegistrator.register();
-} catch {
-    // Already registered
-}
-
-beforeEach(() => {
-    while (hasExecutionContext()) popExecutionContext();
-    document.body.innerHTML = "";
-});
 
 describe("Show", () => {
     test("swaps branches on condition change", () => {

@@ -7,14 +7,6 @@
  * Run: bun test types.test.ts
  */
 
-import { GlobalRegistrator } from "@happy-dom/global-registrator";
-
-try {
-  GlobalRegistrator.register();
-} catch {
-  // Already registered
-}
-
 import { div, button, input, img } from "./elements/elements";
 import { $, Mut } from "./reactivity/reactivity";
 import type {
