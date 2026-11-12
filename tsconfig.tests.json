@@ -5,7 +5,8 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "types": ["bun"],
-    "incremental": false
+    "incremental": true,
+    "tsBuildInfoFile": "./tests.tsbuildinfo"
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist", "benchmark_repo"]

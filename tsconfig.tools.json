@@ -4,7 +4,8 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "types": ["bun"],
-    "incremental": false
+    "incremental": true,
+    "tsBuildInfoFile": "./tools.tsbuildinfo"
   },
   "include": ["bench", "scripts/size.ts", "scripts/coverage-gate.ts"],
   "exclude": ["node_modules", "dist", "benchmark_repo", "bench/.results"]
