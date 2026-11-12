@@ -26,6 +26,7 @@
     "bench": "bun bench/run.ts",
     "bench:ab": "bun bench/run.ts --against HEAD",
     "size": "bun scripts/size.ts",
+    "check:pure": "bun scripts/check-pure.ts",
     "benchmark": "bun run scripts/benchmark.ts",
     "build:docs": "bun build ./src/docs/main.ts --outdir ./docs --minify",
     "bundle:full": "bun build --target=browser --minify --outdir=dist ./src/core/mod.ts",

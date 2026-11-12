@@ -21,6 +21,7 @@ jobs:
       # and enforces coverage-thresholds.json on totals.
       - run: bun run test:coverage
       - run: bun run size
+      - run: bun run check:pure
 
   fuzz:
     name: Deep fuzz (random seed)
