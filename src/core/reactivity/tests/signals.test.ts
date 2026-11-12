@@ -1,6 +1,6 @@
 
 import { describe, expect, test } from "bun:test";
-import { $, $e, Mut } from "../reactivity";
+import { $, $e, batch, Mut, setDevHook } from "../reactivity";
 
 describe("Signals", () => {
     test("should hold a value", () => {
@@ -152,5 +152,65 @@ describe("Computed errors", () => {
         expect(computations).toBe(1);
         a.value = 5;
         expect(c.value).toBe(5);
+    });
+});
+
+describe("Dependency de-duplication", () => {
+    const depCounts = (fn: () => void): number[] => {
+        const nodes: { deps: readonly unknown[] }[] = [];
+        const prev = setDevHook((kind, node) => {
+            if (kind === "effect") nodes.push(node);
+        });
+        try {
+            fn();
+        } finally {
+            setDevHook(prev);
+        }
+        return nodes.map((n) => n.deps.length);
+    };
+
+    test("repeated reads subscribe once", () => {
+        const s = $(Mut(1));
+        let total = 0;
+        expect(
+            depCounts(() => {
+                $e(() => {
+                    for (let i = 0; i < 1000; i++) total += s.value;
+                });
+            }),
+        ).toEqual([1]);
+        s.value = 2;
+        expect(total).toBe(3000);
+    });
+
+    test("a nested computed reading the same source doesn't duplicate it", () => {
+        const s = $(Mut(1));
+        const c = $(() => s.value * 2);
+        let seen = 0;
+        expect(
+            depCounts(() => {
+                $e(() => {
+                    s.value;
+                    c.value; // refresh reads s as c, overwriting s's marker
+                    s.value;
+                    seen = c.value + s.value;
+                });
+            }),
+        ).toEqual([2]);
+        s.value = 5;
+        expect(seen).toBe(15);
+    });
+
+    test("an effect with many dependencies re-runs once per batch", () => {
+        const signals = Array.from({ length: 2000 }, () => $(Mut(0)));
+        let runs = 0;
+        $e(() => {
+            for (const sig of signals) sig.value;
+            runs++;
+        });
+        batch(() => {
+            for (const sig of signals) sig.value++;
+        });
+        expect(runs).toBe(2);
     });
 });

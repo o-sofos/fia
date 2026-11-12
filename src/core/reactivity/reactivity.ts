@@ -20,6 +20,11 @@ type EffectFn = () => void;
 interface ReactiveNode {
   version: number;
   subs: Subscriber[];
+  /** For each entry of `subs`: this node's index in that subscriber's `deps` */
+  subSlots: number[];
+  /** Last subscriber that tracked this node, and when (see `track`) */
+  tracker: Subscriber | undefined;
+  trackedAt: number;
   /** Computed nodes only: bring the cached value up to date (may bump version). */
   refresh?: () => void;
 }
@@ -41,7 +46,22 @@ interface Subscriber {
   deps: ReactiveNode[];
   /** Version of each dep when it was read (parallel to `deps`). */
   depVersions: number[];
+  /** For each dep: this subscriber's index in that dep's `subs` (O(1) unsubscribe) */
+  depSlots: number[];
+  /** `trackClock` when the current run started */
+  runStart: number;
 }
+
+/** Monotonic clock for de-duplicating dependency reads (see `track`) */
+let trackClock = 0;
+
+/**
+ * Shared placeholders for a node nobody has subscribed to yet: most signals
+ * never get a subscriber, so their lists are allocated on first `track`.
+ * Never mutated (trackIn swaps in real arrays before pushing).
+ */
+const NO_SUBS: Subscriber[] = [];
+const NO_SLOTS: number[] = [];
 
 /** Current tracking context */
 let activeSubscriber: Subscriber | undefined = undefined;
@@ -180,12 +200,35 @@ export function untrack<T>(fn: () => T): T {
  */
 function track(node: ReactiveNode): void {
   const sub = activeSubscriber;
-  // deps and subs are kept symmetric, so one membership check covers both
-  if (sub && !sub.deps.includes(node)) {
-    sub.deps.push(node);
-    sub.depVersions.push(node.version);
-    node.subs.push(sub);
+  if (sub !== undefined) trackIn(sub, node);
+}
+
+/**
+ * Subscribe `sub` to `node` unless it already is in this run. O(1): the node
+ * remembers who tracked it last and when. If that was `sub` during the
+ * current run, it's a repeat. If it was another subscriber during our run
+ * (a computed nested inside us read the same node), we may or may not have
+ * it, so scan; that's the only case that scans.
+ */
+function trackIn(sub: Subscriber, node: ReactiveNode): void {
+  if (node.trackedAt > sub.runStart) {
+    if (node.tracker === sub || sub.deps.includes(node)) {
+      node.tracker = sub;
+      return;
+    }
   }
+  if (node.subs === NO_SUBS) {
+    node.subs = [];
+    node.subSlots = [];
+  }
+  const n = sub.deps.length;
+  sub.deps.push(node);
+  sub.depVersions.push(node.version);
+  sub.depSlots.push(node.subs.length);
+  node.subs.push(sub);
+  node.subSlots.push(n);
+  node.tracker = sub;
+  node.trackedAt = ++trackClock;
 }
 
 /**
@@ -251,15 +294,26 @@ function depsChanged(sub: Subscriber): boolean {
  * This is crucial for avoiding stale subscriptions (inspired by SolidJS)
  */
 function cleanupSubscriber(sub: Subscriber): void {
-  for (let i = 0; i < sub.deps.length; i++) {
-    const dep = sub.deps[i];
-    const idx = dep.subs.indexOf(sub);
-    if (idx > -1) {
-      dep.subs.splice(idx, 1);
+  const deps = sub.deps;
+  const slots = sub.depSlots;
+  for (let i = 0; i < deps.length; i++) {
+    // Swap-remove `sub` from the dep's subscriber list, fixing the slot of
+    // whichever subscriber takes its place
+    const dep = deps[i];
+    const slot = slots[i];
+    const subs = dep.subs;
+    const subSlots = dep.subSlots;
+    const last = subs.pop()!;
+    const lastSlot = subSlots.pop()!;
+    if (slot < subs.length) {
+      subs[slot] = last;
+      subSlots[slot] = lastSlot;
+      last.depSlots[lastSlot] = slot;
     }
   }
-  sub.deps.length = 0;
+  deps.length = 0;
   sub.depVersions.length = 0;
+  slots.length = 0;
 }
 
 /**
@@ -314,6 +368,8 @@ export function $e(fn: EffectFn): () => void {
     },
     deps: [],
     depVersions: [],
+    depSlots: [],
+    runStart: 0,
     owned: undefined,
   };
 
@@ -327,6 +383,7 @@ export function $e(fn: EffectFn): () => void {
 
     const prevSubscriber = activeSubscriber;
     const prevOwner = currentOwner;
+    subscriber.runStart = ++trackClock;
     activeSubscriber = subscriber;
     currentOwner = subscriber;
     try {
@@ -460,7 +517,10 @@ export interface WritableSignal<T> extends Signal<T> {
 function createSignal<T>(initial: T, readonly: boolean = false): Signal<T> | WritableSignal<T> {
   const node: ReactiveNode = {
     version: 0,
-    subs: [],
+    subs: NO_SUBS,
+    subSlots: NO_SLOTS,
+    tracker: undefined,
+    trackedAt: 0,
   };
 
   let currentValue = initial;
@@ -522,7 +582,10 @@ function createComputed<T>(compute: () => T): Signal<T> {
 
   const node: ReactiveNode = {
     version: 0,
-    subs: [],
+    subs: NO_SUBS,
+    subSlots: NO_SLOTS,
+    tracker: undefined,
+    trackedAt: 0,
     refresh,
   };
 
@@ -539,6 +602,8 @@ function createComputed<T>(compute: () => T): Signal<T> {
     },
     deps: [],
     depVersions: [],
+    depSlots: [],
+    runStart: 0,
   };
 
   /** Unsubscribed by its owner's disposal — can't trust staleness anymore */
@@ -561,6 +626,7 @@ function createComputed<T>(compute: () => T): Signal<T> {
     // so anything created inside must not attach to whoever triggered the read
     const prevSubscriber = activeSubscriber;
     const prevOwner = currentOwner;
+    subscriber.runStart = ++trackClock;
     activeSubscriber = subscriber;
     currentOwner = undefined;
     let newValue: T;
@@ -794,7 +860,7 @@ function createStore<T extends object>(initial: T, mutability: Set<PropertyKey> 
   function getOrCreateNode(key: PropertyKey): ReactiveNode {
     let node = nodes.get(key);
     if (!node) {
-      node = { version: 0, subs: [] };
+      node = { version: 0, subs: NO_SUBS, subSlots: NO_SLOTS, tracker: undefined, trackedAt: 0 };
       nodes.set(key, node);
     }
     return node;
