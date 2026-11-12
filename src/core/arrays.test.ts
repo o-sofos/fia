@@ -18,11 +18,56 @@ describe("Array Reactivity (Store)", () => {
         // Initial run
         expect(updateCount).toBe(1);
 
-        // TODO: extending arrays (push/assignment to new index) is currently not triggering updates
-        // possibly due to proxy traps not catching length changes or new property addition correctly in this env.
-        // list[list.length] = "Banana";
+        // Read-only store: in-place mutation is rejected
+        expect(() => (list as unknown as string[]).push("Banana")).toThrow(TypeError);
+        expect(updateCount).toBe(1);
+    });
 
-        // expect(updateCount).toBe(2);
+    it("assignment past the end updates length readers", () => {
+        const list = $(Mut(["Apple"]));
+        const lengths: number[] = [];
+        $e(() => {
+            lengths.push(list.length);
+        });
+
+        list[list.length] = "Banana";
+        list.push("Cherry");
+        expect(lengths).toEqual([1, 2, 3]);
+    });
+
+    it("truncating length updates readers of removed indices", () => {
+        const list = $(Mut(["a", "b", "c"]));
+        const seen: (string | undefined)[] = [];
+        $e(() => {
+            seen.push(list[2]);
+        });
+
+        list.length = 1;
+        expect(seen).toEqual(["c", undefined]);
+    });
+
+    it("array methods notify once and never expose intermediate states", () => {
+        const list = $(Mut([3, 1, 2]));
+        const snapshots: string[] = [];
+        $e(() => {
+            snapshots.push(list.join(","));
+        });
+
+        list.sort();
+        list.splice(0, 2, 9);
+        expect(snapshots).toEqual(["3,1,2", "1,2,3", "9,3"]);
+    });
+
+    it("an effect that pushes doesn't re-trigger itself", () => {
+        const list = $(Mut([] as number[]));
+        let runs = 0;
+        $e(() => {
+            runs++;
+            list.push(runs);
+        });
+
+        expect(runs).toBe(1);
+        expect([...list]).toEqual([1]);
     });
 
     it("should reject index assignment on immutable arrays (default)", () => {
@@ -61,8 +106,7 @@ describe("Array Reactivity (Store)", () => {
 
         expect(updateCount).toBe(1);
 
-        // Splice triggers multiple updates (index change + length change check)
-        // Use batch to consolidate them into a single update
+        // Array methods are batched internally (an explicit batch also works)
         batch(() => {
             list.splice(0, 1, "Orange");
         });

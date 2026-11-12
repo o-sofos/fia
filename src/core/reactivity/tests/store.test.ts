@@ -136,3 +136,28 @@ describe("Store element identity", () => {
         expect(seen).toEqual([false, true]);
     });
 });
+
+describe("Store key tracking", () => {
+    test("Object.keys and for...in react to added and deleted keys", () => {
+        const state = $(Mut({ a: 1 } as Record<string, number>));
+        const keys: string[] = [];
+        $e(() => {
+            keys.push(Object.keys(state).join());
+        });
+
+        state.b = 2;
+        delete state.a;
+        expect(keys).toEqual(["a", "a,b", "b"]);
+    });
+
+    test("`in` reacts to a key appearing", () => {
+        const state = $(Mut({} as Record<string, number>));
+        const has: boolean[] = [];
+        $e(() => {
+            has.push("x" in state);
+        });
+
+        state.x = 1;
+        expect(has).toEqual([false, true]);
+    });
+});

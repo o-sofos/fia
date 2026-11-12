@@ -670,6 +670,49 @@ const REACTIVE_PROXY = Symbol("reactive-proxy");
 /** Symbol to access the raw (unwrapped) object */
 const RAW = Symbol("raw");
 
+/** Store node for the key set (Object.keys, for...in, `in` on missing keys) */
+const ITERATE = Symbol("iterate");
+
+/**
+ * Array methods that write. Called on a store they run as one batch and
+ * untracked: one notification instead of one per index they touch, no
+ * effect ever sees a half-sorted array, and an effect that pushes doesn't
+ * subscribe to the length it just changed (which would re-run it forever).
+ */
+const ARRAY_MUTATORS: Record<string, true> = {
+  push: true, pop: true, shift: true, unshift: true, splice: true,
+  sort: true, reverse: true, fill: true, copyWithin: true,
+};
+
+/** Wrap an array method to run untracked inside one batch. */
+function batchedMutator(method: (...args: unknown[]) => unknown): (...args: unknown[]) => unknown {
+  return function (this: unknown, ...args: unknown[]) {
+    const prevSubscriber = activeSubscriber;
+    activeSubscriber = undefined;
+    batchDepth++;
+    try {
+      return method.apply(this, args);
+    } finally {
+      activeSubscriber = prevSubscriber;
+      if (--batchDepth === 0) flush();
+    }
+  };
+}
+
+/** Trigger several nodes as one update (no flush between them). */
+function triggerAll(nodes: ReactiveNode[]): void {
+  if (nodes.length === 1) {
+    trigger(nodes[0]);
+    return;
+  }
+  batchDepth++;
+  try {
+    for (let i = 0; i < nodes.length; i++) trigger(nodes[i]);
+  } finally {
+    if (--batchDepth === 0) flush();
+  }
+}
+
 /**
  * Utility type to extract keys that are wrapped in Mutable<T>
  */
@@ -744,6 +787,10 @@ function createStore<T extends object>(initial: T, mutability: Set<PropertyKey> 
   // We separate mutable and immutable proxies to ensure consistency
   const proxyCache = new WeakMap<object, { readonly?: ReactiveStore<any>; mutable?: ReactiveStore<any> }>();
 
+  /** Batched wrappers for ARRAY_MUTATORS, created on first use */
+  let mutators: Record<string, (...args: unknown[]) => unknown> | undefined;
+  const isArray = Array.isArray(initial);
+
   function getOrCreateNode(key: PropertyKey): ReactiveNode {
     let node = nodes.get(key);
     if (!node) {
@@ -810,10 +857,17 @@ function createStore<T extends object>(initial: T, mutability: Set<PropertyKey> 
       // Mark as reactive proxy
       if (key === REACTIVE_PROXY) return true;
 
-      const node = getOrCreateNode(key);
-      track(node);  // Track this property access
-
       const value = Reflect.get(target, key, receiver);
+
+      // Writing array methods: batched + untracked (see ARRAY_MUTATORS).
+      // Checked only for function values so plain reads pay nothing.
+      // (The wrapper is built outside the trap: a closure here would make
+      // every read allocate a scope for the captured value.)
+      if (isArray && typeof value === "function" && ARRAY_MUTATORS[key as string] === true) {
+        return ((mutators ??= {})[key as string] ??= batchedMutator(value as (...a: unknown[]) => unknown));
+      }
+
+      track(getOrCreateNode(key));  // Track this property access
 
       // Deep reactivity: wrap nested objects in proxies
       // Check for Mutable wrapper first to unwrap
@@ -900,14 +954,10 @@ function createStore<T extends object>(initial: T, mutability: Set<PropertyKey> 
         ? value[RAW]
         : value;
 
-      // Special handling for Array loop: 
-      // array[index] = val -> updates length silently.
-      // array.push -> sets index then sets length.
-      // When setting length, it might already be updated on target, so Object.is returns true.
-      // We must force trigger for length changes on arrays.
-      const isArrayLength = Array.isArray(target) && key === "length";
+      const hadKey = oldValue !== undefined || Object.prototype.hasOwnProperty.call(target, key);
+      if (hadKey && Object.is(oldValue, rawValue)) return true;  // No change
 
-      if (Object.is(oldValue, rawValue) && !isArrayLength) return true;  // No change
+      const oldLength = isArray ? (target as unknown[]).length : 0;
 
       Reflect.set(target, key, rawValue, receiver);
 
@@ -918,21 +968,48 @@ function createStore<T extends object>(initial: T, mutability: Set<PropertyKey> 
       // first one. The WeakMap releases it once the object is unreachable.
 
       const node = nodes.get(key);
-      if (node) {
-        trigger(node);  // Trigger updates for this property
+      // Fast path: overwriting an existing key of a plain object
+      if (hadKey && !isArray) {
+        if (node) trigger(node);
+        return true;
       }
+
+      const changed: ReactiveNode[] = [];
+      if (node) changed.push(node);
+      if (!hadKey) {
+        const keysNode = nodes.get(ITERATE);
+        if (keysNode) changed.push(keysNode);
+      }
+      if (isArray) {
+        const newLength = (target as unknown[]).length;
+        if (key !== "length" && newLength !== oldLength) {
+          // arr[arr.length] = x grows the array without a "length" write
+          const lengthNode = nodes.get("length");
+          if (lengthNode) changed.push(lengthNode);
+        } else if (key === "length" && newLength < oldLength) {
+          // Truncation removes indices without writing them
+          for (let i = newLength; i < oldLength; i++) {
+            const indexNode = nodes.get(String(i));
+            if (indexNode) changed.push(indexNode);
+          }
+        }
+      }
+      if (changed.length > 0) triggerAll(changed);
 
       return true;
     },
 
-    // Handle 'in' operator
+    // Handle 'in' operator — tracked, so `"k" in store` updates when k appears
     has(target, key) {
       if (key === REACTIVE_PROXY || key === RAW || key === "$raw") return true;
+      track(getOrCreateNode(key));
       return Reflect.has(target, key);
     },
 
-    // Handle Object.keys, for...in, etc.
+    // Handle Object.keys, for...in, etc. — tracked against the key set
     ownKeys(target) {
+      track(getOrCreateNode(ITERATE));
+      if (Array.isArray(target)) track(getOrCreateNode("length"));
       return Reflect.ownKeys(target);
     },
 
@@ -970,8 +1047,12 @@ function createStore<T extends object>(initial: T, mutability: Set<PropertyKey> 
       const result = Reflect.deleteProperty(target, key);
 
       if (hadKey && result) {
+        const changed: ReactiveNode[] = [];
         const node = nodes.get(key);
-        if (node) trigger(node);
+        if (node) changed.push(node);
+        const keysNode = nodes.get(ITERATE);
+        if (keysNode) changed.push(keysNode);
+        if (changed.length > 0) triggerAll(changed);
       }
 
       return result;
