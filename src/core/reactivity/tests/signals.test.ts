@@ -116,3 +116,41 @@ describe("Effects ($e)", () => {
         expect(runCount).toBe(2); // Should not run again
     });
 });
+
+describe("Computed errors", () => {
+    test("readers keep their subscription through a throw and recover", () => {
+        const a = $(Mut(1));
+        const c = $(() => {
+            if (a.value === 2) throw new Error("boom");
+            return a.value;
+        });
+        const seen: number[] = [];
+        $e(() => {
+            try {
+                seen.push(c.value);
+            } catch {
+                seen.push(-1);
+            }
+        });
+
+        a.value = 2;
+        a.value = 3;
+        expect(seen).toEqual([1, -1, 3]);
+    });
+
+    test("the cached error is rethrown until a dependency changes", () => {
+        const a = $(Mut(0));
+        let computations = 0;
+        const c = $(() => {
+            computations++;
+            if (a.value === 0) throw new Error("zero");
+            return a.value;
+        });
+
+        expect(() => c.value).toThrow("zero");
+        expect(() => c.peek()).toThrow("zero");
+        expect(computations).toBe(1);
+        a.value = 5;
+        expect(c.value).toBe(5);
+    });
+});

@@ -544,6 +544,10 @@ function createComputed<T>(compute: () => T): Signal<T> {
   /** Unsubscribed by its owner's disposal — can't trust staleness anymore */
   let detached = false;
 
+  /** The last computation threw; `error` is rethrown to readers */
+  let hasError = false;
+  let error: unknown = undefined;
+
   function refresh(): void {
     if (!stale) return;
     stale = false;
@@ -563,16 +567,25 @@ function createComputed<T>(compute: () => T): Signal<T> {
     try {
       newValue = compute();
     } catch (e) {
-      stale = true; // retry on next read
-      throw e;
+      // Cache the error like a value: readers rethrow it, and because the
+      // deps read before the throw stay tracked (and readers keep tracking
+      // this node), a later change to them recomputes and recovers. Throwing
+      // out of refresh instead would drop readers' subscriptions for good.
+      error = e;
+      hasError = true;
+      initialized = true;
+      node.version = ++globalVersion;
+      return;
     } finally {
       activeSubscriber = prevSubscriber;
       currentOwner = prevOwner;
     }
 
-    if (!initialized || !Object.is(currentValue, newValue)) {
+    if (!initialized || hasError || !Object.is(currentValue, newValue)) {
       currentValue = newValue;
       initialized = true;
+      hasError = false;
+      error = undefined;
       node.version = ++globalVersion;
     }
   }
@@ -592,8 +605,9 @@ function createComputed<T>(compute: () => T): Signal<T> {
   const signal = function (): T {
     refresh();
 
-    // Track this computed as a dependency
+    // Track this computed as a dependency (also when it holds an error)
     track(node);
+    if (hasError) throw error;
     return currentValue;
   } as Signal<T>;
 
@@ -609,6 +623,7 @@ function createComputed<T>(compute: () => T): Signal<T> {
   // Peek without tracking
   signal.peek = () => {
     refresh();
+    if (hasError) throw error;
     return currentValue as Readable<T>;
   };
 
