@@ -27,6 +27,7 @@ describe("Context System", () => {
 
         expect(hasExecutionContext()).toBe(true);
         expect(getCurrentExecutionContext()).toBe(div);
+        popExecutionContext();
     });
 
     it("should pop context and return to previous", () => {

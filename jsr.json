@@ -8,6 +8,6 @@
     "./svg": "./src/core/svg/svg.ts"
   },
   "publish": {
-    "exclude": ["benchmark_repo", "src/examples", "src/playground", "test_*.ts"]
+    "exclude": ["benchmark_repo", "bench", "src/examples", "src/playground", "src/testing", "test_*.ts"]
   }
 }

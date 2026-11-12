@@ -1,0 +1,4 @@
+[test]
+# Registers happy-dom, resets the DOM before each test and fails tests that
+# leave the runtime dirty. See src/testing/setup.ts.
+preload = ["./src/testing/setup.ts"]
