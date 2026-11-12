@@ -11,19 +11,25 @@ Fia (`@fia/core` on JSR) is a zero-dependency, type-safe reactive UI library: fi
 | Task | Command |
 |---|---|
 | Dev server (port 4000, HMR) | `bun run dev` |
-| Run all tests | `bun test src/core` |
+| Run all tests | `bun run test` (= `bun test src/core src/testing`) |
 | Run a single test file | `bun test src/core/elements/elements.test.ts` |
 | Run tests matching a name | `bun test src/core -t "should create empty element"` |
-| Type-check | `bun run test:types` (= `bun tsc --noEmit`) |
+| Type-check (lib + tests + tooling) | `bun run test:types` — incremental; ~1–5s warm, ~100s cold |
+| Coverage gate (totals vs coverage-thresholds.json) | `bun run test:coverage` (`--update` ratchets up) |
+| Deep fuzz (property tests ×20) | `bun run test:fuzz` · replay: `FIA_FUZZ_SEED=<seed> FIA_FUZZ_RUNS=1 bun test -t "<name>"` |
+| Benchmarks | `bun run bench` · A/B vs HEAD: `bun run bench:ab` · vs any ref: `bun run bench --against <ref>` |
+| Bundle size budgets (gzip, size-limits.json) | `bun run size` (`--update` to accept growth) |
+| Tree-shaking guard | `bun run check:pure` |
 | Build docs site | `bun run build:docs` (src/docs/main.ts → docs/) |
-| Measure bundle sizes | `bun run bundle:full` / `bundle:signals` / `bundle:elements` / `bundle:hello` / `bundle:analyze` |
-| js-framework-benchmark | `bun run benchmark` (requires the gitignored `benchmark_repo/` clone; see benchmark_repo/INSTALL_DEPS.md) |
+| js-framework-benchmark (real browser) | `bun run benchmark` (requires the gitignored `benchmark_repo/` clone; see benchmark_repo/INSTALL_DEPS.md) |
 
-Note: `**/*.test.ts` is excluded in tsconfig.json, so `tsc --noEmit` does **not** type-check test files. `src/core/*.types.test.ts` / `types.test.ts` files exercise the type system via `@ts-expect-error` under `bun test` instead.
+Note: `**/*.test.ts` is excluded in tsconfig.json; `tsconfig.tests.json` type-checks them (this is what makes `@ts-expect-error` in `*.types.test.ts` a gate — `bun test` strips types), and `tsconfig.tools.json` covers `bench/`, `scripts/` gates and `.claude/hooks/`. `test:types` runs all three.
+
+CI (`.github/workflows/ci.yml`, every push/PR): types, tests+coverage, size, check:pure; a deep-fuzz job with a random seed (printed in the job summary); an informational A/B bench vs the base ref.
 
 ## Publishing
 
-Push a `v*` tag → GitHub Actions (`.github/workflows/publish.yml`) runs `tsc --noEmit`, `bun test`, then `bunx jsr publish`. **The published version lives in `jsr.json`** — bump it there (package.json's `version` is not what JSR publishes and has drifted). `jsr.json` only exposes `.` and `./svg` and excludes `benchmark_repo`, `src/examples`, `src/playground`.
+Push a `v*` tag → GitHub Actions (`.github/workflows/publish.yml`) runs `tsc --noEmit`, `bun test`, then `bunx jsr publish`. **The published version lives in `jsr.json`** — bump it there (package.json's `version` is not what JSR publishes and has drifted). `jsr.json` only exposes `.` and `./svg` and excludes `benchmark_repo`, `bench`, `src/examples`, `src/playground`, `src/testing`. The `release` skill walks through it.
 
 ## Architecture
 
@@ -84,14 +90,22 @@ Global event delegation: one `document`-level listener per event type in `DELEGA
 
 ## Tests
 
-`bun:test` with happy-dom. There is no global preload — **each test file registers the DOM itself**:
+`bun:test` with happy-dom, via the harness in `src/testing/` (not published). `bunfig.toml` preloads `src/testing/setup.ts`, which registers happy-dom, resets the DOM + execution-context stack before **every** test, and **fails any test that leaves the runtime dirty** (unbalanced push/pop, open batch, queued effects, leaked tracking/owner scope). New test files need no setup boilerplate.
 
-```ts
-import { GlobalRegistrator } from "@happy-dom/global-registrator";
-try { GlobalRegistrator.register(); } catch { /* already registered */ }
-```
+Fixtures (`import { ... } from "../../testing/mod"`):
 
-and resets shared module state in `beforeEach` (drain the execution-context stack via `popExecutionContext`, clear `document.body.innerHTML`). Follow this pattern in new test files.
+- `render(() => ui)` → `{ container, dispose, text, html, get, query, all }`. Runs the UI under a root owner so `dispose()` tears down every binding.
+- `fire.click/input/change/keydown/submit/...` — bubbling events that reach Fia's document-level delegation.
+- `trackLeaks()` / `expectNoLeaks(fn)` — records every effect/computed created (via the internal `setDevHook` in reactivity.ts) and reports any still subscribed after disposal, with creation stacks. Create long-lived signals *before* starting the tracker.
+- `checkProperty(name, { generate, check, shrink, show })` + `rng`/`shrinkArray`/`shrinkInt` — seeded property tests with greedy shrinking; failures print a replay command. Name such tests with "property" (CI's deep fuzz selects them with `-t property`). Existing: `reactivity/tests/graph.fuzz.test.ts` (DAG vs eager model), `control/each.fuzz.test.ts` (keyed reconciliation vs array model).
+
+When a property fails: replay the seed, decide library bug vs model bug, add a focused regression test, then fix (the `fuzz-repro` skill has the full procedure).
+
+## Claude Code harness (`.claude/`)
+
+- Hooks (`.claude/hooks/`, registered in `.claude/settings.json`): `guard.ts` blocks edits to generated/ratcheted files (docs/, dist/, coverage/, size-limits.json, coverage-thresholds.json); `related-tests.ts` runs the tests related to an edited `src/core`/`src/testing` file (plus check-pure) and feeds failures back; `stop-gate.ts` runs types/tests/size/check-pure before a turn ends when code changed (cached by diff hash, gives up after 3 blocked attempts).
+- Agents: `reactivity-reviewer` (scheduling/ownership/leaks/hot paths), `api-surface-reviewer` (entry points, type tests, tree-shaking, size).
+- Skills: `fuzz-repro`, `perf-check`, `release`.
 
 ## Other notes
 

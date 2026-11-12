@@ -7,6 +7,6 @@
     "incremental": true,
     "tsBuildInfoFile": "./tools.tsbuildinfo"
   },
-  "include": ["bench", "scripts/size.ts", "scripts/coverage-gate.ts", "scripts/check-pure.ts"],
+  "include": ["bench", "scripts/size.ts", "scripts/coverage-gate.ts", "scripts/check-pure.ts", ".claude/hooks"],
   "exclude": ["node_modules", "dist", "benchmark_repo", "bench/.results"]
 }
