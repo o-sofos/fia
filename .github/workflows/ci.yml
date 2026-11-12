@@ -1,0 +1,55 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Types, tests, coverage, size
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - run: bun run test:types
+      # Runs the full suite (with the runtime-idle checks from the preload)
+      # and enforces coverage-thresholds.json on totals.
+      - run: bun run test:coverage
+      - run: bun run size
+
+  fuzz:
+    name: Deep fuzz (random seed)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      # A fresh seed every run explores new cases; a failure prints the case
+      # seed and an exact replay command.
+      - name: Property tests ×50
+        run: |
+          seed=$(( (RANDOM << 15) | RANDOM ))
+          echo "FIA_FUZZ_SEED=$seed" | tee -a "$GITHUB_STEP_SUMMARY"
+          FIA_FUZZ_SEED=$seed FIA_FUZZ_SCALE=50 bun test src/core --test-name-pattern property
+
+  bench:
+    name: Benchmarks (informational)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      # Shared runners are noisy: this reports, it doesn't gate. Run
+      # `bun run bench --against <ref> --fail-on-regression` locally to gate.
+      - name: A/B against base
+        run: |
+          base=${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || 'HEAD~1' }}
+          bun run bench --quick --against "$base" --threshold 10 | tee bench.txt
+          { echo '### Benchmarks vs `'"$base"'`'; echo '```'; cat bench.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
