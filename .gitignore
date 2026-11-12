@@ -31,3 +31,6 @@ benchmark_repo
 
 # Benchmark baselines (machine-specific)
 bench/.results
+
+# Personal Claude Code settings
+.claude/settings.local.json
