@@ -1,6 +1,6 @@
 
 import { describe, expect, test } from "bun:test";
-import { $, $e, Mut } from "../reactivity";
+import { $, $e, batch, Mut } from "../reactivity";
 
 describe("Stores (Objects)", () => {
     test("should be readonly by default", () => {
@@ -112,5 +112,27 @@ describe("Stores (Arrays)", () => {
         expect(count).toBe(1);
         list.pop();
         expect(count).toBe(2);
+    });
+});
+
+describe("Store element identity", () => {
+    test("a nested object keeps its proxy when it moves to another index", () => {
+        const list = $(Mut([{ name: "a", done: false }, { name: "b", done: false }]));
+        const b = list[1];
+        const seen: boolean[] = [];
+        $e(() => {
+            seen.push(b.done);
+        });
+
+        batch(() => {
+            list.reverse();
+        });
+        expect(list[0]).toBe(b);
+
+        // A write through the new index must reach bindings made through the old
+        // one. (Nested objects of a Mut array are writable at runtime but typed
+        // readonly, hence the cast.)
+        (list[0] as { done: boolean }).done = true;
+        expect(seen).toEqual([false, true]);
     });
 });

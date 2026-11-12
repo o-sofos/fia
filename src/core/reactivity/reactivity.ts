@@ -896,10 +896,11 @@ function createStore<T extends object>(initial: T, mutability: Set<PropertyKey> 
 
       Reflect.set(target, key, rawValue, receiver);
 
-      // Clear cached proxy for this key if it was an object
-      if (oldValue !== null && typeof oldValue === "object") {
-        proxyCache.delete(oldValue);
-      }
+      // Keep oldValue's cached proxy: the cache is keyed by the raw object, not
+      // the slot, and an object overwritten here may still live at another
+      // index (splice/reverse/sort). Dropping it would mint a second proxy with
+      // its own property nodes, silently cutting off bindings made through the
+      // first one. The WeakMap releases it once the object is unreachable.
 
       const node = nodes.get(key);
       if (node) {
