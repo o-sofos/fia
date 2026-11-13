@@ -173,7 +173,7 @@ export function looksLikeImgSrc(value: unknown): boolean {
  * });
  * ```
  */
-export type OnMountCallback = (cb: () => void) => void;
+export type OnMountCallback = (cb: () => void | (() => void)) => void;
 
 /**
  * Callback for creating child elements within a parent.

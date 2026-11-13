@@ -23,7 +23,7 @@
 // REACTIVITY
 // =============================================================================
 
-export { $, signal, $e, batch, Mut } from "./reactivity/reactivity";
+export { $, signal, $e, batch, Mut, onCleanup, untrack, root } from "./reactivity/reactivity";
 export type { Signal, WritableSignal, Mutable } from "./reactivity/reactivity";
 
 // =============================================================================

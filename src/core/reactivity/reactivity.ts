@@ -145,13 +145,51 @@ export interface Owner {
 let currentOwner: Owner | undefined = undefined;
 
 /**
- * Register a cleanup with the current owner. No-op at the root (unowned).
- * @internal
+ * Run `fn` when the current scope is torn down: before an effect re-runs or
+ * when it's disposed, when a Show/Match branch is swapped out, when an Each
+ * item leaves the list, or when a `root`/`mount` is disposed. Use it to
+ * release timers, subscriptions and listeners a component set up.
+ *
+ * ```ts
+ * $e(() => {
+ *   const id = setInterval(tick, delay.value);
+ *   onCleanup(() => clearInterval(id));
+ * });
+ * ```
+ *
+ * Outside any scope there is nothing to attach to and `fn` never runs.
  */
 export function onCleanup(fn: () => void): void {
   if (currentOwner) {
     (currentOwner.owned ??= []).push(fn);
   }
+}
+
+/**
+ * The scope currently collecting effects/cleanups, if any.
+ * @internal
+ */
+export function getOwner(): Owner | undefined {
+  return currentOwner;
+}
+
+/**
+ * Create an independent scope. Everything created inside `fn` (effects,
+ * computeds, control flow, cleanups) is disposed by the `dispose` function
+ * passed to `fn`, and not by any enclosing scope. Reads inside `fn` are not
+ * tracked.
+ *
+ * ```ts
+ * const stop = root((dispose) => {
+ *   $e(() => console.log(count.value));
+ *   return dispose;
+ * });
+ * stop(); // the effect stops
+ * ```
+ */
+export function root<T>(fn: (dispose: () => void) => T): T {
+  const owner: Owner = { owned: undefined };
+  return runWithOwner(owner, () => untrack(() => fn(() => disposeOwner(owner))));
 }
 
 /**
@@ -182,8 +220,15 @@ export function disposeOwner(owner: Owner): void {
 }
 
 /**
- * Run `fn` without tracking any reactive reads.
- * @internal
+ * Run `fn` without tracking any reactive reads: inside an effect or computed,
+ * signals read in `fn` don't become dependencies.
+ *
+ * ```ts
+ * $e(() => {
+ *   // Re-runs when `query` changes, not when `settings` does
+ *   search(query.value, untrack(() => settings.value));
+ * });
+ * ```
  */
 export function untrack<T>(fn: () => T): T {
   const prevSubscriber = activeSubscriber;

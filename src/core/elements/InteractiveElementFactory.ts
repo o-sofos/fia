@@ -1,3 +1,4 @@
+import { scheduleMount, type MountCallback } from "./mount-callbacks";
 import {
   pushExecutionContext,
   popExecutionContext,
@@ -141,7 +142,7 @@ export function createInteractiveElement<K extends keyof HTMLElementTagNameMap>(
     }
 
     // Execute children with implicit fragment batching
-    const mountCallbacks: (() => void)[] = [];
+    const mountCallbacks: MountCallback[] = [];
     const onMount: OnMountCallback = (cb) => mountCallbacks.push(cb);
 
     if (children) {
@@ -158,14 +159,9 @@ export function createInteractiveElement<K extends keyof HTMLElementTagNameMap>(
     // Mount to current context
     getCurrentExecutionContext().appendChild(element);
 
-    // Execute onMount callbacks after element is in DOM
-    if (mountCallbacks.length > 0) {
-      requestAnimationFrame(() => {
-        for (const cb of mountCallbacks) {
-          cb();
-        }
-      });
-    }
+    // Run onMount callbacks once the element is in the document
+
+    if (mountCallbacks.length > 0) scheduleMount(element, mountCallbacks);
 
     return element;
   }) as InteractiveElementFactory<K>;

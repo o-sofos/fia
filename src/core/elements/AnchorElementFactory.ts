@@ -1,3 +1,4 @@
+import { scheduleMount, type MountCallback } from "./mount-callbacks";
 import {
   pushExecutionContext,
   popExecutionContext,
@@ -124,7 +125,7 @@ export function createAnchorElement(): AnchorElementFactory {
     }
 
     // Execute children
-    const mountCallbacks: (() => void)[] = [];
+    const mountCallbacks: MountCallback[] = [];
     const onMount: OnMountCallback = (cb) => mountCallbacks.push(cb);
 
     if (children) {
@@ -140,13 +141,9 @@ export function createAnchorElement(): AnchorElementFactory {
 
     getCurrentExecutionContext().appendChild(element);
 
-    if (mountCallbacks.length > 0) {
-      requestAnimationFrame(() => {
-        for (const cb of mountCallbacks) {
-          cb();
-        }
-      });
-    }
+    // Run onMount callbacks once the element is in the document
+
+    if (mountCallbacks.length > 0) scheduleMount(element, mountCallbacks);
 
     return element;
   }) as AnchorElementFactory;
