@@ -36,31 +36,35 @@ const handlerMap = new WeakMap<Element, Record<string, EventListener>>();
 const attachedEvents = new Set<string>();
 
 /**
- * Global event handler that simulates bubbling.
+ * Global event handler that simulates bubbling over the delegated handlers.
+ *
+ * Walks `composedPath()` (not `parentElement`) so handlers inside open shadow
+ * roots fire too, honours stopPropagation/stopImmediatePropagation, and
+ * restores `currentTarget` afterwards so handlers that keep the event see
+ * the native value.
  */
 function globalListener(event: Event) {
-    let target = event.target as Element | null;
     const eventType = event.type;
+    const path = event.composedPath();
+    let patched = false;
 
-    // Bubble up the DOM
-    while (target) {
-        const handlers = handlerMap.get(target);
-        if (handlers && handlers[eventType]) {
-            // Mock currentTarget for the handler
-            // We use defineProperty because currentTarget is read-only
-            Object.defineProperty(event, "currentTarget", {
-                configurable: true,
-                value: target,
-            });
+    try {
+        for (let i = 0; i < path.length; i++) {
+            const target = path[i];
+            if (!(target instanceof Element)) continue;
+            const handlers = handlerMap.get(target);
+            const handler = handlers?.[eventType];
+            if (!handler) continue;
 
-            // Invoke handler
-            handlers[eventType](event);
+            // currentTarget is read-only on Event; shadow it per handler
+            Object.defineProperty(event, "currentTarget", { configurable: true, value: target });
+            patched = true;
+            handler(event);
 
-            // Stop propagation if requested (optional simulation, 
-            // strict DOM bubbling keeps going unless stopPropagation is called on event)
             if (event.cancelBubble) break;
         }
-        target = target.parentElement;
+    } finally {
+        if (patched) delete (event as { currentTarget?: unknown }).currentTarget;
     }
 }
 
