@@ -1,5 +1,5 @@
 
-import type { MaybeSignal } from "../../reactivity/reactivity.ts";
+import type { Bindable } from "../../reactivity/reactivity.ts";
 import type { GlobalAttributes, StrictUnion } from "./common.ts";
 import type {
     Target,
@@ -23,23 +23,23 @@ import type {
  */
 export interface AnchorAttrs extends GlobalAttributes {
     /** URL of the linked resource. */
-    href?: MaybeSignal<string>;
+    href?: Bindable<string>;
     /** Browsing context for the linked resource. */
-    target?: MaybeSignal<Target>;
+    target?: Bindable<Target>;
     /** Relationship to the linked resource. */
-    rel?: MaybeSignal<AnchorRel>;
+    rel?: Bindable<AnchorRel>;
     /** Prompts the user to download the linked resource. */
-    download?: MaybeSignal<string | boolean>;
+    download?: Bindable<string | boolean>;
     /** Language of the linked resource. */
-    hreflang?: MaybeSignal<string>;
+    hreflang?: Bindable<string>;
     /** Media type of the linked resource. */
-    type?: MaybeSignal<string>;
+    type?: Bindable<string>;
     /** Referrer policy for fetches initiated by the element. */
-    referrerPolicy?: MaybeSignal<ReferrerPolicy>;
+    referrerPolicy?: Bindable<ReferrerPolicy>;
     /** URLs to ping for tracking. */
-    ping?: MaybeSignal<string>;
+    ping?: Bindable<string>;
     /** Experimental attribution source. */
-    attributionSrc?: MaybeSignal<string>;
+    attributionSrc?: Bindable<string>;
 }
 
 // =============================================================================
@@ -51,35 +51,35 @@ export interface AnchorAttrs extends GlobalAttributes {
  */
 export interface ImgAttrs extends GlobalAttributes {
     /** Source URL of the image. */
-    src?: MaybeSignal<string>;
+    src?: Bindable<string>;
     /** Alternate text for the image. */
-    alt?: MaybeSignal<string>;
+    alt?: Bindable<string>;
     /** Intrinsic width of the image. */
-    width?: MaybeSignal<number | string>;
+    width?: Bindable<number | string>;
     /** Intrinsic height of the image. */
-    height?: MaybeSignal<number | string>;
+    height?: Bindable<number | string>;
     /** How the browser should load the image. */
-    loading?: MaybeSignal<Loading>;
+    loading?: Bindable<Loading>;
     /** Image decoding hint. */
-    decoding?: MaybeSignal<Decoding>;
+    decoding?: Bindable<Decoding>;
     /** CORS settings for the image. */
-    crossOrigin?: MaybeSignal<CrossOrigin>;
+    crossOrigin?: Bindable<CrossOrigin>;
     /** Set of source URLs for responsive display. */
-    srcset?: MaybeSignal<string>;
+    srcset?: Bindable<string>;
     /** Media conditions for selecting a source. */
-    sizes?: MaybeSignal<string>;
+    sizes?: Bindable<string>;
     /** Name of an image map to use. */
-    useMap?: MaybeSignal<string>;
+    useMap?: Bindable<string>;
     /** Whether the image is a server-side image map. */
-    isMap?: MaybeSignal<boolean>;
+    isMap?: Bindable<boolean>;
     /** Referrer policy for fetches. */
-    referrerPolicy?: MaybeSignal<ReferrerPolicy>;
+    referrerPolicy?: Bindable<ReferrerPolicy>;
     /** Fetch priority hint. */
-    fetchPriority?: MaybeSignal<FetchPriority>;
+    fetchPriority?: Bindable<FetchPriority>;
     /** Experimental element timing. */
-    elementTiming?: MaybeSignal<string>;
+    elementTiming?: Bindable<string>;
     /** Experimental attribution source. */
-    attributionSrc?: MaybeSignal<string>;
+    attributionSrc?: Bindable<string>;
 }
 
 /**
@@ -87,37 +87,37 @@ export interface ImgAttrs extends GlobalAttributes {
  */
 export interface VideoAttrs extends GlobalAttributes {
     /** Source URL of the video. */
-    src?: MaybeSignal<string>;
+    src?: Bindable<string>;
     /** Display width of the video. */
-    width?: MaybeSignal<number | string>;
+    width?: Bindable<number | string>;
     /** Display height of the video. */
-    height?: MaybeSignal<number | string>;
+    height?: Bindable<number | string>;
     /** URL of an image to show while downloading. */
-    poster?: MaybeSignal<string>;
+    poster?: Bindable<string>;
     /** Hint for how much of the video to preload. */
-    preload?: MaybeSignal<Preload>;
+    preload?: Bindable<Preload>;
     /** Whether to play automatically. */
-    autoplay?: MaybeSignal<boolean>;
+    autoplay?: Bindable<boolean>;
     /** Whether to loop the video. */
-    loop?: MaybeSignal<boolean>;
+    loop?: Bindable<boolean>;
     /** Whether to mute the audio. */
-    muted?: MaybeSignal<boolean>;
+    muted?: Bindable<boolean>;
     /** Whether to show playback controls. */
-    controls?: MaybeSignal<boolean>;
+    controls?: Bindable<boolean>;
     /** Whether to play inline on mobile. */
-    playsInline?: MaybeSignal<boolean>;
+    playsInline?: Bindable<boolean>;
     /** CORS settings for valid requests. */
-    crossOrigin?: MaybeSignal<CrossOrigin>;
+    crossOrigin?: Bindable<CrossOrigin>;
     /** Initial playback position. */
-    currentTime?: MaybeSignal<number>;
+    currentTime?: Bindable<number>;
     /** Audio volume (0.0 to 1.0). */
-    volume?: MaybeSignal<number>;
+    volume?: Bindable<number>;
     /** Prevents Picture-in-Picture mode. */
-    disablePictureInPicture?: MaybeSignal<boolean>;
+    disablePictureInPicture?: Bindable<boolean>;
     /** Prevents remote playback (casting). */
-    disableRemotePlayback?: MaybeSignal<boolean>;
+    disableRemotePlayback?: Bindable<boolean>;
     /** Controls to display/hide. */
-    controlsList?: MaybeSignal<ControlsList>;
+    controlsList?: Bindable<ControlsList>;
 }
 
 /**
@@ -125,27 +125,27 @@ export interface VideoAttrs extends GlobalAttributes {
  */
 export interface AudioAttrs extends GlobalAttributes {
     /** Source URL of the audio. */
-    src?: MaybeSignal<string>;
+    src?: Bindable<string>;
     /** Hint for how much of the audio to preload. */
-    preload?: MaybeSignal<Preload>;
+    preload?: Bindable<Preload>;
     /** Whether to play automatically. */
-    autoplay?: MaybeSignal<boolean>;
+    autoplay?: Bindable<boolean>;
     /** Whether to loop the audio. */
-    loop?: MaybeSignal<boolean>;
+    loop?: Bindable<boolean>;
     /** Whether to mute the audio. */
-    muted?: MaybeSignal<boolean>;
+    muted?: Bindable<boolean>;
     /** Whether to show playback controls. */
-    controls?: MaybeSignal<boolean>;
+    controls?: Bindable<boolean>;
     /** CORS settings. */
-    crossOrigin?: MaybeSignal<CrossOrigin>;
+    crossOrigin?: Bindable<CrossOrigin>;
     /** Initial playback position. */
-    currentTime?: MaybeSignal<number>;
+    currentTime?: Bindable<number>;
     /** Audio volume (0.0 to 1.0). */
-    volume?: MaybeSignal<number>;
+    volume?: Bindable<number>;
     /** Prevents remote playback. */
-    disableRemotePlayback?: MaybeSignal<boolean>;
+    disableRemotePlayback?: Bindable<boolean>;
     /** Controls to display/hide. */
-    controlsList?: MaybeSignal<ControlsList>;
+    controlsList?: Bindable<ControlsList>;
 }
 
 /**
@@ -153,16 +153,16 @@ export interface AudioAttrs extends GlobalAttributes {
  */
 export interface BaseSourceAttrs extends GlobalAttributes {
     /** MIME type of the resource. */
-    type?: MaybeSignal<string>;
+    type?: Bindable<string>;
     /** Width of the image resource. */
-    width?: MaybeSignal<number>;
+    width?: Bindable<number>;
     /** Height of the image resource. */
-    height?: MaybeSignal<number>;
+    height?: Bindable<number>;
 }
 
 export interface SourceMediaAttrs extends BaseSourceAttrs {
     /** Address of the media resource. */
-    src: MaybeSignal<string>;
+    src: Bindable<string>;
     srcset?: never;
     sizes?: never;
     media?: never;
@@ -171,11 +171,11 @@ export interface SourceMediaAttrs extends BaseSourceAttrs {
 export interface SourceImageAttrs extends BaseSourceAttrs {
     src?: never;
     /** Source set for responsive images. */
-    srcset: MaybeSignal<string>;
+    srcset: Bindable<string>;
     /** Media conditions for image sources. */
-    sizes?: MaybeSignal<string>;
+    sizes?: Bindable<string>;
     /** Media query for the resource. */
-    media?: MaybeSignal<string>;
+    media?: Bindable<string>;
 }
 
 /**
@@ -188,25 +188,25 @@ export type SourceAttrs = StrictUnion<SourceMediaAttrs | SourceImageAttrs>;
  */
 export interface BaseTrackAttrs extends GlobalAttributes {
     /** Address of the track. */
-    src?: MaybeSignal<string>;
+    src?: Bindable<string>;
     /** User-readable title of the track. */
-    label?: MaybeSignal<string>;
+    label?: Bindable<string>;
     /** Whether to enable the track by default. */
-    default?: MaybeSignal<boolean>;
+    default?: Bindable<boolean>;
 }
 
 export interface TrackSubtitlesAttrs extends BaseTrackAttrs {
     /** Kind of text track. */
-    kind: MaybeSignal<"subtitles">;
+    kind: Bindable<"subtitles">;
     /** Language of the track text. */
-    srclang: MaybeSignal<string>;
+    srclang: Bindable<string>;
 }
 
 export interface TrackOtherAttrs extends BaseTrackAttrs {
     /** Kind of text track. */
-    kind?: MaybeSignal<"captions" | "descriptions" | "chapters" | "metadata">;
+    kind?: Bindable<"captions" | "descriptions" | "chapters" | "metadata">;
     /** Language of the track text. */
-    srclang?: MaybeSignal<string>;
+    srclang?: Bindable<string>;
 }
 
 /**
@@ -219,9 +219,9 @@ export type TrackAttrs = StrictUnion<TrackSubtitlesAttrs | TrackOtherAttrs>;
  */
 export interface CanvasAttrs extends GlobalAttributes {
     /** Coordinate space width. */
-    width?: MaybeSignal<number>;
+    width?: Bindable<number>;
     /** Coordinate space height. */
-    height?: MaybeSignal<number>;
+    height?: Bindable<number>;
 }
 
 // =============================================================================
@@ -233,29 +233,29 @@ export interface CanvasAttrs extends GlobalAttributes {
  */
 export interface IframeAttrs extends GlobalAttributes {
     /** Address of the resource. */
-    src?: MaybeSignal<string>;
+    src?: Bindable<string>;
     /** HTML content of the page to show. */
-    srcdoc?: MaybeSignal<string>;
+    srcdoc?: Bindable<string>;
     /** Name of the browsing context. */
-    name?: MaybeSignal<string>;
+    name?: Bindable<string>;
     /** Width of the frame. */
-    width?: MaybeSignal<number | string>;
+    width?: Bindable<number | string>;
     /** Height of the frame. */
-    height?: MaybeSignal<number | string>;
+    height?: Bindable<number | string>;
     /** How the browser should load the iframe. */
-    loading?: MaybeSignal<Loading>;
+    loading?: Bindable<Loading>;
     /** Security rules for nested content. */
-    sandbox?: MaybeSignal<Sandbox>;
+    sandbox?: Bindable<Sandbox>;
     /** Feature policy to apply. */
-    allow?: MaybeSignal<string>;
+    allow?: Bindable<string>;
     /** Referrer policy for fetches. */
-    referrerPolicy?: MaybeSignal<ReferrerPolicy>;
+    referrerPolicy?: Bindable<ReferrerPolicy>;
     /** Whether to allow fullscreen mode. */
-    allowFullscreen?: MaybeSignal<boolean>;
+    allowFullscreen?: Bindable<boolean>;
     /** Whether to load without specific credentials. */
-    credentialless?: MaybeSignal<boolean>;
+    credentialless?: Bindable<boolean>;
     /** Content Security Policy to apply. */
-    csp?: MaybeSignal<string>;
+    csp?: Bindable<string>;
 }
 
 /**
@@ -263,13 +263,13 @@ export interface IframeAttrs extends GlobalAttributes {
  */
 export interface EmbedAttrs extends GlobalAttributes {
     /** Address of the resource. */
-    src?: MaybeSignal<string>;
+    src?: Bindable<string>;
     /** MIME type of the resource. */
-    type?: MaybeSignal<string>;
+    type?: Bindable<string>;
     /** Display width. */
-    width?: MaybeSignal<number | string>;
+    width?: Bindable<number | string>;
     /** Display height. */
-    height?: MaybeSignal<number | string>;
+    height?: Bindable<number | string>;
 }
 
 /**
@@ -277,17 +277,17 @@ export interface EmbedAttrs extends GlobalAttributes {
  */
 export interface ObjectAttrs extends GlobalAttributes {
     /** Address of the resource. */
-    data?: MaybeSignal<string>;
+    data?: Bindable<string>;
     /** MIME type of the resource. */
-    type?: MaybeSignal<string>;
+    type?: Bindable<string>;
     /** Name of the browsing context. */
-    name?: MaybeSignal<string>;
+    name?: Bindable<string>;
     /** Display width. */
-    width?: MaybeSignal<number | string>;
+    width?: Bindable<number | string>;
     /** Display height. */
-    height?: MaybeSignal<number | string>;
+    height?: Bindable<number | string>;
     /** ID of the form the element belongs to. */
-    form?: MaybeSignal<string>;
+    form?: Bindable<string>;
     /** Name of image map to use. */
-    useMap?: MaybeSignal<string>;
+    useMap?: Bindable<string>;
 }

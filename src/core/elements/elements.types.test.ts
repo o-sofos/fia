@@ -20,6 +20,7 @@ import {
   form,
   dialog,
 } from "./elements";
+import { $, Mut } from "../reactivity/reactivity";
 
 // =============================================================================
 // VALID USAGE (Should compile)
@@ -473,4 +474,16 @@ input({
       void e.message;
     },
   });
+}
+
+// Bindable: a bound attribute may go null/undefined (removes it); static
+// values and signal payloads must still match the attribute's type
+{
+  const maybeTitle = $(Mut("x" as string | null));
+  div({ title: maybeTitle });
+  div({ title: $(Mut(undefined as string | undefined)) });
+  // @ts-expect-error - a number signal isn't a title
+  div({ title: $(Mut(5)) });
+  // @ts-expect-error - wrong static type
+  div({ title: 5 });
 }

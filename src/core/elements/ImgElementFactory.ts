@@ -5,7 +5,6 @@ import {
   type ContextualValidateProps,
   type ElementProps,
   type LooseElementProps,
-  looksLikeImgSrc,
 } from "./elements";
 import type { SmartElement } from "./SmartElement";
 
@@ -60,8 +59,8 @@ export function createImgElement(): ImgElementFactory {
 
     if (arg1 === undefined) {
       // img() - empty
-    } else if (typeof arg1 === "string" && looksLikeImgSrc(arg1)) {
-      // First arg is src
+    } else if (typeof arg1 === "string") {
+      // First string arg is always the src (the types promise it)
       src = arg1;
 
       if (arg2 === undefined) {

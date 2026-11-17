@@ -1,4 +1,4 @@
-import type { MaybeSignal } from "../../reactivity/reactivity.ts";
+import type { Bindable } from "../../reactivity/reactivity.ts";
 import type { GlobalAttributes, StrictUnion } from "./common.ts";
 import type {
     Autocomplete,
@@ -18,17 +18,17 @@ import type {
  */
 export interface BaseInputAttrs extends GlobalAttributes {
     /** Name of the form control. Submitted with the form. */
-    name?: MaybeSignal<string>;
+    name?: Bindable<string>;
     /** The control is unavailable for interaction. */
-    disabled?: MaybeSignal<boolean>;
+    disabled?: Bindable<boolean>;
     /** ID of the form the element belongs to. */
-    form?: MaybeSignal<string>;
+    form?: Bindable<string>;
     /** Automatically focus the element when the page loads. */
-    autofocus?: MaybeSignal<boolean>;
+    autofocus?: Bindable<boolean>;
     /** Hint for form autofill feature. */
-    autocomplete?: MaybeSignal<Autocomplete>;
+    autocomplete?: Bindable<Autocomplete>;
     /** ID of a `<datalist>` element. */
-    list?: MaybeSignal<string>;
+    list?: Bindable<string>;
 }
 
 // Text-like inputs
@@ -37,27 +37,27 @@ export interface BaseInputAttrs extends GlobalAttributes {
  */
 export interface InputTextAttrs extends BaseInputAttrs {
     /** Type of the input control. Defaults to "text". */
-    type?: MaybeSignal<"text" | "password" | "search" | "tel" | "url">;
+    type?: Bindable<"text" | "password" | "search" | "tel" | "url">;
     /** Current value of the control. */
-    value?: MaybeSignal<string | number>;
+    value?: Bindable<string | number>;
     /** Initial value of the control. */
-    defaultValue?: MaybeSignal<string>;
+    defaultValue?: Bindable<string>;
     /** Text that appears in the form control when it has no value set. */
-    placeholder?: MaybeSignal<string>;
+    placeholder?: Bindable<string>;
     /** The user cannot edit the value. */
-    readOnly?: MaybeSignal<boolean>;
+    readOnly?: Bindable<boolean>;
     /** The value is required for form submission. */
-    required?: MaybeSignal<boolean>;
+    required?: Bindable<boolean>;
     /** Minimum length of value. */
-    minLength?: MaybeSignal<number>;
+    minLength?: Bindable<number>;
     /** Maximum length of value. */
-    maxLength?: MaybeSignal<number>;
+    maxLength?: Bindable<number>;
     /** Regex pattern the value must match. */
-    pattern?: MaybeSignal<string>;
+    pattern?: Bindable<string>;
     /** Size of the control. */
-    size?: MaybeSignal<number>;
+    size?: Bindable<number>;
     /** Directionality of the element's text. */
-    dirname?: MaybeSignal<string>;
+    dirname?: Bindable<string>;
 }
 
 /**
@@ -65,27 +65,27 @@ export interface InputTextAttrs extends BaseInputAttrs {
  */
 export interface InputEmailAttrs extends BaseInputAttrs {
     /** Type of the input control. */
-    type: MaybeSignal<"email">;
+    type: Bindable<"email">;
     /** Current value of the control. */
-    value?: MaybeSignal<string>;
+    value?: Bindable<string>;
     /** Initial value of the control. */
-    defaultValue?: MaybeSignal<string>;
+    defaultValue?: Bindable<string>;
     /** Text that appears in the form control when it has no value set. */
-    placeholder?: MaybeSignal<string>;
+    placeholder?: Bindable<string>;
     /** The user cannot edit the value. */
-    readOnly?: MaybeSignal<boolean>;
+    readOnly?: Bindable<boolean>;
     /** The value is required for form submission. */
-    required?: MaybeSignal<boolean>;
+    required?: Bindable<boolean>;
     /** Minimum length of value. */
-    minLength?: MaybeSignal<number>;
+    minLength?: Bindable<number>;
     /** Maximum length of value. */
-    maxLength?: MaybeSignal<number>;
+    maxLength?: Bindable<number>;
     /** Regex pattern the value must match. */
-    pattern?: MaybeSignal<string>;
+    pattern?: Bindable<string>;
     /** Size of the control. */
-    size?: MaybeSignal<number>;
+    size?: Bindable<number>;
     /** Whether to allow multiple values. */
-    multiple?: MaybeSignal<boolean>;
+    multiple?: Bindable<boolean>;
 }
 
 // Numeric
@@ -94,23 +94,23 @@ export interface InputEmailAttrs extends BaseInputAttrs {
  */
 export interface InputNumberAttrs extends BaseInputAttrs {
     /** Type of the input control. */
-    type: MaybeSignal<"number">;
+    type: Bindable<"number">;
     /** Current value of the control. */
-    value?: MaybeSignal<number | string>;
+    value?: Bindable<number | string>;
     /** Initial value of the control. */
-    defaultValue?: MaybeSignal<number | string>;
+    defaultValue?: Bindable<number | string>;
     /** Text that appears in the form control when it has no value set. */
-    placeholder?: MaybeSignal<string>;
+    placeholder?: Bindable<string>;
     /** The user cannot edit the value. */
-    readOnly?: MaybeSignal<boolean>;
+    readOnly?: Bindable<boolean>;
     /** The value is required for form submission. */
-    required?: MaybeSignal<boolean>;
+    required?: Bindable<boolean>;
     /** Minimum value. */
-    min?: MaybeSignal<string | number>;
+    min?: Bindable<string | number>;
     /** Maximum value. */
-    max?: MaybeSignal<string | number>;
+    max?: Bindable<string | number>;
     /** Incremental bounds for numeric values. */
-    step?: MaybeSignal<string | number>;
+    step?: Bindable<string | number>;
 }
 
 /**
@@ -118,17 +118,17 @@ export interface InputNumberAttrs extends BaseInputAttrs {
  */
 export interface InputRangeAttrs extends BaseInputAttrs {
     /** Type of the input control. */
-    type: MaybeSignal<"range">;
+    type: Bindable<"range">;
     /** Current value of the control. */
-    value?: MaybeSignal<number | string>;
+    value?: Bindable<number | string>;
     /** Initial value of the control. */
-    defaultValue?: MaybeSignal<number | string>;
+    defaultValue?: Bindable<number | string>;
     /** Minimum value. */
-    min?: MaybeSignal<string | number>;
+    min?: Bindable<string | number>;
     /** Maximum value. */
-    max?: MaybeSignal<string | number>;
+    max?: Bindable<string | number>;
     /** Incremental bounds. */
-    step?: MaybeSignal<string | number>;
+    step?: Bindable<string | number>;
 }
 
 // Time/Date
@@ -137,21 +137,21 @@ export interface InputRangeAttrs extends BaseInputAttrs {
  */
 export interface InputDateAttrs extends BaseInputAttrs {
     /** Type of the input control. */
-    type: MaybeSignal<"date" | "datetime-local" | "month" | "time" | "week">;
+    type: Bindable<"date" | "datetime-local" | "month" | "time" | "week">;
     /** Current value of the control. */
-    value?: MaybeSignal<string>;
+    value?: Bindable<string>;
     /** Initial value of the control. */
-    defaultValue?: MaybeSignal<string>;
+    defaultValue?: Bindable<string>;
     /** The user cannot edit the value. */
-    readOnly?: MaybeSignal<boolean>;
+    readOnly?: Bindable<boolean>;
     /** The value is required for form submission. */
-    required?: MaybeSignal<boolean>;
+    required?: Bindable<boolean>;
     /** Minimum value. */
-    min?: MaybeSignal<string>;
+    min?: Bindable<string>;
     /** Maximum value. */
-    max?: MaybeSignal<string>;
+    max?: Bindable<string>;
     /** Incremental bounds. */
-    step?: MaybeSignal<string | number>;
+    step?: Bindable<string | number>;
 }
 
 // Boolean
@@ -160,17 +160,17 @@ export interface InputDateAttrs extends BaseInputAttrs {
  */
 export interface InputCheckboxAttrs extends BaseInputAttrs {
     /** Type of the input control. */
-    type: MaybeSignal<"checkbox" | "radio">;
+    type: Bindable<"checkbox" | "radio">;
     /** Whether the control is checked. */
-    checked?: MaybeSignal<boolean>;
+    checked?: Bindable<boolean>;
     /** The initial checked state. */
-    defaultChecked?: MaybeSignal<boolean>;
+    defaultChecked?: Bindable<boolean>;
     /** Visual indeterminate state for checkboxes. */
-    indeterminate?: MaybeSignal<boolean>;
+    indeterminate?: Bindable<boolean>;
     /** The value is required (must be checked). */
-    required?: MaybeSignal<boolean>;
+    required?: Bindable<boolean>;
     /** Value submitted when checked. */
-    value?: MaybeSignal<string>;
+    value?: Bindable<string>;
 }
 
 // File
@@ -179,15 +179,15 @@ export interface InputCheckboxAttrs extends BaseInputAttrs {
  */
 export interface InputFileAttrs extends BaseInputAttrs {
     /** Type of the input control. */
-    type: MaybeSignal<"file">;
+    type: Bindable<"file">;
     /** File types accepted by the file upload. */
-    accept?: MaybeSignal<string>;
+    accept?: Bindable<string>;
     /** Whether to allow multiple files. */
-    multiple?: MaybeSignal<boolean>;
+    multiple?: Bindable<boolean>;
     /** The value is required. */
-    required?: MaybeSignal<boolean>;
+    required?: Bindable<boolean>;
     /** Media capture source. */
-    capture?: MaybeSignal<"user" | "environment" | boolean>;
+    capture?: Bindable<"user" | "environment" | boolean>;
     /** File input value is uncontrolled/read-only via value prop. */
     value?: never;
 }
@@ -198,11 +198,11 @@ export interface InputFileAttrs extends BaseInputAttrs {
  */
 export interface InputColorAttrs extends BaseInputAttrs {
     /** Type of the input control. */
-    type: MaybeSignal<"color">;
+    type: Bindable<"color">;
     /** Current value of the control (hex color). */
-    value?: MaybeSignal<string>;
+    value?: Bindable<string>;
     /** Initial value of the control. */
-    defaultValue?: MaybeSignal<string>;
+    defaultValue?: Bindable<string>;
 }
 
 // Hidden
@@ -211,9 +211,9 @@ export interface InputColorAttrs extends BaseInputAttrs {
  */
 export interface InputHiddenAttrs extends BaseInputAttrs {
     /** Type of the input control. */
-    type: MaybeSignal<"hidden">;
+    type: Bindable<"hidden">;
     /** Current value of the control. */
-    value?: MaybeSignal<string | number>;
+    value?: Bindable<string | number>;
 }
 
 // Buttons
@@ -222,19 +222,19 @@ export interface InputHiddenAttrs extends BaseInputAttrs {
  */
 export interface InputButtonAttrs extends BaseInputAttrs {
     /** Type of the input control. */
-    type: MaybeSignal<"submit" | "reset" | "button">;
+    type: Bindable<"submit" | "reset" | "button">;
     /** Button label. */
-    value?: MaybeSignal<string>;
+    value?: Bindable<string>;
     /** URL for form submission. */
-    formAction?: MaybeSignal<string>;
+    formAction?: Bindable<string>;
     /** HTTP method for form submission. */
-    formMethod?: MaybeSignal<FormMethod>;
+    formMethod?: Bindable<FormMethod>;
     /** Encoding type for form submission. */
-    formEnctype?: MaybeSignal<FormEnctype>;
+    formEnctype?: Bindable<FormEnctype>;
     /** Bypasses form validation. */
-    formNoValidate?: MaybeSignal<boolean>;
+    formNoValidate?: Bindable<boolean>;
     /** Browsing context for form submission. */
-    formTarget?: MaybeSignal<Target>;
+    formTarget?: Bindable<Target>;
 }
 
 /**
@@ -242,25 +242,25 @@ export interface InputButtonAttrs extends BaseInputAttrs {
  */
 export interface InputImageAttrs extends BaseInputAttrs {
     /** Type of the input control. */
-    type: MaybeSignal<"image">;
+    type: Bindable<"image">;
     /** Source URL of the image. */
-    src?: MaybeSignal<string>;
+    src?: Bindable<string>;
     /** Alternate text for the image. */
-    alt?: MaybeSignal<string>;
+    alt?: Bindable<string>;
     /** Width of the image. */
-    width?: MaybeSignal<number>;
+    width?: Bindable<number>;
     /** Height of the image. */
-    height?: MaybeSignal<number>;
+    height?: Bindable<number>;
     /** URL for form submission. */
-    formAction?: MaybeSignal<string>;
+    formAction?: Bindable<string>;
     /** HTTP method for form submission. */
-    formMethod?: MaybeSignal<FormMethod>;
+    formMethod?: Bindable<FormMethod>;
     /** Encoding type for form submission. */
-    formEnctype?: MaybeSignal<FormEnctype>;
+    formEnctype?: Bindable<FormEnctype>;
     /** Bypasses form validation. */
-    formNoValidate?: MaybeSignal<boolean>;
+    formNoValidate?: Bindable<boolean>;
     /** Browsing context for form submission. */
-    formTarget?: MaybeSignal<Target>;
+    formTarget?: Bindable<Target>;
 }
 
 /**
@@ -285,37 +285,37 @@ export type InputAttrs = StrictUnion<
  */
 export interface TextAreaAttrs extends GlobalAttributes {
     /** Name of the control. */
-    name?: MaybeSignal<string>;
+    name?: Bindable<string>;
     /** Current value of the control. */
-    value?: MaybeSignal<string>;
+    value?: Bindable<string>;
     /** Initial value of the control. */
-    defaultValue?: MaybeSignal<string>;
+    defaultValue?: Bindable<string>;
     /** Placeholder text. */
-    placeholder?: MaybeSignal<string>;
+    placeholder?: Bindable<string>;
     /** The control is unavailable for interaction. */
-    disabled?: MaybeSignal<boolean>;
+    disabled?: Bindable<boolean>;
     /** The user cannot edit the value. */
-    readOnly?: MaybeSignal<boolean>;
+    readOnly?: Bindable<boolean>;
     /** The value is required. */
-    required?: MaybeSignal<boolean>;
+    required?: Bindable<boolean>;
     /** Automatically focus the element when the page loads. */
-    autofocus?: MaybeSignal<boolean>;
+    autofocus?: Bindable<boolean>;
     /** Hint for form autofill feature. */
-    autocomplete?: MaybeSignal<Autocomplete>;
+    autocomplete?: Bindable<Autocomplete>;
     /** Visible height in text lines. */
-    rows?: MaybeSignal<number>;
+    rows?: Bindable<number>;
     /** Visible width in average character widths. */
-    cols?: MaybeSignal<number>;
+    cols?: Bindable<number>;
     /** Minimum length of value. */
-    minLength?: MaybeSignal<number>;
+    minLength?: Bindable<number>;
     /** Maximum length of value. */
-    maxLength?: MaybeSignal<number>;
+    maxLength?: Bindable<number>;
     /** How the text should be wrapped. */
-    wrap?: MaybeSignal<Wrap>;
+    wrap?: Bindable<Wrap>;
     /** ID of the form the element belongs to. */
-    form?: MaybeSignal<string>;
+    form?: Bindable<string>;
     /** Directionality of the element's text. */
-    dirname?: MaybeSignal<string>;
+    dirname?: Bindable<string>;
 }
 
 /**
@@ -323,23 +323,23 @@ export interface TextAreaAttrs extends GlobalAttributes {
  */
 export interface SelectAttrs extends GlobalAttributes {
     /** Name of the control. */
-    name?: MaybeSignal<string>;
+    name?: Bindable<string>;
     /** The current value of the select (reflects the selected option's value). */
-    value?: MaybeSignal<string>;
+    value?: Bindable<string>;
     /** The control is unavailable for interaction. */
-    disabled?: MaybeSignal<boolean>;
+    disabled?: Bindable<boolean>;
     /** The value is required. */
-    required?: MaybeSignal<boolean>;
+    required?: Bindable<boolean>;
     /** Automatically focus the element when the page loads. */
-    autofocus?: MaybeSignal<boolean>;
+    autofocus?: Bindable<boolean>;
     /** Whether to allow multiple values. */
-    multiple?: MaybeSignal<boolean>;
+    multiple?: Bindable<boolean>;
     /** Number of visible options. */
-    size?: MaybeSignal<number>;
+    size?: Bindable<number>;
     /** ID of the form the element belongs to. */
-    form?: MaybeSignal<string>;
+    form?: Bindable<string>;
     /** Hint for form autofill feature. */
-    autocomplete?: MaybeSignal<Autocomplete>;
+    autocomplete?: Bindable<Autocomplete>;
 }
 
 /**
@@ -347,13 +347,13 @@ export interface SelectAttrs extends GlobalAttributes {
  */
 export interface OptionAttrs extends GlobalAttributes {
     /** Value submitted with the form. */
-    value?: MaybeSignal<string>;
+    value?: Bindable<string>;
     /** The option is unavailable for interaction. */
-    disabled?: MaybeSignal<boolean>;
+    disabled?: Bindable<boolean>;
     /** Whether the option is selected. */
-    selected?: MaybeSignal<boolean>;
+    selected?: Bindable<boolean>;
     /** Shorter label for the option. */
-    label?: MaybeSignal<string>;
+    label?: Bindable<string>;
 }
 
 /**
@@ -361,9 +361,9 @@ export interface OptionAttrs extends GlobalAttributes {
  */
 export interface OptgroupAttrs extends GlobalAttributes {
     /** Label for the group of options. */
-    label?: MaybeSignal<string>;
+    label?: Bindable<string>;
     /** The group is unavailable for interaction. */
-    disabled?: MaybeSignal<boolean>;
+    disabled?: Bindable<boolean>;
 }
 
 /**
@@ -371,23 +371,23 @@ export interface OptgroupAttrs extends GlobalAttributes {
  */
 export interface BaseButtonAttrs extends GlobalAttributes {
     /** Name of the button. Submitted with the form. */
-    name?: MaybeSignal<string>;
+    name?: Bindable<string>;
     /** Value associated with the button. */
-    value?: MaybeSignal<string>;
+    value?: Bindable<string>;
     /** The control is unavailable for interaction. */
-    disabled?: MaybeSignal<boolean>;
+    disabled?: Bindable<boolean>;
     /** Automatically focus the element when the page loads. */
-    autofocus?: MaybeSignal<boolean>;
+    autofocus?: Bindable<boolean>;
     /** ID of the form the element belongs to. */
-    form?: MaybeSignal<string>;
+    form?: Bindable<string>;
     /** ID of the element to control via popover API. */
-    popoverTarget?: MaybeSignal<string>;
+    popoverTarget?: Bindable<string>;
     /** Action to perform on the popover target. */
-    popoverTargetAction?: MaybeSignal<"toggle" | "show" | "hide">;
+    popoverTargetAction?: Bindable<"toggle" | "show" | "hide">;
     /** (Experimental) ID of element this button commands. */
-    commandfor?: MaybeSignal<string>;
+    commandfor?: Bindable<string>;
     /** (Experimental) Command to execute. */
-    command?: MaybeSignal<string>;
+    command?: Bindable<string>;
 }
 
 /**
@@ -395,17 +395,17 @@ export interface BaseButtonAttrs extends GlobalAttributes {
  */
 export interface ButtonSubmitAttrs extends BaseButtonAttrs {
     /** The behavior of the button. Defaults to "submit". */
-    type?: MaybeSignal<"submit">;
+    type?: Bindable<"submit">;
     /** URL for form submission. */
-    formAction?: MaybeSignal<string>;
+    formAction?: Bindable<string>;
     /** HTTP method for form submission. */
-    formMethod?: MaybeSignal<FormMethod>;
+    formMethod?: Bindable<FormMethod>;
     /** Encoding type for form submission. */
-    formEnctype?: MaybeSignal<FormEnctype>;
+    formEnctype?: Bindable<FormEnctype>;
     /** Bypasses form validation. */
-    formNoValidate?: MaybeSignal<boolean>;
+    formNoValidate?: Bindable<boolean>;
     /** Browsing context for form submission. */
-    formTarget?: MaybeSignal<Target>;
+    formTarget?: Bindable<Target>;
 }
 
 /**
@@ -413,7 +413,7 @@ export interface ButtonSubmitAttrs extends BaseButtonAttrs {
  */
 export interface ButtonRestAttrs extends BaseButtonAttrs {
     /** The behavior of the button. */
-    type: MaybeSignal<"reset" | "button">;
+    type: Bindable<"reset" | "button">;
     formAction?: never;
     formMethod?: never;
     formEnctype?: never;
@@ -431,31 +431,31 @@ export type ButtonAttrs = StrictUnion<ButtonSubmitAttrs | ButtonRestAttrs>;
  */
 export interface BaseFormAttrs extends GlobalAttributes {
     /** URL to use for form submission. */
-    action?: MaybeSignal<string>;
+    action?: Bindable<string>;
     /** Browsing context for form submission. */
-    target?: MaybeSignal<Target>;
+    target?: Bindable<Target>;
     /** Bypasses form validation. */
-    noValidate?: MaybeSignal<boolean>;
+    noValidate?: Bindable<boolean>;
     /** Hint for form autofill feature. */
-    autocomplete?: MaybeSignal<"on" | "off">;
+    autocomplete?: Bindable<"on" | "off">;
     /** Name of the form. */
-    name?: MaybeSignal<string>;
+    name?: Bindable<string>;
     /** Character encodings allowed for submission. */
-    acceptCharset?: MaybeSignal<string>;
+    acceptCharset?: Bindable<string>;
     /** Relationship to the target resource. */
-    rel?: MaybeSignal<AnchorRel>;
+    rel?: Bindable<AnchorRel>;
 }
 
 export interface FormPostAttrs extends BaseFormAttrs {
     /** HTTP method to use for form submission. */
-    method: MaybeSignal<"post">;
+    method: Bindable<"post">;
     /** Encoding type to use for form submission. */
-    enctype?: MaybeSignal<FormEnctype>;
+    enctype?: Bindable<FormEnctype>;
 }
 
 export interface FormGetAttrs extends BaseFormAttrs {
     /** HTTP method to use for form submission. */
-    method?: MaybeSignal<"get" | "dialog">;
+    method?: Bindable<"get" | "dialog">;
     enctype?: never;
 }
 
@@ -469,9 +469,9 @@ export type FormAttrs = StrictUnion<FormPostAttrs | FormGetAttrs>;
  */
 export interface LabelAttrs extends GlobalAttributes {
     /** ID of the element the label is bound to. */
-    htmlFor?: MaybeSignal<string>;
+    htmlFor?: Bindable<string>;
     /** Alias for htmlFor. */
-    for?: MaybeSignal<string>;
+    for?: Bindable<string>;
 }
 
 /**
@@ -479,11 +479,11 @@ export interface LabelAttrs extends GlobalAttributes {
  */
 export interface FieldsetAttrs extends GlobalAttributes {
     /** The group is unavailable for interaction. */
-    disabled?: MaybeSignal<boolean>;
+    disabled?: Bindable<boolean>;
     /** ID of the form the element belongs to. */
-    form?: MaybeSignal<string>;
+    form?: Bindable<string>;
     /** Name of the fieldset. */
-    name?: MaybeSignal<string>;
+    name?: Bindable<string>;
 }
 
 /**
@@ -491,11 +491,11 @@ export interface FieldsetAttrs extends GlobalAttributes {
  */
 export interface OutputAttrs extends GlobalAttributes {
     /** Name of the control. */
-    name?: MaybeSignal<string>;
+    name?: Bindable<string>;
     /** ID of the form the element belongs to. */
-    form?: MaybeSignal<string>;
+    form?: Bindable<string>;
     /** IDs of elements that contributed to the calculation. */
-    htmlFor?: MaybeSignal<string>;
+    htmlFor?: Bindable<string>;
     /** Alias for htmlFor. */
-    for?: MaybeSignal<string>;
+    for?: Bindable<string>;
 }

@@ -21,6 +21,7 @@ import {
   $e,
   type Signal,
   type MaybeSignal,
+  type Bindable,
   isSignal,
 } from "../reactivity/reactivity";
 import { registerEventHandler } from "../events/events";
@@ -29,7 +30,7 @@ import type { ReactiveCSSProperties } from "../css/css-types";
 import type { IsValidStyleValue } from "../css/grammar";
 import type { AriaRoleRequirements } from "../a11y/aria";
 
-export { type MaybeSignal, isSignal };
+export { type MaybeSignal, type Bindable, isSignal };
 export type { ElementProps, TypedEvent };
 
 /**
@@ -310,20 +311,22 @@ export type DOMPropertyKey =
 /**
  * Type guard to check if a key is a DOM property key
  */
+const DOM_PROPERTY_KEYS: Record<string, true> = {
+  value: true,
+  checked: true,
+  selected: true,
+  muted: true,
+  currentTime: true,
+  volume: true,
+  indeterminate: true,
+  defaultValue: true,
+  defaultChecked: true,
+  textContent: true,
+  innerText: true,
+};
+
 export function isDOMPropertyKey(key: string): key is DOMPropertyKey {
-  return [
-    "value",
-    "checked",
-    "selected",
-    "muted",
-    "currentTime",
-    "volume",
-    "indeterminate",
-    "defaultValue",
-    "defaultChecked",
-    "textContent",
-    "innerText",
-  ].includes(key);
+  return DOM_PROPERTY_KEYS[key] === true;
 }
 
 /**
@@ -428,7 +431,10 @@ export function assignProp(
     setElementProperty(element, key, value);
   } else {
     const attr = attributeName(key);
-    if (typeof value === "boolean") {
+    if (value === null || value === undefined) {
+      // A binding that goes null/undefined unsets the attribute
+      element.removeAttribute(attr);
+    } else if (typeof value === "boolean") {
       // ARIA and enumerated attributes spell out "false" — removing them
       // means "unset", which differs (aria-expanded absent ≠ collapsed)
       if (ENUMERATED_BOOLEAN_ATTRS.has(attr) || attr.startsWith("aria-")) {
@@ -465,7 +471,9 @@ export function applyProps<K extends keyof HTMLElementTagNameMap>(
 }
 
 export function applyClass(element: HTMLElement, value: unknown): void {
-  if (typeof value === "string") {
+  if (value === null || value === undefined || value === false) {
+    element.removeAttribute("class");
+  } else if (typeof value === "string") {
     element.className = value;
   } else if (Array.isArray(value)) {
     element.className = value.filter(Boolean).join(" ");

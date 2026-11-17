@@ -1258,6 +1258,12 @@ export { $ as signal };
  */
 export type MaybeSignal<T> = T | Signal<T>;
 
+/**
+ * An attribute/property value: a static value, or a signal that may also be
+ * `null`/`undefined` — which removes the attribute (or resets the property).
+ */
+export type Bindable<T> = T | Signal<T | null | undefined>;
+
 // =============================================================================
 // INTERNAL: FAST SIGNAL DETECTION
 // =============================================================================

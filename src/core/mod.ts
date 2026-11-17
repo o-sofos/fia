@@ -107,6 +107,7 @@ export {
 
 export type {
   MaybeSignal,
+  Bindable,
   Child,
   ElementProps,
   ElementFactory,

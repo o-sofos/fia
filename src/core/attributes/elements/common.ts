@@ -1,4 +1,4 @@
-import type { MaybeSignal } from "../../reactivity/reactivity.ts";
+import type { Bindable } from "../../reactivity/reactivity.ts";
 import type { ReactiveCSSProperties } from "../../css/css-types.ts";
 import type {
     AriaAttributeName,
@@ -9,7 +9,7 @@ import type {
 } from "../../a11y/aria.ts";
 
 /** A camelCase ARIA prop: the attribute's tokens, booleans where valid, or a signal of either */
-type AriaProp<N extends AriaAttributeName> = MaybeSignal<AriaInput<AriaAttributeValue<N>>>;
+type AriaProp<N extends AriaAttributeName> = Bindable<AriaInput<AriaAttributeValue<N>>>;
 import type {
     InputMode,
     AutoCapitalize,
@@ -38,36 +38,36 @@ export type StrictUnion<T, All extends PropertyKey = UnionKeys<T>> =
 export interface GlobalAttributes {
     // Core
     /** Unique identifier for the element. */
-    id?: MaybeSignal<string>;
+    id?: Bindable<string>;
     /** CSS class(es) for the element. Can be a string, an array of strings, or an object of { className: boolean }. */
-    class?: MaybeSignal<string> | MaybeSignal<string[]> | Record<string, MaybeSignal<boolean>>;
+    class?: Bindable<string> | Bindable<string[]> | Record<string, Bindable<boolean>>;
     /** Alias for class to support React-style className. */
-    className?: MaybeSignal<string> | MaybeSignal<string[]> | Record<string, MaybeSignal<boolean>>;
+    className?: Bindable<string> | Bindable<string[]> | Record<string, Bindable<boolean>>;
     /** Array of class names to apply. */
-    classList?: MaybeSignal<string[]>;
+    classList?: Bindable<string[]>;
     /**
      * Inline CSS styles. Can be:
      * - A CSS string: "color: red; font-size: 16px"
      * - A reactive string: $(myStyleString)
      * - A style object with mixed reactive/static: { color: $(c), fontSize: "16px" }
      */
-    style?: MaybeSignal<string> | ReactiveCSSProperties;
+    style?: Bindable<string> | ReactiveCSSProperties;
     /** Advisory information for the element (tooltip). */
-    title?: MaybeSignal<string>;
+    title?: Bindable<string>;
     /** Language of the element's content. */
-    lang?: MaybeSignal<string>;
+    lang?: Bindable<string>;
     /** Text directionality. */
-    dir?: MaybeSignal<Dir>;
+    dir?: Bindable<Dir>;
 
     // Content
     /** The text content of the element and its descendants. */
-    textContent?: MaybeSignal<string | number | null | undefined>;
+    textContent?: Bindable<string | number | null | undefined>;
     /** The rendered text content of the element. */
-    innerText?: MaybeSignal<string | number | null | undefined>;
+    innerText?: Bindable<string | number | null | undefined>;
 
     // Accessibility (Strict Types)
     /** ARIA role indicating the semantic purpose of the element. */
-    role?: MaybeSignal<ConcreteAriaRole>;
+    role?: Bindable<ConcreteAriaRole>;
     /** Identifies the currently active element when focus is on a composite widget, combobox, textbox, group, or application. */
     ariaActiveDescendant?: AriaProp<"aria-activedescendant">;
     /** Indicates whether assistive technologies will present all, or only parts of, the changed region based on the change notifications defined by the aria-relevant attribute. */
@@ -177,68 +177,68 @@ export interface GlobalAttributes {
 
     // Accessibility (Legacy)
     /** Indicates if the element can take input focus. */
-    tabIndex?: MaybeSignal<number>;
+    tabIndex?: Bindable<number>;
 
     // Editing
     /** Indicates whether the element is editable. */
-    contentEditable?: MaybeSignal<"true" | "false" | "plaintext-only">;
+    contentEditable?: Bindable<"true" | "false" | "plaintext-only">;
     /** Indicates whether spell checking is allowed. Enumerated: serializes as "true"/"false". */
-    spellcheck?: MaybeSignal<boolean | "true" | "false">;
+    spellcheck?: Bindable<boolean | "true" | "false">;
     /** Indicates whether the element is draggable. Enumerated: serializes as "true"/"false". */
-    draggable?: MaybeSignal<boolean | "true" | "false">;
+    draggable?: Bindable<boolean | "true" | "false">;
 
     // Input hints
     /** Hint for the type of data that might be entered by the user. */
-    inputMode?: MaybeSignal<InputMode>;
+    inputMode?: Bindable<InputMode>;
     /** Hint for the action label (or icon) to present for the enter key on virtual keyboards. */
-    enterKeyHint?: MaybeSignal<EnterKeyHint>;
+    enterKeyHint?: Bindable<EnterKeyHint>;
     /** Controls whether and how text input is automatically capitalized. */
-    autoCapitalize?: MaybeSignal<AutoCapitalize>;
+    autoCapitalize?: Bindable<AutoCapitalize>;
 
     // Boolean
     /** Indicates whether the element is not yet, or is no longer, relevant. */
-    hidden?: MaybeSignal<boolean | "until-found">;
+    hidden?: Bindable<boolean | "until-found">;
     /** Indicates that the browser should ignore this section. */
-    inert?: MaybeSignal<boolean>;
+    inert?: Bindable<boolean>;
 
     // Popover
     /** Designates an element as a popover element. */
-    popover?: MaybeSignal<"auto" | "manual">;
+    popover?: Bindable<"auto" | "manual">;
 
     // Security
-    nonce?: MaybeSignal<string>;
+    nonce?: Bindable<string>;
 
     // Translation
-    translate?: MaybeSignal<"yes" | "no">;
+    translate?: Bindable<"yes" | "no">;
 
     // Microdata
-    itemScope?: MaybeSignal<boolean>;
-    itemType?: MaybeSignal<string>;
-    itemId?: MaybeSignal<string>;
-    itemProp?: MaybeSignal<string>;
-    itemRef?: MaybeSignal<string>;
+    itemScope?: Bindable<boolean>;
+    itemType?: Bindable<string>;
+    itemId?: Bindable<string>;
+    itemProp?: Bindable<string>;
+    itemRef?: Bindable<string>;
 
     // Custom element
-    is?: MaybeSignal<string>;
+    is?: Bindable<string>;
 
     // Part (for shadow DOM styling)
-    part?: MaybeSignal<string>;
+    part?: Bindable<string>;
 
     // Slot
-    slot?: MaybeSignal<string>;
+    slot?: Bindable<string>;
 
     // Export parts
-    exportparts?: MaybeSignal<string>;
+    exportparts?: Bindable<string>;
 
     // Anchor positioning (new)
-    anchor?: MaybeSignal<string>;
+    anchor?: Bindable<string>;
 }
 
 /**
  * Data attributes (data-*) - allows any custom data attributes
  */
 export interface DataAttributes {
-    [key: `data-${string}`]: MaybeSignal<string | number | boolean>;
+    [key: `data-${string}`]: Bindable<string | number | boolean>;
 }
 
 /**

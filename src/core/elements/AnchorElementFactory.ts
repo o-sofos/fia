@@ -10,7 +10,6 @@ import {
   isChildrenCallback,
   isProps,
   isTextContent,
-  looksLikeHref,
   type ChildrenCallback,
   type ContextualValidateProps,
   type ElementProps,
@@ -82,8 +81,9 @@ export function createAnchorElement(): AnchorElementFactory {
 
     if (arg1 === undefined) {
       // a() - empty
-    } else if (typeof arg1 === "string" && looksLikeHref(arg1)) {
-      // First arg is href
+    } else if (typeof arg1 === "string") {
+      // First string arg is always the href (relative URLs like "about" or
+      // "?q=1" included — the types promise it)
       href = arg1;
 
       if (arg2 === undefined) {

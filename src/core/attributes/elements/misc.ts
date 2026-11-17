@@ -1,4 +1,4 @@
-import type { MaybeSignal } from "../../reactivity/reactivity.ts";
+import type { Bindable } from "../../reactivity/reactivity.ts";
 import type { GlobalAttributes, StrictUnion } from "./common.ts";
 import type {
     ThScope,
@@ -21,7 +21,7 @@ import type {
  */
 export interface MapAttrs extends GlobalAttributes {
     /** Name of the image map. */
-    name?: MaybeSignal<string>;
+    name?: Bindable<string>;
 }
 
 /**
@@ -29,34 +29,34 @@ export interface MapAttrs extends GlobalAttributes {
  */
 export interface BaseAreaAttrs extends GlobalAttributes {
     /** Alternate text for the area. */
-    alt?: MaybeSignal<string>;
+    alt?: Bindable<string>;
     /** Prompts the user to download the resource. */
-    download?: MaybeSignal<string | boolean>;
+    download?: Bindable<string | boolean>;
     /** Hyperlink target. */
-    href?: MaybeSignal<string>;
+    href?: Bindable<string>;
     /** Language of the linked resource. */
-    hreflang?: MaybeSignal<string>;
+    hreflang?: Bindable<string>;
     /** URLs to ping for tracking. */
-    ping?: MaybeSignal<string>;
+    ping?: Bindable<string>;
     /** Referrer policy for fetches. */
-    referrerPolicy?: MaybeSignal<ReferrerPolicy>;
+    referrerPolicy?: Bindable<ReferrerPolicy>;
     /** Relationship to the linked resource. */
-    rel?: MaybeSignal<AnchorRel>;
+    rel?: Bindable<AnchorRel>;
     /** Browsing context for the link. */
-    target?: MaybeSignal<Target>;
+    target?: Bindable<Target>;
 }
 
 export interface AreaDefaultAttrs extends BaseAreaAttrs {
     /** Shape of the area. */
-    shape: MaybeSignal<"default">;
+    shape: Bindable<"default">;
     coords?: never;
 }
 
 export interface AreaGeometricAttrs extends BaseAreaAttrs {
     /** Shape of the area. */
-    shape?: MaybeSignal<"rect" | "circle" | "poly">;
+    shape?: Bindable<"rect" | "circle" | "poly">;
     /** Coordinates for the shape. */
-    coords: MaybeSignal<string>;
+    coords: Bindable<string>;
 }
 
 /**
@@ -73,9 +73,9 @@ export type AreaAttrs = StrictUnion<AreaDefaultAttrs | AreaGeometricAttrs>;
  */
 export interface ProgressAttrs extends GlobalAttributes {
     /** Current value of the progress. */
-    value?: MaybeSignal<number>;
+    value?: Bindable<number>;
     /** Maximum value of the progress. */
-    max?: MaybeSignal<number>;
+    max?: Bindable<number>;
 }
 
 /**
@@ -83,17 +83,17 @@ export interface ProgressAttrs extends GlobalAttributes {
  */
 export interface MeterAttrs extends GlobalAttributes {
     /** Current value of the meter. */
-    value?: MaybeSignal<number>;
+    value?: Bindable<number>;
     /** Minimum value. */
-    min?: MaybeSignal<number>;
+    min?: Bindable<number>;
     /** Maximum value. */
-    max?: MaybeSignal<number>;
+    max?: Bindable<number>;
     /** Upper bound of the low end of the range. */
-    low?: MaybeSignal<number>;
+    low?: Bindable<number>;
     /** Lower bound of the high end of the range. */
-    high?: MaybeSignal<number>;
+    high?: Bindable<number>;
     /** Optimum value in the range. */
-    optimum?: MaybeSignal<number>;
+    optimum?: Bindable<number>;
 }
 
 // =============================================================================
@@ -105,7 +105,7 @@ export interface MeterAttrs extends GlobalAttributes {
  */
 export interface TimeAttrs extends GlobalAttributes {
     /** Machine-readable equivalent of the time. */
-    dateTime?: MaybeSignal<string>;
+    dateTime?: Bindable<string>;
 }
 
 /**
@@ -113,7 +113,7 @@ export interface TimeAttrs extends GlobalAttributes {
  */
 export interface DataElemAttrs extends GlobalAttributes {
     /** Machine-readable value. */
-    value?: MaybeSignal<string>;
+    value?: Bindable<string>;
 }
 
 // =============================================================================
@@ -125,7 +125,7 @@ export interface DataElemAttrs extends GlobalAttributes {
  */
 export interface DialogAttrs extends GlobalAttributes {
     /** Whether the dialog is open. */
-    open?: MaybeSignal<boolean>;
+    open?: Bindable<boolean>;
 }
 
 /**
@@ -133,9 +133,9 @@ export interface DialogAttrs extends GlobalAttributes {
  */
 export interface DetailsAttrs extends GlobalAttributes {
     /** Whether the details are visible. */
-    open?: MaybeSignal<boolean>;
+    open?: Bindable<boolean>;
     /** Name of the details group. */
-    name?: MaybeSignal<string>;
+    name?: Bindable<string>;
 }
 
 // =============================================================================
@@ -147,11 +147,11 @@ export interface DetailsAttrs extends GlobalAttributes {
  */
 export interface TableCellAttrs extends GlobalAttributes {
     /** Number of columns to span. */
-    colSpan?: MaybeSignal<number>;
+    colSpan?: Bindable<number>;
     /** Number of rows to span. */
-    rowSpan?: MaybeSignal<number>;
+    rowSpan?: Bindable<number>;
     /** IDs of headers for this cell. */
-    headers?: MaybeSignal<string>;
+    headers?: Bindable<string>;
 }
 
 /**
@@ -159,9 +159,9 @@ export interface TableCellAttrs extends GlobalAttributes {
  */
 export interface ThAttrs extends TableCellAttrs {
     /** Scope of the header. */
-    scope?: MaybeSignal<ThScope>;
+    scope?: Bindable<ThScope>;
     /** Abbreviation for the header content. */
-    abbr?: MaybeSignal<string>;
+    abbr?: Bindable<string>;
 }
 
 /**
@@ -169,7 +169,7 @@ export interface ThAttrs extends TableCellAttrs {
  */
 export interface ColAttrs extends GlobalAttributes {
     /** Number of columns to span. */
-    span?: MaybeSignal<number>;
+    span?: Bindable<number>;
 }
 
 /**
@@ -177,7 +177,7 @@ export interface ColAttrs extends GlobalAttributes {
  */
 export interface ColgroupAttrs extends GlobalAttributes {
     /** Number of columns to span. */
-    span?: MaybeSignal<number>;
+    span?: Bindable<number>;
 }
 
 // =============================================================================
@@ -189,7 +189,7 @@ export interface ColgroupAttrs extends GlobalAttributes {
  */
 export interface BlockquoteAttrs extends GlobalAttributes {
     /** URL of the source. */
-    cite?: MaybeSignal<string>;
+    cite?: Bindable<string>;
 }
 
 /**
@@ -197,7 +197,7 @@ export interface BlockquoteAttrs extends GlobalAttributes {
  */
 export interface QAttrs extends GlobalAttributes {
     /** URL of the source. */
-    cite?: MaybeSignal<string>;
+    cite?: Bindable<string>;
 }
 
 /**
@@ -205,9 +205,9 @@ export interface QAttrs extends GlobalAttributes {
  */
 export interface ModAttrs extends GlobalAttributes {
     /** URL of the source explaining the change. */
-    cite?: MaybeSignal<string>;
+    cite?: Bindable<string>;
     /** Date and time of the change. */
-    dateTime?: MaybeSignal<string>;
+    dateTime?: Bindable<string>;
 }
 
 // =============================================================================
@@ -219,11 +219,11 @@ export interface ModAttrs extends GlobalAttributes {
  */
 export interface OlAttrs extends GlobalAttributes {
     /** Starting value of the list. */
-    start?: MaybeSignal<number>;
+    start?: Bindable<number>;
     /** Whether the list is reversed. */
-    reversed?: MaybeSignal<boolean>;
+    reversed?: Bindable<boolean>;
     /** Type of list marker. */
-    type?: MaybeSignal<"1" | "a" | "A" | "i" | "I">;
+    type?: Bindable<"1" | "a" | "A" | "i" | "I">;
 }
 
 /**
@@ -231,7 +231,7 @@ export interface OlAttrs extends GlobalAttributes {
  */
 export interface LiAttrs extends GlobalAttributes {
     /** Value of the list item. */
-    value?: MaybeSignal<number>;
+    value?: Bindable<number>;
 }
 
 // =============================================================================
@@ -243,71 +243,71 @@ export interface LiAttrs extends GlobalAttributes {
  */
 export interface BaseLinkAttrs extends GlobalAttributes {
     /** URL of the linked resource. */
-    href?: MaybeSignal<string>;
+    href?: Bindable<string>;
     /** Media type of the linked resource. */
-    type?: MaybeSignal<string>;
+    type?: Bindable<string>;
     /** CORS settings. */
-    crossOrigin?: MaybeSignal<CrossOrigin>;
+    crossOrigin?: Bindable<CrossOrigin>;
     /** Integrity metadata. */
-    integrity?: MaybeSignal<string>;
+    integrity?: Bindable<string>;
     /** Referrer policy for fetches. */
-    referrerPolicy?: MaybeSignal<ReferrerPolicy>;
+    referrerPolicy?: Bindable<ReferrerPolicy>;
     /** Language of the linked resource. */
-    hreflang?: MaybeSignal<string>;
+    hreflang?: Bindable<string>;
     /** Fetch priority hint. */
-    fetchPriority?: MaybeSignal<FetchPriority>;
+    fetchPriority?: Bindable<FetchPriority>;
     /** Whether the element is blocking. */
-    blocking?: MaybeSignal<"render">;
+    blocking?: Bindable<"render">;
     /** Color for mask-icon. */
-    color?: MaybeSignal<string>;
+    color?: Bindable<string>;
     /** Whether the link is disabled. */
-    disabled?: MaybeSignal<boolean>;
+    disabled?: Bindable<boolean>;
 }
 
 export interface LinkPreloadAttrs extends BaseLinkAttrs {
     /** Relationship to the linked resource. */
-    rel: MaybeSignal<"preload" | "modulepreload">;
+    rel: Bindable<"preload" | "modulepreload">;
     /** Potential destination for a preload request. */
-    as: MaybeSignal<LinkAs>;
+    as: Bindable<LinkAs>;
     /** Media query for the resource. */
-    media?: MaybeSignal<string>;
+    media?: Bindable<string>;
     /** Source set for responsive images. */
-    imageSrcset?: MaybeSignal<string>;
+    imageSrcset?: Bindable<string>;
     /** Sizes for responsive images. */
-    imageSizes?: MaybeSignal<string>;
+    imageSizes?: Bindable<string>;
     sizes?: never;
 }
 
 export interface LinkStylesheetAttrs extends BaseLinkAttrs {
     /** Relationship to the linked resource. */
-    rel: MaybeSignal<"stylesheet">;
+    rel: Bindable<"stylesheet">;
     imageSrcset?: never;
     imageSizes?: never;
     sizes?: never;
     as?: never;
     /** Media query for the resource. */
-    media?: MaybeSignal<string>;
+    media?: Bindable<string>;
 }
 
 export interface LinkIconAttrs extends BaseLinkAttrs {
     /** Relationship to the linked resource. */
-    rel: MaybeSignal<"icon" | "apple-touch-icon">;
+    rel: Bindable<"icon" | "apple-touch-icon">;
     /** Sizes for icons. */
-    sizes?: MaybeSignal<string>;
+    sizes?: Bindable<string>;
     imageSrcset?: never;
     imageSizes?: never;
     as?: never;
-    media?: MaybeSignal<string>;
+    media?: Bindable<string>;
 }
 
 export interface LinkOtherAttrs extends BaseLinkAttrs {
     /** Relationship to the linked resource. */
-    rel?: MaybeSignal<LinkRel>;
+    rel?: Bindable<LinkRel>;
     sizes?: never;
     imageSrcset?: never;
     imageSizes?: never;
     as?: never;
-    media?: MaybeSignal<string>;
+    media?: Bindable<string>;
 }
 
 /**
@@ -320,9 +320,9 @@ export type LinkAttrs = StrictUnion<LinkPreloadAttrs | LinkStylesheetAttrs | Lin
  */
 export interface BaseElemAttrs extends GlobalAttributes {
     /** Base URL for relative URLs in the document. */
-    href?: MaybeSignal<string>;
+    href?: Bindable<string>;
     /** Default browsing context for navigations from the document. */
-    target?: MaybeSignal<Target>;
+    target?: Bindable<Target>;
 }
 
 /**
@@ -330,12 +330,12 @@ export interface BaseElemAttrs extends GlobalAttributes {
  */
 export interface BaseMetaAttrs extends GlobalAttributes {
     /** Metadata content. */
-    content: MaybeSignal<string>;
+    content: Bindable<string>;
 }
 
 export interface MetaNameAttrs extends BaseMetaAttrs {
     /** Name of the metadata. */
-    name: MaybeSignal<string>;
+    name: Bindable<string>;
     httpEquiv?: never;
     charset?: never;
 }
@@ -343,13 +343,13 @@ export interface MetaNameAttrs extends BaseMetaAttrs {
 export interface MetaHttpEquivAttrs extends BaseMetaAttrs {
     name?: never;
     /** Pragma directive. */
-    httpEquiv: MaybeSignal<HttpEquiv>;
+    httpEquiv: Bindable<HttpEquiv>;
     charset?: never;
 }
 
 export interface MetaCharsetAttrs extends GlobalAttributes {
     /** Character encoding. */
-    charset: MaybeSignal<"utf-8">;
+    charset: Bindable<"utf-8">;
     name?: never;
     httpEquiv?: never;
     content?: never;
@@ -365,40 +365,40 @@ export type MetaAttrs = StrictUnion<MetaNameAttrs | MetaHttpEquivAttrs | MetaCha
  */
 export interface BaseScriptAttrs extends GlobalAttributes {
     /** URL of the script. */
-    src?: MaybeSignal<string>;
+    src?: Bindable<string>;
     /** Type of the script. */
-    type?: MaybeSignal<string>;
+    type?: Bindable<string>;
     /** Whether to execute asynchronously. */
-    async?: MaybeSignal<boolean>;
+    async?: Bindable<boolean>;
     /** Whether to defer execution. */
-    defer?: MaybeSignal<boolean>;
+    defer?: Bindable<boolean>;
     /** CORS settings. */
-    crossOrigin?: MaybeSignal<CrossOrigin>;
+    crossOrigin?: Bindable<CrossOrigin>;
     /** Integrity metadata. */
-    integrity?: MaybeSignal<string>;
+    integrity?: Bindable<string>;
     /** Referrer policy for fetches. */
-    referrerPolicy?: MaybeSignal<ReferrerPolicy>;
+    referrerPolicy?: Bindable<ReferrerPolicy>;
     /** Whether the element is blocking. */
-    blocking?: MaybeSignal<"render">;
+    blocking?: Bindable<"render">;
     /** Fetch priority hint. */
-    fetchPriority?: MaybeSignal<FetchPriority>;
+    fetchPriority?: Bindable<FetchPriority>;
     /** Whether to execute without blocking parser. */
-    noModule?: MaybeSignal<boolean>;
+    noModule?: Bindable<boolean>;
 }
 
 export interface ScriptClassicAttrs extends BaseScriptAttrs {
     /** Type of the script. */
-    type?: MaybeSignal<"text/javascript" | "application/javascript">;
+    type?: Bindable<"text/javascript" | "application/javascript">;
 }
 
 export interface ScriptModuleAttrs extends BaseScriptAttrs {
     /** Type of the script. */
-    type: MaybeSignal<"module">;
+    type: Bindable<"module">;
 }
 
 export interface ScriptImportMapAttrs extends BaseScriptAttrs {
     /** Type of the script. */
-    type: MaybeSignal<"importmap">;
+    type: Bindable<"importmap">;
     src?: never;
     async?: never;
     defer?: never;
@@ -414,9 +414,9 @@ export type ScriptAttrs = StrictUnion<ScriptClassicAttrs | ScriptModuleAttrs | S
  */
 export interface StyleAttrs extends GlobalAttributes {
     /** Media query for the style. */
-    media?: MaybeSignal<string>;
+    media?: Bindable<string>;
     /** Whether the style is blocking. */
-    blocking?: MaybeSignal<"render">;
+    blocking?: Bindable<"render">;
 }
 
 // =============================================================================
@@ -428,7 +428,7 @@ export interface StyleAttrs extends GlobalAttributes {
  */
 export interface SlotAttrs extends GlobalAttributes {
     /** Name of the slot. */
-    name?: MaybeSignal<string>;
+    name?: Bindable<string>;
 }
 
 /**
@@ -436,11 +436,11 @@ export interface SlotAttrs extends GlobalAttributes {
  */
 export interface TemplateAttrs extends GlobalAttributes {
     /** Shadow root mode. */
-    shadowRootMode?: MaybeSignal<"open" | "closed">;
+    shadowRootMode?: Bindable<"open" | "closed">;
     /** Whether shadow root delegates focus. */
-    shadowRootDelegatesFocus?: MaybeSignal<boolean>;
+    shadowRootDelegatesFocus?: Bindable<boolean>;
     /** Whether shadow root is clonable. */
-    shadowRootClonable?: MaybeSignal<boolean>;
+    shadowRootClonable?: Bindable<boolean>;
     /** Whether shadow root is serializable. */
-    shadowRootSerializable?: MaybeSignal<boolean>;
+    shadowRootSerializable?: Bindable<boolean>;
 }
